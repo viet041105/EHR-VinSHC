@@ -1,0 +1,18 @@
+# Local credentials, runtime reports and caches
+.env
+.env.*
+!.env.example
+.runtime/
+__pycache__/
+*.py[cod]
+.venv/
+node_modules/
+
+# Local input documents are not CI fixtures or distributable application data.
+/Sample_Data/
+
+# Generated application/build output
+target/
+dist/
+.DS_Store
+Thumbs.db

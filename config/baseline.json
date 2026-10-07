@@ -1,0 +1,36 @@
+{
+  "referenceApplication": {
+    "version": "3.7.1",
+    "repository": "https://github.com/openmrs/openmrs-distro-referenceapplication",
+    "commit": "a476fd609612394ff66fce0b4ce29e949b0cfaf9"
+  },
+  "images": {
+    "db": "mariadb:10.11.19@sha256:7db29378d4fdab73f8123bbc2b48905c90d1a4b00cf848b028f1e81e623257f2",
+    "backend": "ehr-vinshc-backend:3.7.1-baseline",
+    "frontend": "openmrs/openmrs-reference-application-3-frontend:3.7.1@sha256:f6b1f8443ab27a6b1c3944c5a948f2e0cdfea3701dcfd59316677fef28a58f8d",
+    "gateway": "openmrs/openmrs-reference-application-3-gateway:3.7.1@sha256:49070abbcda8aeced46f78ce0c1559236a2ba45bc624fe8485a59220cbd159a2"
+  },
+  "backendBuild": {
+    "context": "infra/backend",
+    "dockerfile": "Dockerfile",
+    "baseImage": "openmrs/openmrs-reference-application-3-backend:3.7.1@sha256:929cfe5dca5f221460e0f4a57abb9294614df5f74fbb3bb865e01b8dfe7a985b"
+  },
+  "upstreamComponents": {
+    "openmrsCore": "2.8.8",
+    "webservicesRest": "3.5.0.69fa31",
+    "fhir2": "4.2.0",
+    "initializer": "2.12.0",
+    "frontendAppShell": "10.0.0"
+  },
+  "developmentLocation": {
+    "uuid": "feae71be-957c-4f94-b100-d84bc6915574",
+    "name": "VinSHC Development Clinic",
+    "tags": ["Login Location", "Facility Location", "Visit Location"]
+  },
+  "notes": [
+    "Versions come from the fixed 3.7.1 images; REST reports the full artifact version 3.5.0.69fa31 at runtime, while the distro manifest says 3.5.0. Smoke tests check the exact runtime versions.",
+    "MariaDB uses a pinned 10.11 maintenance release; compatibility is checked by fresh startup and persistence tests.",
+    "Backend is derived from the fixed 3.7.1 release: large demo content and its generator are removed, base reference metadata is kept, and one synthetic login/facility/visit location is loaded with Initializer.",
+    "Upstream moving no-demo tags were not used because inspection showed snapshot components. Vietnamese clinical metadata is not implemented yet."
+  ]
+}

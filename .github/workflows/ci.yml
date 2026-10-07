@@ -1,0 +1,90 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  configuration:
+    name: Configuration and tooling
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Create isolated test settings
+        run: python scripts/bootstrap.py
+      - name: Validate Compose and pinned baseline
+        run: python scripts/check_config.py
+      - name: Test bootstrap and smoke failure handling
+        run: python -m unittest discover -s tests -v
+      - name: Validate GitHub Actions workflow
+        shell: bash
+        run: |
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/rhysd/actionlint/releases/download/v1.7.12/actionlint_1.7.12_linux_amd64.tar.gz \
+            --output /tmp/actionlint.tar.gz
+          echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  /tmp/actionlint.tar.gz" | sha256sum --check
+          tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
+          /tmp/actionlint -color
+
+  smoke:
+    name: OpenMRS REST, FHIR and persistence
+    needs: configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      COMPOSE_PROJECT_NAME: ehr-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      EHR_HTTP_PORT: '8080'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Create isolated test settings
+        run: python scripts/bootstrap.py
+      - name: Validate settings
+        run: python scripts/check_config.py
+      - name: Pull exact reviewed images
+        run: docker compose pull --quiet --ignore-buildable
+      - name: Build lightweight backend from the fixed upstream release
+        run: docker compose build --pull backend
+      - name: Start a fresh stack and wait for readiness
+        run: docker compose up -d --wait --wait-timeout 1200
+      - name: Verify APIs and create a synthetic patient
+        run: python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
+      - name: Recreate containers and retain named volumes
+        run: |
+          docker compose down
+          docker compose up -d --wait --wait-timeout 600
+      - name: Verify the same patient survived through REST and FHIR
+        run: python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
+      - name: Collect redacted diagnostics
+        if: always()
+        run: python scripts/collect_diagnostics.py
+      - name: Upload synthetic-stack reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: openmrs-smoke-${{ github.run_id }}-${{ github.run_attempt }}
+          path: .runtime/reports/
+          retention-days: 7
+          if-no-files-found: warn
+      - name: Remove only this CI run's containers and volumes
+        if: always()
+        run: docker compose down --volumes --remove-orphans
