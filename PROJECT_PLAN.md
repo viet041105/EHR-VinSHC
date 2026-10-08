@@ -134,7 +134,7 @@ Lộ trình lên chuỗi phòng khám và bệnh viện, cùng cách phân loạ
 - **Phiên bản:** Khóa bộ phiên bản tương thích, gồm image, module, package và công cụ build. Không phụ thuộc tag động như `latest`, `next` hoặc `qa`.
 - **Backend:** Tái sử dụng API và mô hình của OpenMRS. Thêm module hoặc adapter khi xác định được khoảng trống cụ thể.
 - **Frontend:** Tái sử dụng các app O3 (registration, patient chart, appointments, service queues, billing, dispensing, stock). Ưu tiên cấu hình, dịch thuật và biểu mẫu trước khi sửa core.
-- **Database:** **PostgreSQL** theo [ADR-0002](docs/decisions/0002-postgresql.md), dùng chung hệ quản trị với EHRbase, OpenCR và kho dữ liệu ở tầng sau. Để OpenMRS quản lý schema. Chức năng mới thao tác qua API/service. Migration cho phần mở rộng được quản lý riêng và phải chạy trên PostgreSQL. Baseline hiện tại vẫn chạy MariaDB cho tới khi BE-10 hoàn thành.
+- **Database:** **PostgreSQL** theo [ADR-0002](docs/decisions/0002-postgresql.md), dùng chung hệ quản trị với EHRbase, OpenCR và kho dữ liệu ở tầng sau. Để OpenMRS quản lý schema. Chức năng mới thao tác qua API/service. Migration cho phần mở rộng được quản lý riêng và phải chạy trên PostgreSQL. Baseline trong `compose.yaml` đã chuyển sang PostgreSQL 16.15; bản sửa tương thích và bằng chứng local nằm trong `docs/VALIDATION.md` và `docs/BACKEND.md`. Kiểm tra/đóng đầu việc BE-10 theo tiêu chí riêng.
 - **Metadata:** Lưu trong Git theo gói, dùng UUID ổn định, kiểm tra việc nạp lại và cập nhật.
 - **Mỗi cơ sở một instance:** OpenMRS không hỗ trợ multi-tenant. Không dùng chung database giữa các pháp nhân.
 - **Tích hợp:** Mọi kết nối hệ thống bên ngoài đi qua adapter có thể tắt.
@@ -201,7 +201,7 @@ Các mốc quy định thứ tự và đầu ra, chưa ấn định số tuần.
 | Mốc | Công việc chính | Phụ trách | Điều kiện chuyển bước |
 | --- | --- | --- | --- |
 | M0 — Chốt nghiệp vụ | Khảo sát 1–2 phòng khám tư; chốt luồng, role, ma trận quyền, dữ liệu tối thiểu, mẫu giấy tờ; rà soát checklist pháp lý; chốt ADR-0001 và giấy phép | Cả nhóm + mentor | Có [CLINIC_WORKFLOW.md](docs/CLINIC_WORKFLOW.md) đã xác nhận, ADR-0001 được chấp nhận, có `LICENSE` |
-| M1 — Dựng baseline | Chọn release; dựng môi trường; kiểm tra đăng nhập, frontend, REST/FHIR; dữ liệu giả; chuyển sang PostgreSQL (BE-10) | Người 1 + 2; người 3 + 4 kiểm chứng | Một thành viên khác dựng lại được **trên PostgreSQL**. Bản MariaDB đã đạt local ([VALIDATION.md](docs/VALIDATION.md)); cần kiểm chứng lại sau BE-10 |
+| M1 — Dựng baseline | Chọn release; dựng môi trường; kiểm tra đăng nhập, frontend, REST/FHIR; dữ liệu giả; chuyển sang PostgreSQL (BE-10) | Người 1 + 2; người 3 + 4 kiểm chứng | Một thành viên khác dựng lại được **trên PostgreSQL**. Baseline PostgreSQL có bằng chứng local ([VALIDATION.md](docs/VALIDATION.md)); mỗi môi trường và run CI vẫn phải được kiểm chứng |
 | M2 — Repo và CI tối thiểu | Cấu trúc, lệnh chạy/build/test, PR; kiểm tra khả dụng trong CI | Người 4 + 1 | Pipeline chạy trên GitHub và lỗi làm check thất bại. **Workflow đã có**, cần xác nhận run trên GitHub |
 | M3 — MVP-1 lõi lâm sàng | Gói metadata Việt Nam, biểu mẫu, Việt hóa, role, luồng khám, kiểm thử tích hợp | Cả 4 người | Chạy xuyên suốt kịch bản MVP-1 trên backend thật |
 | M4 — MVP-2 vận hành phòng khám | Lịch hẹn, hàng đợi, bảng giá, thu tiền, chỉ định CLS, mẫu in, báo cáo, backup–restore | Cả 4 người | Chạy trọn quy trình mục 2.3 với dữ liệu giả, có in ấn và đối soát tiền |

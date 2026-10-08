@@ -9,9 +9,9 @@ Repo cung cấp cùng một cấu hình Docker Compose cho mọi thành viên. M
 | `gateway` | Điểm truy cập duy nhất từ trình duyệt; chuyển request đến frontend/backend |
 | `frontend` | Giao diện OpenMRS 3 và các app từ baseline |
 | `backend` | OpenMRS Core, REST, FHIR2, Initializer và các module của bản phân phối |
-| `db` | Database lưu hồ sơ và metadata (hiện là MariaDB, sẽ chuyển sang PostgreSQL) |
+| `db` | PostgreSQL 16.15 lưu hồ sơ và metadata |
 
-> **Database:** dự án đã chọn **PostgreSQL** ([ADR-0002](decisions/0002-postgresql.md)). Việc chuyển đổi thuộc đầu việc BE-10. Cho tới khi PR đó được merge, `compose.yaml` vẫn dùng **MariaDB 10.11.19** và hướng dẫn dưới đây mô tả đúng cấu hình đang chạy. Sau BE-10, các mục về biến môi trường, healthcheck, volume, backup và xử lý lỗi sẽ được cập nhật. Khi chuyển, dùng `COMPOSE_PROJECT_NAME` mới hoặc xóa volume `db-data` cũ; không dùng lại volume MariaDB cho PostgreSQL.
+> **Database:** baseline hiện dùng **PostgreSQL 16.15** theo [ADR-0002](decisions/0002-postgresql.md), với volume `postgres-data` và `openmrs-pg-data`. Nếu đã chạy MariaDB, đọc [hướng dẫn chuyển](POSTGRESQL_MIGRATION.md); không dùng lại volume MariaDB cho PostgreSQL. Bản cập nhật không tự chuyển dữ liệu cũ.
 
 Baseline dùng **Reference Application 3.7.1**. Frontend, gateway, database và image nền của backend được khóa digest. Backend của nhóm là một lớp build nhỏ từ image release đó. Thông tin nguồn, commit và phiên bản nằm trong [baseline.json](../config/baseline.json).
 
@@ -116,7 +116,7 @@ Log và báo cáo nằm trong `.runtime/reports/`, được Git bỏ qua. Nếu 
 | --- | --- |
 | `COMPOSE_PROJECT_NAME` | Tên instance và nhóm volume; mặc định `ehr-vinshc` |
 | `EHR_HTTP_PORT` | Cổng trình duyệt trên localhost; mặc định `8080` |
-| `OMRS_DB_USER`, `OMRS_DB_PASSWORD`, `MYSQL_ROOT_PASSWORD` | Thông tin khởi tạo database. `MYSQL_ROOT_PASSWORD` sẽ được thay bằng biến của PostgreSQL trong BE-10 |
+| `OMRS_DB_USER`, `OMRS_DB_PASSWORD` | User/password khởi tạo PostgreSQL và kết nối OpenMRS |
 | `EHR_ADMIN_USERNAME`, `EHR_ADMIN_PASSWORD` | Tài khoản dùng cho kiểm chứng; username admin mặc định của baseline |
 | `SPA_DEFAULT_LOCALE` | Locale frontend; baseline đang dùng `en` |
 
