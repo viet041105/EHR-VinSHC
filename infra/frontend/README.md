@@ -2,11 +2,11 @@
 
 Frontend độc lập bằng HTML/CSS/JavaScript modules, giữ backend OpenMRS hiện có. Trang chủ dùng ảnh chụp thật và bố cục xanh dương/xanh ngọc theo ảnh tham chiếu; khu nhân viên dùng menu bên trái và trang theo 8 role.
 
-Đọc [thiết kế FE và hợp đồng bàn giao FE–BE](../docs/FRONTEND.md) để đối chiếu màn hình, quyền, DTO và các mốc B1–B9. [Phạm vi/mapping 13 thành phần ban đầu](../docs/FRONTEND_SCOPE.md) giữ bối cảnh báo cáo; không phải hợp đồng API đã được kiểm chứng.
+Đọc [thiết kế FE và hợp đồng bàn giao FE–BE](../../docs/FRONTEND.md) để đối chiếu màn hình, quyền, DTO và các mốc B1–B9. [Phạm vi/mapping 13 thành phần ban đầu](../../docs/FRONTEND_SCOPE.md) giữ bối cảnh báo cáo; không phải hợp đồng API đã được kiểm chứng.
 
 ## Chạy
 
-FE dùng Vite chạy trên Node.js. Cần Node.js **22.12 trở lên** và npm; nên dùng Node.js 24 LTS cho các máy trong nhóm. Trong thư mục `frontend`, cài dependency lần đầu rồi khởi động:
+FE dùng Vite chạy trên Node.js. Cần Node.js **22.12 trở lên** và npm; nên dùng Node.js 24 LTS cho các máy trong nhóm. Trong thư mục `infra/frontend`, cài dependency lần đầu rồi khởi động:
 
 ```sh
 npm install
@@ -16,7 +16,7 @@ npm run dev
 Tại gốc repo, lệnh tương đương là:
 
 ```sh
-npm --prefix frontend install
+npm --prefix infra/frontend install
 npm run dev
 ```
 
@@ -24,7 +24,7 @@ Mở http://127.0.0.1:5173. Server chạy bằng Node.js, không cần Python, D
 
 ## Các màn hình và vai trò
 
-Trang chủ chỉ giới thiệu VinSHC; các nội dung xuất hiện theo viewport với độ trễ lần lượt 80ms trong mỗi nhóm, hỗ trợ reduced motion và focus bàn phím. “Vào phòng khám” mở bộ chọn tài khoản, không mặc định bác sĩ. Khu nhân viên có menu riêng theo role; điện thoại mở menu bằng nút cạnh tài khoản. Xem [thiết kế theo kế hoạch 8 role](../docs/ROLE_WORKFLOWS.md).
+Trang chủ chỉ giới thiệu VinSHC; các nội dung xuất hiện theo viewport với độ trễ lần lượt 80ms trong mỗi nhóm, hỗ trợ reduced motion và focus bàn phím. “Vào phòng khám” mở bộ chọn tài khoản, không mặc định bác sĩ. Khu nhân viên có menu riêng theo role; điện thoại mở menu bằng nút cạnh tài khoản. Xem [thiết kế theo kế hoạch 8 role](../../docs/ROLE_WORKFLOWS.md).
 
 - Tiếp đón: tiếp nhận, sửa hành chính, mở lượt, lịch hẹn, hàng đợi theo phòng/bác sĩ; lịch sử hành chính; hủy/bỏ về có lý do.
 - Điều dưỡng: danh sách đo sinh hiệu, ghi chú/bàn giao, tài liệu, biểu mẫu điều dưỡng; ngữ cảnh lâm sàng chỉ đọc.
@@ -63,12 +63,12 @@ Bản in đơn/chỉ định/kết quả/phiếu thu/báo cáo/tóm tắt lượ
 - `styles.css`: layout responsive và hiệu ứng; `assets/`: ảnh thật tải local, xem [nguồn ảnh](assets/ASSET_SOURCES.md).
 
 ```sh
-node frontend/verify.mjs
-node --check frontend/app.js
-node --check frontend/modules.js
+node infra/frontend/verify.mjs
+node --check infra/frontend/app.js
+node --check infra/frontend/modules.js
 ```
 
-Browser QA dùng Playwright; `browser-check.cjs` và `design-check.cjs` dùng browser context riêng, dữ liệu giả không tác động browser người dùng. Bài thứ hai kiểm tra mọi trang của 8 role trên desktop/mobile, hiệu ứng tuần tự/reduced motion/focus, ảnh local, giấy hẹn/tóm tắt lượt và hủy/bỏ về. Chạy từ frontend sau `npm install` / `npx playwright install chromium`, cùng server đang chạy:
+Browser QA dùng Playwright; `browser-check.cjs` và `design-check.cjs` dùng browser context riêng, dữ liệu giả không tác động browser người dùng. Bài thứ hai kiểm tra mọi trang của 8 role trên desktop/mobile, hiệu ứng tuần tự/reduced motion/focus, ảnh local, giấy hẹn/tóm tắt lượt và hủy/bỏ về. Chạy từ infra/frontend sau `npm install` / `npx playwright install chromium`, cùng server đang chạy:
 
 ```sh
 npm run test:browser
@@ -82,6 +82,6 @@ UI tiếng Việt, ngày vi-VN và thời gian hiển thị Asia/Ho_Chi_Minh. C�
 
 Metadata Việt Nam/UUID/địa chỉ hierarchy, O3 form schema, drug/order type/care setting, provider/location, pagination, role/privilege cần xác nhận với người 1/3/4 khi nối backend. Không suy ra quyền ghi FHIR từ read capabilities.
 
-Chỉ nhập dữ liệu giả. localStorage/tài liệu/journal/thu tiền/cấp thuốc/khóa tài khoản/role demo không phải lưu trữ bệnh án hoặc phân quyền production. Không có chữ ký điện tử, cấp phát thuốc, LIS/PACS, liên thông hay patient portal. Không tuyên bố tuân thủ đầy đủ quy định Việt Nam. Các mục cần xác minh nằm trong [VIETNAM_COMPLIANCE.md](../docs/VIETNAM_COMPLIANCE.md).
+Chỉ nhập dữ liệu giả. localStorage/tài liệu/journal/thu tiền/cấp thuốc/khóa tài khoản/role demo không phải lưu trữ bệnh án hoặc phân quyền production. Không có chữ ký điện tử, cấp phát thuốc, LIS/PACS, liên thông hay patient portal. Không tuyên bố tuân thủ đầy đủ quy định Việt Nam. Các mục cần xác minh nằm trong [VIETNAM_COMPLIANCE.md](../../docs/VIETNAM_COMPLIANCE.md).
 
 Font Be Vietnam Pro tải từ Google Fonts, fallback Arial/sans-serif khi offline. Ảnh mới là ảnh chụp trên Pexels, tải và lưu local theo yêu cầu không dùng ảnh gen AI; ảnh không đại diện nhân viên của VinSHC. Tác giả, trang nguồn, URL tải và giấy phép được ghi tại [ASSET_SOURCES.md](assets/ASSET_SOURCES.md).

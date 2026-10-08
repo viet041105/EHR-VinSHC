@@ -2,6 +2,6 @@
   "name": "ehr-vinshc",
   "private": true,
   "scripts": {
-    "dev": "npm --prefix frontend run dev --"
+    "dev": "npm --prefix infra/frontend run dev --"
   }
 }

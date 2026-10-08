@@ -50,7 +50,7 @@ Không import package O3 vào FE này. Các tên esm trong báo cáo xác địn
 
 Kế hoạch mới xác định **8 role**, không phải 4: tiếp đón, thu ngân, điều dưỡng, bác sĩ, KTV CLS, dược/quầy thuốc, quản lý phòng khám, quản trị hệ thống. Một tài khoản có thể kiêm nhiều role. Xem [thiết kế từng role, phạm vi dữ liệu và hợp đồng cần BE](ROLE_WORKFLOWS.md).
 
-FE đã có không gian riêng cho cả 8 role, thao tác theo nhiệm vụ và privilege ghép, các màn hình operational bổ sung tại `frontend/operations.js`: thu/hoàn/hủy/phiếu thu/bảng giá, worklist CLS theo tài khoản được giao, kết quả/tệp, cấp theo bản chụp đơn mẫu, báo cáo tổng hợp. Quản trị không mặc định được đọc/ghi chart; tiếp đón không thấy tài liệu lâm sàng. Bộ chọn phiên hiển thị role được giao của tài khoản đang hoạt động.
+FE đã có không gian riêng cho cả 8 role, thao tác theo nhiệm vụ và privilege ghép, các màn hình operational bổ sung tại `infra/frontend/operations.js`: thu/hoàn/hủy/phiếu thu/bảng giá, worklist CLS theo tài khoản được giao, kết quả/tệp, cấp theo bản chụp đơn mẫu, báo cáo tổng hợp. Quản trị không mặc định được đọc/ghi chart; tiếp đón không thấy tài liệu lâm sàng. Bộ chọn phiên hiển thị role được giao của tài khoản đang hoạt động.
 
 Các màn hình này dùng dữ liệu giả. Billing/dispensing/reporting là phần FE chuẩn bị cho MVP-2/module tùy chọn, chưa chứng minh module backend hay toàn bộ nghiệp vụ hoạt động. Baseline mới dùng PostgreSQL 16.15. Danh sách 13 thành phần trong báo cáo ban đầu không bao trùm backlog backend hiện tại; tham chiếu `docs/BACKEND.md` B8 cho billing/stock và các adapter cần khảo sát.
 
@@ -70,6 +70,6 @@ Các màn hình này dùng dữ liệu giả. Billing/dispensing/reporting là p
 
 ## Kiểm chứng và tiêu chí hoàn thành
 
-Xem [ROLE_WORKFLOWS.md](ROLE_WORKFLOWS.md#kiểm-chứng) và `frontend/README.md` cho kiểm tra hiện tại. FE mới có demo tương tác theo 8 role, gồm test sai quyền, tài khoản khóa/kiêm nhiệm, thu/hoàn/hủy, CLS được giao, đơn bất biến, form theo người điền và desktop/mobile. Kiểm tra session dùng phản hồi giả, không kiểm tra đăng nhập backend thật.
+Xem [ROLE_WORKFLOWS.md](ROLE_WORKFLOWS.md#kiểm-chứng) và `infra/frontend/README.md` cho kiểm tra hiện tại. FE mới có demo tương tác theo 8 role, gồm test sai quyền, tài khoản khóa/kiêm nhiệm, thu/hoàn/hủy, CLS được giao, đơn bất biến, form theo người điền và desktop/mobile. Kiểm tra session dùng phản hồi giả, không kiểm tra đăng nhập backend thật.
 
 Chưa đủ điều kiện đánh dấu FE-05–FE-09 hoặc toàn bộ MVP hoàn thành theo kế hoạch: còn clinical API, metadata, privilege backend, mẫu in đã duyệt và mentor review. Không tuyên bố đạt quy chuẩn y khoa/pháp lý Việt Nam hoặc đủ điều kiện pilot.

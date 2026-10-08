@@ -125,7 +125,7 @@ Trả trước/trả sau hiện là hướng dẫn cấu hình. Backend B8 phả
 
 **Hệ màu:** xanh navy cho chữ, xanh dương cho thương hiệu, xanh ngọc cho hành động; nền trắng và xanh nhạt, đường viền xám. Cỡ chữ nội dung 13–14px, không dùng chữ 8–9px cho bảng công việc. Badge có text, không dùng màu làm tín hiệu duy nhất. Mobile giữ vùng bảng cuộn bên trong, menu mở/đóng và biểu mẫu một cột; focus bàn phím luôn nhìn thấy.
 
-**Hiệu ứng:** nội dung công khai xuất hiện khi đi vào viewport, mỗi nhóm trễ lần lượt khoảng 70–90ms; chỉ quan sát một lần, tôn trọng `prefers-reduced-motion`, focus làm hiện nội dung ngay. Nội dung và thao tác lâm sàng không bị ẩn để chờ animation. Ảnh tải local, lazy load dưới màn hình đầu; nguồn tại [ASSET_SOURCES](../frontend/assets/ASSET_SOURCES.md). Không dùng ảnh gen AI theo yêu cầu.
+**Hiệu ứng:** nội dung công khai xuất hiện khi đi vào viewport, mỗi nhóm trễ lần lượt khoảng 70–90ms; chỉ quan sát một lần, tôn trọng `prefers-reduced-motion`, focus làm hiện nội dung ngay. Nội dung và thao tác lâm sàng không bị ẩn để chờ animation. Ảnh tải local, lazy load dưới màn hình đầu; nguồn tại [ASSET_SOURCES](../infra/frontend/assets/ASSET_SOURCES.md). Không dùng ảnh gen AI theo yêu cầu.
 
 ## 7. Lỗi, lưu và quyền truy cập
 
@@ -163,4 +163,4 @@ Các bài test FE phải bao gồm: 8 role và role kiêm nhiệm; locked accoun
 - Giấy hẹn/tóm tắt lượt có xem/in mẫu. Hủy/bỏ về giữ dữ liệu và giao dịch, chặn cấp đơn của lượt hủy; số lượt hủy tách khỏi lượt hoàn tất trong báo cáo theo nhóm lượt mở của ngày được chọn.
 - `backend-mapping.js`: bản đồ dịch vụ bàn giao và command sinh hiệu với UUID/context, metadata version, mã trường/đơn vị. Chỉ kiểm tra command trung gian; không gọi API lâm sàng và không chứng minh UUID tồn tại tại server.
 
-Kiểm tra đã chạy trên dữ liệu giả: `node frontend/verify.mjs`, `frontend/browser-check.cjs`, `frontend/design-check.cjs`; kiểm tra mọi trang được công bố cho 8 role trên 1440px/390px, sai quyền, kiêm nhiệm, final/closed readonly, thu/hoàn, file, rollback khi lưu lỗi, scroll/reduced motion/focus, mẫu in và snapshot đơn. B5/B9 và nghiệm thu chuyên môn vẫn thực hiện sau khi có hợp đồng/metadata thật.
+Kiểm tra đã chạy trên dữ liệu giả: `node infra/frontend/verify.mjs`, `infra/frontend/browser-check.cjs`, `infra/frontend/design-check.cjs`; kiểm tra mọi trang được công bố cho 8 role trên 1440px/390px, sai quyền, kiêm nhiệm, final/closed readonly, thu/hoàn, file, rollback khi lưu lỗi, scroll/reduced motion/focus, mẫu in và snapshot đơn. B5/B9 và nghiệm thu chuyên môn vẫn thực hiện sau khi có hợp đồng/metadata thật.

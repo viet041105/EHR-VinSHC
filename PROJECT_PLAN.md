@@ -329,7 +329,7 @@ EHR-VinSHC/
 │   └── decisions/               # ADR
 ├── config/                      # Baseline đã khóa
 ├── infra/backend/configuration/ # Gói Việt Nam + cấu hình cơ sở mẫu (Initializer)
-├── frontend/                    # Cấu hình, bản dịch, mẫu in, phần frontend tùy biến
+├── infra/frontend/              # Cấu hình, bản dịch, mẫu in, phần frontend tùy biến
 ├── modules/                     # Module backend riêng khi có nhu cầu đã xác nhận
 ├── integrations/                # Adapter BHYT, HĐĐT, đơn thuốc QG, LIS, PACS, openEHR
 ├── tests/                       # API test, integration/E2E, fixture giả
