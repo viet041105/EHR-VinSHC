@@ -2,6 +2,8 @@
 
 **Ngày kiểm chứng:** 07/10/2026, múi giờ UTC+7.
 
+> **Lưu ý:** Toàn bộ kết quả dưới đây được đo trên **MariaDB 10.11.19**. Dự án đã chuyển hướng sang PostgreSQL ([ADR-0002](decisions/0002-postgresql.md)). Các kiểm tra phải được chạy lại trên PostgreSQL trong BE-10 và ghi thành một mục kết quả mới; kết quả MariaDB không thay thế kiểm chứng đó.
+
 Docker baseline đã được chạy thật trên máy phát triển và trên một Compose project độc lập có database mới, mật khẩu mới và cổng riêng. Báo cáo này ghi nhận kiểm chứng local đã đạt; trạng thái workflow trên GitHub được theo dõi riêng trong [GitHub Actions](https://github.com/viet041105/EHR-VinSHC/actions).
 
 ## Môi trường đã chạy

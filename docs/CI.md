@@ -45,6 +45,8 @@ Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định
 
 ## 4. Giới hạn của CI hiện tại
 
+CI hiện dựng stack với MariaDB. Theo [ADR-0002](decisions/0002-postgresql.md), job `OpenMRS REST, FHIR and persistence` sẽ chuyển sang PostgreSQL cùng PR BE-10, và kiểm tra persistence phải đạt trên PostgreSQL.
+
 CI kiểm chứng baseline chạy được và các API chính; chưa nghiệm thu biểu mẫu Việt Nam, ma trận quyền lễ tân/điều dưỡng/bác sĩ, toàn bộ mapping lâm sàng, E2E trên trình duyệt hoặc triển khai production.
 
 Hiện repo build một lớp backend từ image upstream cố định để bỏ demo lớn. Khi thêm mã Java/frontend tùy biến, bổ sung build và test cần thiết vào pipeline, rồi tích hợp artifact vừa build vào stack kiểm chứng.
