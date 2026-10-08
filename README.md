@@ -27,3 +27,7 @@ Mở **http://127.0.0.1:8080/openmrs/spa/**. Đăng nhập bằng `EHR_ADMIN_USE
 - [Kết quả kiểm chứng](docs/VALIDATION.md): đã chạy thật những gì và các giới hạn còn lại.
 
 Baseline dùng OpenMRS Reference Application 3.7.1 và MariaDB 10.11.19. Backend được build từ image upstream đã khóa digest, giữ metadata nền và bỏ bộ demo lớn. Metadata và biểu mẫu Việt Nam tiếp tục làm theo kế hoạch.
+
+## Frontend VinSHC độc lập
+
+Giao diện tiếng Việt và các nghiệp vụ theo báo cáo: xem [frontend/README.md](frontend/README.md) và [phạm vi/mapping FE–BE](docs/FRONTEND_SCOPE.md). Chạy `python3 -m http.server 5173 --bind 127.0.0.1 --directory frontend`, mở http://127.0.0.1:5173. Đây là dữ liệu giả; giao diện chưa đọc/ghi hồ sơ OpenMRS thật.
