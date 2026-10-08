@@ -12,7 +12,7 @@ Tại gốc repo EHR-VinSHC hoặc trong thư mục `frontend`, chạy:
 npm run dev
 ```
 
-Lệnh ngắn dùng Node.js/npm và Python 3 có sẵn qua lệnh `python`; không cần `npm install` để mở giao diện. Nếu máy dùng lệnh `python3`, có thể chạy trực tiếp từ gốc repo:
+Lệnh này dùng Node.js/npm và Python 3 có sẵn qua lệnh `python3`; không cần `npm install` để mở giao diện. Có thể chạy trực tiếp từ gốc repo:
 
 ```sh
 python3 -m http.server 5173 --bind 127.0.0.1 --directory frontend
