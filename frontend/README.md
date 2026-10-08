@@ -6,27 +6,21 @@ Frontend độc lập bằng HTML/CSS/JavaScript modules, giữ backend OpenMRS 
 
 ## Chạy
 
-Tại gốc repo EHR-VinSHC hoặc trong thư mục `frontend`, chạy:
+FE dùng Vite chạy trên Node.js. Cần Node.js **22.12 trở lên** và npm; nên dùng Node.js 24 LTS cho các máy trong nhóm. Trong thư mục `frontend`, cài dependency lần đầu rồi khởi động:
 
 ```sh
+npm install
 npm run dev
 ```
 
-Lệnh này cần Node.js/npm và Docker Desktop đang chạy. Python nằm trong image đã khóa digest của service `vinshc-fe` trong `compose.yaml`; máy host không cần Python hoặc `npm install`. Source FE được mount chỉ đọc, sửa code rồi refresh trình duyệt. Lệnh chỉ khởi động `vinshc-fe`, dùng `.env.example` để nội suy cấu hình; không khởi động database/backend và không dùng mật khẩu mẫu để tạo database.
-
-Nếu chỉ có Docker, chạy từ gốc repo:
+Tại gốc repo, lệnh tương đương là:
 
 ```sh
-docker compose --env-file .env.example up --no-deps vinshc-fe
+npm --prefix frontend install
+npm run dev
 ```
 
-Nếu muốn chạy trực tiếp bằng Python 3 đã cài trên máy, từ gốc repo:
-
-```sh
-python3 -m http.server 5173 --bind 127.0.0.1 --directory frontend
-```
-
-Mở http://127.0.0.1:5173. Không mở bằng file://. `Ctrl+C` để dừng server. Nếu cổng 5173 đã có server chạy, dừng server đó trước khi chạy cách khác.
+Mở http://127.0.0.1:5173. Server chạy bằng Node.js, không cần Python, Docker hoặc backend để mở bản demo. Sửa source rồi lưu, Vite tự cập nhật trang. `Ctrl+C` để dừng server. Cổng được giữ cố định 5173; nếu đã có server chạy ở cổng này, dừng server đó trước. Không mở bằng file://.
 
 ## Các màn hình và vai trò
 

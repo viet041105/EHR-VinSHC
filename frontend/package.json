@@ -2,12 +2,16 @@
   "name": "vinshc-frontend",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22.12.0"
+  },
   "scripts": {
-    "dev": "docker compose --env-file ../.env.example -f ../compose.yaml up --no-deps vinshc-fe",
+    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "test": "node verify.mjs",
     "test:browser": "node browser-check.cjs && node design-check.cjs"
   },
   "devDependencies": {
-    "playwright": "1.64.0"
+    "playwright": "1.64.0",
+    "vite": "8.3.4"
   }
 }
