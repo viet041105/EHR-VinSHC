@@ -110,7 +110,7 @@ def assert_capabilities(statement):
     return resources
 
 
-def assert_modules(modules, expected_components):
+def assert_modules(modules, expected_components, expected_modules=None):
     by_id = {module.get("uuid"): module for module in modules}
     versions = {}
     for module_id, component in (("webservices.rest", "webservicesRest"), ("fhir2", "fhir2"),
@@ -119,6 +119,12 @@ def assert_modules(modules, expected_components):
         require(module.get("started") is True, f"Required module {module_id} is not started.")
         require(module.get("version") == expected_components[component],
                 f"Required module {module_id} differs from the reviewed baseline version.")
+        versions[module_id] = module["version"]
+    for module_id, expected_version in (expected_modules or {}).items():
+        module = by_id.get(module_id, {})
+        require(module.get("started") is True, f"Baseline module {module_id} is not started.")
+        require(module.get("version") == expected_version,
+                f"Baseline module {module_id} differs from the reviewed version.")
         versions[module_id] = module["version"]
     return versions
 
@@ -178,9 +184,110 @@ def create_fixture(client, fixture_path):
     require(bool(patient.get("uuid")), "REST did not return a synthetic patient UUID.")
     fixture = {"patientUuid": patient["uuid"], "identifier": identifier,
                "createdAt": datetime.now(timezone.utc).isoformat()}
+    fixture.update(create_clinical_fixture(client, patient["uuid"], location_uuid))
     fixture_path.parent.mkdir(parents=True, exist_ok=True)
     fixture_path.write_text(json.dumps(fixture, indent=2) + "\n", encoding="utf-8")
     return fixture
+
+
+def create_clinical_fixture(client, patient_uuid, location_uuid):
+    """Exercise PostgreSQL relationships, numeric/Unicode text values and timestamps."""
+    def named_type(resource, name):
+        items = client.json(f"/openmrs/ws/rest/v1/{resource}?v=full").get("results", [])
+        item = next((item for item in items if item.get("name") == name), None)
+        if item is None:
+            item = client.json(f"/openmrs/ws/rest/v1/{resource}", method="POST", statuses=(200, 201),
+                               payload={"name": name, "description": "Synthetic local/CI data only"})
+        return item["uuid"]
+
+    visit_type = named_type("visittype", "VinSHC synthetic smoke visit")
+    encounter_type = named_type("encountertype", "VinSHC synthetic smoke encounter")
+    datatypes = client.json("/openmrs/ws/rest/v1/conceptdatatype?v=full").get("results", [])
+    classes = client.json("/openmrs/ws/rest/v1/conceptclass?v=full").get("results", [])
+    numeric = next((item["uuid"] for item in datatypes if item.get("name") == "Numeric"), None)
+    text_type = next((item["uuid"] for item in datatypes if item.get("name") == "Text"), None)
+    test_class = next((item["uuid"] for item in classes if item.get("name") == "Test"), None)
+    require(bool(numeric and text_type and test_class), "Numeric/Text datatype or Test concept class is missing.")
+    concept = client.json("/openmrs/ws/rest/v1/concept", method="POST", statuses=(200, 201), payload={
+        "names": [{"name": "VinSHC synthetic measurement " + uuid.uuid4().hex[:8],
+                   "locale": "en", "conceptNameType": "FULLY_SPECIFIED"}],
+        "datatype": numeric, "conceptClass": test_class, "units": "degC", "allowDecimal": True,
+    })
+    timestamp = datetime.now(timezone.utc).isoformat(timespec="milliseconds")
+    visit = client.json("/openmrs/ws/rest/v1/visit", method="POST", statuses=(200, 201), payload={
+        "patient": patient_uuid, "visitType": visit_type, "location": location_uuid,
+        "startDatetime": timestamp,
+    })
+    encounter = client.json("/openmrs/ws/rest/v1/encounter", method="POST", statuses=(200, 201), payload={
+        "patient": patient_uuid, "encounterType": encounter_type, "location": location_uuid,
+        "visit": visit["uuid"], "encounterDatetime": timestamp,
+    })
+    obs = client.json("/openmrs/ws/rest/v1/obs", method="POST", statuses=(200, 201), payload={
+        "person": patient_uuid, "encounter": encounter["uuid"], "concept": concept["uuid"],
+        "location": location_uuid, "obsDatetime": timestamp, "value": 36.7,
+    })
+    text_value = ("Ghi chú giả lập VinSHC: kiểm tra lưu văn bản tiếng Việt. " * 32).strip()
+    text_concept = client.json("/openmrs/ws/rest/v1/concept", method="POST", statuses=(200, 201), payload={
+        "names": [{"name": "VinSHC synthetic note " + uuid.uuid4().hex[:8],
+                   "locale": "en", "conceptNameType": "FULLY_SPECIFIED"}],
+        "datatype": text_type, "conceptClass": test_class,
+        "descriptions": [{"description": text_value, "locale": "vi"}],
+    })
+    text_obs = client.json("/openmrs/ws/rest/v1/obs", method="POST", statuses=(200, 201), payload={
+        "person": patient_uuid, "encounter": encounter["uuid"], "concept": text_concept["uuid"],
+        "location": location_uuid, "obsDatetime": timestamp, "value": text_value,
+    })
+    return {"visitUuid": visit["uuid"], "encounterUuid": encounter["uuid"],
+            "obsUuid": obs["uuid"], "conceptUuid": concept["uuid"], "numericValue": 36.7,
+            "textObsUuid": text_obs["uuid"], "textConceptUuid": text_concept["uuid"], "textValue": text_value,
+            "clinicalDatetime": timestamp}
+
+
+def verify_clinical_fixture(client, fixture):
+    patient_uuid = fixture["patientUuid"]
+    visit = client.json(f"/openmrs/ws/rest/v1/visit/{fixture['visitUuid']}?v=full")
+    encounter = client.json(f"/openmrs/ws/rest/v1/encounter/{fixture['encounterUuid']}?v=full")
+    obs = client.json(f"/openmrs/ws/rest/v1/obs/{fixture['obsUuid']}?v=full")
+    require(visit.get("patient", {}).get("uuid") == patient_uuid,
+            "Visit references a different patient.")
+    require(encounter.get("patient", {}).get("uuid") == patient_uuid
+            and encounter.get("visit", {}).get("uuid") == fixture["visitUuid"],
+            "Encounter lost its patient or visit relationship.")
+    require(obs.get("person", {}).get("uuid") == patient_uuid
+            and obs.get("encounter", {}).get("uuid") == fixture["encounterUuid"]
+            and obs.get("concept", {}).get("uuid") == fixture["conceptUuid"]
+            and obs.get("value") == fixture["numericValue"],
+            "Observation lost its relationships or numeric value.")
+    observed = datetime.fromisoformat(obs["obsDatetime"].replace("Z", "+00:00"))
+    expected = datetime.fromisoformat(fixture["clinicalDatetime"])
+    require(abs((observed - expected).total_seconds()) < 1, "Observation timestamp changed.")
+    fhir_encounter = client.json(f"/openmrs/ws/fhir2/R4/Encounter/{fixture['encounterUuid']}")
+    fhir_obs = client.json(f"/openmrs/ws/fhir2/R4/Observation/{fixture['obsUuid']}")
+    require(fhir_encounter.get("resourceType") == "Encounter"
+            and fhir_encounter.get("id") == fixture["encounterUuid"]
+            and fhir_encounter.get("subject", {}).get("reference", "").endswith("Patient/" + patient_uuid),
+            "FHIR Encounter maps to a different patient or encounter.")
+    require(fhir_obs.get("resourceType") == "Observation" and fhir_obs.get("id") == fixture["obsUuid"]
+            and fhir_obs.get("subject", {}).get("reference", "").endswith("Patient/" + patient_uuid)
+            and fhir_obs.get("encounter", {}).get("reference", "").endswith("Encounter/" + fixture["encounterUuid"])
+            and fhir_obs.get("valueQuantity", {}).get("value") == fixture["numericValue"]
+            and fhir_obs.get("valueQuantity", {}).get("unit") == "degC",
+            "FHIR Observation lost its patient, encounter, numeric value or unit.")
+    if fixture.get("textObsUuid"):
+        text_obs = client.json(f"/openmrs/ws/rest/v1/obs/{fixture['textObsUuid']}?v=full")
+        text_concept = client.json(
+            f"/openmrs/ws/rest/v1/concept/{fixture['textConceptUuid']}?v=custom:(uuid,descriptions:(uuid,description))")
+        fhir_text = client.json(f"/openmrs/ws/fhir2/R4/Observation/{fixture['textObsUuid']}")
+        require(text_obs.get("value") == fixture["textValue"]
+                and text_obs.get("person", {}).get("uuid") == patient_uuid
+                and text_obs.get("encounter", {}).get("uuid") == fixture["encounterUuid"]
+                and any(item.get("description") == fixture["textValue"].strip()
+                        for item in text_concept.get("descriptions", [])),
+                "REST lost Unicode text or the concept description.")
+        require(fhir_text.get("id") == fixture["textObsUuid"]
+                and fhir_text.get("subject", {}).get("reference", "").endswith("Patient/" + patient_uuid)
+                and fhir_text.get("valueString") == fixture["textValue"],
+                "FHIR lost Unicode observation text or its patient relationship.")
 
 
 def verify_fixture(client, fixture):
@@ -195,6 +302,8 @@ def verify_fixture(client, fixture):
             "FHIR mapping points to a different patient.")
     require(any(item.get("value") == fixture["identifier"] for item in fhir_patient.get("identifier", [])),
             "FHIR mapping lost the synthetic identifier.")
+    if fixture.get("obsUuid"):
+        verify_clinical_fixture(client, fixture)
 
 
 def run_checks(client, args, report):
@@ -222,7 +331,7 @@ def run_checks(client, args, report):
     passed("REST authentication")
     baseline = json.loads((ROOT / "config/baseline.json").read_text(encoding="utf-8"))
     modules = client.json("/openmrs/ws/rest/v1/module?v=full").get("results", [])
-    report["moduleVersions"] = assert_modules(modules, baseline["upstreamComponents"])
+    report["moduleVersions"] = assert_modules(modules, baseline["upstreamComponents"], baseline["requiredModules"])
     system_info = client.json("/openmrs/ws/rest/v1/systeminformation").get("systemInfo", {})
     core_version = baseline["upstreamComponents"]["openmrsCore"]
     report["coreVersion"] = assert_core_version(system_info, core_version)
@@ -266,11 +375,14 @@ def run_checks(client, args, report):
     if args.create_fixture:
         fixture = create_fixture(client, args.fixture)
         verify_fixture(client, fixture)
-        passed("synthetic patient stored and read through REST/FHIR")
+        passed("synthetic patient and clinical fixture stored and read through REST/FHIR"
+               if fixture.get("obsUuid") else "synthetic patient stored and read through REST/FHIR")
     elif args.require_fixture:
         require(args.fixture.is_file(), "Persistence fixture is missing; run --create-fixture before restarting.")
-        verify_fixture(client, json.loads(args.fixture.read_text(encoding="utf-8")))
-        passed("existing synthetic patient survives restart through REST/FHIR")
+        fixture = json.loads(args.fixture.read_text(encoding="utf-8"))
+        verify_fixture(client, fixture)
+        passed("existing patient, visit, encounter and observation survive restart through REST/FHIR"
+               if fixture.get("obsUuid") else "existing synthetic patient survives restart through REST/FHIR")
 
 
 def main():
@@ -280,7 +392,7 @@ def main():
     parser.add_argument("--report", type=Path, default=ROOT / ".runtime/reports/smoke.json")
     parser.add_argument("--fixture", type=Path, default=ROOT / ".runtime/smoke-fixture.json")
     mode = parser.add_mutually_exclusive_group()
-    mode.add_argument("--create-fixture", action="store_true", help="Create/reuse one synthetic local patient")
+    mode.add_argument("--create-fixture", action="store_true", help="Create/reuse a synthetic patient and clinical fixture")
     mode.add_argument("--require-fixture", action="store_true", help="Verify an existing fixture without recreating it")
     args = parser.parse_args()
     if args.timeout <= 0:

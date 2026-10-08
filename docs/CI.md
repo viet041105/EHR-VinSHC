@@ -21,16 +21,16 @@ Kết quả kiểm chứng local hiện có trong [VALIDATION.md](VALIDATION.md)
 3. Chạy regression test cho bootstrap, cấu hình, che credential và smoke failure handling.
 4. Validate cú pháp/hành vi workflow bằng actionlint có phiên bản và checksum cố định.
 
-### Job `OpenMRS REST, FHIR and persistence`
+### Job `PostgreSQL, OpenMRS REST, FHIR and persistence`
 
-1. Pull image đã khóa và build lớp backend bỏ nội dung demo lớn từ image release cố định.
-2. Dựng stack trên runner mới và chờ các service khỏe.
+1. Pull image đã khóa và build backend từ image release cố định, bỏ demo lớn và áp dụng bản sửa PostgreSQL đã lưu trong repo.
+2. Dựng stack PostgreSQL trên runner mới và chờ các service khỏe; xác nhận version, UTF8, extension, schema OpenMRS, đủ 118 khóa ngoại Stock Management và hai cột nhị phân của module dùng BYTEA. Lệnh khởi tạo có giới hạn tổng 2.400 giây; dựng lại dùng 600 giây, để khi lỗi vẫn còn thời gian lấy diagnostics và dọn project.
 3. Kiểm tra HTML/import map O3 và tải JavaScript app shell/login qua gateway.
-4. Xác thực REST; xác nhận phiên bản Core/REST/FHIR2/Initializer; kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
+4. Xác thực REST; xác nhận phiên bản Core và đủ 29 module của baseline; kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
 5. Kiểm tra REST patient search, FHIR R4 CapabilityStatement và FHIR Patient search.
-6. Tạo một bệnh nhân giả; đối chiếu cùng mã bệnh nhân qua REST/FHIR.
+6. Tạo bệnh nhân giả, visit, encounter, observation số và văn bản tiếng Việt dài; đối chiếu mã bệnh nhân, quan hệ, giá trị, đơn vị, thời gian và văn bản qua REST/FHIR.
 7. Dừng và dựng lại container, giữ volume; đọc chính hồ sơ trước đó để kiểm chứng persistence.
-8. Lưu báo cáo/log đã che mật khẩu cấu hình, rồi xóa container/volume của chính project CI đó.
+8. Lưu báo cáo/log đã che mật khẩu cấu hình, gồm log OpenMRS trong application volume khi khởi tạo chưa xong, rồi xóa container/volume của chính project CI đó.
 
 Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định danh hoặc mất hồ sơ sau restart, job phải thất bại.
 
@@ -45,16 +45,19 @@ Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định
 
 ## 4. Giới hạn của CI hiện tại
 
+CI hiện dựng stack với MariaDB. Theo [ADR-0002](decisions/0002-postgresql.md), job `OpenMRS REST, FHIR and persistence` sẽ chuyển sang PostgreSQL cùng PR BE-10, và kiểm tra persistence phải đạt trên PostgreSQL.
+
 CI kiểm chứng baseline chạy được và các API chính; chưa nghiệm thu biểu mẫu Việt Nam, ma trận quyền lễ tân/điều dưỡng/bác sĩ, toàn bộ mapping lâm sàng, E2E trên trình duyệt hoặc triển khai production.
 
-Hiện repo build một lớp backend từ image upstream cố định để bỏ demo lớn. Khi thêm mã Java/frontend tùy biến, bổ sung build và test cần thiết vào pipeline, rồi tích hợp artifact vừa build vào stack kiểm chứng.
+Repo build backend từ image upstream cố định, có lớp Hibernate, bản sửa migration Appointments, đồng bộ sequence sau dữ liệu nền của Core và kiểm tra khóa ngoại Stock Management theo từng bảng. Build biên dịch lớp Java và kiểm tra hash artifact gốc; smoke kiểm chứng qua API thật. Khi thêm chức năng Java/frontend của nhóm, bổ sung test phù hợp vào pipeline.
 
 ## 5. Kiểm tra trước khi mở PR
 
 ```powershell
 python scripts/check_config.py
 python -m unittest discover -s tests -v
-docker compose up -d --wait --wait-timeout 1200
+docker compose up -d --wait --wait-timeout 2400
+python scripts/check_database.py
 python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
 docker compose down
 docker compose up -d --wait --wait-timeout 600

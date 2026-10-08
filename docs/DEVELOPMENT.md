@@ -9,9 +9,11 @@ Repo cung cấp cùng một cấu hình Docker Compose cho mọi thành viên. M
 | `gateway` | Điểm truy cập duy nhất từ trình duyệt; chuyển request đến frontend/backend |
 | `frontend` | Giao diện OpenMRS 3 và các app từ baseline |
 | `backend` | OpenMRS Core, REST, FHIR2, Initializer và các module của bản phân phối |
-| `db` | MariaDB lưu hồ sơ và metadata |
+| `db` | Database lưu hồ sơ và metadata (hiện là MariaDB, sẽ chuyển sang PostgreSQL) |
 
-Baseline dùng **Reference Application 3.7.1** và **MariaDB 10.11.19**. Frontend, gateway, MariaDB và image nền của backend được khóa digest. Backend của nhóm là một lớp build nhỏ từ image release đó. Thông tin nguồn, commit và phiên bản nằm trong [baseline.json](../config/baseline.json).
+> **Database:** dự án đã chọn **PostgreSQL** ([ADR-0002](decisions/0002-postgresql.md)). Việc chuyển đổi thuộc đầu việc BE-10. Cho tới khi PR đó được merge, `compose.yaml` vẫn dùng **MariaDB 10.11.19** và hướng dẫn dưới đây mô tả đúng cấu hình đang chạy. Sau BE-10, các mục về biến môi trường, healthcheck, volume, backup và xử lý lỗi sẽ được cập nhật. Khi chuyển, dùng `COMPOSE_PROJECT_NAME` mới hoặc xóa volume `db-data` cũ; không dùng lại volume MariaDB cho PostgreSQL.
+
+Baseline dùng **Reference Application 3.7.1**. Frontend, gateway, database và image nền của backend được khóa digest. Backend của nhóm là một lớp build nhỏ từ image release đó. Thông tin nguồn, commit và phiên bản nằm trong [baseline.json](../config/baseline.json).
 
 Backend giữ metadata nền của OpenMRS, bỏ các thư mục nội dung `referenceapplication-demo` và module sinh dữ liệu demo lớn. Cấu hình frontend demo cũng được tắt. Initializer nạp một location giả **VinSHC Development Clinic** với UUID ổn định và các tag Login/Facility/Visit từ `infra/backend/configuration/locations/vinshc/locations.csv`. Lớp build này không sửa mã Core/REST/FHIR2. Metadata và biểu mẫu Việt Nam thuộc các đầu việc tiếp theo trong [PROJECT_PLAN.md](../PROJECT_PLAN.md).
 
@@ -35,6 +37,8 @@ python --version
 
 ## 3. Chạy lần đầu
 
+Nếu đã chạy bản MariaDB trước đây, đọc [hướng dẫn chuyển PostgreSQL](POSTGRESQL_MIGRATION.md) trước. Bản này dùng volume DB và volume OpenMRS mới; nó không tự chuyển dữ liệu từ MariaDB.
+
 Mở terminal tại thư mục repo rồi chạy lần lượt:
 
 ```powershell
@@ -42,13 +46,18 @@ python scripts/bootstrap.py
 python scripts/check_config.py
 docker compose pull --quiet --ignore-buildable
 docker compose build --pull backend
-docker compose up -d --wait --wait-timeout 1200
+docker compose up -d --wait --wait-timeout 2400
+python scripts/check_database.py
 python scripts/smoke.py
 ```
 
-`bootstrap.py` tạo `.env` từ mẫu và sinh ba mật khẩu độc lập cho database, database root và OpenMRS admin. Nếu `.env` đã có, script giữ nguyên file.
+`bootstrap.py` tạo `.env` từ mẫu và sinh hai mật khẩu độc lập cho database và OpenMRS admin. Nếu `.env` đã có, script giữ nguyên file.
 
 `check_config.py` kiểm tra image khớp baseline, digest, nguồn Dockerfile backend, readiness, volume và cổng localhost. Nó không in cấu hình đã nội suy mật khẩu.
+
+`check_database.py` xác nhận DB đang chạy thật là PostgreSQL đúng phiên bản, dùng UTF8, có extension `fuzzystrmatch`/`uuid-ossp` và các bảng OpenMRS cần thiết. Extension được tạo khi DB mới khởi tạo từ `infra/postgres/initdb/001-openmrs-extensions.sql`.
+
+`OMRS_DB_USER` là user khởi tạo của image PostgreSQL, có quyền quản trị cluster trong baseline local/CI này. Trước triển khai production cần tách quyền migration/quản trị khỏi tài khoản ứng dụng. Phần agent và `pgvector` chưa được triển khai; sau này dùng database riêng cho dữ liệu của agent.
 
 Compose build backend từ Dockerfile của repo, chờ database khỏe, backend sẵn sàng, rồi khởi động frontend/gateway. `smoke.py` kiểm tra giao diện, đăng nhập, phiên bản các module cần thiết, từ chối truy cập trái phép, REST và FHIR trên hệ thống thật.
 
@@ -67,9 +76,9 @@ docker compose up -d --wait --wait-timeout 600
 python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
 ```
 
-- Lần đầu tạo một loại mã test và một bệnh nhân giả tên `Synthetic VinSHC Smoke`, rồi lưu UUID/mã vào `.runtime/smoke-fixture.json`.
-- Lần sau đọc **chính hồ sơ đó** qua REST và FHIR; không tạo lại khi hồ sơ bị mất.
-- `docker compose down` giữ hai named volume `db-data` và `openmrs-data`.
+- Lần đầu tạo một bệnh nhân giả tên `Synthetic VinSHC Smoke`, một visit/encounter, observation số có đơn vị/thời gian và observation văn bản tiếng Việt dài, cùng metadata test cần thiết; UUID/mã được lưu vào `.runtime/smoke-fixture.json`.
+- Lần sau đọc **chính hồ sơ đó** qua REST và FHIR, đối chiếu quan hệ, giá trị số, đơn vị, thời gian và văn bản; không tạo lại khi hồ sơ bị mất.
+- `docker compose down` giữ hai named volume `postgres-data` và `openmrs-pg-data`.
 - Các script smoke chỉ nhận địa chỉ HTTP loopback, để tránh gửi dữ liệu test tới hệ thống bên ngoài.
 
 Khi muốn tạo môi trường thử nghiệm hoàn toàn khác, dùng một `COMPOSE_PROJECT_NAME` khác và đường dẫn `--fixture` khác. Database và fixture phải thuộc cùng instance.
@@ -107,7 +116,7 @@ Log và báo cáo nằm trong `.runtime/reports/`, được Git bỏ qua. Nếu 
 | --- | --- |
 | `COMPOSE_PROJECT_NAME` | Tên instance và nhóm volume; mặc định `ehr-vinshc` |
 | `EHR_HTTP_PORT` | Cổng trình duyệt trên localhost; mặc định `8080` |
-| `OMRS_DB_USER`, `OMRS_DB_PASSWORD`, `MYSQL_ROOT_PASSWORD` | Thông tin khởi tạo database |
+| `OMRS_DB_USER`, `OMRS_DB_PASSWORD`, `MYSQL_ROOT_PASSWORD` | Thông tin khởi tạo database. `MYSQL_ROOT_PASSWORD` sẽ được thay bằng biến của PostgreSQL trong BE-10 |
 | `EHR_ADMIN_USERNAME`, `EHR_ADMIN_PASSWORD` | Tài khoản dùng cho kiểm chứng; username admin mặc định của baseline |
 | `SPA_DEFAULT_LOCALE` | Locale frontend; baseline đang dùng `en` |
 
@@ -128,7 +137,7 @@ Các mật khẩu sinh trong `.env` không chứa ký tự `$`, để tránh n�
 
 Frontend/gateway hiện dùng image upstream. Backend có Dockerfile riêng để tạo baseline nhẹ từ release ổn định. Metadata của nhóm dưới `infra/backend/configuration/` được copy vào cấu hình distribution khi build; sau khi sửa, chạy `docker compose build backend` rồi `docker compose up -d --wait --wait-timeout 600`. Initializer nạp thay đổi khi khởi động backend. Với mã frontend hoặc Java tùy biến, cần bổ sung cơ chế build/load tương ứng; tránh mount đè cả thư mục cấu hình upstream và mất metadata cần thiết.
 
-CI hiện build lớp backend này rồi kiểm tra hệ thống chạy thật. Chưa có mã Java/frontend do nhóm phát triển; thêm build/unit/E2E cho từng phần khi có mã tương ứng.
+CI hiện build lớp backend này rồi kiểm tra hệ thống chạy thật. Có lớp Hibernate và bản sửa migration Appointments cho PostgreSQL trong [postgresql/README.md](../infra/backend/postgresql/README.md); chưa có chức năng Java/frontend nghiệp vụ của nhóm. Khi nâng cấp upstream, phải kiểm chứng lại các bản sửa tương thích này.
 
 ## 8. Khi gặp lỗi
 

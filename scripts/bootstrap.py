@@ -12,12 +12,13 @@ def bootstrap(root=ROOT):
     target = root / ".env"
     if target.exists():
         print(".env already exists; keeping its credentials and settings.")
+        if any(line.startswith("MYSQL_ROOT_PASSWORD=") for line in target.read_text(encoding="utf-8-sig").splitlines()):
+            print("Legacy MariaDB settings detected. Read docs/POSTGRESQL_MIGRATION.md before starting the PostgreSQL stack.")
         return
     text = (root / ".env.example").read_text(encoding="utf-8")
     replacements = {
         "GENERATE_DB_PASSWORD": secrets.token_hex(24),
-        "GENERATE_ROOT_PASSWORD": secrets.token_hex(24),
-        "GENERATE_ADMIN_PASSWORD": "Vshc!" + secrets.token_urlsafe(24),
+        "GENERATE_ADMIN_PASSWORD": "Vshc1!" + secrets.token_urlsafe(24),
     }
     for placeholder, value in replacements.items():
         text = text.replace(placeholder, value)

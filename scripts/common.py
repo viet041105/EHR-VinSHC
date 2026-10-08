@@ -26,7 +26,7 @@ def read_settings(root=ROOT):
     for key in settings:
         if key in os.environ:
             settings[key] = os.environ[key]
-    for key in ("OMRS_DB_USER", "OMRS_DB_PASSWORD", "MYSQL_ROOT_PASSWORD",
+    for key in ("OMRS_DB_USER", "OMRS_DB_PASSWORD",
                 "EHR_ADMIN_USERNAME", "EHR_ADMIN_PASSWORD"):
         if not settings.get(key) or settings[key].startswith("GENERATE_"):
             raise ValueError(f"Set {key} in .env; bootstrap generates local passwords.")

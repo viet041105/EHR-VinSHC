@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="vinshc-reporting-bytea-20261008" author="vinshc" dbms="postgresql">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">SELECT count(*) FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'reporting_report_design_resource' AND column_name = 'contents' AND udt_name = 'oid'</sqlCheck>
+        </preConditions>
+        <comment>Match Hibernate byte binding while preserving existing large-object contents.</comment>
+        <sql>ALTER TABLE reporting_report_design_resource ALTER COLUMN contents TYPE bytea USING lo_get(contents);</sql>
+    </changeSet>
+</databaseChangeLog>
