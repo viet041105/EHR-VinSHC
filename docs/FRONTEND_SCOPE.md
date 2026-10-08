@@ -1,5 +1,7 @@
 # Phạm vi FE sau đối chiếu báo cáo
 
+Thiết kế hiện tại theo backlog backend phòng khám mới nằm trong [FRONTEND.md](FRONTEND.md): ma trận 8 role, trang/DTO/dịch vụ bàn giao và tiêu chí nối API. Bảng 13 thành phần dưới đây giữ bối cảnh báo cáo ban đầu, không phải danh sách API đã thử trên runtime.
+
 Ngày đối chiếu: 08/10/2026, cập nhật lại sau khi đồng bộ main `631f89e`. Nguồn: `Electronic Heath Record.pdf`, 45 trang, đặc biệt sơ đồ trang 4, danh sách thành phần trang 5 và phân công trang 6; đối chiếu `PROJECT_PLAN.md`, `config/baseline.json` và mã hiện có.
 
 Báo cáo là tài liệu khảo sát/định hướng. Các phần nghiên cứu EHR quốc gia và câu hỏi nghiên cứu không được coi là yêu cầu đã chốt cho MVP hoặc bằng chứng module đã hoạt động. Lựa chọn của nhóm trong phiên làm việc này: tự xây FE độc lập, tái sử dụng backend OpenMRS.

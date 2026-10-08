@@ -1,8 +1,8 @@
 /** Frontend demo workflow invariants; replace IDs and mutations with reviewed API calls. */
 export const ROLE_PERMISSIONS={
- reception:['register','updatePatient','openVisit','appointments','queue'],
+ reception:['register','updatePatient','openVisit','cancelVisit','appointments','queue'],
  nurse:['vitals','notes','documents','fillNurseForm'],
- doctor:['exam','notes','orders','documents','closeVisit','fillDoctorForm','appointments','prescriptions'],
+ doctor:['exam','notes','orders','documents','closeVisit','cancelVisit','fillDoctorForm','appointments','prescriptions'],
  cashier:['billing','receipts'],
  lab:['results'],
  pharmacy:['dispense'],
@@ -11,25 +11,25 @@ export const ROLE_PERMISSIONS={
 };
 // Proposed FE matrix, grounded in current PROJECT_PLAN and CLINIC_WORKFLOW; BE-05/DATA-04 remain open.
 export const ROLE_DEFINITIONS={
- reception:{label:'Tiếp đón',title:'Không gian tiếp nhận',description:'Đối chiếu định danh, tiếp nhận và điều phối người bệnh.',
+ reception:{label:'Tiếp đón',title:'Tiếp đón người bệnh',description:'Đối chiếu định danh, tiếp nhận và điều phối người bệnh.',
   pages:[['workspace','Tổng quan'],['patients','Tiếp nhận & hồ sơ'],['appointments','Lịch hẹn'],['queue','Điều phối'],['active','Lượt đang mở'],['history','Lịch sử tiếp nhận']],
   tabs:['overview','history'],defaultTab:'overview',noteTypes:[]},
- nurse:{label:'Điều dưỡng',title:'Không gian điều dưỡng',description:'Ghi sinh hiệu, theo dõi chăm sóc và bàn giao cho bác sĩ.',
+ nurse:{label:'Điều dưỡng',title:'Chăm sóc điều dưỡng',description:'Ghi sinh hiệu, theo dõi chăm sóc và bàn giao cho bác sĩ.',
   pages:[['workspace','Tổng quan'],['vitals','Đo sinh hiệu'],['active','Lượt đang mở'],['queue','Hàng đợi'],['patients','Hồ sơ chăm sóc'],['history','Lịch sử chăm sóc'],['templates','Biểu mẫu điều dưỡng']],
   tabs:['overview','vitals','allergies','meds','notes','orders','tests','documents','forms','exam','conditions','history'],defaultTab:'vitals',noteTypes:['Ghi chú điều dưỡng','Bàn giao chăm sóc']},
- doctor:{label:'Bác sĩ',title:'Không gian khám bệnh',description:'Thăm khám, ghi nhận chẩn đoán, điều trị và hoàn tất lượt khám.',
+ doctor:{label:'Bác sĩ',title:'Khám ngoại trú',description:'Thăm khám, ghi nhận chẩn đoán, điều trị và hoàn tất lượt khám.',
   pages:[['workspace','Tổng quan'],['active','Danh sách khám'],['patients','Hồ sơ bệnh nhân'],['queue','Hàng đợi'],['appointments','Lịch khám'],['history','Lịch sử khám'],['templates','Biểu mẫu khám']],
   tabs:['overview','exam','vitals','conditions','allergies','meds','notes','orders','tests','documents','forms','history'],defaultTab:'exam',noteTypes:['Ghi chú lâm sàng','Dặn dò']},
- cashier:{label:'Thu ngân',title:'Không gian thu ngân',description:'Lập phí, thu tiền, hoàn / hủy và đối chiếu phiếu thu.',
+ cashier:{label:'Thu ngân',title:'Thu ngân',description:'Lập phí, thu tiền, hoàn / hủy và đối chiếu phiếu thu.',
   pages:[['workspace','Tổng quan'],['billing','Thu phí dịch vụ'],['receipts','Phiếu thu'],['prices','Bảng giá']],tabs:[],defaultTab:null,noteTypes:[]},
- lab:{label:'Kỹ thuật viên CLS',title:'Không gian cận lâm sàng',description:'Thực hiện chỉ định được giao, ghi kết quả và đính kèm báo cáo.',
-  pages:[['workspace','Tổng quan'],['lab','Chỉ định được giao']],tabs:[],defaultTab:null,noteTypes:[]},
- pharmacy:{label:'Dược / quầy thuốc',title:'Không gian quầy thuốc',description:'Đối chiếu đơn đã xác nhận và ghi nhận cấp thuốc theo đơn.',
-  pages:[['workspace','Tổng quan'],['dispensing','Đơn chờ cấp thuốc']],tabs:[],defaultTab:null,noteTypes:[]},
- manager:{label:'Quản lý phòng khám',title:'Không gian quản lý',description:'Theo dõi lượt khám, doanh thu và công suất ở mức tổng hợp.',
+ lab:{label:'Kỹ thuật viên CLS',title:'Cận lâm sàng',description:'Thực hiện chỉ định được giao, ghi kết quả và đính kèm báo cáo.',
+  pages:[['workspace','Tổng quan'],['lab','Chỉ định chờ xử lý'],['lab-results','Kết quả đã hoàn tất']],tabs:[],defaultTab:null,noteTypes:[]},
+ pharmacy:{label:'Dược / quầy thuốc',title:'Quầy thuốc',description:'Đối chiếu đơn đã xác nhận và ghi nhận cấp thuốc theo đơn.',
+  pages:[['workspace','Tổng quan'],['dispensing','Đơn chờ cấp thuốc'],['dispensed','Lịch sử cấp thuốc']],tabs:[],defaultTab:null,noteTypes:[]},
+ manager:{label:'Quản lý phòng khám',title:'Hoạt động phòng khám',description:'Theo dõi lượt khám, doanh thu và công suất ở mức tổng hợp.',
   pages:[['workspace','Tổng quan'],['reports','Báo cáo hoạt động']],tabs:[],defaultTab:null,noteTypes:[]},
- admin:{label:'Quản trị',title:'Không gian quản trị',description:'Quản lý tài khoản, cấu hình và biểu mẫu của cơ sở.',
-  pages:[['workspace','Tổng quan'],['admin','Tài khoản & quyền'],['templates','Quản lý biểu mẫu'],['settings','Cấu hình cơ sở'],['prices','Bảng giá cơ sở'],['audit','Nhật ký'],['connection','Kết nối OpenMRS']],
+ admin:{label:'Quản trị',title:'Quản trị hệ thống',description:'Quản lý tài khoản, cấu hình và biểu mẫu của cơ sở.',
+  pages:[['workspace','Tổng quan'],['admin','Tài khoản & quyền'],['templates','Quản lý biểu mẫu'],['settings','Cấu hình cơ sở'],['prices','Bảng giá cơ sở'],['audit','Nhật ký'],['integration','Bàn giao FE–BE'],['connection','Kết nối OpenMRS']],
   tabs:[],defaultTab:null,noteTypes:[]},
 };
 const roleDefinition=role=>Object.hasOwn(ROLE_DEFINITIONS,role)?ROLE_DEFINITIONS[role]:undefined;
@@ -40,6 +40,32 @@ export const canFillForm=(role,form)=>['nurse','doctor'].includes(role)&&form?.t
 export const accountRoles=account=>[...new Set((Array.isArray(account?.roles)?account.roles:[account?.role]).filter(r=>typeof r==='string'&&Object.hasOwn(ROLE_DEFINITIONS,r)))];
 export function demoAccount(accounts,id){return accounts.find(a=>a.id===id&&a.active===true&&accountRoles(a).length)||null;}
 export function accountPermitted(account,action,facility={}){return !!account?.active&&(accountRoles(account).some(role=>permitted(role,action))||(action==='vitals'&&facility.hasNurse===false&&accountRoles(account).includes('doctor')));}
+// Keep multi-role privileges, while each workspace exposes only its assigned tasks.
+export function workspacePermitted(account,role,action,facility={}){
+ if(!accountRoles(account).includes(role)||!accountPermitted(account,action,facility))return false;
+ return permitted(role,action)||(role==='doctor'&&action==='vitals');
+}
+export function cancelVisit(patient,reason,actor,actorId=null){
+ if(!canWriteVisit(patient))throw Error('Cần lượt đang mở để ghi nhận hủy / bỏ về.');
+ if(typeof reason!=='string'||!reason.trim())throw Error('Cần lý do kết thúc tiếp nhận.');
+ patient.visit.status='closed';patient.visit.ended=new Date().toISOString();
+ patient.visit.closure={kind:'cancelled',reason:reason.trim(),actor,actorId,recorded:patient.visit.ended};
+ return patient.visit;
+}
+export function validateExamDraft(exam){
+ for(const key of ['reason','history','clinical','diagnosis','plan'])if(typeof exam?.[key]!=='string'||!exam[key].trim())throw Error('Cần hoàn thành nội dung phiếu khám bắt buộc.');
+ if(!['provisional','confirmed'].includes(exam.certainty))throw Error('Cần mức độ chắc chắn của chẩn đoán.');
+ if(exam.allergyState==='Có dị ứng'&&!exam.allergyDetail?.trim())throw Error('Cần ghi tác nhân / phản ứng khi chọn Có dị ứng.');
+ for(const medication of exam.medications||[]){
+  for(const key of ['name','directions','unit','doseUnit','route','frequency'])if(typeof medication[key]!=='string'||!medication[key].trim())throw Error('Mỗi dòng thuốc cần tên, đơn vị, đường dùng, tần suất và cách dùng.');
+  if(!Number.isFinite(Number(medication.dose))||Number(medication.dose)<=0)throw Error('Liều mỗi lần phải là số dương.');
+  for(const key of ['quantity','durationDays'])if(!Number.isSafeInteger(Number(medication[key]))||Number(medication[key])<=0)throw Error('Số lượng và số ngày dùng phải là số nguyên dương.');
+ }
+}
+export function medicationInstructions(medication){
+ const m=medication||{};
+ return [m.dose?`Liều mỗi lần: ${m.dose} ${m.doseUnit||''}`:'',m.route?`Đường dùng: ${m.route}`:'',m.frequency?`Tần suất: ${m.frequency}`:'',m.durationDays?`Số ngày: ${m.durationDays}`:'',m.directions].filter(Boolean).join('\n');
+}
 export function billTotal(bill){return bill.items.reduce((sum,item)=>sum+item.price*item.quantity,0);}
 export function addPayment(bill,input,author){
  if(['cancelled','refunded'].includes(bill.status))throw Error('Phiếu phí đã hủy hoặc hoàn.');

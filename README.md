@@ -43,5 +43,4 @@ Baseline dùng OpenMRS Reference Application 3.7.1 và PostgreSQL 16.15. Backend
 
 ## Frontend VinSHC độc lập
 
-Giao diện tiếng Việt và các nghiệp vụ theo kế hoạch: xem [frontend/README.md](frontend/README.md) và [phạm vi/mapping FE–BE](docs/FRONTEND_SCOPE.md). Chạy `npm run dev` tại gốc repo, mở http://127.0.0.1:5173. Lệnh này dùng Node.js/npm và Python 3, không cần cài dependency để mở giao diện. Đây là dữ liệu giả; giao diện chưa đọc/ghi hồ sơ OpenMRS thật.
-
+Giao diện tiếng Việt và các nghiệp vụ theo kế hoạch: xem [frontend/README.md](frontend/README.md) và [thiết kế/hợp đồng bàn giao FE–BE](docs/FRONTEND.md). Chạy `npm run dev` tại gốc repo, mở http://127.0.0.1:5173. Lệnh này dùng Node.js/npm và Python 3, không cần cài dependency để mở giao diện. Đây là dữ liệu giả; giao diện chưa đọc/ghi hồ sơ OpenMRS thật.

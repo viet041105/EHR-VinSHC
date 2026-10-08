@@ -16,7 +16,7 @@ const html=await readFile(new URL('./index.html',import.meta.url),'utf8');
 assert.match(html,/lang="vi"/);assert.match(html,/type="module"/);
 console.log('PASS: dữ liệu giả, mã riêng cho người trùng tên, giữ dữ liệu và phục hồi khi dữ liệu lưu hỏng.');
 const workflowSource=await readFile(new URL('./workflow.js',import.meta.url),'utf8');
-const {permitted,createOrder,recordResult,validateAppointment,validateFormDefinition,ROLE_DEFINITIONS,canOpenPage,canOpenTab,canFillForm,demoAccount,accountPermitted,accountRoles,billTotal,addPayment,refundBill}=await import('data:text/javascript;base64,'+Buffer.from(workflowSource).toString('base64'));
+const {permitted,createOrder,recordResult,validateAppointment,validateFormDefinition,ROLE_DEFINITIONS,canOpenPage,canOpenTab,canFillForm,demoAccount,accountPermitted,accountRoles,billTotal,addPayment,refundBill,workspacePermitted,cancelVisit,validateExamDraft}=await import('data:text/javascript;base64,'+Buffer.from(workflowSource).toString('base64'));
 assert.equal(permitted('reception','exam'),false);
 assert.equal(permitted('doctor','orders'),true);
 assert.equal(permitted('nurse','results'),false);
@@ -100,3 +100,49 @@ await assert.rejects(()=>authenticateSession(login,async()=>new Response('{"auth
 const session=await authenticateSession(login,async()=>new Response('{"authenticated":true,"user":{"uuid":"demo-user","display":"Demo"}}',{headers:{'content-type':'application/json'}}));
 assert.equal(session.uuid,'demo-user');
 console.log('PASS: session UI adapter rejects remote origins, network failure, 401, HTML fallback and unauthenticated JSON.');
+
+// Cross-role commands stay in the workspace that owns them, even for multi-role accounts.
+const combined={roles:['admin','doctor','reception','nurse'],active:true};
+assert.equal(workspacePermitted(combined,'admin','exam'),false);
+assert.equal(workspacePermitted(combined,'reception','exam'),false);
+assert.equal(workspacePermitted(combined,'doctor','billing'),false);
+assert.equal(workspacePermitted(combined,'nurse','exam'),false);
+assert.equal(workspacePermitted(combined,'doctor','vitals'),true);
+assert.equal(workspacePermitted({...combined,active:false},'doctor','exam'),false);
+assert.equal(canOpenPage('lab','lab-results'),true);
+assert.equal(canOpenPage('pharmacy','dispensed'),true);
+assert.equal(canOpenPage('manager','lab-results'),false);
+assert.equal(canOpenPage('admin','integration'),true);
+assert.equal(canOpenPage('doctor','integration'),false);
+const abandoned={visit:{id:'local-test',status:'open',orders:[{id:'original-order'}]}};
+assert.throws(()=>cancelVisit(abandoned,' ','Tiếp đón'));
+cancelVisit(abandoned,'Người bệnh hủy khám','Tiếp đón');
+assert.equal(abandoned.visit.status,'closed');assert.equal(abandoned.visit.closure.reason,'Người bệnh hủy khám');
+assert.equal(abandoned.visit.orders[0].id,'original-order');assert.throws(()=>cancelVisit(abandoned,'Ghi đè','Tiếp đón'));
+const examDraft={reason:'Dữ liệu giả',history:'Dữ liệu giả',clinical:'Dữ liệu giả',diagnosis:'Dữ liệu giả',plan:'Dữ liệu giả',certainty:'provisional',medications:[{name:'Thuốc giả',directions:'Cách dùng giả',unit:'Đơn vị giả',doseUnit:'Đơn vị giả',route:'Đường dùng giả',frequency:'Tần suất giả',dose:'1',quantity:'1',durationDays:'1'}]};
+validateExamDraft(examDraft);
+assert.throws(()=>validateExamDraft({...examDraft,certainty:'unknown'}));
+assert.throws(()=>validateExamDraft({...examDraft,medications:[{...examDraft.medications[0],quantity:'1.5'}]}));
+assert.throws(()=>validateExamDraft({...examDraft,medications:[{...examDraft.medications[0],durationDays:'0'}]}));
+assert.throws(()=>validateExamDraft({...examDraft,medications:[{...examDraft.medications[0],route:''}]}));
+
+// These UUIDs are synthetic unit fixtures only; no requests are sent to an instance.
+const mappingSource=await readFile(new URL('./backend-mapping.js',import.meta.url),'utf8');
+const {buildVitalsCommand,VITAL_FIELD_MAP}=await import('data:text/javascript;base64,'+Buffer.from(mappingSource).toString('base64'));
+const fixtureUuid=n=>`00000000-0000-4000-8000-${String(n).padStart(12,'0')}`;
+const links=Object.fromEntries(['patientUuid','visitUuid','encounterUuid','providerUuid','locationUuid','userUuid'].map((key,i)=>[key,fixtureUuid(i+1)]));
+const metadata={version:'synthetic-unit-test',concepts:Object.fromEntries(VITAL_FIELD_MAP.map((f,i)=>[f.code,fixtureUuid(i+100)]))};
+const input={context:{...links,clinicalHistory:'Must not enter command'},values:{temperature:'36.7',spo2:0,weight:'',height:null},measuredAt:'2026-10-08T09:30:00+07:00',metadata};
+const command=buildVitalsCommand(input);
+assert.deepEqual(command.observations.map(o=>[o.fieldCode,o.value,o.unit]),[['vitals.nhiet_do',36.7,'Cel'],['vitals.spo2',0,'%']]);
+assert.deepEqual(command.context,links);
+assert.throws(()=>buildVitalsCommand({...input,context:{...links,patientUuid:'BN-000128'}}));
+assert.throws(()=>buildVitalsCommand({...input,metadata:{...metadata,concepts:{}}}));
+assert.throws(()=>buildVitalsCommand({...input,metadata:{...metadata,version:''}}));
+assert.throws(()=>buildVitalsCommand({...input,values:{temperature:'36.7°C'}}));
+assert.throws(()=>buildVitalsCommand({...input,values:{temperature:true}}));
+assert.throws(()=>buildVitalsCommand({...input,values:{temperature:' '}}));
+assert.throws(()=>buildVitalsCommand({...input,values:{}}));
+assert.throws(()=>buildVitalsCommand({...input,measuredAt:'2026-10-08T09:30'}));
+assert.throws(()=>buildVitalsCommand({...input,metadata:{...metadata,concepts:{...metadata.concepts,'vitals.spo2':metadata.concepts['vitals.nhiet_do']}}}));
+console.log('PASS: workspace privilege boundaries, result/dispensing history routes, cancellation provenance, structured medication fields and metadata-backed vital commands.');
