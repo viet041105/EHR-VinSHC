@@ -68,6 +68,14 @@ services:
       retries: 12
       start_period: 10s
 
+  vinshc-fe:
+    profiles: ["fe"]
+    image: python:3.14.8-slim-bookworm@sha256:48b13b003dda20b16f9442b8475aa05fe21bf6579a8c881db92ffb4d8fd20f83
+    working_dir: /app
+    volumes: ["./frontend:/app:ro"]
+    ports: ["127.0.0.1:5173:5173"]
+    command: ["python3", "-m", "http.server", "5173", "--bind", "0.0.0.0"]
+
   gateway:
     image: openmrs/openmrs-reference-application-3-gateway:3.7.1@sha256:49070abbcda8aeced46f78ce0c1559236a2ba45bc624fe8485a59220cbd159a2
     restart: unless-stopped

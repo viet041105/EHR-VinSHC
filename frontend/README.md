@@ -12,13 +12,21 @@ Tại gốc repo EHR-VinSHC hoặc trong thư mục `frontend`, chạy:
 npm run dev
 ```
 
-Lệnh này dùng Node.js/npm và Python 3 có sẵn qua lệnh `python3`; không cần `npm install` để mở giao diện. Có thể chạy trực tiếp từ gốc repo:
+Lệnh này cần Node.js/npm và Docker Desktop đang chạy. Python nằm trong image đã khóa digest của service `vinshc-fe` trong `compose.yaml`; máy host không cần Python hoặc `npm install`. Source FE được mount chỉ đọc, sửa code rồi refresh trình duyệt. Lệnh chỉ khởi động `vinshc-fe`, dùng `.env.example` để nội suy cấu hình; không khởi động database/backend và không dùng mật khẩu mẫu để tạo database.
+
+Nếu chỉ có Docker, chạy từ gốc repo:
+
+```sh
+docker compose --env-file .env.example up --no-deps vinshc-fe
+```
+
+Nếu muốn chạy trực tiếp bằng Python 3 đã cài trên máy, từ gốc repo:
 
 ```sh
 python3 -m http.server 5173 --bind 127.0.0.1 --directory frontend
 ```
 
-Mở http://127.0.0.1:5173. Không mở bằng file://. Sửa code rồi refresh trình duyệt; `Ctrl+C` để dừng server.
+Mở http://127.0.0.1:5173. Không mở bằng file://. `Ctrl+C` để dừng server. Nếu cổng 5173 đã có server chạy, dừng server đó trước khi chạy cách khác.
 
 ## Các màn hình và vai trò
 
