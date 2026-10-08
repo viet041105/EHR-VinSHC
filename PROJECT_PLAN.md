@@ -80,7 +80,7 @@ Lễ tân / Điều dưỡng / Bác sĩ
   OpenMRS Core + các module đã chọn
        │                    │
        ▼                    ▼
-    MariaDB             FHIR2 API
+    PostgreSQL          FHIR2 API
   Hồ sơ tại cơ sở     Phục vụ app O3 và thử nghiệm liên thông sau
 
 Metadata và biểu mẫu được quản lý trong Git
@@ -94,7 +94,7 @@ Metadata và biểu mẫu được quản lý trong Git
 - **Phiên bản:** Khóa bộ phiên bản tương thích, bao gồm image, module, package và công cụ build. Bản dựng được nghiệm thu không phụ thuộc vào tag thay đổi như `latest`, `next` hoặc `qa`.
 - **Backend:** Tái sử dụng API và mô hình của OpenMRS. Thêm module hoặc adapter khi xác định được khoảng trống cụ thể.
 - **Frontend:** Tái sử dụng các app O3; ưu tiên cấu hình, dịch thuật và biểu mẫu trước khi sửa core.
-- **Database:** Để OpenMRS quản lý schema của nền tảng. Chức năng mới thao tác qua API/service phù hợp; migration cho phần mở rộng phải được quản lý riêng.
+- **Database:** Baseline của nhóm dùng PostgreSQL; để OpenMRS quản lý schema của nền tảng. Chức năng mới thao tác qua API/service phù hợp; migration cho phần mở rộng phải được quản lý riêng. Khi triển khai agent, dùng database riêng cho dữ liệu của agent và kiểm chứng extension cần thiết như pgvector; đổi DB chưa đồng nghĩa đã có AI.
 - **Metadata:** Lưu cấu hình trong Git, dùng UUID ổn định cho các đối tượng được biểu mẫu/API tham chiếu, kiểm tra việc nạp lại và cập nhật.
 - **Môi trường:** Có cấu hình chạy local và dữ liệu giả chung. Tài khoản demo chỉ dùng cho môi trường thử nghiệm; thông tin bí mật thực tế nằm ngoài Git.
 - **Giấy phép:** Giữ thông tin nguồn và giấy phép của thành phần tái sử dụng; chốt giấy phép cho phần nhóm tự phát triển trước khi phát hành.

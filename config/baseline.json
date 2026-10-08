@@ -5,8 +5,8 @@
     "commit": "a476fd609612394ff66fce0b4ce29e949b0cfaf9"
   },
   "images": {
-    "db": "mariadb:10.11.19@sha256:7db29378d4fdab73f8123bbc2b48905c90d1a4b00cf848b028f1e81e623257f2",
-    "backend": "ehr-vinshc-backend:3.7.1-baseline",
+    "db": "postgres:16.15-bookworm@sha256:0ea6700a3b4f0ae6ce746519073558aed4d88a79d8d07622a9a644946c7319c4",
+    "backend": "ehr-vinshc-backend:3.7.1-postgresql",
     "frontend": "openmrs/openmrs-reference-application-3-frontend:3.7.1@sha256:f6b1f8443ab27a6b1c3944c5a948f2e0cdfea3701dcfd59316677fef28a58f8d",
     "gateway": "openmrs/openmrs-reference-application-3-gateway:3.7.1@sha256:49070abbcda8aeced46f78ce0c1559236a2ba45bc624fe8485a59220cbd159a2"
   },
@@ -25,12 +25,59 @@
   "developmentLocation": {
     "uuid": "feae71be-957c-4f94-b100-d84bc6915574",
     "name": "VinSHC Development Clinic",
-    "tags": ["Login Location", "Facility Location", "Visit Location"]
+    "tags": [
+      "Login Location",
+      "Facility Location",
+      "Visit Location"
+    ]
   },
   "notes": [
     "Versions come from the fixed 3.7.1 images; REST reports the full artifact version 3.5.0.69fa31 at runtime, while the distro manifest says 3.5.0. Smoke tests check the exact runtime versions.",
-    "MariaDB uses a pinned 10.11 maintenance release; compatibility is checked by fresh startup and persistence tests.",
+    "PostgreSQL uses a pinned official 16.15 image with dedicated PostgreSQL and application volumes; compatibility is checked by fresh startup, module, API and persistence tests.",
     "Backend is derived from the fixed 3.7.1 release: large demo content and its generator are removed, base reference metadata is kept, and one synthetic login/facility/visit location is loaded with Initializer.",
-    "Upstream moving no-demo tags were not used because inspection showed snapshot components. Vietnamese clinical metadata is not implemented yet."
-  ]
+    "Upstream moving no-demo tags were not used because inspection showed snapshot components. Vietnamese clinical metadata is not implemented yet.",
+    "The pinned backend includes checked-in PostgreSQL patches for Appointments Liquibase and TEXT/BYTEA Hibernate binding; see infra/backend/postgresql/README.md. Upstream component version numbers remain unchanged."
+  ],
+  "database": {
+    "engine": "postgresql",
+    "version": "16.15",
+    "extensions": [
+      "fuzzystrmatch",
+      "uuid-ossp"
+    ],
+    "volume": "postgres-data",
+    "applicationVolume": "openmrs-pg-data",
+    "hibernateDialect": "org.vinshc.hibernate.VinSHCPostgreSQLDialect"
+  },
+  "requiredModules": {
+    "addresshierarchy": "2.21.0",
+    "appointments": "2.1.0",
+    "attachments": "4.0.0",
+    "authentication": "2.3.0",
+    "bedmanagement": "7.2.0",
+    "billing": "2.3.0",
+    "calculation": "2.0.0",
+    "cohort": "3.7.3",
+    "emrapi": "3.4.0",
+    "event": "4.0.0",
+    "fhir2": "4.2.0",
+    "htmlwidgets": "2.0.1",
+    "idgen": "5.0.4",
+    "initializer": "2.12.0",
+    "legacyui": "2.1.0",
+    "metadatamapping": "2.0.0",
+    "o3forms": "2.3.0",
+    "openconceptlab": "3.1.0",
+    "ordertemplates": "2.2.0",
+    "patientdocuments": "1.1.0",
+    "patientflags": "3.0.10",
+    "queue": "3.0.0",
+    "reporting": "2.1.0",
+    "reportingrest": "2.0.0",
+    "serialization.xstream": "0.3.0",
+    "stockmanagement": "3.0.0",
+    "tasks": "2.1.0",
+    "teleconsultation": "2.0.0",
+    "webservices.rest": "3.5.0.69fa31"
+  }
 }

@@ -1,25 +1,25 @@
 # Local development/test baseline. Image updates must also update config/baseline.json.
 services:
   db:
-    image: mariadb:10.11.19@sha256:7db29378d4fdab73f8123bbc2b48905c90d1a4b00cf848b028f1e81e623257f2
+    image: postgres:16.15-bookworm@sha256:0ea6700a3b4f0ae6ce746519073558aed4d88a79d8d07622a9a644946c7319c4
     restart: unless-stopped
     environment:
-      MARIADB_DATABASE: openmrs
-      MARIADB_USER: ${OMRS_DB_USER:?Run python scripts/bootstrap.py first}
-      MARIADB_PASSWORD: ${OMRS_DB_PASSWORD:?Run python scripts/bootstrap.py first}
-      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Run python scripts/bootstrap.py first}
-    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_general_ci"]
+      POSTGRES_DB: openmrs
+      POSTGRES_USER: ${OMRS_DB_USER:?Run python scripts/bootstrap.py first}
+      POSTGRES_PASSWORD: ${OMRS_DB_PASSWORD:?Run python scripts/bootstrap.py first}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C.UTF-8"
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD-SHELL", "pg_isready -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
       interval: 10s
       timeout: 5s
       retries: 18
       start_period: 30s
     volumes:
-      - db-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
+      - ./infra/postgres/initdb:/docker-entrypoint-initdb.d:ro
 
   backend:
-    image: ehr-vinshc-backend:3.7.1-baseline
+    image: ehr-vinshc-backend:3.7.1-postgresql
     build:
       context: ./infra/backend
       dockerfile: Dockerfile
@@ -29,6 +29,9 @@ services:
       db:
         condition: service_healthy
     environment:
+      OMRS_DB: postgresql
+      OMRS_EXTRA_HIBERNATE_DIALECT: org.vinshc.hibernate.VinSHCPostgreSQLDialect
+      OMRS_CONFIG_CONNECTION_PORT: "5432"
       OMRS_CONFIG_MODULE_WEB_ADMIN: "true"
       OMRS_CONFIG_AUTO_UPDATE_DATABASE: "true"
       OMRS_CONFIG_CREATE_TABLES: "true"
@@ -42,10 +45,10 @@ services:
       test: ["CMD", "curl", "--fail", "--silent", "--show-error", "--max-time", "5", "http://localhost:8080/openmrs/health/started"]
       interval: 15s
       timeout: 10s
-      retries: 80
+      retries: 160
       start_period: 120s
     volumes:
-      - openmrs-data:/openmrs/data
+      - openmrs-pg-data:/openmrs/data
 
   frontend:
     image: openmrs/openmrs-reference-application-3-frontend:3.7.1@sha256:f6b1f8443ab27a6b1c3944c5a948f2e0cdfea3701dcfd59316677fef28a58f8d
@@ -83,5 +86,5 @@ services:
       start_period: 10s
 
 volumes:
-  db-data:
-  openmrs-data:
+  postgres-data:
+  openmrs-pg-data:

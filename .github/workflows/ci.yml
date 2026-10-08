@@ -42,10 +42,10 @@ jobs:
           /tmp/actionlint -color
 
   smoke:
-    name: OpenMRS REST, FHIR and persistence
+    name: PostgreSQL, OpenMRS REST, FHIR and persistence
     needs: configuration
     runs-on: ubuntu-24.04
-    timeout-minutes: 45
+    timeout-minutes: 60
     env:
       COMPOSE_PROJECT_NAME: ehr-ci-${{ github.run_id }}-${{ github.run_attempt }}
       EHR_HTTP_PORT: '8080'
@@ -62,18 +62,22 @@ jobs:
         run: python scripts/check_config.py
       - name: Pull exact reviewed images
         run: docker compose pull --quiet --ignore-buildable
-      - name: Build lightweight backend from the fixed upstream release
+      - name: Build PostgreSQL-compatible backend from the fixed upstream release
         run: docker compose build --pull backend
       - name: Start a fresh stack and wait for readiness
-        run: docker compose up -d --wait --wait-timeout 1200
-      - name: Verify APIs and create a synthetic patient
+        run: docker compose up -d --wait --wait-timeout 2400
+      - name: Verify PostgreSQL version, extensions and OpenMRS schema
+        run: python scripts/check_database.py
+      - name: Verify APIs and create synthetic patient and clinical data
         run: python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
       - name: Recreate containers and retain named volumes
         run: |
           docker compose down
           docker compose up -d --wait --wait-timeout 600
-      - name: Verify the same patient survived through REST and FHIR
-        run: python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
+      - name: Verify the same clinical data survived through REST and FHIR
+        run: |
+          python scripts/check_database.py
+          python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
       - name: Collect redacted diagnostics
         if: always()
         run: python scripts/collect_diagnostics.py

@@ -9,7 +9,7 @@ from common import ROOT, read_settings
 
 def redact(text, settings):
     sensitive = [settings.get(key, "") for key in
-                 ("OMRS_DB_PASSWORD", "MYSQL_ROOT_PASSWORD", "EHR_ADMIN_PASSWORD")]
+                 ("OMRS_DB_PASSWORD", "EHR_ADMIN_PASSWORD")]
     auth = f"{settings.get('EHR_ADMIN_USERNAME', '')}:{settings.get('EHR_ADMIN_PASSWORD', '')}"
     sensitive.extend([auth, base64.b64encode(auth.encode()).decode()])
     for value in sorted(set(sensitive), key=len, reverse=True):
