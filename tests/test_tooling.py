@@ -25,12 +25,14 @@ class EnvironmentTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root / ".env.example").write_text((ROOT / ".env.example").read_text(), encoding="utf-8")
-            bootstrap(root)
+            with patch("bootstrap.secrets.token_urlsafe", return_value="a" * 32):
+                bootstrap(root)
             original = (root / ".env").read_text()
             with patch.dict(os.environ, {}, clear=True):
                 settings = read_settings(root)
             secrets = [settings[key] for key in ("OMRS_DB_PASSWORD", "EHR_ADMIN_PASSWORD")]
             self.assertEqual(len(set(secrets)), 2)
+            self.assertTrue(any(character.isdigit() for character in settings["EHR_ADMIN_PASSWORD"]))
             self.assertFalse(any(value.startswith("GENERATE_") for value in secrets),
                              "A generated credential still contains a placeholder.")
             bootstrap(root)
@@ -226,11 +228,14 @@ class ConfigurationRegressionTests(unittest.TestCase):
 class DatabaseRegressionTests(unittest.TestCase):
     def test_wrong_database_version_or_missing_extension_is_rejected(self):
         baseline = {"database": {"engine": "postgresql", "version": "16.15",
-                                  "extensions": ["fuzzystrmatch", "uuid-ossp"]}}
+                                  "extensions": ["fuzzystrmatch", "uuid-ossp"],
+                                  "stockForeignKeyCount": 118}}
         snapshot = {"version": "16.15 (Debian)", "database": "openmrs", "encoding": "UTF8",
-                    "extensions": ["fuzzystrmatch", "uuid-ossp"], "tables": sorted(REQUIRED_TABLES)}
+                    "extensions": ["fuzzystrmatch", "uuid-ossp"], "tables": sorted(REQUIRED_TABLES),
+                    "stockForeignKeyCount": 118, "moduleBinaryColumnCount": 2}
         verify_snapshot(snapshot, baseline)
-        for key, value in (("version", "15.0"), ("extensions", []), ("tables", ["patient"])):
+        for key, value in (("version", "15.0"), ("extensions", []), ("tables", ["patient"]),
+                           ("stockForeignKeyCount", 97), ("moduleBinaryColumnCount", 0)):
             broken = copy.deepcopy(snapshot)
             broken[key] = value
             with self.subTest(key=key), self.assertRaises(ValueError):

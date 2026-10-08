@@ -65,7 +65,7 @@ jobs:
       - name: Build PostgreSQL-compatible backend from the fixed upstream release
         run: docker compose build --pull backend
       - name: Start a fresh stack and wait for readiness
-        run: docker compose up -d --wait --wait-timeout 2400
+        run: timeout 2400s docker compose up -d --wait --wait-timeout 2400
       - name: Verify PostgreSQL version, extensions and OpenMRS schema
         run: python scripts/check_database.py
       - name: Verify APIs and create synthetic patient and clinical data
@@ -73,7 +73,7 @@ jobs:
       - name: Recreate containers and retain named volumes
         run: |
           docker compose down
-          docker compose up -d --wait --wait-timeout 600
+          timeout 600s docker compose up -d --wait --wait-timeout 600
       - name: Verify the same clinical data survived through REST and FHIR
         run: |
           python scripts/check_database.py

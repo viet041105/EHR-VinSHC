@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+    <changeSet id="vinshc-postgresql-core-sequences-20261008" author="vinshc" dbms="postgresql">
+        <comment>Advance owned identity/serial sequences after Core inserts seed data with explicit IDs.</comment>
+        <sql splitStatements="false"><![CDATA[
+DO $vinshc$
+DECLARE
+    target RECORD;
+    sequence_name TEXT;
+    maximum_id BIGINT;
+    sequence_value BIGINT;
+    sequence_called BOOLEAN;
+BEGIN
+    FOR target IN
+        SELECT c.table_schema, c.table_name, c.column_name
+        FROM information_schema.columns c
+        JOIN information_schema.tables t
+          ON t.table_schema = c.table_schema AND t.table_name = c.table_name
+        WHERE c.table_schema = current_schema() AND t.table_type = 'BASE TABLE'
+          AND c.data_type IN ('smallint', 'integer', 'bigint')
+    LOOP
+        sequence_name := pg_get_serial_sequence(
+            format('%I.%I', target.table_schema, target.table_name), target.column_name);
+        IF sequence_name IS NOT NULL THEN
+            EXECUTE format('SELECT max(%I) FROM %I.%I',
+                target.column_name, target.table_schema, target.table_name) INTO maximum_id;
+            EXECUTE format('SELECT last_value, is_called FROM %s', sequence_name)
+                INTO sequence_value, sequence_called;
+            IF maximum_id IS NOT NULL AND
+               (maximum_id > sequence_value OR
+                (maximum_id = sequence_value AND NOT sequence_called)) THEN
+                PERFORM setval(sequence_name::regclass, maximum_id, true);
+            END IF;
+        END IF;
+    END LOOP;
+END
+$vinshc$;
+        ]]></sql>
+    </changeSet>
+</databaseChangeLog>

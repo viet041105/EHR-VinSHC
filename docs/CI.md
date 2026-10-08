@@ -24,13 +24,13 @@ Kết quả kiểm chứng local hiện có trong [VALIDATION.md](VALIDATION.md)
 ### Job `PostgreSQL, OpenMRS REST, FHIR and persistence`
 
 1. Pull image đã khóa và build backend từ image release cố định, bỏ demo lớn và áp dụng bản sửa PostgreSQL đã lưu trong repo.
-2. Dựng stack PostgreSQL trên runner mới và chờ các service khỏe; xác nhận version, UTF8, extension và schema OpenMRS.
+2. Dựng stack PostgreSQL trên runner mới và chờ các service khỏe; xác nhận version, UTF8, extension, schema OpenMRS, đủ 118 khóa ngoại Stock Management và hai cột nhị phân của module dùng BYTEA. Lệnh khởi tạo có giới hạn tổng 2.400 giây; dựng lại dùng 600 giây, để khi lỗi vẫn còn thời gian lấy diagnostics và dọn project.
 3. Kiểm tra HTML/import map O3 và tải JavaScript app shell/login qua gateway.
 4. Xác thực REST; xác nhận phiên bản Core và đủ 29 module của baseline; kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
 5. Kiểm tra REST patient search, FHIR R4 CapabilityStatement và FHIR Patient search.
 6. Tạo bệnh nhân giả, visit, encounter, observation số và văn bản tiếng Việt dài; đối chiếu mã bệnh nhân, quan hệ, giá trị, đơn vị, thời gian và văn bản qua REST/FHIR.
 7. Dừng và dựng lại container, giữ volume; đọc chính hồ sơ trước đó để kiểm chứng persistence.
-8. Lưu báo cáo/log đã che mật khẩu cấu hình, rồi xóa container/volume của chính project CI đó.
+8. Lưu báo cáo/log đã che mật khẩu cấu hình, gồm log OpenMRS trong application volume khi khởi tạo chưa xong, rồi xóa container/volume của chính project CI đó.
 
 Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định danh hoặc mất hồ sơ sau restart, job phải thất bại.
 
@@ -47,7 +47,7 @@ Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định
 
 CI kiểm chứng baseline chạy được và các API chính; chưa nghiệm thu biểu mẫu Việt Nam, ma trận quyền lễ tân/điều dưỡng/bác sĩ, toàn bộ mapping lâm sàng, E2E trên trình duyệt hoặc triển khai production.
 
-Repo build backend từ image upstream cố định, có lớp Hibernate và bản sửa migration Appointments để tương thích PostgreSQL. Build biên dịch lớp Java này và kiểm tra hash module gốc; smoke kiểm chứng qua API thật. Khi thêm chức năng Java/frontend của nhóm, bổ sung test phù hợp vào pipeline.
+Repo build backend từ image upstream cố định, có lớp Hibernate, bản sửa migration Appointments, đồng bộ sequence sau dữ liệu nền của Core và kiểm tra khóa ngoại Stock Management theo từng bảng. Build biên dịch lớp Java và kiểm tra hash artifact gốc; smoke kiểm chứng qua API thật. Khi thêm chức năng Java/frontend của nhóm, bổ sung test phù hợp vào pipeline.
 
 ## 5. Kiểm tra trước khi mở PR
 

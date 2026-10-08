@@ -18,7 +18,7 @@ def bootstrap(root=ROOT):
     text = (root / ".env.example").read_text(encoding="utf-8")
     replacements = {
         "GENERATE_DB_PASSWORD": secrets.token_hex(24),
-        "GENERATE_ADMIN_PASSWORD": "Vshc!" + secrets.token_urlsafe(24),
+        "GENERATE_ADMIN_PASSWORD": "Vshc1!" + secrets.token_urlsafe(24),
     }
     for placeholder, value in replacements.items():
         text = text.replace(placeholder, value)

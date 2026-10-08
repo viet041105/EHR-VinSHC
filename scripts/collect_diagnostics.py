@@ -24,6 +24,7 @@ def main():
     destination.mkdir(parents=True, exist_ok=True)
     commands = {
         "compose.log": ["docker", "compose", "logs", "--no-color", "--tail", "500"],
+        "openmrs.log": ["docker", "compose", "exec", "-T", "backend", "tail", "-n", "500", "/openmrs/data/openmrs.log"],
         "containers.json": ["docker", "compose", "ps", "--all", "--format", "json"],
     }
     for name, command in commands.items():

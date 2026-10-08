@@ -15,6 +15,13 @@ SELECT json_build_object(
   'database', current_database(),
   'encoding', current_setting('server_encoding'),
   'extensions', ARRAY(SELECT extname FROM pg_extension ORDER BY extname),
+  'stockForeignKeyCount', (SELECT count(*) FROM pg_constraint c
+    JOIN pg_class t ON t.oid = c.conrelid JOIN pg_namespace n ON n.oid = t.relnamespace
+    WHERE c.contype = 'f' AND n.nspname = 'public' AND t.relname LIKE 'stockmgmt_%'),
+  'moduleBinaryColumnCount', (SELECT count(*) FROM information_schema.columns
+    WHERE table_schema = 'public' AND udt_name = 'bytea'
+      AND (table_name, column_name) IN (('openconceptlab_item', 'hashed_url'),
+                                       ('reporting_report_design_resource', 'contents'))),
   'tables', ARRAY(SELECT tablename FROM pg_tables WHERE schemaname = 'public' ORDER BY tablename)
 );
 """
@@ -31,6 +38,10 @@ def verify_snapshot(snapshot, baseline):
         raise ValueError("PostgreSQL is missing required OpenMRS extensions.")
     if not REQUIRED_TABLES.issubset(snapshot.get("tables", [])):
         raise ValueError("OpenMRS schema initialization is incomplete.")
+    if snapshot.get("stockForeignKeyCount") != expected["stockForeignKeyCount"]:
+        raise ValueError("Stock Management foreign-key migrations are incomplete.")
+    if snapshot.get("moduleBinaryColumnCount") != 2:
+        raise ValueError("Module binary columns do not match the PostgreSQL Hibernate dialect.")
 
 
 def main():
@@ -48,12 +59,14 @@ def main():
     verify_snapshot(snapshot, baseline)
     report = {"passed": True, "engine": "postgresql", "version": snapshot["version"],
               "encoding": snapshot["encoding"], "extensions": snapshot["extensions"],
-              "tableCount": len(snapshot["tables"])}
+              "tableCount": len(snapshot["tables"]),
+              "stockForeignKeyCount": snapshot["stockForeignKeyCount"],
+              "moduleBinaryColumnCount": snapshot["moduleBinaryColumnCount"]}
     destination = ROOT / ".runtime/reports/database.json"
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f"PASS: PostgreSQL {baseline['database']['version']}, UTF8, OpenMRS extensions "
-          f"and {report['tableCount']} tables.")
+          f"and {report['tableCount']} tables; {report['stockForeignKeyCount']} Stock Management foreign keys.")
 
 
 if __name__ == "__main__":

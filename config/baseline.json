@@ -36,7 +36,7 @@
     "PostgreSQL uses a pinned official 16.15 image with dedicated PostgreSQL and application volumes; compatibility is checked by fresh startup, module, API and persistence tests.",
     "Backend is derived from the fixed 3.7.1 release: large demo content and its generator are removed, base reference metadata is kept, and one synthetic login/facility/visit location is loaded with Initializer.",
     "Upstream moving no-demo tags were not used because inspection showed snapshot components. Vietnamese clinical metadata is not implemented yet.",
-    "The pinned backend includes checked-in PostgreSQL patches for Appointments Liquibase and TEXT/BYTEA Hibernate binding; see infra/backend/postgresql/README.md. Upstream component version numbers remain unchanged."
+    "The pinned backend includes checked-in PostgreSQL patches for Appointments Liquibase, TEXT/BYTEA Hibernate binding, two module OID-to-BYTEA columns, Core seed sequences and scoped Stock Management preconditions; see infra/backend/postgresql/README.md. Upstream component version numbers remain unchanged."
   ],
   "database": {
     "engine": "postgresql",
@@ -47,7 +47,8 @@
     ],
     "volume": "postgres-data",
     "applicationVolume": "openmrs-pg-data",
-    "hibernateDialect": "org.vinshc.hibernate.VinSHCPostgreSQLDialect"
+    "hibernateDialect": "org.vinshc.hibernate.VinSHCPostgreSQLDialect",
+    "stockForeignKeyCount": 118
   },
   "requiredModules": {
     "addresshierarchy": "2.21.0",
