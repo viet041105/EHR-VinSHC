@@ -1,6 +1,6 @@
-# Kết quả kiểm chứng Docker và CI baseline
+# Kiểm chứng baseline PostgreSQL
 
-**Ngày kiểm chứng:** 07/10/2026, múi giờ UTC+7.
+**Ngày kiểm chứng local:** 08/10/2026, UTC+7. Trạng thái từng run trên GitHub được ghi riêng tại [GitHub Actions](https://github.com/viet041105/EHR-VinSHC/actions).
 
 > **Lưu ý:** Toàn bộ kết quả dưới đây được đo trên **MariaDB 10.11.19**. Dự án đã chuyển hướng sang PostgreSQL ([ADR-0002](decisions/0002-postgresql.md)). Các kiểm tra phải được chạy lại trên PostgreSQL trong BE-10 và ghi thành một mục kết quả mới; kết quả MariaDB không thay thế kiểm chứng đó.
 
@@ -10,51 +10,57 @@ Docker baseline đã được chạy thật trên máy phát triển và trên m
 
 | Thành phần | Phiên bản |
 | --- | --- |
-| Máy host | Windows, Docker Engine chạy Linux containers |
-| Docker CLI | 28.4.0 |
-| Docker Compose | 2.39.4 |
+| Host | Windows, Docker chạy Linux containers |
+| Docker CLI / Compose | 28.4.0 / 2.39.4 |
 | Python | 3.11.9 |
-| Reference Application | 3.7.1; image upstream khóa digest |
-| MariaDB | 10.11.19; image khóa digest |
-| OpenMRS Core qua API | 2.8.8 |
-| REST module qua API | 3.5.0.69fa31 |
-| FHIR2 module qua API | 4.2.0 |
-| Initializer module qua API | 2.12.0 |
+| Reference Application / Core | 3.7.1 / 2.8.8 |
+| PostgreSQL | 16.15-bookworm; image khóa digest |
+| REST / FHIR2 / Initializer | 3.5.0.69fa31 / 4.2.0 / 2.12.0 |
+| Module | Đủ 29 module started, phiên bản khớp `config/baseline.json` |
 
-REST module báo thêm mã build `69fa31` so với phiên bản `3.5.0` trong manifest distro. Smoke kiểm tra **phiên bản runtime đầy đủ**, được ghi trong `config/baseline.json`.
+Backend được build từ release upstream đã khóa digest, bỏ demo lớn, giữ metadata nền và thêm location giả. Phiên bản component gốc được giữ; bản sửa tương thích được lưu cùng nguồn trong [postgresql/README.md](../infra/backend/postgresql/README.md).
 
-## Kết quả
+## Các lỗi phát hiện và đã xử lý
 
-| Kiểm tra | Kết quả |
+Đổi image database đơn thuần chưa đủ. Lần dựng PostgreSQL mới phát hiện SQL `AUTO_INCREMENT` trong Appointments, Hibernate đọc `TEXT` như OID và cấp ID qua `hibernate_sequence` không tồn tại. Dựng từ database trống còn phát hiện sequence chưa tăng theo ID cố định của dữ liệu nền Core và hai cột OID của Reporting/Open Concept Lab không khớp kiểu BYTEA. Bản cuối backport migration PostgreSQL của Appointments, bổ sung dialect Hibernate dùng TEXT/BYTEA cùng identity theo bảng, đồng bộ sequence và thêm migration hai cột nhị phân bằng `lo_get` để giữ nội dung cũ. Không bỏ module để làm smoke vượt qua.
+
+Stock Management kiểm tra khóa ngoại bằng cách quét schema 113 lần; bản ban đầu mất khoảng 25 phút trên máy này. Bản sửa dùng truy vấn catalog đúng bảng/khóa ngoại; giữ nguyên thao tác migration và đối chiếu đủ 118 khóa ngoại sau khi dựng. CI có giới hạn tổng 2.400 giây cho khởi tạo và 600 giây cho dựng lại, để vẫn lấy được diagnostics và dọn project khi lỗi. Không bỏ qua changeset hay vô hiệu hóa migration để giảm thời gian.
+
+Bản cuối dựng từ hai volume trống đến cả bốn service healthy trong 263,3 giây trên máy này (khoảng 4 phút 23 giây, chưa tính build/pull image). REST/FHIR tạo và đọc được fixture ngay trên lần khởi tạo này. Backend mới cũng chạy được trên database đã có, không gặp lỗi checksum Liquibase và giữ nguyên các fixture cũ.
+
+## Kết quả local
+
+| Kiểm chứng | Kết quả |
 | --- | --- |
-| Compose: nguồn image/build, readiness, localhost binding và named volumes | Đạt |
-| Regression test của các công cụ | 15/15 đạt |
+| Compose, digest/build, dialect, localhost binding và volume | Đạt |
+| Regression tests của công cụ | 21/21 đạt |
 | Workflow qua actionlint 1.7.12 | Đạt |
-| Archive actionlint Linux tải thật khớp SHA-256 trong workflow | Đạt |
-| Khởi tạo database mới và nạp metadata tối thiểu | Đạt |
-| Bốn service cùng healthy | Đạt |
+| PostgreSQL thật: 16.15, UTF8, fuzzystrmatch, uuid-ossp, schema 239 bảng | Đạt |
+| Migration nhị phân: giữ nguyên bytes có giá trị 00/ff và NULL trong kiểm thử SQL có rollback | Đạt; chưa phải nghiệm thu upload file nghiệp vụ |
+| Bốn service healthy và đủ 29 module started | Đạt |
 | O3 HTML/import map và JavaScript app shell/login qua gateway | Đạt |
-| Đăng nhập REST và chọn VinSHC Development Clinic trong session | Đạt |
-| Mật khẩu sai bị từ chối; tra cứu Patient REST/FHIR không đăng nhập bị từ chối | Đạt |
-| Core/REST/FHIR2/Initializer đúng baseline và các module cần thiết đã started | Đạt |
-| FHIR R4 CapabilityStatement, quảng bá read cho Patient/Encounter/Observation | Đạt |
-| REST patient search và FHIR Patient search trả đúng cấu trúc | Đạt |
-| Tạo bệnh nhân giả qua REST, đọc đúng UUID/mã qua REST và FHIR | Đạt |
-| Dựng lại container, giữ volume và đọc chính hồ sơ trước đó | Đạt trên cả instance local và instance mới độc lập |
-| Mật khẩu cấu hình không xuất hiện trong báo cáo/log đã thu thập | Đạt |
+| REST authentication và chọn VinSHC Development Clinic | Đạt |
+| Từ chối mật khẩu sai và truy cập Patient REST/FHIR không đăng nhập | Đạt |
+| FHIR R4 capabilities và tìm Patient qua REST/FHIR | Đạt |
+| Tạo/đọc bệnh nhân giả, visit, encounter, observation số 36.7 với đơn vị degC | Đạt |
+| Quan hệ Patient/Visit/Encounter/Observation và thời gian | Đạt |
+| Observation tiếng Việt dài và mô tả concept; đọc qua REST/FHIR | Đạt |
+| Dựng lại container, giữ volume, đọc chính fixture trước đó | Đạt trên project PostgreSQL độc lập |
+| Giữ UUID/mã bệnh nhân giả cũ từ MariaDB và xác nhận qua REST/FHIR | Đạt |
+| Dump PostgreSQL và restore sang volume của project chính | Đạt; API và schema được kiểm tra lại sau restore |
 
-Instance độc lập vượt qua **9 nhóm smoke check trước restart và 9 nhóm sau restart**. Fixture sau restart được đọc lại, không tạo lại để che mất dữ liệu.
+Môi trường kiểm chứng độc lập dùng project, volume, cổng và mật khẩu DB riêng. Project chính dùng `postgres-data` / `openmrs-pg-data`; mật khẩu admin hiện có được giữ. Chuyển sang project chính bằng dump PostgreSQL đã kiểm chứng giúp đồng thời kiểm tra backup–restore. Đây là database phát triển chứa dữ liệu giả, không phải bài kiểm thử phục hồi production hoặc chuyển bệnh án thật.
 
-Bản backend ban đầu chứa bộ demo lớn mất nhiều thời gian nhập dữ liệu. Bản cuối dùng lớp Dockerfile từ release cố định, bỏ nội dung `referenceapplication-demo` và module sinh demo, giữ metadata nền, thêm một location giả có UUID ổn định bằng Initializer. Cấu hình frontend demo được tắt.
+Bản sao MariaDB, `.env`/Compose cũ và fixture cũ nằm trong `.runtime/mariadb-backup-20261008/`. Hai volume MariaDB/OpenMRS cũ được giữ nguyên, không còn được dùng bởi Compose mới. Bản dump PostgreSQL nằm dưới `.runtime/postgres-backup-20261008/`. Các file riêng này được Git bỏ qua; CI không upload chúng.
 
-Các báo cáo local nằm dưới `.runtime/reports/`: `ci-local-before.json`, `ci-local-after.json`, `ci-local-compose.log`, `ci-local-containers.json`. Thư mục này được Git bỏ qua. Instance kiểm chứng tạm đã được dọn; instance phát triển chính và hai volume của nó được giữ lại.
+Báo cáo REST/FHIR local nằm trong `.runtime/reports/`: `postgres-before.json`, `postgres-after.json`, `postgres-main-before.json`, `postgres-main-after.json`, `postgres-main-final.json`, `postgres-fresh-before.json` và `postgres-fresh-after.json`, cùng báo cáo database và diagnostics đã che credentials. Fixture mới gồm dữ liệu số và văn bản; kiểm tra sau restart dùng `--require-fixture`, không tạo lại dữ liệu bị mất.
 
-## Giới hạn cần đọc cùng kết quả
+## Giới hạn
 
-- Báo cáo này chưa bao gồm kết quả runner GitHub. Cần kiểm tra cả hai job trong tab Actions; báo cáo local không thay thế run đó.
-- Kiểm tra giao diện hiện tải HTML, import map và JavaScript; chưa thao tác toàn bộ luồng qua trình duyệt. Công cụ điều khiển browser của phiên này không khởi tạo được, nên không ghi nhận E2E trình duyệt là đạt.
-- Chưa nghiệm thu đăng ký/khám ngoại trú xuyên suốt, biểu mẫu và metadata Việt Nam, phân quyền nghiệp vụ, mapping Encounter/Observation hoặc liên thông hai cơ sở. Các phần này tiếp tục theo `PROJECT_PLAN.md`.
-- Log upstream còn thông báo về thiếu cấu hình Address Hierarchy, thư mục cấu hình Tomcat và xác thực XML module. Các kiểm tra trên vẫn đạt, nhưng chưa thể kết luận toàn bộ module của distro hoạt động đầy đủ. Nhóm cần đối chiếu và xử lý các thông báo này khi triển khai chức năng phụ thuộc; log đã được giữ trong báo cáo diagnostics.
-- Kiểm chứng giữ volume sau restart khác với kiểm chứng backup–restore; backup–restore chưa được nghiệm thu.
+- Các kết quả trên là kiểm chứng local. Workflow GitHub dựng database mới từ đầu; xem run tương ứng trong Actions để biết kết quả runner.
+- Chưa nghiệm thu E2E trên trình duyệt, toàn bộ nghiệp vụ của 29 module, biểu mẫu Việt Nam, phân quyền nghiệp vụ, đầy đủ mapping FHIR hoặc agent/pgvector.
+- Kiểm tra TEXT đã chạy qua API thật. Luồng tải file/complex observation và dữ liệu BLOB nghiệp vụ chưa được nghiệm thu.
+- Upstream vẫn có thông báo cấu hình Address Hierarchy/XML module và cảnh báo của Tomcat/FHIR. Module đã started và các API nêu trên đạt; chức năng phụ thuộc các cấu hình này cần được nhóm kiểm chứng riêng.
+- Không dùng MariaDB SQL dump trực tiếp cho PostgreSQL. Dữ liệu khác trên máy thành viên cần kế hoạch chuyển và đối chiếu riêng theo [POSTGRESQL_MIGRATION.md](POSTGRESQL_MIGRATION.md).
 
-Hướng dẫn tái hiện nằm trong [DEVELOPMENT.md](DEVELOPMENT.md); phạm vi và trigger workflow nằm trong [CI.md](CI.md).
+Hướng dẫn chạy nằm trong [DEVELOPMENT.md](DEVELOPMENT.md); phạm vi workflow nằm trong [CI.md](CI.md).

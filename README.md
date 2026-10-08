@@ -26,7 +26,8 @@ python scripts/bootstrap.py
 python scripts/check_config.py
 docker compose pull --quiet --ignore-buildable
 docker compose build --pull backend
-docker compose up -d --wait --wait-timeout 1200
+docker compose up -d --wait --wait-timeout 2400
+python scripts/check_database.py
 python scripts/smoke.py
 ```
 
@@ -36,6 +37,7 @@ Mở **http://127.0.0.1:8080/openmrs/spa/**. Đăng nhập bằng `EHR_ADMIN_USE
 - [CI](docs/CI.md): các check trên PR và kiểm tra REST/FHIR/persistence.
 - [Baseline được khóa](config/baseline.json): nguồn upstream, phiên bản và image digest.
 - [Kết quả kiểm chứng](docs/VALIDATION.md): đã chạy thật những gì và các giới hạn còn lại.
+- [Chuyển từ MariaDB sang PostgreSQL](docs/POSTGRESQL_MIGRATION.md): dành cho thành viên đã chạy baseline cũ.
 
 Baseline dùng OpenMRS Reference Application 3.7.1. Backend được build từ image upstream đã khóa digest, giữ metadata nền và bỏ bộ demo lớn. Metadata và biểu mẫu Việt Nam tiếp tục làm theo kế hoạch.
 

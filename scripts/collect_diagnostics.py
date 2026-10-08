@@ -9,7 +9,7 @@ from common import ROOT, read_settings
 
 def redact(text, settings):
     sensitive = [settings.get(key, "") for key in
-                 ("OMRS_DB_PASSWORD", "MYSQL_ROOT_PASSWORD", "EHR_ADMIN_PASSWORD")]
+                 ("OMRS_DB_PASSWORD", "EHR_ADMIN_PASSWORD")]
     auth = f"{settings.get('EHR_ADMIN_USERNAME', '')}:{settings.get('EHR_ADMIN_PASSWORD', '')}"
     sensitive.extend([auth, base64.b64encode(auth.encode()).decode()])
     for value in sorted(set(sensitive), key=len, reverse=True):
@@ -24,6 +24,7 @@ def main():
     destination.mkdir(parents=True, exist_ok=True)
     commands = {
         "compose.log": ["docker", "compose", "logs", "--no-color", "--tail", "500"],
+        "openmrs.log": ["docker", "compose", "exec", "-T", "backend", "tail", "-n", "500", "/openmrs/data/openmrs.log"],
         "containers.json": ["docker", "compose", "ps", "--all", "--format", "json"],
     }
     for name, command in commands.items():

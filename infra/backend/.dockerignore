@@ -2,3 +2,5 @@
 !Dockerfile
 !configuration/
 !configuration/**
+!postgresql/
+!postgresql/**
