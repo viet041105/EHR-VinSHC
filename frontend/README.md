@@ -6,13 +6,19 @@ Frontend độc lập bằng HTML/CSS/JavaScript modules, giữ backend OpenMRS 
 
 ## Chạy
 
-Tại EHR-VinSHC:
+Tại gốc repo EHR-VinSHC hoặc trong thư mục `frontend`, chạy:
+
+```sh
+npm run dev
+```
+
+Lệnh ngắn dùng Node.js/npm và Python 3 có sẵn qua lệnh `python`; không cần `npm install` để mở giao diện. Nếu máy dùng lệnh `python3`, có thể chạy trực tiếp từ gốc repo:
 
 ```sh
 python3 -m http.server 5173 --bind 127.0.0.1 --directory frontend
 ```
 
-Mở http://127.0.0.1:5173. Không mở bằng file://. Không cần cài dependency/build để dùng giao diện.
+Mở http://127.0.0.1:5173. Không mở bằng file://. Sửa code rồi refresh trình duyệt; `Ctrl+C` để dừng server.
 
 ## Các màn hình
 

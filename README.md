@@ -30,4 +30,4 @@ Baseline dùng OpenMRS Reference Application 3.7.1 và MariaDB 10.11.19. Backend
 
 ## Frontend VinSHC độc lập
 
-Giao diện tiếng Việt và các nghiệp vụ theo báo cáo: xem [frontend/README.md](frontend/README.md) và [phạm vi/mapping FE–BE](docs/FRONTEND_SCOPE.md). Chạy `python3 -m http.server 5173 --bind 127.0.0.1 --directory frontend`, mở http://127.0.0.1:5173. Đây là dữ liệu giả; giao diện chưa đọc/ghi hồ sơ OpenMRS thật.
+Giao diện tiếng Việt và các nghiệp vụ theo báo cáo: xem [frontend/README.md](frontend/README.md) và [phạm vi/mapping FE–BE](docs/FRONTEND_SCOPE.md). Chạy `npm run dev` tại gốc repo, mở http://127.0.0.1:5173. Lệnh này dùng Node.js/npm và Python 3, không cần cài dependency để mở giao diện. Đây là dữ liệu giả; giao diện chưa đọc/ghi hồ sơ OpenMRS thật.
