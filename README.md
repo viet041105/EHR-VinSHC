@@ -6,6 +6,8 @@ Dự án phát triển bản phân phối OpenMRS phù hợp với luồng khám
 
 Đọc [kế hoạch triển khai và phân công công việc](PROJECT_PLAN.md) để nắm phạm vi MVP, đầu việc của 4 thành viên, thứ tự phối hợp và tiêu chí nghiệm thu.
 
+Đọc [từ điển dữ liệu và bảng bàn giao cho BE](docs/DATA_DICTIONARY.md) để tra các trường từ hồ sơ mẫu 195 trang, trang nguồn và những điểm còn cần xác nhận. Người phụ trách metadata bắt đầu ở mục 1; phạm vi triển khai vẫn cần mentor và nhóm chốt.
+
 ## Chạy baseline OpenMRS
 
 Cần Docker đang chạy với Linux containers, Docker Compose v2 và Python 3.11+.
