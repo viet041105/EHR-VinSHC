@@ -1,0 +1,558 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap');
+
+:root{--ink:#153052;--muted:#617186;--teal:#008e87;--blue:#0855bc;--line:#dfe6ee;--bg:#f5f7fa;--red:#a93638}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px 'Be Vietnam Pro',Arial,sans-serif;line-height:1.6}
+button,input,select,textarea{font:inherit}
+button,a,input,select,textarea{outline-offset:4px}
+button{cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1px solid #cdd8e4;background:#fff;color:var(--ink);border-radius:6px;padding:10px 14px;font-size:13px;line-height:1.5}
+button:hover{border-color:#94b7d7;background:#f4f8fd}
+button:disabled{opacity:.5;cursor:not-allowed}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--blue)}
+a{color:var(--blue)}
+svg{width:20px;height:20px;flex-shrink:0}
+.primary{background:var(--teal);border-color:var(--teal);color:#fff;font-weight:600;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:12px}
+.primary:hover{background:#007872;border-color:#007872;color:#fff}
+.danger{color:var(--red)}
+.skip-link{position:fixed;top:-80px;left:20px;background:white;padding:12px;z-index:60}
+.skip-link:focus{top:10px}
+#main-content:focus{outline:none}
+.site-header{min-height:76px;padding:14px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;background:#fff;border-bottom:1px solid var(--line)}
+.site-brand{display:flex;align-items:center;gap:9px;text-decoration:none;color:var(--blue);flex-shrink:0}
+.logo-plus{font-size:34px;font-weight:800;line-height:1}
+.site-brand strong{font-size:27px;line-height:1.2;display:block;letter-spacing:-1px}
+.site-brand small{display:block;color:#4b627f;font-size:8px;letter-spacing:1.4px;font-weight:600;margin-top:3px}
+.site-header>nav{display:flex;gap:28px;align-items:center}
+.site-header>nav a{font-size:12px;color:var(--ink);font-weight:500;text-decoration:none;white-space:nowrap;position:relative}
+.site-header>nav a:hover{color:var(--blue)}
+.header-controls{display:flex;align-items:center;gap:12px;min-width:0}
+.landing-header{max-width:1440px;margin:12px auto 0;border:0;border-radius:14px 14px 0 0;padding:20px 38px}
+.landing-header .primary{font-size:12px;padding:12px 17px}
+.landing-header>nav a:first-child{color:var(--blue)}
+.landing-header>nav a:first-child:after{content:'';height:2px;background:var(--blue);position:absolute;bottom:-10px;left:0;right:0}
+.public-main{max-width:1440px;margin:auto;background:#fff}
+.content{min-width:0}
+.landing-content{padding:0;max-width:none;background:#fff}
+.health-hero{min-height:540px;position:relative;overflow:hidden;background:#eff5fe}
+.hero-photo{position:absolute;right:0;top:0;width:78%;height:100%;object-fit:cover;object-position:55% 45%}
+.hero-shade{position:absolute;inset:0;background:linear-gradient(90deg,#f0f6ff 0%,#f0f6ff 28%,#f0f6fff0 36%,#f0f6ff70 49%,transparent 65%)}
+.health-hero-copy{position:relative;z-index:1;padding:72px 55px 55px;max-width:650px}
+.hero-kicker{font-size:11px;font-weight:700;letter-spacing:.7px;color:var(--teal)}
+.health-hero h1{font-size:48px;letter-spacing:-1.9px;line-height:1.25;margin:19px 0 23px;font-weight:800}
+.health-hero h1 em{font-style:normal;color:var(--teal)}
+.health-hero-copy>p{font-size:14px;color:#3f5570;line-height:1.95;margin:0 0 26px}
+.hero-buttons{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.hero-buttons>a{font-size:12px;padding:13px 18px;border-radius:6px}
+.secondary-link{display:inline-flex;align-items:center;gap:10px;color:var(--blue);background:#fff;border:1px solid #9bb9df;border-radius:5px;font-weight:600;text-decoration:none;padding:12px 17px;font-size:12px}
+.secondary-link:hover{background:#f3f8ff}
+.hero-note{display:flex;align-items:center;gap:8px;color:#4f6480;font-size:11px;margin-top:28px;max-width:370px}
+.hero-note svg{width:18px;color:var(--teal)}
+.hero-benefits{position:absolute;right:32px;top:100px;display:grid;gap:16px;z-index:2;width:200px}
+.hero-benefits>div{display:flex;gap:13px;align-items:center;background:#fffffff2;border-radius:8px;padding:18px 16px;box-shadow:0 5px 20px #163b6312}
+.hero-benefits svg{color:var(--teal);width:28px;height:28px;stroke-width:1.3}
+.hero-benefits strong{font-size:11px;display:block;font-weight:600;line-height:1.7}
+.hero-benefits small{display:block;font-size:10px;color:var(--muted);margin-top:3px}
+.landing-inner{padding:0 38px 38px}
+.help-strip{position:relative;z-index:3;margin:-30px 0 0;background:#fff;border:1px solid #e7edf5;border-radius:12px;padding:23px 18px 18px;box-shadow:0 7px 22px #1749770c}
+.help-strip>h2{text-align:center;font-size:20px;margin:0 0 19px;letter-spacing:-.5px}
+.help-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.help-grid>a{display:grid;grid-template-columns:31px 1fr;gap:10px;text-decoration:none;color:var(--ink);background:#f3f7fd;padding:18px 13px;border-radius:7px;align-items:start}
+.help-grid>a:hover{background:#e9f2ff}
+.help-grid svg{width:28px;height:28px;color:var(--blue);stroke-width:1.3}
+.help-grid strong{display:block;font-size:12px}
+.help-grid small{display:block;font-size:10px;line-height:1.8;margin-top:5px;color:#576e8c}
+.help-grid b{grid-column:2;font-size:16px;color:var(--blue)}
+.section-heading{text-align:center;margin-bottom:28px}
+.section-heading>span{display:block;font-size:10px;letter-spacing:1.1px;color:var(--teal);font-weight:600;margin-bottom:10px}
+.section-heading h2{font-size:27px;letter-spacing:-.8px;line-height:1.4;margin:0 0 10px}
+.section-heading p{font-size:12px;color:var(--muted);margin:0;line-height:1.8}
+.health-services{margin-top:50px}
+.health-services-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:17px}
+.health-service{border:1px solid #e4ebf5;border-radius:8px;overflow:hidden;background:#f6f9fe;min-width:0}
+.health-service>img{display:block;width:100%;height:150px;object-fit:cover}
+.health-service>div{padding:17px 16px;position:relative;min-height:134px}
+.health-service h3{font-size:13px;margin:0 0 8px}
+.health-service p{font-size:11px;color:#52657f;line-height:1.85;margin:0;padding-right:22px}
+.health-service a{position:absolute;right:13px;bottom:17px;border-radius:50%;background:var(--teal);color:#fff;width:28px;height:28px;display:grid;place-items:center}
+.health-service a svg{width:15px;height:15px}
+.care-principles{background:linear-gradient(110deg,#0755c6,#009c96);color:white;border-radius:8px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));margin:30px 0 40px;padding:28px 20px}
+.care-principles>div{display:flex;align-items:center;gap:14px;padding:0 15px;border-right:1px solid #ffffff33}
+.care-principles>div:last-child{border:0}
+.care-principles svg{width:30px;height:30px;stroke-width:1.3;color:#d6f7ff}
+.care-principles strong{font-size:14px;display:block;line-height:1.6;font-weight:600}
+.care-principles small{display:block;font-size:10px;line-height:1.8;margin-top:4px;color:#e1f3ff}
+.about-health{display:grid;grid-template-columns:1.05fr 1.3fr .85fr;gap:30px;align-items:stretch}
+.about-photo{position:relative;min-height:350px;border-radius:8px;overflow:hidden}
+.about-photo>img{height:100%;width:100%;object-fit:cover;object-position:35% center;display:block}
+.about-photo>div{background:#008e87f0;color:#fff;position:absolute;right:0;bottom:0;padding:22px;border-radius:8px 0 0 0;max-width:95%}
+.about-photo span{font-size:8px;letter-spacing:.8px;display:block;margin-bottom:9px}
+.about-photo strong{font-size:18px;font-weight:600;line-height:1.65}
+.about-copy{padding:15px 0}
+.about-copy h2{font-size:25px;letter-spacing:-.8px;line-height:1.45;margin:13px 0 15px}
+.about-copy p{font-size:12px;line-height:1.9;color:var(--muted)}
+.about-copy ul{padding:0;list-style:none;margin:20px 0;display:grid;gap:12px}
+.about-copy li{display:flex;align-items:flex-start;gap:9px;color:#3d5878;font-size:11px;line-height:1.8}
+.about-copy li svg{border:1px solid var(--teal);border-radius:50%;width:15px;height:15px;padding:2px;margin-top:3px;color:var(--teal)}
+.staff-entry{background:#0855bc;color:white;border-radius:8px;padding:27px 22px;display:flex;flex-direction:column;align-items:flex-start}
+.staff-entry>svg{width:36px;height:36px;stroke-width:1.3;margin-bottom:20px;color:#bbddff}
+.staff-entry>span{font-size:8px;letter-spacing:.8px;color:#c7e0ff}
+.staff-entry h3{font-size:24px;line-height:1.5;letter-spacing:-.8px;margin:14px 0}
+.staff-entry p{font-size:11px;line-height:1.9;color:#e0edff;margin:0 0 22px}
+.staff-entry button{margin-top:auto;background:white;border:0;color:#0855bc;font-size:11px}
+.staff-entry small{font-size:9px;color:#c5ddff;margin-top:12px}
+.landing-workflow{margin-top:50px}
+.workflow-steps{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:15px}
+.workflow-steps article{padding:19px 16px;background:#f5f9ff;border-radius:7px;border-top:2px solid #bad4ef}
+.workflow-steps span{font-size:21px;font-weight:500;color:#3b76b6}
+.workflow-steps h3{font-size:13px;margin:14px 0 8px}
+.workflow-steps p{font-size:11px;line-height:1.8;color:var(--muted);margin:0}
+.care-band{margin-top:40px;background:var(--teal);color:white;border-radius:9px;padding:25px 30px;display:flex;justify-content:space-between;align-items:center;gap:20px}
+.care-band>div{display:flex;align-items:center;gap:22px}
+.care-band>div>svg{width:35px;height:35px;stroke-width:1.3}
+.care-band small{font-size:9px;letter-spacing:.8px;color:#d5faf6}
+.care-band h2{font-size:21px;margin:8px 0 0;letter-spacing:-.6px;font-weight:600}
+.care-band button{background:white;color:var(--ink);border:0;min-width:220px;font-size:12px;padding:15px 20px;justify-content:space-between}
+.health-footer{max-width:1440px;margin:0 auto 15px;background:#f7faff;border-radius:0 0 14px 14px;padding:35px 40px 0;display:grid;grid-template-columns:1.2fr .9fr 1fr 1.3fr;gap:30px;font-size:11px;line-height:1.9}
+.health-footer>div>strong{display:block;margin-bottom:13px;font-size:12px}
+.health-footer>div>a:not(.site-brand){display:block;text-decoration:none;color:#556d8d;margin:5px 0}
+.health-footer p{color:#61758f;font-size:11px;line-height:1.9;margin:13px 0 0}
+.health-footer button{background:transparent;border:0;padding:0;font-size:11px;color:var(--blue);justify-content:flex-start}
+.health-footer>div>span{display:block;color:#61758f;margin-top:5px}
+.health-footer>small{grid-column:1/-1;background:#0a3978;color:#dbeaff;text-align:center;margin:0 -40px;padding:12px;font-size:10px;border-radius:0 0 14px 14px}
+.landing-content [id]{scroll-margin-top:24px}
+.scroll-reveal{opacity:0;transform:translateY(22px);transition:opacity 550ms ease var(--reveal-delay,0ms),transform 550ms cubic-bezier(.2,.7,.2,1) var(--reveal-delay,0ms)}
+.scroll-reveal.is-revealed,.scroll-reveal:focus-within{opacity:1;transform:none}
+
+/* Staff screens keep the table and next action in view. */
+.clinic-header{position:sticky;top:0;z-index:15;min-height:74px;padding:13px 26px}
+.clinic-header .site-brand{width:170px}
+.clinic-header .site-brand strong{font-size:23px}
+.clinic-header .logo-plus{font-size:29px}
+.clinic-header>nav{flex:1;min-width:0}
+.clinic-context strong{display:block;font-size:13px;font-weight:600}
+.clinic-context small{font-size:10px;color:var(--muted);display:block;margin-top:2px}
+.account-badge{text-align:right}
+.account-badge strong{font-size:12px;display:block}
+.account-badge small{font-size:10px;color:var(--muted);display:block}
+.clinic-header .header-controls button{font-size:11px;padding:8px 11px}
+.clinic-header #workspaceRole{width:137px;font-size:11px;padding:8px;flex-shrink:0}
+.clinic-header #logout{padding:8px}
+.menu-toggle{display:none}
+.clinic-main{display:grid;grid-template-columns:216px minmax(0,1fr);min-height:calc(100vh - 118px)}
+.clinic-sidebar{position:sticky;top:74px;align-self:start;height:calc(100vh - 74px);border-right:1px solid var(--line);padding:24px 14px;background:white;display:flex;flex-direction:column}
+.sidebar-label{font-size:11px;font-weight:600;color:var(--muted);padding:0 12px 15px}
+.workspace-nav{display:flex;flex-direction:column;gap:4px}
+.workspace-nav>button{border:0;background:transparent;padding:11px 12px;justify-content:flex-start;font-size:12px;color:#53667c;line-height:1.6;text-align:left}
+.workspace-nav>button svg{width:18px;height:18px;stroke-width:1.5;color:#69809c}
+.workspace-nav>button.active{background:#ecf4ff;color:var(--blue);font-weight:600}
+.workspace-nav>button.active svg{color:var(--blue)}
+.workspace-nav>button:hover{background:#f4f7fb}
+.sidebar-note{margin-top:auto;border-top:1px solid var(--line);padding:16px 8px 0;font-size:10px;color:#537367}
+.sidebar-note small{display:block;font-size:9px;color:var(--muted);margin-top:5px}
+.dot{display:inline-block;width:6px;height:6px;background:#478b76;border-radius:50%;margin-right:5px}
+.content:not(.landing-content){padding:29px 32px 40px;max-width:1440px;width:100%;margin:0 auto}
+.clinic-footer{margin-left:216px;display:flex;justify-content:space-between;gap:20px;padding:12px 32px;border-top:1px solid var(--line);font-size:10px;color:var(--muted);background:#fff}
+.clinic-footer small{font-size:10px}
+.heading{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:24px}
+.eyebrow{display:block;color:#6c7e94;font-size:10px;letter-spacing:.7px;font-weight:500}
+.heading h1{font-size:26px;letter-spacing:-.8px;margin:7px 0 8px;line-height:1.5}
+.heading p{font-size:12px;color:var(--muted);margin:0;line-height:1.85}
+.date{font-size:11px;color:var(--muted)}
+.role-welcome{margin-bottom:20px}
+.role-welcome h1{font-size:28px;margin:7px 0 8px;letter-spacing:-.8px;line-height:1.5}
+.role-welcome p{font-size:13px;color:var(--muted);margin:0 0 10px;line-height:1.85}
+.role-welcome small{font-size:10px;color:#748397}
+.role-emblem,.hero{display:none}
+.role-actions{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:23px}
+.role-actions button{font-size:12px;padding:10px 14px;justify-content:flex-start;gap:10px}
+.role-actions button>svg{width:17px;color:var(--blue)}
+.role-actions button>svg:last-child{width:14px;color:#7591b0}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin-bottom:24px}
+.stat{padding:17px 18px;background:#fff;border:1px solid var(--line);border-radius:7px;display:flex;align-items:flex-start;justify-content:space-between;gap:10px;min-width:0}
+.stat small{display:block;font-size:11px;color:#5c6e84;line-height:1.7}
+.stat strong{display:block;font-size:27px;font-weight:600;margin:7px 0;letter-spacing:-.6px;line-height:1.4}
+.stat span{display:block;font-size:10px;color:#78869a;line-height:1.8}
+.iconbox{display:grid;place-items:center;width:30px;height:30px;background:#f0f5fc;border-radius:5px;color:#547eb0;flex-shrink:0}
+.iconbox svg{width:17px;height:17px}
+.metric-value{font-size:24px!important;overflow-wrap:anywhere}
+.role-workspace{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:22px}
+.role-workspace>section{align-self:start;min-width:0}
+.role-guide{padding:22px}
+.role-guide h2{font-size:16px;margin:7px 0 22px;font-weight:600}
+.role-guide .eyebrow{font-size:9px}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:22px}
+.panel{background:white;border:1px solid var(--line);border-radius:7px;overflow:hidden;min-width:0}
+.panel-header{padding:18px 21px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);gap:15px}
+.panel-header h2{font-size:14px;margin:0;font-weight:600}
+.panel-header small{font-size:11px;color:var(--muted);display:block;margin-top:5px;line-height:1.8}
+.count,.pill{display:inline-block;background:#edf4fc;color:#456da0;border-radius:4px;padding:4px 7px;font-size:10px;line-height:1.7}
+.count{margin-left:5px}
+.tools{display:flex;gap:12px;padding:16px 20px;align-items:center}
+.search{position:relative;flex:1;min-width:180px}
+.search svg{position:absolute;left:12px;top:13px;width:16px;height:16px;color:#7c8c9f}
+.search input{padding-left:37px}
+.tools select{width:180px}
+input,select,textarea{border:1px solid #cbd6e2;border-radius:5px;background:white;color:var(--ink);padding:10px 11px;width:100%;font-size:13px;line-height:1.65}
+input::placeholder,textarea::placeholder{color:#8592a3;font-size:12px}
+input:disabled,select:disabled,textarea:disabled{background:#f5f7fa;color:#5b6c7e;opacity:1}
+textarea{min-height:95px;resize:vertical}
+.table-scroll{overflow:auto;max-width:100%;overscroll-behavior-x:contain}
+table{width:100%;border-collapse:collapse;text-align:left;white-space:nowrap}
+th{font-size:10px;font-weight:600;color:#63758b;background:#f7f9fc;padding:12px 18px;border-bottom:1px solid var(--line);letter-spacing:.2px}
+td{font-size:12px;padding:16px 18px;border-bottom:1px solid #e9eef4;line-height:1.75}
+tbody tr:last-child td{border-bottom:0}
+tbody tr:hover{background:#fbfdff}
+.wrap-cell{white-space:normal;min-width:190px;max-width:500px}
+.patient-cell{display:flex;gap:11px;align-items:center}
+.patient-cell strong{font-size:12px;font-weight:600}
+.patient-cell small{display:block;font-size:10px;color:var(--muted);margin-top:4px}
+.patient-avatar{background:#edf3fa;color:#4a6a8d;border-radius:6px;width:36px;height:36px;display:grid;place-items:center;font-size:11px;flex-shrink:0}
+.badge{display:inline-flex;background:#edf6f2;color:#28715b;border-radius:4px;padding:5px 8px;font-size:10px;line-height:1.7}
+.badge.wait{background:#fff5e5;color:#876226}
+.badge.exam{background:#edf3fd;color:#446d9d}
+.badge.neutral{background:#f0f2f5;color:#617186}
+.link-button{color:var(--blue);border:0;background:transparent;padding:3px 4px;font-size:12px;text-decoration:none;line-height:1.8}
+.link-button:hover{background:#edf4ff}
+.link-button svg{width:15px;height:15px}
+.table-footer{font-size:10px;color:var(--muted);border-top:1px solid var(--line);padding:13px 20px}
+.record-meta{display:block;font-size:10px;color:#728399;line-height:1.85;margin-top:6px}
+.side-section{padding:22px}
+.side-section h3{font-size:14px;margin:0 0 18px}
+.step{display:flex;gap:11px;margin-bottom:22px}
+.step:last-child{margin-bottom:0}
+.step-number{width:24px;height:24px;border-radius:50%;background:#edf3fa;color:#547baa;display:grid;place-items:center;font-size:10px;flex-shrink:0}
+.step strong{font-size:12px;font-weight:500}
+.step p{font-size:11px;line-height:1.85;color:var(--muted);margin:5px 0 0}
+.side-tip{border:1px solid #dfe8f2;background:#f0f5fb;border-radius:6px;padding:19px;margin-top:15px}
+.side-tip h3{font-size:12px;display:flex;gap:8px;align-items:center;margin:0 0 9px;font-weight:500;color:#40658f}
+.side-tip p{font-size:11px;line-height:1.85;color:#617895;margin:0}
+.side-tip svg{width:17px;height:17px}
+.profile{display:flex;align-items:center;gap:17px;padding:23px}
+.profile .patient-avatar{height:54px;width:54px;font-size:18px}
+.profile h2{font-size:21px;margin:0 0 8px}
+.profile p{font-size:11px;line-height:1.85;color:var(--muted);margin:4px 0}
+.profile .actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;max-width:400px}
+.profile .actions button{font-size:11px}
+.tabs{display:flex;flex-wrap:wrap;gap:0 20px;border-bottom:1px solid #d6e1ed;margin:20px 0}
+.tabs button{border:0;border-radius:0;background:transparent;font-size:12px;color:#6e8096;padding:12px 0;border-bottom:2px solid transparent}
+.tabs button.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:600}
+.alert{padding:12px 16px;margin-top:15px;border:1px solid #efdccb;background:#fff9f1;color:#8a613a;font-size:12px;border-radius:6px;line-height:1.85}
+.form-card{padding:24px}
+.form-card h3{font-size:15px;margin:0 0 17px}
+.form-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:18px}
+.form-grid label{display:block;font-size:12px;line-height:1.8}
+.form-grid input,.form-grid select,.form-grid textarea{margin-top:6px}
+.full{grid-column:1/-1}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:23px;flex-wrap:wrap}
+.vital-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.vital{padding:17px;border-radius:6px;background:#f5f9fd;border:1px solid var(--line)}
+.vital small{font-size:11px;color:var(--muted)}
+.vital strong{display:block;font-size:25px;margin:8px 0 3px;font-weight:500}
+.vital span{font-size:11px;color:var(--muted)}
+.empty{padding:36px 25px;text-align:center;font-size:12px;line-height:1.9;color:var(--muted);white-space:normal}
+.readonly,.privacy,.clinical-readonly-note{font-size:12px;color:var(--muted);line-height:1.9}
+.error{font-size:12px;color:var(--red);line-height:1.9}
+.timeline{padding:24px}
+.timeline-item{position:relative;padding:0 0 25px 21px;border-left:2px solid #d2e1f1}
+.timeline-item:before{content:'';height:8px;width:8px;border-radius:50%;background:#5a88b7;position:absolute;left:-5px;top:6px}
+.timeline-item h3{font-size:14px;margin:0 0 10px}
+.timeline-item p{font-size:12px;color:var(--muted);line-height:1.9;margin:8px 0}
+.module-notice{padding:14px 18px;background:#edf4fb;border:1px solid #d7e5f3;border-left:3px solid #8bafd4;border-radius:4px;margin:17px 0;font-size:12px;line-height:1.85;color:#506c8a}
+.section-gap{height:22px}
+.queue-summary{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:15px;margin-bottom:22px}
+.queue-summary>div{background:white;border:1px solid var(--line);border-radius:6px;padding:17px}
+.queue-summary span{font-size:9px;color:#7991ab;letter-spacing:.5px}
+.queue-summary strong{display:block;font-size:15px;margin:8px 0;font-weight:600}
+.queue-summary small{font-size:10px;color:var(--muted);line-height:1.8}
+.queue-number{font-size:19px;color:#567fae}
+.records-list{padding:20px}
+.record-card{padding:18px;border:1px solid var(--line);border-radius:6px;background:#fcfdff;margin-bottom:15px}
+.record-card:last-child{margin-bottom:0}
+.record-card h3{font-size:14px;margin:0 0 8px}
+.record-card p{font-size:12px;line-height:1.9}
+.record-title{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.record-title small{font-size:10px;color:var(--muted)}
+.pre-wrap{white-space:pre-wrap;overflow-wrap:anywhere}
+.allergy-status{display:flex;align-items:flex-start;gap:15px;padding:20px;background:#fff9ef;border:1px solid #efdfc9;border-radius:6px}
+.allergy-status svg{color:#9e773b}
+.allergy-status strong{font-size:14px}
+.allergy-status p{font-size:12px;color:#816b50;line-height:1.85}
+.template-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.template-card{padding:22px;display:flex;flex-direction:column;align-items:flex-start}
+.template-icon{height:38px;width:38px;display:grid;place-items:center;border-radius:5px;background:#edf4fd;color:#4c7eb8;margin-bottom:18px}
+.article-kicker{font-size:9px;color:#7890ab;letter-spacing:.5px}
+.template-card h2{font-size:17px;margin:12px 0;font-weight:600}
+.template-card p,.template-card small{font-size:11px;color:var(--muted);line-height:1.85}
+.template-card button{margin-top:18px}
+.custom-form-item{display:flex;justify-content:space-between;align-items:center;gap:15px;padding:18px 0;border-bottom:1px solid var(--line)}
+.custom-form-item strong{font-size:13px}
+.custom-form-item small{font-size:10px;color:var(--muted);display:block;margin-top:6px}
+.form-shortcuts{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.checkbox-label{display:flex!important;align-items:center;gap:10px;font-size:12px;line-height:1.85}
+.checkbox-label input{width:16px;height:16px;margin:0;flex-shrink:0}
+.account-roles{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:5px;padding:18px;gap:13px}
+.account-roles legend{font-size:12px;color:var(--muted);padding:0 7px}
+.admin-tasks{padding:5px 21px}
+.admin-tasks button{width:100%;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:18px 0;justify-content:flex-start;gap:15px;text-align:left;background:transparent}
+.admin-tasks button:last-child{border-bottom:0}
+.admin-tasks button>svg{color:#587dab}
+.admin-tasks button>svg:last-child{margin-left:auto;width:16px}
+.admin-tasks span{flex:1}
+.admin-tasks strong{font-size:12px;display:block;font-weight:500}
+.admin-tasks small{font-size:11px;display:block;color:var(--muted);margin-top:5px;line-height:1.9}
+.report-controls{display:flex;gap:20px;align-items:flex-end}
+.report-controls label{font-size:12px;max-width:250px;flex:1}
+.report-controls input{margin-top:7px}
+.document-preview{display:block;width:100%;height:420px;object-fit:contain;border:1px solid var(--line)}
+.busy-state{text-align:center;padding:45px;color:var(--muted)}
+.busy-state svg{animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+dialog{border:1px solid #d5e0ec;border-radius:10px;padding:27px;width:min(680px,95vw);max-height:92vh;overflow-y:auto;color:var(--ink)}
+dialog::backdrop{background:#172d4f80}
+dialog h2{font-size:21px;margin:0 0 10px;letter-spacing:-.5px;line-height:1.5}
+dialog>p{font-size:12px;line-height:1.9;color:var(--muted);margin:12px 0 20px}
+dialog:has(.role-card){width:min(830px,95vw);padding:28px}
+.session-heading p{font-size:12px;color:var(--muted);margin:10px 0 22px;line-height:1.9}
+.session-heading .eyebrow{font-size:9px;margin-bottom:8px}
+.session-list{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.session-list .role-card{display:grid;grid-template-columns:34px minmax(0,1fr);column-gap:13px;row-gap:5px;text-align:left;align-items:start;justify-content:start;padding:16px;border:1px solid var(--line);border-radius:6px;background:#fff}
+.role-card:hover{background:#f5f9ff;border-color:#95b7da}
+.role-card-icon{grid-row:1/5;color:var(--blue);padding-top:3px}
+.role-card strong{grid-column:2;font-size:14px;font-weight:600}
+.role-card>span:not(.role-card-icon){grid-column:2;font-size:10px;line-height:1.85;color:var(--muted)}
+.role-card small{grid-column:2;font-size:10px;color:#647991;margin-top:3px}
+.role-card b{grid-column:2;display:flex;align-items:center;justify-content:space-between;font-size:10px;font-weight:500;color:var(--blue);margin-top:3px}
+.role-card b svg{width:14px;height:14px}
+#toast{position:fixed;bottom:23px;left:50%;transform:translateX(-50%);max-width:calc(100vw - 35px);background:#183b60;color:white;border-radius:6px;padding:13px 19px;display:none;z-index:40;font-size:12px;line-height:1.85;box-shadow:0 8px 25px #14293a25}
+.print-facility{border-bottom:1px solid var(--line);padding-bottom:15px;margin-bottom:22px}
+.print-facility strong{font-size:17px}
+.print-facility p{font-size:11px;color:var(--muted);margin:5px 0}
+#printBody h2{text-align:center;font-size:22px}
+#printBody>p{font-size:12px;line-height:1.9}
+.print-demo{text-align:center;color:#956339;font-size:10px!important;letter-spacing:.7px}
+#printBody td{white-space:normal}
+
+@media(max-width:1200px){
+ .landing-header,.public-main,.health-footer{margin-inline:12px}
+ .landing-header{padding:18px 28px;gap:20px}
+ .landing-header>nav{gap:22px}
+ .health-hero-copy{padding:65px 38px;max-width:565px}
+ .health-hero h1{font-size:42px}
+ .hero-benefits{right:23px;width:170px}
+ .hero-benefits>div{padding:14px 12px}
+ .hero-benefits strong{font-size:10px}
+ .hero-benefits svg{width:23px;height:23px}
+ .landing-inner{padding-inline:28px}
+ .help-grid>a{grid-template-columns:24px 1fr;padding:16px 10px;gap:8px}
+ .help-grid svg{width:23px;height:23px}
+ .help-grid strong{font-size:11px}
+ .health-services-grid{gap:12px}
+ .health-service>img{height:125px}
+ .health-service>div{padding:14px 12px;min-height:150px}
+ .about-health{gap:22px;grid-template-columns:1fr 1.25fr .9fr}
+ .about-copy h2{font-size:22px}
+ .staff-entry{padding:23px 19px}
+ .staff-entry h3{font-size:21px}
+ .care-principles{padding-inline:12px}
+ .care-principles>div{gap:10px;padding-inline:12px}
+ .care-principles strong{font-size:12px}
+ .care-principles small{font-size:9px}
+ .clinic-main{grid-template-columns:200px minmax(0,1fr)}
+ .clinic-header{gap:15px;padding-inline:20px}
+ .clinic-header .site-brand{width:155px}
+ .content:not(.landing-content){padding:24px}
+ .clinic-footer{margin-left:200px}
+ .role-workspace,.workspace{grid-template-columns:minmax(0,1fr)}
+ .role-workspace>aside{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+ .role-workspace>aside .side-tip{margin:0}
+ .role-guide{padding:18px}
+ .role-guide h2{margin-bottom:16px}
+ .workspace>.aside{display:none}
+ .stat{padding:15px}
+ .stat .iconbox{display:none}
+}
+@media(max-width:950px){
+ .hero-benefits{display:none}
+ .health-hero{min-height:500px}
+ .health-hero-copy{max-width:535px}
+ .hero-photo{width:85%;object-position:65% center}
+ .landing-header>nav{gap:15px}
+ .landing-header>nav a{font-size:10px}
+ .help-grid{gap:8px}
+ .help-grid>a{display:flex;flex-direction:column;padding:14px 12px}
+ .help-grid b{display:none}
+ .health-services-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .health-service>img{height:155px}
+ .health-service>div{min-height:135px}
+ .about-health{grid-template-columns:1fr 1.3fr}
+ .staff-entry{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:10px 22px}
+ .staff-entry>svg{display:none}
+ .staff-entry>span{grid-column:1}
+ .staff-entry h3{grid-column:1;grid-row:2/5;margin:0}
+ .staff-entry p{grid-column:2;grid-row:1/3;margin:0}
+ .staff-entry button{grid-column:2;grid-row:3;justify-self:start}
+ .staff-entry small{grid-column:2;grid-row:4;margin:0}
+ .workflow-steps{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .care-principles{grid-template-columns:1fr 1fr;gap:22px}
+ .care-principles>div:nth-child(2){border:0}
+ .clinic-context{display:none}
+ .clinic-header .site-brand{width:auto}
+ .clinic-header>nav{display:none}
+ .clinic-header .header-controls{margin-left:auto}
+ .account-badge{display:none}
+ .stats{gap:10px}
+ .template-grid{grid-template-columns:1fr 1fr}
+}
+@media(max-width:700px){
+ .landing-header{padding:16px 18px 12px;flex-wrap:wrap;gap:16px;margin-top:8px;border-radius:10px 10px 0 0}
+ .site-brand strong{font-size:23px}
+ .logo-plus{font-size:29px}
+ .site-brand small{font-size:7px}
+ .landing-header>nav{order:3;width:100%;justify-content:space-between;padding:8px 0 4px;gap:10px}
+ .landing-header>nav a{font-size:10px}
+ .landing-header>nav a:first-child:after{bottom:-6px}
+ .landing-header .header-controls{margin-left:auto}
+ .landing-header .primary{font-size:9px;padding:10px 11px}
+ .landing-header .primary svg{width:14px}
+ .health-hero{min-height:620px}
+ .hero-photo{width:100%;height:350px;top:auto;bottom:0;object-position:60% 35%}
+ .hero-shade{background:linear-gradient(180deg,#f0f6ff 0%,#f0f6ff 41%,#f0f6ff50 54%,transparent 70%)}
+ .health-hero-copy{padding:33px 22px 0;max-width:none}
+ .hero-kicker{font-size:9px}
+ .health-hero h1{font-size:34px;letter-spacing:-1.4px;line-height:1.28;margin:14px 0 15px}
+ .health-hero-copy>p{font-size:11px;line-height:1.9;margin-bottom:17px}
+ .hero-buttons{gap:8px}
+ .hero-buttons>a{font-size:9px;padding:10px 12px;gap:7px}
+ .hero-buttons svg{width:15px}
+ .hero-note{font-size:9px;margin-top:17px;max-width:none}
+ .landing-inner{padding:0 15px 24px}
+ .help-strip{padding:18px 12px 13px;margin-top:-24px}
+ .help-strip h2{font-size:16px;margin-bottom:15px}
+ .help-grid{grid-template-columns:1fr 1fr;gap:8px}
+ .help-grid>a{flex-direction:row;align-items:center;gap:9px;padding:13px 10px;min-height:76px}
+ .help-grid>a:last-child{grid-column:1/-1;min-height:66px}
+ .help-grid strong{font-size:11px}
+ .help-grid small{font-size:9px;margin-top:3px}
+ .help-grid svg{width:24px;height:24px}
+ .health-services{margin-top:36px}
+ .section-heading{margin-bottom:22px;padding:0 5px}
+ .section-heading h2{font-size:22px;letter-spacing:-.7px}
+ .section-heading>span{font-size:8px}
+ .section-heading p{font-size:10px}
+ .health-services-grid{grid-template-columns:1fr 1fr;gap:10px}
+ .health-service:last-child{grid-column:1/-1;display:grid;grid-template-columns:42% 1fr}
+ .health-service>img{height:122px}
+ .health-service:last-child>img{height:100%}
+ .health-service>div{padding:13px 11px;min-height:143px}
+ .health-service h3{font-size:11px}
+ .health-service p{font-size:10px;line-height:1.85;padding-right:0;padding-bottom:20px}
+ .health-service a{bottom:12px;width:22px;height:22px}
+ .care-principles{padding:23px 13px;gap:20px 8px;margin:25px 0 30px}
+ .care-principles>div{gap:9px;padding-inline:5px}
+ .care-principles svg{width:22px;height:22px}
+ .care-principles strong{font-size:10px}
+ .care-principles small{font-size:8px;line-height:1.9}
+ .about-health{grid-template-columns:1fr;gap:20px}
+ .about-photo{min-height:310px}
+ .about-copy{padding:0 5px}
+ .about-copy h2{font-size:25px}
+ .about-copy p{font-size:12px}
+ .about-copy li{font-size:11px}
+ .staff-entry{grid-column:auto;display:flex;padding:24px}
+ .staff-entry h3{font-size:23px;margin:8px 0 12px}
+ .staff-entry p{font-size:11px;margin-bottom:17px}
+ .staff-entry small{margin-top:10px}
+ .landing-workflow{margin-top:35px}
+ .workflow-steps{grid-template-columns:1fr 1fr;gap:10px}
+ .workflow-steps article{padding:16px 13px}
+ .workflow-steps h3{font-size:12px}
+ .workflow-steps p{font-size:10px}
+ .care-band{margin-top:30px;padding:23px 19px;flex-wrap:wrap;gap:19px}
+ .care-band>div{gap:12px}
+ .care-band>div>svg{width:25px;height:25px}
+ .care-band h2{font-size:17px;line-height:1.6;margin-top:6px}
+ .care-band small{font-size:8px}
+ .care-band button{width:100%;min-width:0;font-size:11px;padding:12px 15px}
+ .health-footer{grid-template-columns:1fr 1fr;gap:24px 17px;padding:28px 20px 0;margin-bottom:8px;font-size:10px}
+ .health-footer p,.health-footer button{font-size:10px}
+ .health-footer>div>strong{font-size:11px}
+ .health-footer>small{margin-inline:-20px;font-size:9px}
+ .clinic-header{padding:12px 16px;gap:12px;min-height:66px;flex-wrap:wrap}
+ .clinic-header .site-brand small{display:none}
+ .clinic-header .site-brand strong{font-size:21px}
+ .clinic-header .logo-plus{font-size:25px}
+ .clinic-header .header-controls{gap:7px}
+ .clinic-header .header-controls button{padding:8px;font-size:10px}
+ .clinic-header .header-controls #sessionDemo{padding-inline:10px}
+ .clinic-header #workspaceRole{width:105px;font-size:10px}
+ .clinic-header:has(#workspaceRole) .site-brand{width:100%}
+ .clinic-header:has(#workspaceRole) .header-controls{width:100%;justify-content:space-between}
+ .menu-toggle{display:inline-flex}
+ .clinic-main{display:block;min-height:calc(100vh - 110px)}
+ .clinic-sidebar{display:none;position:relative;top:0;width:100%;height:auto;padding:16px;border-right:0;border-bottom:1px solid var(--line)}
+ .clinic-sidebar.menu-open{display:block}
+ .clinic-sidebar.menu-open .workspace-nav{display:grid;grid-template-columns:1fr 1fr}
+ .clinic-sidebar.menu-open .sidebar-note{margin-top:15px;padding-top:12px}
+ .content:not(.landing-content){padding:23px 16px 30px}
+ .clinic-footer{margin-left:0;padding:13px 16px;flex-wrap:wrap;gap:4px}
+ .clinic-footer>span{display:none}
+ .role-welcome h1{font-size:25px}
+ .role-welcome p{font-size:12px}
+ .role-welcome small{font-size:9px}
+ .role-actions{gap:8px;margin-bottom:20px}
+ .role-actions button{font-size:11px;padding:9px 11px}
+ .stats{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:22px}
+ .stat{padding:15px 13px}
+ .stat small{font-size:10px}
+ .stat strong{font-size:25px}
+ .stat span{font-size:9px}
+ .metric-value{font-size:20px!important}
+ .role-workspace,.workspace{display:block}
+ .role-workspace>aside{display:block;margin-top:19px}
+ .role-workspace>aside .side-tip{margin-top:14px}
+ .role-guide{padding:20px}
+ .heading{flex-wrap:wrap;align-items:flex-start;gap:15px}
+ .heading h1{font-size:24px}
+ .heading p{font-size:11px}
+ .eyebrow{font-size:9px}
+ .date{display:none}
+ .panel-header{padding:16px;flex-wrap:wrap;gap:10px}
+ .panel-header h2{font-size:13px}
+ .panel-header small{font-size:10px}
+ .tools{padding:15px;flex-wrap:wrap;gap:10px}
+ .tools select{width:160px}
+ th{font-size:9px;padding:12px 15px}
+ td{font-size:11px;padding:15px}
+ .link-button{font-size:11px}
+ .table-footer{padding:12px 16px;font-size:9px}
+ .profile{padding:18px;flex-wrap:wrap;gap:13px}
+ .profile .patient-avatar{width:42px;height:42px;font-size:14px}
+ .profile h2{font-size:19px}
+ .profile p{font-size:10px}
+ .profile .actions{margin:0;max-width:none;width:100%;justify-content:flex-start}
+ .tabs{flex-wrap:nowrap;overflow:auto;white-space:nowrap;gap:17px;overscroll-behavior-x:contain}
+ .tabs button{font-size:11px;padding:11px 0;flex-shrink:0}
+ .form-card{padding:19px}
+ .form-grid{grid-template-columns:minmax(0,1fr);gap:16px}
+ .vital-grid{grid-template-columns:1fr 1fr;gap:10px}
+ .vital{padding:15px}
+ .vital strong{font-size:23px}
+ .queue-summary{gap:8px}
+ .queue-summary>div{padding:13px 10px}
+ .queue-summary strong{font-size:12px;line-height:1.8}
+ .queue-summary small{font-size:9px}
+ .queue-summary span{font-size:8px}
+ .template-grid{grid-template-columns:1fr;gap:15px}
+ .record-title{flex-wrap:wrap;gap:8px}
+ .account-roles{grid-template-columns:1fr}
+ .report-controls{flex-wrap:wrap;gap:15px}
+ .document-preview{height:320px}
+ dialog,dialog:has(.role-card){padding:21px}
+ .session-heading p{font-size:11px}
+ .session-list{grid-template-columns:1fr}
+ .session-list .role-card{padding:15px}
+ .role-card>span:not(.role-card-icon){font-size:11px}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.scroll-reveal{opacity:1;transform:none;transition:none}.busy-state svg{animation:none}}
+@media print{body{background:white;color:#111;font-family:Arial,sans-serif}#app,#toast{display:none!important}dialog{position:static!important;display:block!important;width:100%!important;max-width:none!important;max-height:none!important;margin:0;border:0!important;padding:15px!important;color:#111}dialog:not([open]){display:none!important}dialog::backdrop{background:transparent}dialog>.form-actions{display:none!important}#printBody{display:block}#printBody table{white-space:normal}#printBody th,#printBody td{color:#111;border-color:#aaa;padding:10px}.print-demo{color:#444!important}}
