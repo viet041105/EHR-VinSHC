@@ -1,12 +1,23 @@
 # EHR-VinSHC
 
-Dự án phát triển bản phân phối OpenMRS phù hợp với luồng khám ngoại trú tại một cơ sở, sau đó mở rộng liên thông hồ sơ và AI tra cứu/tóm tắt có dẫn nguồn.
+Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại Việt Nam, thiết kế theo gói và adapter để mở rộng lên chuỗi phòng khám, bệnh viện, liên thông hồ sơ và AI tra cứu/tóm tắt có dẫn nguồn.
+
+> Dự án đang phát triển và chỉ được kiểm chứng với dữ liệu giả. Chưa dùng cho dữ liệu bệnh nhân thật.
 
 ## Bắt đầu tại đây
 
 Đọc [kế hoạch triển khai và phân công công việc](PROJECT_PLAN.md) để nắm phạm vi MVP, đầu việc của 4 thành viên, thứ tự phối hợp và tiêu chí nghiệm thu.
 
-Đọc [từ điển dữ liệu và bảng bàn giao cho BE](docs/DATA_DICTIONARY.md) để tra các trường từ hồ sơ mẫu 195 trang, trang nguồn và những điểm còn cần xác nhận. Người phụ trách metadata bắt đầu ở mục 1; phạm vi triển khai vẫn cần mentor và nhóm chốt.
+Đọc [từ điển dữ liệu và bảng bàn giao cho BE](docs/DATA_DICTIONARY.md) để tra các trường từ hồ sơ mẫu 195 trang, trang nguồn và những điểm còn cần xác nhận. Người phụ trách metadata bắt đầu ở mục 1; mục 10 giữ khung dữ liệu MVP của nhóm.
+
+| Tài liệu | Nội dung |
+| --- | --- |
+| [Quy trình phòng khám](docs/CLINIC_WORKFLOW.md) | Vai trò, luồng khám, giấy tờ đầu ra |
+| [Kiến trúc](docs/ARCHITECTURE.md) | Các tầng phòng khám → bệnh viện, phân loại module |
+| [Tuân thủ Việt Nam](docs/VIETNAM_COMPLIANCE.md) | Checklist pháp lý và yêu cầu thiết kế |
+| [Từ điển dữ liệu](docs/DATA_DICTIONARY.md) | Trường dữ liệu, ánh xạ FHIR/openEHR |
+| [Quyết định kiến trúc](docs/decisions/) | ADR, gồm vai trò OpenMRS/openEHR |
+| [Đóng góp](CONTRIBUTING.md) · [Bảo mật](SECURITY.md) | Quy tắc PR và báo lỗ hổng |
 
 ## Chạy baseline OpenMRS
 
@@ -30,4 +41,6 @@ Mở **http://127.0.0.1:8080/openmrs/spa/**. Đăng nhập bằng `EHR_ADMIN_USE
 - [Kết quả kiểm chứng](docs/VALIDATION.md): đã chạy thật những gì và các giới hạn còn lại.
 - [Chuyển từ MariaDB sang PostgreSQL](docs/POSTGRESQL_MIGRATION.md): dành cho thành viên đã chạy baseline cũ.
 
-Baseline dùng OpenMRS Reference Application 3.7.1 và PostgreSQL 16.15. Backend được build từ image upstream đã khóa digest, giữ metadata nền và bỏ bộ demo lớn. Metadata và biểu mẫu Việt Nam tiếp tục làm theo kế hoạch.
+Baseline dùng OpenMRS Reference Application 3.7.1. Backend được build từ image upstream đã khóa digest, giữ metadata nền và bỏ bộ demo lớn. Metadata và biểu mẫu Việt Nam tiếp tục làm theo kế hoạch.
+
+**Database:** dự án dùng **PostgreSQL** ([ADR-0002](docs/decisions/0002-postgresql.md)). Việc chuyển đổi đang làm trong BE-10; cho tới khi PR đó được merge, `compose.yaml` vẫn chạy MariaDB 10.11.19 và các kết quả kiểm chứng hiện có là trên MariaDB.

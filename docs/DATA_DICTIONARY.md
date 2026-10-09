@@ -1,10 +1,12 @@
-# Từ điển dữ liệu từ hồ sơ mẫu và bàn giao cho BE
+# Từ điển dữ liệu và khảo sát hồ sơ mẫu
 
-**Ngày rà soát:** 09/10/2026. **Nguồn:** S01, PDF mẫu mentor gửi gồm 195 trang. **Trạng thái:** bản đặc tả để nhóm kiểm tra và chọn phạm vi; mentor chưa chốt phạm vi.
+**Ngày rà soát:** 09/10/2026. **Nguồn:** S01, PDF mẫu mentor gửi gồm 195 trang. **Trạng thái:** bản đặc tả để nhóm kiểm tra và chọn phạm vi; phần sử dụng từ bộ mẫu S01 còn cần mentor xác nhận.
 
 Tài liệu này trả lời: mẫu có những trường gì, chúng xuất hiện ở đâu, nên ghi theo kiểu/đơn vị nào và điểm nào còn cần xác nhận. Bản tổng quan trước đã kiểm kê toàn bộ 195 trang và chi tiết 104 dòng nền tảng. Bộ này mở rộng các nhóm còn lại thành **983 dòng đặc tả**, gồm cả trường nguồn, trường tách và metadata đề xuất.
 
-**983 dòng không phải 983 cột database hay 983 ô cần xây ngay.** Một khái niệm có thể dùng trong nhiều tài liệu; một dòng có thể mô tả cấu trúc tái sử dụng. Việc đọc hết nguồn cũng không có nghĩa số hóa toàn bộ nội trú trong MVP. [Kế hoạch dự án](../PROJECT_PLAN.md) hiện chọn luồng ngoại trú; thay đổi phạm vi cần ghi quyết định chung.
+**983 dòng không phải 983 cột database hay 983 ô cần xây ngay.** Một khái niệm có thể dùng trong nhiều tài liệu; một dòng có thể mô tả cấu trúc tái sử dụng. Việc đọc hết nguồn cũng không có nghĩa số hóa toàn bộ nội trú trong MVP. [Kế hoạch dự án](../PROJECT_PLAN.md) hiện chọn phòng khám tư với MVP-1 lõi lâm sàng và MVP-2 vận hành; việc bổ sung nhóm nội trú cần quyết định chung.
+
+Khung trường MVP từ bản `main` mới nhất được giữ tại **mục 10**. Mã kỹ thuật dạng `patient.ma_noi_bo` trong khung MVP và mã khảo sát như K01 có vai trò khác nhau; người 3 cùng BE sẽ ghi ánh xạ khi chọn trường. Các cột B/T/Đk, FHIR và openEHR của khung là đề xuất cần xác nhận, chưa chứng minh API hỗ trợ trên baseline.
 
 ## 1. Người 3 nên đọc và làm gì trước
 
@@ -12,7 +14,7 @@ Tài liệu này trả lời: mẫu có những trường gì, chúng xuất hi�
 2. Đọc [diễn biến, chỉ định và thuốc](data/ORDERS_AND_MEDICATIONS.md), bắt đầu nhóm DR/YL. Thống nhất diễn biến khác chỉ định, đơn thuốc và thuốc đã dùng.
 3. Đưa các nhóm dự kiến dùng vào bảng mục 7; trạng thái chưa có quyết định để **CXT**. Bản nháp này có thể bàn giao BE ngay để kiểm tra cách lưu.
 4. Cùng mentor chọn phần triển khai trước và duyệt quy tắc bắt buộc/danh mục/đơn vị. Cùng BE chốt tên trường kỹ thuật và cách lưu; cùng FE chốt form.
-5. Sau khi chốt, tạo metadata và dữ liệu giả theo các mã đã chọn, kiểm tra lưu rồi đọc lại trên backend thật. Các đầu việc DATA-01 đến DATA-07 tiếp tục theo [kế hoạch](../PROJECT_PLAN.md).
+5. Sau khi chốt, tạo metadata và dữ liệu giả theo các mã đã chọn, kiểm tra lưu rồi đọc lại trên backend thật. Các đầu việc DATA-01 đến DATA-10 tiếp tục theo [kế hoạch](../PROJECT_PLAN.md).
 
 | Phần tra cứu | Mã nhóm | Dòng đặc tả | Nội dung |
 | --- | --- | --- | --- |
@@ -39,7 +41,7 @@ Tài liệu này trả lời: mẫu có những trường gì, chúng xuất hi�
 | Tách | Tách từ ô gộp/đoạn văn/đồ thị. Chỉ nhận giá trị cấu trúc khi có bằng chứng và đã đối chiếu |
 | Đề xuất | Nhóm bổ sung để truy vết, liên kết, phiên bản hoặc xác minh; không giả là trường có sẵn trên mẫu |
 
-**CXT = cần xác nhận.** Hiện chưa chốt trường bắt buộc, giới hạn giá trị, mã chuẩn, phiên bản thang điểm, thuật toán, quyền và phạm vi MVP. Một ô điền trên hồ sơ này không chứng minh bắt buộc cho mọi người bệnh. Các lựa chọn in sẵn không chứng minh đó là toàn bộ danh mục của hệ thống.
+**CXT = cần xác nhận.** Các dòng khảo sát S01 chưa chốt trường bắt buộc, giới hạn giá trị, mã chuẩn, phiên bản thang điểm, thuật toán, quyền và tập được chọn cho MVP. Khung MVP ở mục 10 có B/T/Đk và mapping dự kiến từ bản khung trên `main`; các giá trị này vẫn cần duyệt và kiểm chứng. Một ô điền trên hồ sơ này không chứng minh bắt buộc cho mọi người bệnh. Các lựa chọn in sẵn không chứng minh đó là toàn bộ danh mục của hệ thống.
 
 Kiểu “điểm và nhãn” là cấu trúc gồm giá trị điểm, nhãn nguồn, tên/phiên bản thang, thời điểm và trạng thái xác minh. Kiểu “văn bản và mã” cần giữ văn bản, mã, hệ mã/phiên bản và vai trò. Kiểu “người/vai trò” cần giữ định danh người, tên hiển thị và vai trò trong đúng sự kiện. Không ghép những phần này thành một chuỗi mất cấu trúc.
 
@@ -152,13 +154,13 @@ Nguồn S01 có **195 trang**, không có trường AcroForm tương tác. Dấu
 
 ## 7. Bảng bàn giao và ghi quyết định
 
-Bộ này là phần khảo sát của DATA-01. Người 3 quản lý nội dung; BE kiểm tra cách lưu; FE kiểm tra cách nhập/hiển thị; người 4 kiểm tra hợp đồng API và mapping. Mentor chốt phạm vi và nghiệp vụ. Các vai trò giữ theo [phân công hiện tại](../PROJECT_PLAN.md), không đổi qua tài liệu này.
+Phần khảo sát S01 là đầu vào cho DATA-01. Khung MVP của nhóm được giữ ở mục 10. Người 3 quản lý nội dung; BE kiểm tra cách lưu; FE kiểm tra cách nhập/hiển thị; người 4 kiểm tra hợp đồng API và mapping. Mentor chốt phạm vi và nghiệp vụ. Các vai trò giữ theo [phân công hiện tại](../PROJECT_PLAN.md), không đổi qua tài liệu này.
 
 ### 7.1. Hàng đợi review
 
 | Ưu tiên | Nhóm cần review | Người phối hợp | Kết quả cần ghi | Trạng thái |
 | --- | --- | --- | --- | --- |
-| 1 | Phạm vi ngoại trú hay thêm phần nội trú từ S01 | Người 3 + mentor + cả nhóm | Nhóm được làm trước; nhóm để sau; lý do | CXT |
+| 1 | Chọn trường S01 phù hợp MVP-1/MVP-2; nhóm nội trú cần quyết định riêng | Người 3 + mentor + cả nhóm | Nhóm được làm trước; nhóm để sau; lý do | CXT |
 | 2 | K01-K30, K31-K51 và các mã khác của phân hệ | Người 3 + BE | Mã cấp từ đâu, nhận diện đúng người, liên kết lượt/đợt | CXT |
 | 3 | K52-K80, K81-K94 và sinh hiệu theo thời điểm | Người 3 + BE + FE + mentor | Trường form, kiểu/đơn vị, danh mục, bắt buộc và quyền | CXT |
 | 4 | DR/YL/CD/RX và AD/IF nếu được chọn | Người 3 + BE + mentor | Phân biệt chỉ định/kê đơn/thực hiện và cấu trúc dòng thuốc | CXT |
@@ -222,3 +224,91 @@ Chỉ dùng ID tự tạo như `NB-GIA-001`, `DOT-GIA-001`; đây là tiêu chí
 Đã kiểm tra cấu trúc bảng Markdown, tính duy nhất và liên tục của mã dòng, tham chiếu mã trong ghi chú, trang nguồn trong khoảng 1-195, bảng kiểm kê phủ đủ 195 trang và các liên kết nội bộ. Đã kiểm tra nội dung bàn giao để tránh chép định danh người bệnh; đối chiếu các điểm dễ nhầm như HIV chỉ được chỉ định, đơn vị xét nghiệm, đơn vị tốc độ truyền và ô chưa chọn.
 
 Khi bổ sung, giữ mã cũ, ghi nguồn/trạng thái cho trường mới và cập nhật bảng bàn giao. Nếu mentor chọn phạm vi khác, cập nhật quyết định và tập metadata/API tương ứng; không đổi toàn bộ kế hoạch chỉ vì nguồn có thêm một loại giấy.
+
+## 10. Khung dữ liệu MVP của nhóm
+
+Phần này giữ khung đã có trên `origin/main` tại commit `631f89e`, gồm tên kỹ thuật và mapping dự kiến. Việc tích hợp ở đây bảo toàn đầu vào của nhóm; không xác nhận lại các quy tắc lâm sàng hoặc mapping bằng khảo sát PDF. Các dòng S01 ở phần trước cung cấp nguồn để cùng review, không tự thay thế các quyết định MVP.
+
+**Người chủ trì:** Người 3 (DATA-01). **Trạng thái:** Khung ban đầu. Nội dung lâm sàng cần mentor xác nhận trước khi chốt biểu mẫu (FE-04).
+
+Mỗi trường MVP được ghi một lần trong khung này. Backend, biểu mẫu, API test và mapping FHIR/openEHR đều tham chiếu tới tài liệu này. Khi thêm hoặc đổi trường, cập nhật bảng và báo những người dùng trường đó.
+
+### 10.1. Quy ước
+
+| Cột | Ý nghĩa |
+| --- | --- |
+| Mã trường | Tên ổn định, dạng `nhom.ten_truong`, không đổi khi đổi nhãn hiển thị |
+| Kiểu | `text`, `numeric`, `coded`, `date`, `datetime`, `boolean` |
+| Đơn vị | Đơn vị UCUM khi là số đo |
+| Bắt buộc | `B` bắt buộc, `T` tùy chọn, `Đk` có điều kiện |
+| OpenMRS | Đối tượng lưu: patient, person attribute, identifier, obs (concept UUID), order, allergy, condition, diagnosis |
+| FHIR R4 | Resource và path |
+| openEHR | Archetype tham chiếu trên CKM, để ánh xạ khi thêm EHRbase ([ADR-0001](decisions/0001-openmrs-openehr.md)) |
+| Thiếu dữ liệu | Cách biểu diễn "chưa hỏi", "không rõ", "không có" |
+
+Concept UUID được điền khi DATA-02 tạo metadata. Không dùng UUID tạm trên biểu mẫu đã merge.
+
+### 10.2. Bệnh nhân và định danh
+
+| Mã trường | Nhãn | Kiểu | Bắt buộc | OpenMRS | FHIR R4 | Ghi chú |
+| --- | --- | --- | --- | --- | --- | --- |
+| `patient.ma_noi_bo` | Mã bệnh nhân | text | B | identifier (loại nội bộ) | Patient.identifier | Hệ thống tự sinh; có cơ sở cấp |
+| `patient.cccd` | Số CCCD | text | T | identifier | Patient.identifier | Kiểm tra định dạng 12 chữ số |
+| `patient.ma_bhxh` | Mã BHXH/BHYT | text | T | identifier | Patient.identifier | |
+| `patient.ho_ten` | Họ và tên | text | B | person name | Patient.name | Thứ tự họ – đệm – tên kiểu Việt Nam; xác định cách tách trường |
+| `patient.gioi_tinh` | Giới tính | coded | B | gender | Patient.gender | |
+| `patient.ngay_sinh` | Ngày sinh | date | B | birthdate (+ cờ ước lượng) | Patient.birthDate | Cho phép chỉ biết năm sinh |
+| `patient.dien_thoai` | Điện thoại | text | T | person attribute | Patient.telecom | |
+| `patient.dia_chi` | Địa chỉ | text/coded | T | person address | Patient.address | Tỉnh → xã theo danh mục hiện hành; số nhà dạng text |
+| `patient.dia_chi_cu` | Địa chỉ theo giấy tờ cũ | text | T | person attribute | Patient.address (period) | Đối chiếu sau sắp xếp hành chính 2025 |
+
+### 10.3. Sinh hiệu
+
+| Mã trường | Nhãn | Kiểu | Đơn vị | Bắt buộc | OpenMRS | FHIR R4 | openEHR |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `vitals.mach` | Mạch | numeric | /min | Đk | obs | Observation (LOINC 8867-4) | `openEHR-EHR-OBSERVATION.pulse.v2` |
+| `vitals.ha_tam_thu` | HA tâm thu | numeric | mm[Hg] | Đk | obs | Observation (85354-9, component 8480-6) | `openEHR-EHR-OBSERVATION.blood_pressure.v2` |
+| `vitals.ha_tam_truong` | HA tâm trương | numeric | mm[Hg] | Đk | obs | Observation (85354-9, component 8462-4) | `openEHR-EHR-OBSERVATION.blood_pressure.v2` |
+| `vitals.nhiet_do` | Nhiệt độ | numeric | Cel | Đk | obs | Observation (8310-5) | `openEHR-EHR-OBSERVATION.body_temperature.v2` |
+| `vitals.nhip_tho` | Nhịp thở | numeric | /min | T | obs | Observation (9279-1) | `openEHR-EHR-OBSERVATION.respiration.v2` |
+| `vitals.spo2` | SpO₂ | numeric | % | T | obs | Observation (59408-5) | `openEHR-EHR-OBSERVATION.pulse_oximetry.v1` |
+| `vitals.can_nang` | Cân nặng | numeric | kg | T | obs | Observation (29463-7) | `openEHR-EHR-OBSERVATION.body_weight.v2` |
+| `vitals.chieu_cao` | Chiều cao | numeric | cm | T | obs | Observation (8302-2) | `openEHR-EHR-OBSERVATION.height.v2` |
+
+Tập sinh hiệu bắt buộc và ngưỡng hợp lệ do mentor chốt. Giữ thời điểm đo tách biệt với thời điểm nhập. Phiên bản archetype và mã LOINC phải được kiểm tra lại trên CKM/LOINC khi chốt.
+
+### 10.4. Khám và kết luận
+
+| Mã trường | Nhãn | Kiểu | Bắt buộc | OpenMRS | FHIR R4 | openEHR | Thiếu dữ liệu |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| `visit.ly_do_kham` | Lý do khám | text | B | obs | Encounter.reasonCode / Observation | `EVALUATION.reason_for_encounter.v1` | |
+| `exam.trieu_chung` | Triệu chứng | coded + text | T | obs | Observation / Condition | `CLUSTER.symptom_sign.v2` | |
+| `allergy.trang_thai` | Tình trạng dị ứng | coded | B | allergy (hoặc obs trạng thái) | AllergyIntolerance | `EVALUATION.adverse_reaction_risk.v1`, `EVALUATION.exclusion_specific.v1` | Phân biệt: chưa hỏi / đã hỏi, không ghi nhận / có dị ứng |
+| `allergy.tac_nhan` | Tác nhân dị ứng | coded | Đk | allergy | AllergyIntolerance.code | `EVALUATION.adverse_reaction_risk.v1` | |
+| `dx.chinh` | Chẩn đoán chính | coded (ICD-10) | B | diagnosis | Condition (encounter-diagnosis) | `EVALUATION.problem_diagnosis.v1` | |
+| `dx.kem_theo` | Chẩn đoán kèm theo | coded (ICD-10) | T | diagnosis | Condition | `EVALUATION.problem_diagnosis.v1` | |
+| `dx.do_chac_chan` | Mức độ chắc chắn | coded | B | diagnosis certainty | Condition.verificationStatus | | Sơ bộ / xác định |
+| `followup.ngay_tai_kham` | Ngày tái khám | date | T | appointment hoặc obs | Appointment | | |
+
+### 10.5. Chỉ định, đơn thuốc và thanh toán
+
+| Mã trường | Nhãn | Kiểu | Bắt buộc | OpenMRS | FHIR R4 | Ghi chú |
+| --- | --- | --- | --- | --- | --- | --- |
+| `order.cls` | Chỉ định CLS | coded | Đk | test order | ServiceRequest | Danh mục dịch vụ có mã dùng chung khi có |
+| `result.cls` | Kết quả CLS | numeric/text/file | Đk | obs / attachment | Observation / DiagnosticReport | Đơn vị và khoảng tham chiếu |
+| `rx.thuoc` | Thuốc | coded | B | drug order | MedicationRequest.medication | Tên hoạt chất, hàm lượng, dạng bào chế |
+| `rx.lieu_dung` | Liều, cách dùng | structured + text | B | drug order | MedicationRequest.dosageInstruction | |
+| `rx.so_luong` | Số lượng | numeric | B | drug order | MedicationRequest.dispenseRequest | |
+| `rx.so_ngay` | Số ngày dùng | numeric | B | drug order | MedicationRequest.dispenseRequest | |
+| `rx.loi_dan` | Lời dặn | text | T | obs / order | MedicationRequest.note | |
+| `bill.dich_vu` | Dịch vụ tính phí | coded | B | billing line item | ChargeItem (nếu dùng) | Bảng giá do từng cơ sở cấu hình |
+| `bill.so_tien` | Số tiền | numeric | B | billing | | Đơn vị VND, không có phần thập phân |
+| `bill.trang_thai` | Trạng thái thanh toán | coded | B | billing | | Chưa thu / đã thu / hoàn / hủy |
+
+### 10.6. Việc tiếp theo
+
+- [ ] Mentor xác nhận tập trường sinh hiệu, khám, dị ứng.
+- [ ] Chọn danh mục ICD-10, thuốc, dịch vụ và ghi nguồn/phiên bản (DATA-03).
+- [ ] Điền concept UUID sau DATA-02.
+- [ ] Người 4 kiểm tra cột FHIR bằng dữ liệu thật trên instance (INT-05).
+- [ ] Đối chiếu cột openEHR trên CKM (DATA-10).

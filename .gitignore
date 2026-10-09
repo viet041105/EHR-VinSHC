@@ -16,3 +16,7 @@ target/
 dist/
 .DS_Store
 Thumbs.db
+.claude
+.agents
+CLAUDE.md
+AGENTS.md
