@@ -11,7 +11,7 @@ Repo cung cấp cùng một cấu hình Docker Compose cho mọi thành viên. M
 | `backend` | OpenMRS Core, REST, FHIR2, Initializer và các module của bản phân phối |
 | `db` | PostgreSQL 16.15 lưu hồ sơ và metadata |
 
-> **Database:** baseline hiện dùng **PostgreSQL 16.15** theo [ADR-0002](decisions/0002-postgresql.md), với volume `postgres-data` và `openmrs-pg-data`. Nếu đã chạy MariaDB, đọc [hướng dẫn chuyển](POSTGRESQL_MIGRATION.md); không dùng lại volume MariaDB cho PostgreSQL. Bản cập nhật không tự chuyển dữ liệu cũ.
+> **Database:** baseline dùng **PostgreSQL 16.15** theo [ADR-0002](decisions/0002-postgresql.md), với volume `postgres-data` và `openmrs-pg-data`.
 
 Baseline dùng **Reference Application 3.7.1**. Frontend, gateway, database và image nền của backend được khóa digest. Backend của nhóm là một lớp build nhỏ từ image release đó. Thông tin nguồn, commit và phiên bản nằm trong [baseline.json](../config/baseline.json).
 
@@ -36,8 +36,6 @@ python --version
 `docker version` cần hiển thị cả Client và Server. Trên Windows, nếu engine chưa chạy, mở Docker Desktop hoặc dùng `docker desktop start` nếu CLI của máy có hỗ trợ. Python trên một số máy dùng lệnh `python3` hoặc `py`; thay `python` trong hướng dẫn bằng lệnh tương ứng.
 
 ## 3. Chạy lần đầu
-
-Nếu đã chạy bản MariaDB trước đây, đọc [hướng dẫn chuyển PostgreSQL](POSTGRESQL_MIGRATION.md) trước. Bản này dùng volume DB và volume OpenMRS mới; nó không tự chuyển dữ liệu từ MariaDB.
 
 Mở terminal tại thư mục repo rồi chạy lần lượt:
 
@@ -133,7 +131,7 @@ Các mật khẩu sinh trong `.env` không chứa ký tự `$`, để tránh n�
 | Người 1 — Backend | Dựng baseline, đọc danh sách module; bổ sung cơ chế build/load module riêng khi có đầu việc cần sửa |
 | Người 2 — Frontend | Kiểm tra các app có sẵn; khi sửa mã frontend, dùng dev server của package được chọn và nối tới backend Docker |
 | Người 3 — Metadata | Khảo sát metadata/form hiện có; chuẩn bị cấu hình có UUID ổn định, rồi cùng người 1 kiểm chứng cách nạp |
-| Người 4 — Integration | Chạy smoke/fixture; bổ sung API test và E2E cho chức năng nhóm phát triển |
+| Người 4 — Integration | Chạy smoke/fixture; bổ sung API test và E2E cho chức năng nhóm phát triển; adapter OpenMRS cho FE (`infra/frontend/api.js`); backup–restore trên Compose project tách biệt |
 
 Frontend/gateway hiện dùng image upstream. Backend có Dockerfile riêng để tạo baseline nhẹ từ release ổn định. Metadata của nhóm dưới `infra/backend/configuration/` được copy vào cấu hình distribution khi build; sau khi sửa, chạy `docker compose build backend` rồi `docker compose up -d --wait --wait-timeout 600`. Initializer nạp thay đổi khi khởi động backend. Với mã frontend hoặc Java tùy biến, cần bổ sung cơ chế build/load tương ứng; tránh mount đè cả thư mục cấu hình upstream và mất metadata cần thiết.
 

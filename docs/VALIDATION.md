@@ -2,7 +2,7 @@
 
 **Ngày kiểm chứng local:** 08/10/2026, UTC+7. Trạng thái từng run trên GitHub được ghi riêng tại [GitHub Actions](https://github.com/viet041105/EHR-VinSHC/actions).
 
-> **Lưu ý:** Toàn bộ kết quả dưới đây được đo trên **MariaDB 10.11.19**. Dự án đã chuyển hướng sang PostgreSQL ([ADR-0002](decisions/0002-postgresql.md)). Các kiểm tra phải được chạy lại trên PostgreSQL trong BE-10 và ghi thành một mục kết quả mới; kết quả MariaDB không thay thế kiểm chứng đó.
+> Các kết quả dưới đây đo trên **PostgreSQL 16.15** theo [ADR-0002](decisions/0002-postgresql.md).
 
 Docker baseline đã được chạy thật trên máy phát triển và trên một Compose project độc lập có database mới, mật khẩu mới và cổng riêng. Báo cáo này ghi nhận kiểm chứng local đã đạt; trạng thái workflow trên GitHub được theo dõi riêng trong [GitHub Actions](https://github.com/viet041105/EHR-VinSHC/actions).
 
@@ -46,12 +46,9 @@ Bản cuối dựng từ hai volume trống đến cả bốn service healthy tr
 | Quan hệ Patient/Visit/Encounter/Observation và thời gian | Đạt |
 | Observation tiếng Việt dài và mô tả concept; đọc qua REST/FHIR | Đạt |
 | Dựng lại container, giữ volume, đọc chính fixture trước đó | Đạt trên project PostgreSQL độc lập |
-| Giữ UUID/mã bệnh nhân giả cũ từ MariaDB và xác nhận qua REST/FHIR | Đạt |
 | Dump PostgreSQL và restore sang volume của project chính | Đạt; API và schema được kiểm tra lại sau restore |
 
 Môi trường kiểm chứng độc lập dùng project, volume, cổng và mật khẩu DB riêng. Project chính dùng `postgres-data` / `openmrs-pg-data`; mật khẩu admin hiện có được giữ. Chuyển sang project chính bằng dump PostgreSQL đã kiểm chứng giúp đồng thời kiểm tra backup–restore. Đây là database phát triển chứa dữ liệu giả, không phải bài kiểm thử phục hồi production hoặc chuyển bệnh án thật.
-
-Bản sao MariaDB, `.env`/Compose cũ và fixture cũ nằm trong `.runtime/mariadb-backup-20261008/`. Hai volume MariaDB/OpenMRS cũ được giữ nguyên, không còn được dùng bởi Compose mới. Bản dump PostgreSQL nằm dưới `.runtime/postgres-backup-20261008/`. Các file riêng này được Git bỏ qua; CI không upload chúng.
 
 Báo cáo REST/FHIR local nằm trong `.runtime/reports/`: `postgres-before.json`, `postgres-after.json`, `postgres-main-before.json`, `postgres-main-after.json`, `postgres-main-final.json`, `postgres-fresh-before.json` và `postgres-fresh-after.json`, cùng báo cáo database và diagnostics đã che credentials. Fixture mới gồm dữ liệu số và văn bản; kiểm tra sau restart dùng `--require-fixture`, không tạo lại dữ liệu bị mất.
 
@@ -61,6 +58,5 @@ Báo cáo REST/FHIR local nằm trong `.runtime/reports/`: `postgres-before.json
 - Chưa nghiệm thu E2E trên trình duyệt, toàn bộ nghiệp vụ của 29 module, biểu mẫu Việt Nam, phân quyền nghiệp vụ, đầy đủ mapping FHIR hoặc agent/pgvector.
 - Kiểm tra TEXT đã chạy qua API thật. Luồng tải file/complex observation và dữ liệu BLOB nghiệp vụ chưa được nghiệm thu.
 - Upstream vẫn có thông báo cấu hình Address Hierarchy/XML module và cảnh báo của Tomcat/FHIR. Module đã started và các API nêu trên đạt; chức năng phụ thuộc các cấu hình này cần được nhóm kiểm chứng riêng.
-- Không dùng MariaDB SQL dump trực tiếp cho PostgreSQL. Dữ liệu khác trên máy thành viên cần kế hoạch chuyển và đối chiếu riêng theo [POSTGRESQL_MIGRATION.md](POSTGRESQL_MIGRATION.md).
 
 Hướng dẫn chạy nằm trong [DEVELOPMENT.md](DEVELOPMENT.md); phạm vi workflow nằm trong [CI.md](CI.md).

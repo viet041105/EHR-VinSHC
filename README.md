@@ -37,7 +37,6 @@ Mở **http://127.0.0.1:8080/openmrs/spa/**. Đăng nhập bằng `EHR_ADMIN_USE
 - [CI](docs/CI.md): các check trên PR và kiểm tra REST/FHIR/persistence.
 - [Baseline được khóa](config/baseline.json): nguồn upstream, phiên bản và image digest.
 - [Kết quả kiểm chứng](docs/VALIDATION.md): đã chạy thật những gì và các giới hạn còn lại.
-- [Chuyển từ MariaDB sang PostgreSQL](docs/POSTGRESQL_MIGRATION.md): dành cho thành viên đã chạy baseline cũ.
 
 Baseline dùng OpenMRS Reference Application 3.7.1 và PostgreSQL 16.15. Backend được build từ image upstream đã khóa digest và các bản sửa tương thích PostgreSQL; giữ metadata nền và bỏ bộ demo lớn. Xem [ADR-0002](docs/decisions/0002-postgresql.md) và [kết quả kiểm chứng](docs/VALIDATION.md).
 
