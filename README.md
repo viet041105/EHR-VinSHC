@@ -19,6 +19,8 @@ Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại V
 | [Quyết định kiến trúc](docs/decisions/) | ADR, gồm vai trò OpenMRS/openEHR |
 | [Đóng góp](CONTRIBUTING.md) · [Bảo mật](SECURITY.md) | Quy tắc PR và báo lỗ hổng |
 
+Bộ metadata Việt Nam: [hướng dẫn bàn giao](docs/METADATA.md), [bảng trường MVP](docs/data/MVP_METADATA_FIELDS.md), [kết quả kiểm tra](docs/METADATA_VALIDATION.md). Kiểm tra bằng `python tools/metadata.py`.
+
 ## Chạy baseline OpenMRS
 
 Cần Docker đang chạy với Linux containers, Docker Compose v2 và Python 3.11+.

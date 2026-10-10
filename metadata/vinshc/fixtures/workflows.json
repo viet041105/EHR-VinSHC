@@ -1,0 +1,90 @@
+{
+  "version": "0.1.0",
+  "syntheticOnly": true,
+  "status": "acceptance_scenarios_not_executed",
+  "patients": [
+    {
+      "key": "NB-GIA-000001",
+      "name": "Người bệnh giả trùng tên",
+      "birth": {
+        "raw": "1990",
+        "precision": "year",
+        "year": 1990
+      },
+      "visits": [
+        "VISIT-GIA-001",
+        "VISIT-GIA-002"
+      ]
+    },
+    {
+      "key": "NB-GIA-000002",
+      "name": "Người bệnh giả trùng tên",
+      "birth": {
+        "raw": "1992-05-12",
+        "precision": "day",
+        "date": "1992-05-12"
+      },
+      "visits": [
+        "VISIT-GIA-003"
+      ]
+    }
+  ],
+  "scenarios": [
+    {
+      "id": "same-name-distinct-patients",
+      "expect": "2 UUID patient riêng; tìm kiếm không tự gộp."
+    },
+    {
+      "id": "same-patient-two-visits",
+      "expect": "Mỗi Obs/Diagnosis/Order thuộc đúng Visit; lượt sau không ghi đè lượt trước."
+    },
+    {
+      "id": "repeat-measurements",
+      "expect": "2 nhóm sinh hiệu khác nhau, giữ measuredAt riêng, tất cả numeric/unit/status đọc lại đúng."
+    },
+    {
+      "id": "wrong-patient-order-link",
+      "expect": "API từ chối Result thuộc order của patient khác, kể cả UUID đều tồn tại."
+    },
+    {
+      "id": "not-asked-vs-negative-allergy",
+      "expect": "Hai trạng thái coded khác UUID answer; không tự xóa allergy đã ghi."
+    },
+    {
+      "id": "draft-final-correction",
+      "expect": "Không update bản final trực tiếp; bản sửa giữ liên kết phiên bản gốc, tác giả và lý do."
+    },
+    {
+      "id": "left-before-consultation",
+      "expect": "Đóng Visit kèm left_early và lý do; không tạo Diagnosis hoặc tự hoàn Payment."
+    },
+    {
+      "id": "no-order-result",
+      "expect": "Order pending không có giá trị kết quả, không được hiển thị âm tính/0."
+    },
+    {
+      "id": "duplicate-payment-key",
+      "expect": "Hai request cùng idempotencyKey chỉ một transaction."
+    },
+    {
+      "id": "lab-wrong-assignee",
+      "expect": "KTV khác người được giao không đọc/ghi/download kết quả."
+    },
+    {
+      "id": "reception-chart-denied",
+      "expect": "Tiếp đón không truy cập chart/Obs/đơn/kết quả; không chỉ giấu trên FE."
+    },
+    {
+      "id": "restart-and-reload-metadata",
+      "expect": "UUID/cardinality/group members không đổi sau restart hoặc chạy lại cùng gói."
+    },
+    {
+      "id": "update-label-with-stable-concept",
+      "expect": "Concept UUID không đổi; tên mới version hóa, dùng UUID name mới do Initializer sinh."
+    },
+    {
+      "id": "catalogue-expired",
+      "expect": "Không kê dịch vụ/thuốc đã retire; snapshot lịch sử còn đọc/in được."
+    }
+  ]
+}

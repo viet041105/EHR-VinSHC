@@ -1,0 +1,81 @@
+{
+  "version": "0.1.0",
+  "format": "handoff_spec_not_o3forms_schema",
+  "owner": "DATA-07 + FE-04",
+  "forms": [
+    {
+      "code": "vinshc-registration",
+      "label": "Tiếp nhận người bệnh",
+      "role": "reception",
+      "fields": [
+        "patient.ma_noi_bo",
+        "patient.ho_ten",
+        "patient.gioi_tinh",
+        "patient.do_chinh_xac_ngay_sinh",
+        "patient.ngay_sinh",
+        "patient.nam_sinh",
+        "patient.thang_sinh",
+        "patient.dien_thoai",
+        "patient.cccd",
+        "patient.ma_bhxh",
+        "patient.ma_bhyt",
+        "patient.dia_chi",
+        "patient.dia_chi_cu"
+      ],
+      "notes": [
+        "Ngày sinh hiển thị theo precision, không ép ngày đủ khi chỉ biết năm.",
+        "Mã/CCCD/điện thoại là text; không tự merge."
+      ]
+    },
+    {
+      "code": "vinshc-vitals",
+      "label": "Ghi sinh hiệu",
+      "role": "nurse_or_doctor_with_grant",
+      "fields": [
+        "vitals.thoi_diem_do",
+        "vitals.mach",
+        "vitals.ha_tam_thu",
+        "vitals.ha_tam_truong",
+        "vitals.nhiet_do",
+        "vitals.nhip_tho",
+        "vitals.spo2",
+        "vitals.can_nang",
+        "vitals.chieu_cao"
+      ],
+      "notes": [
+        "Mỗi giá trị có state/value/unit; trạng thái obs dùng concept *_trang_thai.",
+        "Một lần đo = một obsGroup, các lần đo là các nhóm khác nhau.",
+        "Không cấu hình ngưỡng cảnh báo mặc định."
+      ]
+    },
+    {
+      "code": "vinshc-consultation",
+      "label": "Khám ngoại trú",
+      "role": "doctor",
+      "fields": [
+        "visit.ly_do_kham",
+        "history.benh_su",
+        "history.tien_su_ban_than_trang_thai",
+        "history.tien_su_ban_than",
+        "history.tien_su_gia_dinh_trang_thai",
+        "history.tien_su_gia_dinh",
+        "allergy.trang_thai",
+        "allergy.tac_nhan",
+        "exam.toan_than",
+        "exam.bo_phan",
+        "exam.tom_tat",
+        "dx.chinh",
+        "dx.kem_theo",
+        "dx.do_chac_chan",
+        "exam.huong_dieu_tri",
+        "exam.loi_dan",
+        "followup.ngay_tai_kham",
+        "followup.loi_dan"
+      ],
+      "notes": [
+        "Không biến thiếu câu trả lời dị ứng thành no_known_allergy.",
+        "Diagnosis/DrugOrder/Allergy native theo hợp đồng B4, không cố nhét tất cả vào Obs."
+      ]
+    }
+  ]
+}

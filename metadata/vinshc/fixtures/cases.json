@@ -1,0 +1,347 @@
+{
+  "format": "canonical_field_cells_v1",
+  "syntheticOnly": true,
+  "scope": "Structural cases for metadata validator; these are not raw OpenMRS REST requests.",
+  "cases": [
+    {
+      "id": "id-leading-zero",
+      "valid": true,
+      "values": {
+        "patient.cccd": {
+          "state": "recorded",
+          "value": "000000000001"
+        },
+        "patient.ma_noi_bo": {
+          "state": "recorded",
+          "value": "NB-GIA-000001"
+        }
+      }
+    },
+    {
+      "id": "partial-birth-year",
+      "valid": true,
+      "values": {
+        "patient.do_chinh_xac_ngay_sinh": {
+          "state": "recorded",
+          "value": "year"
+        },
+        "patient.nam_sinh": {
+          "state": "recorded",
+          "value": 1990
+        },
+        "patient.ngay_sinh_nguon": {
+          "state": "recorded",
+          "value": "1990"
+        }
+      }
+    },
+    {
+      "id": "partial-birth-month",
+      "valid": true,
+      "values": {
+        "patient.do_chinh_xac_ngay_sinh": {
+          "state": "recorded",
+          "value": "month"
+        },
+        "patient.nam_sinh": {
+          "state": "recorded",
+          "value": 1990
+        },
+        "patient.thang_sinh": {
+          "state": "recorded",
+          "value": 5
+        }
+      }
+    },
+    {
+      "id": "full-birth-date",
+      "valid": true,
+      "values": {
+        "patient.do_chinh_xac_ngay_sinh": {
+          "state": "recorded",
+          "value": "day"
+        },
+        "patient.ngay_sinh": {
+          "state": "recorded",
+          "value": "1990-05-12"
+        }
+      }
+    },
+    {
+      "id": "valid-vitals",
+      "valid": true,
+      "values": {
+        "vitals.mach": {
+          "state": "recorded",
+          "value": 80,
+          "unit": "/min"
+        },
+        "vitals.ha_tam_thu": {
+          "state": "recorded",
+          "value": 120,
+          "unit": "mm[Hg]"
+        },
+        "vitals.ha_tam_truong": {
+          "state": "recorded",
+          "value": 80,
+          "unit": "mm[Hg]"
+        },
+        "vitals.thoi_diem_do": {
+          "state": "recorded",
+          "value": "2026-10-10T09:00:00+07:00"
+        }
+      }
+    },
+    {
+      "id": "unknown-vital-not-zero",
+      "valid": true,
+      "values": {
+        "vitals.nhiet_do": {
+          "state": "unknown"
+        }
+      }
+    },
+    {
+      "id": "masked-source",
+      "valid": true,
+      "values": {
+        "patient.cccd": {
+          "state": "masked"
+        }
+      }
+    },
+    {
+      "id": "allergy-not-asked",
+      "valid": true,
+      "values": {
+        "allergy.trang_thai": {
+          "state": "recorded",
+          "value": "not_asked"
+        }
+      }
+    },
+    {
+      "id": "allergy-negative-after-asking",
+      "valid": true,
+      "values": {
+        "allergy.trang_thai": {
+          "state": "recorded",
+          "value": "no_known_allergy"
+        }
+      }
+    },
+    {
+      "id": "allergy-positive-described",
+      "valid": true,
+      "values": {
+        "allergy.trang_thai": {
+          "state": "recorded",
+          "value": "present"
+        },
+        "allergy.tac_nhan": {
+          "state": "recorded",
+          "value": {
+            "nonCoded": "Tác nhân giả dùng kiểm thử"
+          }
+        }
+      }
+    },
+    {
+      "id": "valid-vnd",
+      "valid": true,
+      "values": {
+        "payment.so_tien": {
+          "state": "recorded",
+          "value": 100000
+        }
+      }
+    },
+    {
+      "id": "numeric-identifier",
+      "valid": false,
+      "values": {
+        "patient.cccd": {
+          "state": "recorded",
+          "value": 1
+        }
+      }
+    },
+    {
+      "id": "partial-date-invented",
+      "valid": false,
+      "values": {
+        "patient.do_chinh_xac_ngay_sinh": {
+          "state": "recorded",
+          "value": "year"
+        },
+        "patient.nam_sinh": {
+          "state": "recorded",
+          "value": 1990
+        },
+        "patient.ngay_sinh": {
+          "state": "recorded",
+          "value": "1990-01-01"
+        }
+      }
+    },
+    {
+      "id": "birth-year-missing",
+      "valid": false,
+      "values": {
+        "patient.do_chinh_xac_ngay_sinh": {
+          "state": "recorded",
+          "value": "year"
+        }
+      }
+    },
+    {
+      "id": "birth-month-invalid",
+      "valid": false,
+      "values": {
+        "patient.do_chinh_xac_ngay_sinh": {
+          "state": "recorded",
+          "value": "month"
+        },
+        "patient.nam_sinh": {
+          "state": "recorded",
+          "value": 1990
+        },
+        "patient.thang_sinh": {
+          "state": "recorded",
+          "value": 13
+        }
+      }
+    },
+    {
+      "id": "invalid-date",
+      "valid": false,
+      "values": {
+        "patient.ngay_sinh": {
+          "state": "recorded",
+          "value": "1990-02-30"
+        }
+      }
+    },
+    {
+      "id": "timezone-missing",
+      "valid": false,
+      "values": {
+        "vitals.thoi_diem_do": {
+          "state": "recorded",
+          "value": "2026-10-10T09:00:00"
+        }
+      }
+    },
+    {
+      "id": "unknown-with-value",
+      "valid": false,
+      "values": {
+        "vitals.nhiet_do": {
+          "state": "unknown",
+          "value": 0
+        }
+      }
+    },
+    {
+      "id": "recorded-with-null",
+      "valid": false,
+      "values": {
+        "vitals.nhiet_do": {
+          "state": "recorded",
+          "value": null
+        }
+      }
+    },
+    {
+      "id": "numeric-as-string",
+      "valid": false,
+      "values": {
+        "vitals.mach": {
+          "state": "recorded",
+          "value": "80"
+        }
+      }
+    },
+    {
+      "id": "negative-weight",
+      "valid": false,
+      "values": {
+        "vitals.can_nang": {
+          "state": "recorded",
+          "value": -1
+        }
+      }
+    },
+    {
+      "id": "invalid-percent",
+      "valid": false,
+      "values": {
+        "vitals.spo2": {
+          "state": "recorded",
+          "value": 101
+        }
+      }
+    },
+    {
+      "id": "unit-conflict",
+      "valid": false,
+      "values": {
+        "vitals.nhiet_do": {
+          "state": "recorded",
+          "value": 37,
+          "unit": "F"
+        }
+      }
+    },
+    {
+      "id": "allergy-unrecognized-code",
+      "valid": false,
+      "values": {
+        "allergy.trang_thai": {
+          "state": "recorded",
+          "value": "none"
+        }
+      }
+    },
+    {
+      "id": "positive-allergy-no-allergen",
+      "valid": false,
+      "values": {
+        "allergy.trang_thai": {
+          "state": "recorded",
+          "value": "present"
+        }
+      }
+    },
+    {
+      "id": "positive-history-no-description",
+      "valid": false,
+      "values": {
+        "history.tien_su_ban_than_trang_thai": {
+          "state": "recorded",
+          "value": "present"
+        }
+      }
+    },
+    {
+      "id": "fractional-vnd",
+      "valid": false,
+      "values": {
+        "payment.so_tien": {
+          "state": "recorded",
+          "value": 0.5
+        }
+      }
+    },
+    {
+      "id": "unknown-field",
+      "valid": false,
+      "values": {
+        "vitals.huyet_ap_gop": {
+          "state": "recorded",
+          "value": "120/80"
+        }
+      }
+    }
+  ]
+}

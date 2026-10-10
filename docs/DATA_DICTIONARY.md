@@ -8,6 +8,12 @@ Tài liệu này trả lời: mẫu có những trường gì, chúng xuất hi�
 
 Khung trường MVP từ bản `main` mới nhất được giữ tại **mục 10**. Mã kỹ thuật dạng `patient.ma_noi_bo` trong khung MVP và mã khảo sát như K01 có vai trò khác nhau; người 3 cùng BE sẽ ghi ánh xạ khi chọn trường. Các cột B/T/Đk, FHIR và openEHR của khung là đề xuất cần xác nhận, chưa chứng minh API hỗ trợ trên baseline.
 
+## Metadata triển khai sau khi chốt với BE (10/10/2026)
+
+Bộ MVP `0.1.0` đã được cụ thể hóa tại [METADATA.md](METADATA.md) và [bảng 165 trường](data/MVP_METADATA_FIELDS.md). Nguồn máy đọc nằm ở `metadata/vinshc/pack.json`; UUID, enum, required theo nghiệp vụ, validation và CSV Initializer được quản lý tại đó. Khảo sát 983 dòng S01 bên dưới vẫn giữ nguyên để tra nguồn; các CXT ở khảo sát không thay thế contract triển khai mới.
+
+BE bắt đầu bằng identifier/attribute/type/concept đã cấp UUID và map 8 sinh hiệu khớp FE. Các danh mục ICD-10, thuốc, dịch vụ/giá, tỉnh/xã còn cần nguồn/phiên bản; form/role/DTO cần được FE/BE và người 4 tích hợp, không được tự coi là đã triển khai vì có file đặc tả. Kết quả kiểm chứng thực tế ghi tại [METADATA_VALIDATION.md](METADATA_VALIDATION.md).
+
 ## 1. Người 3 nên đọc và làm gì trước
 
 1. Đọc mục 2 để hiểu cách đọc bảng, rồi đọc [trường nền tảng](data/CORE_FIELDS.md). Kiểm tra tên trường và ý nghĩa cùng BE, ưu tiên người bệnh, lượt khám, sinh hiệu, bệnh sử và chẩn đoán.
