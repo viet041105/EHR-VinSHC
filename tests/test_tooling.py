@@ -17,7 +17,8 @@ from check_database import REQUIRED_TABLES, verify_snapshot
 from collect_diagnostics import redact
 from common import ROOT, read_settings
 from smoke import (Client, SmokeError, assert_capabilities, assert_core_version, assert_modules,
-                   assert_session, check_local_javascript, create_fixture, verify_fixture, verify_clinical_fixture)
+                   assert_session, check_local_javascript, create_fixture, module_status,
+                   verify_fixture, verify_clinical_fixture)
 
 
 class EnvironmentTests(unittest.TestCase):
@@ -115,6 +116,24 @@ class SmokeRegressionTests(unittest.TestCase):
                    {"uuid": "stockmanagement", "started": False, "version": "3.0.0"}]
         with self.assertRaises(SmokeError):
             assert_modules(modules, expected, {"stockmanagement": "3.0.0"})
+
+    def test_module_report_records_started_state_and_version(self):
+        modules = [{"uuid": "billing", "started": True, "version": "2.3.0"},
+                   {"uuid": "queue", "started": True, "version": "3.0.0"}]
+        self.assertEqual(module_status(modules, {"queue": "3.0.0", "billing": "2.3.0"}), {
+            "billing": {"version": "2.3.0", "started": True},
+            "queue": {"version": "3.0.0", "started": True},
+        })
+
+    def test_fhir_report_ignores_malformed_capability_entries(self):
+        statement = {"resourceType": "CapabilityStatement", "fhirVersion": "4.0.1", "rest": [{
+            "mode": "server", "resource": [
+                {"type": name, "interaction": [{"code": "read"}, {}, {"code": None}]}
+                for name in ("Patient", "Encounter", "Observation")
+            ] + [{"interaction": [{"code": "read"}]}]}]}
+        self.assertEqual(assert_capabilities(statement), {
+            "Patient": {"read"}, "Encounter": {"read"}, "Observation": {"read"},
+        })
 
     def test_core_version_uses_nested_installation_field(self):
         info = {"SystemInfo.title.openmrsInformation": {

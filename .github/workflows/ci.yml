@@ -70,6 +70,8 @@ jobs:
         run: python scripts/check_database.py
       - name: Verify APIs and create synthetic patient and clinical data
         run: python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
+      - name: Verify B1 session, patient, visit and runtime error contracts
+        run: python -m unittest discover -s tests/integration -v
       - name: Recreate containers and retain named volumes
         run: |
           docker compose down

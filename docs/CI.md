@@ -27,10 +27,11 @@ Kết quả kiểm chứng local hiện có trong [VALIDATION.md](VALIDATION.md)
 2. Dựng stack PostgreSQL trên runner mới và chờ các service khỏe; xác nhận version, UTF8, extension, schema OpenMRS, đủ 118 khóa ngoại Stock Management và hai cột nhị phân của module dùng BYTEA. Lệnh khởi tạo có giới hạn tổng 2.400 giây; dựng lại dùng 600 giây, để khi lỗi vẫn còn thời gian lấy diagnostics và dọn project.
 3. Kiểm tra HTML/import map O3 và tải JavaScript app shell/login qua gateway.
 4. Xác thực REST; xác nhận phiên bản Core và đủ 29 module của baseline; kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
-5. Kiểm tra REST patient search, FHIR R4 CapabilityStatement và FHIR Patient search.
+5. Kiểm tra REST patient search, FHIR R4 CapabilityStatement và FHIR Patient search. Báo cáo smoke ghi toàn bộ resource/interaction được server công bố và trạng thái `started`/version của từng module baseline để làm bằng chứng B0; việc được công bố không đồng nghĩa luồng nghiệp vụ đã được nghiệm thu.
 6. Tạo bệnh nhân giả, visit, encounter, observation số và văn bản tiếng Việt dài; đối chiếu mã bệnh nhân, quan hệ, giá trị, đơn vị, thời gian và văn bản qua REST/FHIR.
-7. Dừng và dựng lại container, giữ volume; đọc chính hồ sơ trước đó để kiểm chứng persistence.
-8. Lưu báo cáo/log đã che mật khẩu cấu hình, gồm log OpenMRS trong application volume khi khởi tạo chưa xong, rồi xóa container/volume của chính project CI đó.
+7. Chạy integration contract B1 cho session, tạo/tìm/đọc patient, mở/kết thúc/đọc lịch sử visit và lỗi 400/401/403/404.
+8. Dừng và dựng lại container, giữ volume; đọc chính hồ sơ trước đó để kiểm chứng persistence.
+9. Lưu báo cáo/log đã che mật khẩu cấu hình, gồm log OpenMRS trong application volume khi khởi tạo chưa xong, rồi xóa container/volume của chính project CI đó.
 
 Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định danh hoặc mất hồ sơ sau restart, job phải thất bại.
 
@@ -59,6 +60,7 @@ python -m unittest discover -s tests -v
 docker compose up -d --wait --wait-timeout 2400
 python scripts/check_database.py
 python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
+python -m unittest discover -s tests/integration -v
 docker compose down
 docker compose up -d --wait --wait-timeout 600
 python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json

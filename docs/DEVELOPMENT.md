@@ -100,6 +100,9 @@ docker compose up -d --wait --wait-timeout 600
 python scripts/check_config.py
 python -m unittest discover -s tests -v
 
+# Kiểm tra hợp đồng API B1 trên stack local đang chạy
+python -m unittest discover -s tests/integration -v
+
 # Lưu log/status đã che mật khẩu cấu hình
 python scripts/collect_diagnostics.py
 ```
