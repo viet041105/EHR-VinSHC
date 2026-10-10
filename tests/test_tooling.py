@@ -211,7 +211,7 @@ class ConfigurationRegressionTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 validate_config(config, self.baseline, self.settings)
 
-    def test_old_mariadb_application_volume_is_rejected(self):
+    def test_unexpected_application_volume_is_rejected(self):
         config = copy.deepcopy(self.config)
         config["services"]["backend"]["volumes"][0]["source"] = "openmrs-data"
         with self.assertRaises(ValueError):

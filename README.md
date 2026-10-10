@@ -39,8 +39,9 @@ Mở **http://127.0.0.1:8080/openmrs/spa/**. Đăng nhập bằng `EHR_ADMIN_USE
 - [CI](docs/CI.md): các check trên PR và kiểm tra REST/FHIR/persistence.
 - [Baseline được khóa](config/baseline.json): nguồn upstream, phiên bản và image digest.
 - [Kết quả kiểm chứng](docs/VALIDATION.md): đã chạy thật những gì và các giới hạn còn lại.
-- [Chuyển từ MariaDB sang PostgreSQL](docs/POSTGRESQL_MIGRATION.md): dành cho thành viên đã chạy baseline cũ.
 
-Baseline dùng OpenMRS Reference Application 3.7.1. Backend được build từ image upstream đã khóa digest, giữ metadata nền và bỏ bộ demo lớn. Metadata và biểu mẫu Việt Nam tiếp tục làm theo kế hoạch.
+Baseline dùng OpenMRS Reference Application 3.7.1 và PostgreSQL 16.15. Backend được build từ image upstream đã khóa digest và các bản sửa tương thích PostgreSQL; giữ metadata nền và bỏ bộ demo lớn. Xem [ADR-0002](docs/decisions/0002-postgresql.md) và [kết quả kiểm chứng](docs/VALIDATION.md).
 
-**Database:** dự án dùng **PostgreSQL** ([ADR-0002](docs/decisions/0002-postgresql.md)). Việc chuyển đổi đang làm trong BE-10; cho tới khi PR đó được merge, `compose.yaml` vẫn chạy MariaDB 10.11.19 và các kết quả kiểm chứng hiện có là trên MariaDB.
+## Frontend VinSHC độc lập
+
+Giao diện tiếng Việt và các nghiệp vụ theo kế hoạch: xem [infra/frontend/README.md](infra/frontend/README.md) và [thiết kế/hợp đồng bàn giao FE–BE](docs/FRONTEND.md). Cần Node.js 22.12 trở lên và npm. Tại gốc repo, chạy `npm --prefix infra/frontend install` lần đầu rồi `npm run dev`, mở http://127.0.0.1:5173. Trong thư mục `infra/frontend`, chạy `npm install` rồi `npm run dev`. Vite phục vụ FE bằng Node.js và tự cập nhật trang khi sửa code. Đây là dữ liệu giả; giao diện chưa đọc/ghi hồ sơ OpenMRS thật. FE chạy độc lập với Python, Docker và backend.

@@ -52,6 +52,8 @@ Các mốc sau theo thứ tự phụ thuộc. Công việc trong cùng mốc có
 
 ### Đối chiếu với PROJECT_PLAN
 
+Từ 09/10/2026, BE-03, BE-07, BE-09 và BE-12 (appointments, service queues, tách từ BE-08) do người 4 phụ trách; BE-08 (billing, dispensing, stock management) và BE-11 (HTTPS, secrets, tách tài khoản DB, kế hoạch nâng cấp) ở lại người 1. Vùng file của từng người nằm trong [PROJECT_PLAN.md mục 8.1](../PROJECT_PLAN.md#81-vùng-file-phụ-trách).
+
 | Mốc backend | Đầu việc trong PROJECT_PLAN | Mốc dự án |
 | --- | --- | --- |
 | B0 — Phạm vi và baseline | BE-01, BE-02, BE-10 (đã xong) | M0–M1 |
@@ -60,9 +62,9 @@ Các mốc sau theo thứ tự phụ thuộc. Công việc trong cùng mốc có
 | B3 — Visit, encounter, sinh hiệu | BE-03, BE-04, DATA-02, DATA-06 | M3 |
 | B4 — Khám, dị ứng, chẩn đoán, đơn thuốc | BE-03, BE-06, DATA-07 | M3 |
 | B5 — Xác thực, phân quyền, audit | BE-05, DATA-04, INT-06, INT-09 | M3 |
-| B6 — Database, phục hồi, vận hành | BE-07 | M4 |
+| B6 — Database, phục hồi, vận hành | BE-07 (backup–restore, runbook), BE-11 (triển khai ngoài local) | M4 |
 | B7 — FHIR và mở rộng liên phòng khám | INT-04, INT-05, DATA-07, DATA-10 | M3 (mapping), M7 (liên thông) |
-| B8 — Vận hành phòng khám (MVP-2) | BE-08, BE-09, DATA-09, INT-10, phối hợp FE-08/FE-09 | M4 |
+| B8 — Vận hành phòng khám (MVP-2) | BE-12 (lịch hẹn, hàng đợi), BE-08 (thu tiền, thuốc), BE-09, DATA-09, INT-10, phối hợp FE-08/FE-09 | M4 |
 | B9 — Tích hợp, CI và nghiệm thu | INT-06, INT-07, INT-08 | M3–M5 |
 
 ### Mốc B0 — Khóa phạm vi và chứng minh baseline
@@ -198,7 +200,7 @@ Không sửa file trong container đang chạy để coi là kết quả bàn gi
 
 ## 5. Lệnh kiểm tra và bằng chứng tối thiểu
 
-Các lệnh dưới đây dùng cho **instance local/test** theo [`DEVELOPMENT.md`](DEVELOPMENT.md); fixture bệnh nhân giả có thể ghi vào DB đang chạy. Trước khi chạy kiểm thử có ghi dữ liệu, xác nhận `COMPOSE_PROJECT_NAME`, cổng và instance đích. Thành viên từng chạy bản MariaDB đọc [POSTGRESQL_MIGRATION.md](POSTGRESQL_MIGRATION.md) trước.
+Các lệnh dưới đây dùng cho **instance local/test** theo [`DEVELOPMENT.md`](DEVELOPMENT.md); fixture bệnh nhân giả có thể ghi vào DB đang chạy. Trước khi chạy kiểm thử có ghi dữ liệu, xác nhận `COMPOSE_PROJECT_NAME`, cổng và instance đích.
 
 ```powershell
 python scripts/bootstrap.py
@@ -228,10 +230,10 @@ Sau khi thêm integration test, cập nhật mục này bằng đúng lệnh ch�
 2. Làm B1 và B2: API contract, test client dùng chung, patient/identifier workflow. Đây là phần ít phụ thuộc metadata lâm sàng nhất.
 3. Yêu cầu nhóm metadata bàn giao gói nhỏ đầu tiên: identifier type, visit type, encounter type, location, UUID và concept sinh hiệu. Tích hợp B3 ngay khi gói có thể nạp trên DB sạch.
 4. Chốt ma trận quyền 8 role với cả nhóm, viết test API quyền song song B3/B4.
-5. Khảo sát sớm billing, queue, appointments trên PostgreSQL để biết B8 cần cấu hình hay cần code; không chờ B4 xong mới phát hiện khoảng trống.
+5. Khảo sát sớm billing (BE-08), queue và appointments (BE-12) trên PostgreSQL để biết B8 cần cấu hình hay cần code; không chờ B4 xong mới phát hiện khoảng trống.
 6. Khi B3–B5 có fixture đủ dữ liệu, biến backup–restore thành runbook (B6) và làm FHIR mapping (B7); sau đó làm B8, nối vào CI và nghiệm thu B9.
 
 ## 7. Tài liệu tham chiếu
 
-- Nội bộ: [`PROJECT_PLAN.md`](../PROJECT_PLAN.md), [`CLINIC_WORKFLOW.md`](CLINIC_WORKFLOW.md), [`ARCHITECTURE.md`](ARCHITECTURE.md), [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md), [`VIETNAM_COMPLIANCE.md`](VIETNAM_COMPLIANCE.md), [`DEVELOPMENT.md`](DEVELOPMENT.md), [`CI.md`](CI.md), [`VALIDATION.md`](VALIDATION.md), [`POSTGRESQL_MIGRATION.md`](POSTGRESQL_MIGRATION.md), [ADR-0001](decisions/0001-openmrs-openehr.md), [ADR-0002](decisions/0002-postgresql.md), [`config/baseline.json`](../config/baseline.json), [`infra/backend/postgresql/README.md`](../infra/backend/postgresql/README.md).
+- Nội bộ: [`PROJECT_PLAN.md`](../PROJECT_PLAN.md), [`CLINIC_WORKFLOW.md`](CLINIC_WORKFLOW.md), [`ARCHITECTURE.md`](ARCHITECTURE.md), [`DATA_DICTIONARY.md`](DATA_DICTIONARY.md), [`VIETNAM_COMPLIANCE.md`](VIETNAM_COMPLIANCE.md), [`DEVELOPMENT.md`](DEVELOPMENT.md), [`CI.md`](CI.md), [`VALIDATION.md`](VALIDATION.md), [ADR-0001](decisions/0001-openmrs-openehr.md), [ADR-0002](decisions/0002-postgresql.md), [`config/baseline.json`](../config/baseline.json), [`infra/backend/postgresql/README.md`](../infra/backend/postgresql/README.md).
 - Upstream: [OpenMRS REST documentation](https://rest.openmrs.org/), [Initializer 2.12.0](https://github.com/mekomsolutions/openmrs-module-initializer/tree/2.12.0), [OpenMRS module development with Docker](https://openmrs.atlassian.net/wiki/spaces/docs/pages/1097891841/Backend+Module+Development+Using+Docker+No+SDK), [PostgreSQL 16 backup and restore](https://www.postgresql.org/docs/16/backup.html). Luôn đối chiếu tài liệu upstream với phiên bản và hành vi thực tế của instance VinSHC.

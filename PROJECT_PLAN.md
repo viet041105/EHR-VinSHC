@@ -1,6 +1,6 @@
 # Kế hoạch triển khai EHR-VinSHC
 
-**Ngày cập nhật:** 08/10/2026
+**Ngày cập nhật:** 09/10/2026
 
 **Nhóm:** 4 thành viên
 
@@ -134,7 +134,7 @@ Lộ trình lên chuỗi phòng khám và bệnh viện, cùng cách phân loạ
 - **Phiên bản:** Khóa bộ phiên bản tương thích, gồm image, module, package và công cụ build. Không phụ thuộc tag động như `latest`, `next` hoặc `qa`.
 - **Backend:** Tái sử dụng API và mô hình của OpenMRS. Thêm module hoặc adapter khi xác định được khoảng trống cụ thể.
 - **Frontend:** Tái sử dụng các app O3 (registration, patient chart, appointments, service queues, billing, dispensing, stock). Ưu tiên cấu hình, dịch thuật và biểu mẫu trước khi sửa core.
-- **Database:** **PostgreSQL** theo [ADR-0002](docs/decisions/0002-postgresql.md), dùng chung hệ quản trị với EHRbase, OpenCR và kho dữ liệu ở tầng sau. Để OpenMRS quản lý schema. Chức năng mới thao tác qua API/service. Migration cho phần mở rộng được quản lý riêng và phải chạy trên PostgreSQL. Baseline hiện tại vẫn chạy MariaDB cho tới khi BE-10 hoàn thành.
+- **Database:** **PostgreSQL** theo [ADR-0002](docs/decisions/0002-postgresql.md), dùng chung hệ quản trị với EHRbase, OpenCR và kho dữ liệu ở tầng sau. Để OpenMRS quản lý schema. Chức năng mới thao tác qua API/service. Migration cho phần mở rộng được quản lý riêng và phải chạy trên PostgreSQL. Baseline trong `compose.yaml` dùng PostgreSQL 16.15; bản sửa tương thích nằm trong `infra/backend/postgresql/` và bằng chứng local trong `docs/VALIDATION.md`.
 - **Metadata:** Lưu trong Git theo gói, dùng UUID ổn định, kiểm tra việc nạp lại và cập nhật.
 - **Mỗi cơ sở một instance:** OpenMRS không hỗ trợ multi-tenant. Không dùng chung database giữa các pháp nhân.
 - **Tích hợp:** Mọi kết nối hệ thống bên ngoài đi qua adapter có thể tắt.
@@ -201,7 +201,7 @@ Các mốc quy định thứ tự và đầu ra, chưa ấn định số tuần.
 | Mốc | Công việc chính | Phụ trách | Điều kiện chuyển bước |
 | --- | --- | --- | --- |
 | M0 — Chốt nghiệp vụ | Khảo sát 1–2 phòng khám tư; chốt luồng, role, ma trận quyền, dữ liệu tối thiểu, mẫu giấy tờ; rà soát checklist pháp lý; chốt ADR-0001 và giấy phép | Cả nhóm + mentor | Có [CLINIC_WORKFLOW.md](docs/CLINIC_WORKFLOW.md) đã xác nhận, ADR-0001 được chấp nhận, có `LICENSE` |
-| M1 — Dựng baseline | Chọn release; dựng môi trường; kiểm tra đăng nhập, frontend, REST/FHIR; dữ liệu giả; chuyển sang PostgreSQL (BE-10) | Người 1 + 2; người 3 + 4 kiểm chứng | Một thành viên khác dựng lại được **trên PostgreSQL**. Bản MariaDB đã đạt local ([VALIDATION.md](docs/VALIDATION.md)); cần kiểm chứng lại sau BE-10 |
+| M1 — Dựng baseline | Chọn release; dựng môi trường; kiểm tra đăng nhập, frontend, REST/FHIR; dữ liệu giả; baseline PostgreSQL (BE-10, đã đạt local) | Người 1 + 2; người 3 + 4 kiểm chứng | Một thành viên khác dựng lại được **trên PostgreSQL**. Baseline PostgreSQL có bằng chứng local ([VALIDATION.md](docs/VALIDATION.md)); mỗi môi trường và run CI vẫn phải được kiểm chứng |
 | M2 — Repo và CI tối thiểu | Cấu trúc, lệnh chạy/build/test, PR; kiểm tra khả dụng trong CI | Người 4 + 1 | Pipeline chạy trên GitHub và lỗi làm check thất bại. **Workflow đã có**, cần xác nhận run trên GitHub |
 | M3 — MVP-1 lõi lâm sàng | Gói metadata Việt Nam, biểu mẫu, Việt hóa, role, luồng khám, kiểm thử tích hợp | Cả 4 người | Chạy xuyên suốt kịch bản MVP-1 trên backend thật |
 | M4 — MVP-2 vận hành phòng khám | Lịch hẹn, hàng đợi, bảng giá, thu tiền, chỉ định CLS, mẫu in, báo cáo, backup–restore | Cả 4 người | Chạy trọn quy trình mục 2.3 với dữ liệu giả, có in ấn và đối soát tiền |
@@ -216,24 +216,26 @@ Các mốc quy định thứ tự và đầu ra, chưa ấn định số tuần.
 
 Tên thành viên được điền sau. Mỗi người chịu trách nhiệm kiểm tra phần mình làm; người 4 kiểm chứng luồng ghép chung. Các mã đầu việc dùng để tạo issue.
 
+**Điều chỉnh 09/10/2026:** Người 4 có nhiều thời gian nhất nên nhận thêm BE-03, BE-07, BE-09 của người 1 và FE-05, FE-07 của người 2. Mã đầu việc giữ nguyên để không phải đổi issue và liên kết. Phần triển khai ngoài local của BE-07 cũ tách thành BE-11 và ở lại người 1 vì phải sửa `compose.yaml`/`infra/`. BE-08 chia theo module: người 1 giữ billing, dispensing, stock management; appointments và service queues tách thành BE-12 cho người 4. FE-05 chỉ chuyển phần adapter dữ liệu; phần giao diện gọi adapter vẫn do người 2 làm. Mỗi việc chuyển đi có đầu ra nằm trong vùng file của người 4 ([mục 8.1](#81-vùng-file-phụ-trách)), nên không ai phải sửa cùng file với người khác.
+
 ### 7.1. Người 1 — Backend và nền tảng
 
 **Mục tiêu:** Hệ thống OpenMRS chạy được, tái lập được và cung cấp đúng khả năng cần cho MVP-1 và MVP-2.
 
 - [ ] **BE-01 — Khảo sát và chọn baseline:** Ghi nguồn upstream, release/tag/commit, bộ phiên bản, module cần dùng và các phụ thuộc. Phối hợp người 2 chốt frontend tương thích. *(Đã có baseline 3.7.1; còn bảng lựa chọn module.)*
 - [ ] **BE-02 — Dựng môi trường:** Cấu hình local, mẫu biến môi trường, khởi động/dừng, readiness, log, giữ database sau restart. *(Đã đạt local.)*
-- [ ] **BE-03 — Xác nhận API nền tảng:** Cùng người 4 kiểm tra đăng nhập và API bệnh nhân, visit, encounter, observation, chẩn đoán, đơn thuốc.
 - [ ] **BE-04 — Nạp metadata theo gói:** Cùng người 3 tổ chức cấu hình Initializer thành gói Việt Nam và cấu hình cơ sở. Kiểm tra nạp mới, nạp lại và cập nhật không tạo đối tượng trùng.
 - [ ] **BE-05 — Thực thi quyền và nhật ký:** Cùng người 3 chốt role/privilege cho 8 role; kiểm tra quyền trên API. Khảo sát nhật ký xem/sửa hồ sơ, ghi phần sẵn có và phần cần bổ sung.
 - [ ] **BE-06 — Xử lý khoảng trống:** Khi API hoặc nghiệp vụ thiếu, mô tả vấn đề và chọn cấu hình/module/adapter. Mọi sửa đổi core phải có lý do, phạm vi và cách cập nhật upstream.
-- [ ] **BE-07 — Chuẩn bị vận hành:** Backup–restore trên môi trường giả, cập nhật cấu hình, HTTPS khi triển khai ngoài local, xử lý lỗi thường gặp. Phối hợp người 4 đưa kiểm tra vào CI.
-- [ ] **BE-08 — Module vận hành phòng khám:** Khảo sát và bật appointments, service queues, billing, dispensing, stock management; đánh giá billing có đáp ứng bảng giá, thu/hoàn/hủy hay cần mở rộng.
-- [ ] **BE-09 — Khung adapter:** Đề xuất cấu trúc `integrations/` và cách bật/tắt adapter, chưa cần làm adapter thật.
-- [ ] **BE-10 — Chuyển sang PostgreSQL:** Cùng người 4 thay MariaDB bằng PostgreSQL trong Compose, biến môi trường, script, test, CI, `config/baseline.json` và tài liệu. Kiểm chứng Liquibase của Core và mọi module trong distro; ghi module nào lỗi và cách xử lý. Tiêu chí đầy đủ trong [ADR-0002](docs/decisions/0002-postgresql.md#tiêu-chí-hoàn-thành-be-10).
+- [ ] **BE-08 — Module thu tiền và thuốc (billing, dispensing, stock management):** Khảo sát API trên PostgreSQL, bật và cấu hình ba module, kiểm thử luồng chính. Billing được đánh giá theo yêu cầu phòng khám: bảng giá theo cơ sở, thu/hoàn/hủy, trả trước/sau, số tiền VND nguyên, người thu; dispensing cấp theo đơn đã xác nhận (FHIR `MedicationDispense`), stock management chỉ ở mức cần cho pilot. Danh mục dịch vụ/bảng giá làm cùng người 3 (DATA-09). Khoảng trống xử lý theo BE-06. Ghi kết quả ba module vào `docs/api/capabilities.md`.
+- [x] **BE-10 — Baseline PostgreSQL:** Stack chạy trên PostgreSQL 16.15 (Compose, biến môi trường, script, test, CI, `config/baseline.json`, tài liệu). Liquibase của Core và đủ 29 module chạy hết trên database trống; lỗi tương thích và cách sửa ghi trong [`infra/backend/postgresql/README.md`](infra/backend/postgresql/README.md). *(Đạt local, xem [VALIDATION.md](docs/VALIDATION.md). Các tiêu chí còn mở trong [ADR-0002](docs/decisions/0002-postgresql.md#tiêu-chí-hoàn-thành-be-10) đã giao cho việc khác: Initializer nạp lại không trùng → BE-04/DATA-06; run CI trên GitHub → INT-07.)*
+- [ ] **BE-11 — Cấu hình triển khai ngoài local:** HTTPS ở gateway/reverse proxy, secrets ngoài Git, tách tài khoản database (migration/quản trị và ứng dụng quyền tối thiểu), hostname/cổng, kế hoạch nâng cấp image/module có đường lui. Khi đổi volume hoặc cấu hình ảnh hưởng backup, báo người 4 cập nhật runbook BE-07.
+
+*Đã chuyển sang người 4:* BE-03, BE-07 (backup–restore), BE-09, appointments và service queues của BE-08 (thành BE-12). Người 1 review khi các việc đó cần thay đổi trong vùng file của mình.
 
 **Bàn giao:** Cấu hình môi trường, bảng phiên bản, hướng dẫn chạy, ma trận khả năng backend, phần mở rộng cần thiết.
 
-**Bắt đầu ngay:** BE-10 (chuyển PostgreSQL) vì mọi đầu việc sau dựng trên database này; song song hoàn tất bảng lựa chọn module (BE-01), BE-03 cùng người 4, khảo sát BE-08.
+**Bắt đầu ngay:** Hoàn tất bảng lựa chọn module (BE-01); cùng người 3 dựng cơ chế nạp gói metadata (BE-04); khảo sát sớm billing (BE-08) để biết có cần viết mở rộng hay không.
 
 ### 7.2. Người 2 — Frontend và quy trình sử dụng
 
@@ -243,11 +245,11 @@ Tên thành viên được điền sau. Mỗi người chịu trách nhiệm ki�
 - [ ] **FE-02 — Cấu hình bản phân phối frontend:** Chốt package/app shell tương thích với người 1. Quản lý cấu hình, module được dùng và cách build/chạy phần tùy biến.
 - [ ] **FE-03 — Việt hóa:** Xác nhận cơ chế translation; dịch nhãn, danh mục, lỗi, thông báo trên luồng được chọn. Đóng góp bản dịch về upstream khi có thể; ghi danh sách phần còn thiếu.
 - [ ] **FE-04 — Biểu mẫu ngoại trú:** Dùng dữ liệu và concept UUID của người 3. Có trường bắt buộc, đơn vị, lựa chọn, trạng thái thông tin thiếu và validation đã thống nhất.
-- [ ] **FE-05 — Nối luồng thật:** Ghi và mở lại dữ liệu qua API thật; kiểm tra bản ghi vào đúng bệnh nhân và encounter.
 - [ ] **FE-06 — Tình huống lỗi:** Loading, không có kết quả, mất kết nối, lưu thất bại, dữ liệu không hợp lệ, thao tác bị từ chối. Quyền trên giao diện khớp quyền backend.
-- [ ] **FE-07 — Kiểm chứng cùng người dùng:** Cùng mentor hoặc nhân sự phòng khám đi qua kịch bản; ghi vấn đề sử dụng và cập nhật hướng dẫn demo.
 - [ ] **FE-08 — Mẫu in:** Đơn thuốc, phiếu thu, phiếu chỉ định, phiếu kết quả, giấy hẹn. Thông tin cơ sở và người hành nghề lấy từ cấu hình, không viết cứng.
 - [ ] **FE-09 — Cấu hình luồng vận hành:** Hàng đợi theo phòng/bác sĩ, trả trước/trả sau, có/không có điều dưỡng hoặc quầy thuốc theo [CLINIC_WORKFLOW.md](docs/CLINIC_WORKFLOW.md#các-biến-thể-cần-hỗ-trợ-bằng-cấu-hình).
+
+*Đã chuyển sang người 4:* FE-05 (adapter OpenMRS), FE-07. Người 2 vẫn chuyển các màn hình từ `DemoRepository` sang adapter của người 4 và xử lý trạng thái lỗi trên giao diện (FE-06); lỗi giao diện người 4 phát hiện được mở issue cho người 2.
 
 **Bàn giao:** Cấu hình frontend, biểu mẫu, bản dịch, mẫu in, phần giao diện mở rộng, hướng dẫn quy trình.
 
@@ -282,14 +284,26 @@ Tên thành viên được điền sau. Mỗi người chịu trách nhiệm ki�
 - [ ] **INT-04 — Kiểm chứng FHIR:** Đọc `CapabilityStatement`; lập bảng resource và thao tác thực sự hỗ trợ. Ưu tiên Patient, Encounter, Observation; kiểm tra Condition, AllergyIntolerance, MedicationRequest, ServiceRequest.
 - [ ] **INT-05 — Mapping dữ liệu:** Cùng người 3 đối chiếu OpenMRS với FHIR: đúng bệnh nhân, lượt khám, mã, đơn vị, thời gian, trạng thái, nguồn.
 - [ ] **INT-06 — Kiểm thử tích hợp:** Tự động hóa kiểm tra quan trọng, ví dụ API test và Playwright. Kiểm tra quyền trên API, không chỉ ẩn nút.
-- [ ] **INT-07 — CI:** Xác nhận run trên GitHub; chuyển CI sang PostgreSQL cùng BE-10; mở rộng check khi có metadata, biểu mẫu, mã tùy biến; bật branch rules sau run đầu thành công.
+- [ ] **INT-07 — CI:** Xác nhận run trên GitHub (workflow đã dựng stack PostgreSQL); mở rộng check khi có metadata, biểu mẫu, mã tùy biến; bật branch rules sau run đầu thành công.
 - [ ] **INT-08 — Báo cáo demo:** Kịch bản đạt/chưa đạt, cách tái hiện lỗi, phiên bản đã kiểm tra và giới hạn.
 - [ ] **INT-09 — Kiểm chứng tuân thủ:** Biến các mục thiết kế trong [VIETNAM_COMPLIANCE.md](docs/VIETNAM_COMPLIANCE.md#2-yêu-cầu-thiết-kế-rút-ra) thành kiểm tra được (trường bắt buộc trên đơn in, nhật ký, quyền).
 - [ ] **INT-10 — Hợp đồng adapter:** Mô tả đầu vào/đầu ra cho adapter BHYT, HĐĐT, đơn thuốc quốc gia, LIS để M6 làm độc lập.
 
-**Bàn giao:** Tài liệu API/FHIR, mock/fixture, kịch bản và mã kiểm thử, CI, báo cáo tích hợp.
+**Nhận từ người 1:**
 
-**Bắt đầu ngay:** INT-01; INT-02 và INT-04 làm cùng BE-03; xác nhận run CI trên GitHub.
+- [ ] **BE-03 — Xác nhận API nền tảng:** Kiểm tra đăng nhập và API bệnh nhân, visit, encounter, observation, chẩn đoán, đơn thuốc trên instance thật; kết quả ghi vào `docs/api/` cùng INT-02. Khi API thiếu, mở issue cho người 1 xử lý theo BE-06.
+- [ ] **BE-07 — Backup–restore và runbook:** Script backup/restore (`pg_dump`/`pg_restore` và OpenMRS data volume), thử restore trên Compose project tách biệt, runbook vận hành và xử lý lỗi thường gặp, đưa kiểm tra backup–restore vào CI. Cần đổi `compose.yaml` hoặc volume thì gửi yêu cầu cho người 1. HTTPS/triển khai ngoài local là BE-11 của người 1.
+- [ ] **BE-09 — Khung adapter:** Đề xuất cấu trúc `integrations/` và cách bật/tắt adapter, làm cùng INT-10; chưa cần làm adapter thật.
+- [ ] **BE-12 — Module lịch hẹn và hàng đợi (appointments, service queues; tách từ BE-08):** Khảo sát API trên PostgreSQL, bật và cấu hình hai module, kiểm thử luồng: đặt lịch, xác nhận đến, hủy, slot trùng; cấp số, hàng đợi theo phòng/bác sĩ, chuyển bước tiếp đón → điều dưỡng → bác sĩ → CLS → thu ngân, bệnh nhân bỏ về giữa chừng. Cấu hình dịch vụ hẹn/hàng đợi đặt trong thư mục con riêng của `infra/backend/configuration/`, thống nhất UUID với người 3. Bản sửa PostgreSQL của Appointments trong `infra/backend/postgresql/` vẫn thuộc người 1; cần đổi thì gửi yêu cầu. Khoảng trống cần code chuyển người 1 theo BE-06. Test đặt trong `tests/integration/`; kết quả ghi vào `docs/api/capabilities.md`.
+
+**Nhận từ người 2:**
+
+- [ ] **FE-05 — Adapter OpenMRS cho FE:** Viết lớp dữ liệu thay `DemoRepository` cho từng dịch vụ trong [FRONTEND.md mục 3](docs/FRONTEND.md#3-bản-đồ-trang--dịch-vụ--modulebackend), theo DTO ở mục 4 và hợp đồng INT-02. Chỉ dùng method/path/schema đã kiểm chứng; không fallback sang demo khi API lỗi. Code nằm trong `infra/frontend/api.js`, `backend-mapping.js` và file adapter mới, có test chạy trên backend thật. Giữ export mà màn hình đang dùng; đổi giao diện adapter thì báo người 2 trước. Đạt khi ghi rồi đọc lại đúng bệnh nhân, visit và encounter.
+- [ ] **FE-07 — Kiểm chứng cùng người dùng:** Cùng mentor hoặc nhân sự phòng khám đi qua kịch bản INT-01 trên FE; ghi vấn đề sử dụng, cập nhật hướng dẫn demo và chuyển vấn đề giao diện cho người 2.
+
+**Bàn giao:** Tài liệu API/FHIR, mock/fixture, adapter OpenMRS cho FE, kịch bản và mã kiểm thử, CI (gồm test FE), runbook backup–restore, khung adapter tích hợp, báo cáo tích hợp và kiểm chứng người dùng.
+
+**Bắt đầu ngay:** Xác nhận run CI trên GitHub và thêm job chạy test FE có sẵn (`npm test`, `npm run test:browser` trong `infra/frontend`); INT-01; BE-03 cùng INT-02 và INT-04, bắt đầu từ session và patient để FE-05 có hợp đồng đầu tiên; khảo sát backup–restore (BE-07) trên Compose project tách biệt; khảo sát sớm appointments và queue (BE-12).
 
 ### 7.5. Việc chung — Open source
 
@@ -307,6 +321,9 @@ Tên thành viên được điền sau. Mỗi người chịu trách nhiệm ki�
 | Mẫu in và nội dung bắt buộc | Người 2 | Người 3 + 4 | Trước M4 |
 | API và ví dụ request/response | Người 4 | Người 1 + 2 | M1; cập nhật khi thay đổi |
 | Lệnh build/test và CI | Người 4 | Người 1 + 2 + 3 theo phần thay đổi | M2 |
+| Adapter OpenMRS cho FE và các export của nó | Người 4 | Người 2 | Theo đợt F1–F3 trong [FRONTEND.md](docs/FRONTEND.md#8-thứ-tự-nối-backend-và-tiêu-chí-nghiệm-thu) |
+| Backup–restore và runbook vận hành | Người 4 | Người 1 | M4 |
+| Cấu hình triển khai ngoài local (HTTPS, secrets, tài khoản DB) | Người 1 | Người 4 | Trước M5 |
 | Kịch bản demo xuyên suốt | Người 4 | Cả nhóm | Bản nháp M0; chạy thật từ M1 |
 | Quyết định kiến trúc (ADR) | Người đề xuất | Cả nhóm + mentor | Trước khi làm phần phụ thuộc |
 
@@ -320,6 +337,19 @@ Quy tắc làm việc (chi tiết trong [CONTRIBUTING.md](CONTRIBUTING.md)):
 6. Một chức năng hoàn thành khi đã tích hợp và được người khác kiểm chứng, không chỉ chạy trên máy tác giả.
 7. Không đưa dữ liệu bệnh nhân thật vào repo, issue, PR hoặc ảnh chụp.
 
+### 8.1. Vùng file phụ trách
+
+Mỗi vùng file có một người chủ. Người khác cần sửa file trong vùng đó thì mở issue hoặc gửi PR nhỏ và yêu cầu chủ vùng review, không sửa song song trên nhánh riêng. Cách này tránh conflict khi merge và tránh hai người đổi cùng cấu hình theo hai hướng.
+
+| Người chủ | Vùng file |
+| --- | --- |
+| Người 1 | `compose.yaml`, `.env.example`, `config/baseline.json`, `infra/backend/Dockerfile`, `infra/backend/postgresql/`, `infra/postgres/`, `modules/`, `scripts/bootstrap.py`, `scripts/check_config.py`, `scripts/check_database.py`, `scripts/common.py`, `docs/DEVELOPMENT.md` |
+| Người 2 | `infra/frontend/` trừ các file adapter của người 4; `package.json` ở gốc; `docs/FRONTEND.md`, `docs/FRONTEND_SCOPE.md`, `docs/ROLE_WORKFLOWS.md` |
+| Người 3 | `infra/backend/configuration/` (gói metadata) trừ thư mục cấu hình appointments/queue của người 4, `docs/DATA_DICTIONARY.md`, dữ liệu giả của DATA-05 |
+| Người 4 | `infra/frontend/api.js`, `infra/frontend/backend-mapping.js` và file adapter OpenMRS mới; thư mục cấu hình appointments/queue trong `infra/backend/configuration/`; `tests/` (API, integration, E2E, fixture); `scripts/smoke.py`, script backup/restore; `.github/workflows/`; `docs/api/`, `docs/CI.md`, `docs/VALIDATION.md`, runbook vận hành; `integrations/` |
+
+Test FE hiện có (`verify.mjs`, `browser-check.cjs`, `design-check.cjs`) thuộc người 2; người 4 chỉ gọi chúng trong CI. Tài liệu chung (`PROJECT_PLAN.md`, `docs/BACKEND.md`, `README.md`) sửa bằng PR nhỏ, chỉ đụng mục liên quan. Khi một việc cần thay đổi ở hai vùng, tách thành hai PR theo chủ vùng và ghi liên kết giữa chúng.
+
 ### Cấu trúc repo dự kiến
 
 ```text
@@ -329,7 +359,7 @@ EHR-VinSHC/
 │   └── decisions/               # ADR
 ├── config/                      # Baseline đã khóa
 ├── infra/backend/configuration/ # Gói Việt Nam + cấu hình cơ sở mẫu (Initializer)
-├── frontend/                    # Cấu hình, bản dịch, mẫu in, phần frontend tùy biến
+├── infra/frontend/              # Cấu hình, bản dịch, mẫu in, phần frontend tùy biến
 ├── modules/                     # Module backend riêng khi có nhu cầu đã xác nhận
 ├── integrations/                # Adapter BHYT, HĐĐT, đơn thuốc QG, LIS, PACS, openEHR
 ├── tests/                       # API test, integration/E2E, fixture giả
@@ -418,7 +448,7 @@ Theo [ADR-0001](docs/decisions/0001-openmrs-openehr.md). Không coi việc bật
 | Role và ma trận quyền | 8 role ghép từ privilege | M0 |
 | Bộ dữ liệu và biểu mẫu | Tập tối thiểu theo [DATA_DICTIONARY.md](docs/DATA_DICTIONARY.md); mentor xác nhận | Trước DATA-01 và FE-04 |
 | Vai trò openEHR | Theo đề xuất ADR-0001 | M0, trước M3 |
-| Database | PostgreSQL ([ADR-0002](docs/decisions/0002-postgresql.md)); phiên bản major chốt trong BE-10 | Đã quyết định; kiểm chứng trước M3 |
+| Database | PostgreSQL 16.15 ([ADR-0002](docs/decisions/0002-postgresql.md)) | Đã quyết định và dựng baseline; xác nhận run CI trước M3 |
 | Giấy phép open source | Tương thích MPL 2.0 | M0 |
 | Tên dự án khi công bố | Chưa xác nhận | Trước M5 |
 | Module mở rộng ưu tiên | Theo phòng khám pilot | Trước M6 |
