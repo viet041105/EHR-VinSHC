@@ -399,8 +399,13 @@ def verify_remote(pack, base_url, settings_file):
         class NoRedirect(HTTPRedirectHandler):
             def redirect_request(self, *args, **kwargs):
                 return None
-        with build_opener(NoRedirect).open(request, timeout=12) as response:
-            data = json.load(response)
+        try:
+            with build_opener(NoRedirect).open(request, timeout=12) as response:
+                data = json.load(response)
+        except HTTPError as error:
+            raise ValueError(
+                f"Missing metadata {e['key']} ({e['domain']}/{e['uuid']}): HTTP {error.code}"
+            ) from error
         if data.get("uuid") != e["uuid"] or data.get("retired"):
             raise ValueError("Missing/retired metadata: " + e["key"])
         if e["domain"] == "concepts":

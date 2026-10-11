@@ -17,6 +17,20 @@
 
 78 entity vẫn gồm một location có sẵn và 77 đối tượng managed (4 identifier type, 2 visit type, 4 encounter type, 3 encounter role, 8 person attribute type, 56 concept). Hai provider fixture **không nằm trong số managed được Initializer nạp**, chưa được provision. Contacts/fieldStates/phoneNormalized/catalogue và FHIR panel là adapter contract, không tự tạo bảng hoặc endpoint mới.
 
+## Bằng chứng runtime bổ sung ngày 11/10/2026
+
+Docker Linux đã hoạt động. `python tools/metadata.py --verify-url http://127.0.0.1:8080/openmrs --report .runtime/reports/metadata-import.json` đọc đúng **78/78 identity** không retired trên instance PostgreSQL local. Initializer 2.12.0 cần bản vá tương thích `sortWeight=0.0` cho Person Attribute Type trên Core 2.8.8; bản vá được build vào OMOD và có regression test.
+
+B2 đã kiểm tra runtime nguồn IDGen tuần tự, autogeneration option, bốn identifier type, tám person attribute type và fixture patient qua REST/FHIR. Kết quả chi tiết nằm trong `.runtime/reports/b2-integration.json`.
+
+Những mục này **vẫn chưa đánh dấu đạt**:
+
+- Dựng lại trên database hoàn toàn mới và thử thay đổi nhãn qua một migration metadata riêng; lần chạy hiện tại đã chứng minh import/read và restart trên volume đang dùng.
+- Tạo/đọc lại patient–visit–encounter–obsGroup với dữ liệu giả; lịch sử qua restart.
+- Native Diagnosis/Allergy/DrugOrder, partial birthdate trong luồng đăng ký thực tế.
+- FHIR code/unit/time/BP panel và các resource ngoài smoke nền.
+- 8 role/record-level scope/download/print; ma trận quyền là contract, không phải quyền đã được cấp.
+- Form engine O3, catalogue ICD-10/thuốc/dịch vụ/địa giới và workflow MVP-2.
 ## Những mục chưa chạy / chưa nghiệm thu
 
 - Clean install/import lần hai/update bằng Initializer trên backend với gói 0.2.0/overlay 0.2.1; chưa có báo cáo runtime import của phiên bản này.

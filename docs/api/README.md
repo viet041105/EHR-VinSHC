@@ -5,9 +5,10 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | Tài liệu | Mức kiểm chứng B1 |
 | --- | --- |
 | [Session và xác thực](session-auth.md) | Runtime: đăng nhập, location, 401 |
-| [Patient và identifier](patient-identifier.md) | Runtime: tạo, đọc, tìm theo mã, FHIR read |
-| [Visit và lịch sử](visit.md) | Runtime: mở, kết thúc, đọc, tìm theo patient |
-| [Encounter và observation](encounter-obs.md) | Runtime smoke: tạo/đọc và REST–FHIR mapping synthetic |
+| [Patient và identifier](patient-identifier.md) | B2 runtime: IDGen, CRUD/search/phân trang, tên có dấu, trùng mã/tên, thuộc tính, REST–FHIR và sai quyền |
+| [Visit và lịch sử](visit.md) | B3 runtime: mở/kết thúc, encounter, provider, lịch sử và cô lập patient |
+| [Encounter và observation](encounter-obs.md) | B3 runtime: bộ sinh hiệu chính thức, nhóm/trạng thái thiếu, sửa/void và REST–FHIR |
+| [Phiếu khám B4A](consultation.md) | B4A runtime: encounter bác sĩ, Obs khám, trạng thái thiếu, sửa và hai lượt khám |
 | [Diagnosis và allergy](diagnosis-allergy.md) | Capability mới; chưa có fixture nghiệp vụ |
 | [Medication và order](medication-order.md) | Capability mới; chưa có fixture nghiệp vụ |
 | [Xử lý lỗi](error-handling.md) | Runtime: 400/401/403/404 |
@@ -28,15 +29,15 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | UUID | Nguồn |
 | --- | --- |
 | Location development | `config/baseline.json` và Initializer CSV |
-| Patient identifier type B1 | Metadata synthetic được test tạo/tìm theo tên trên instance local/CI |
-| Visit/encounter type smoke | Metadata synthetic được test tạo/tìm theo tên trên instance local/CI |
+| Patient identifier B2 | UUID chính thức từ `metadata/vinshc/frontend-map.json`; nguồn IDGen và autogeneration option trong cấu hình backend |
+| Visit/encounter/role/concept B3 | UUID chính thức từ `metadata/vinshc/frontend-map.json`, đã đối chiếu runtime |
 | Patient/visit/encounter/obs | Response của request tạo, sau đó lưu dưới `.runtime/` để đọc lại |
-| Metadata Việt Nam chính thức | Chưa bàn giao; khi có phải thay nguồn synthetic bằng UUID version hóa từ một cấu hình được kiểm tra |
+| Metadata Việt Nam 0.1.0 | Đã nạp và kiểm tra runtime 78/78 identity; catalogue ICD-10/thuốc/dịch vụ/địa giới vẫn chưa bàn giao |
 
-## Chạy kiểm chứng B1
+## Chạy kiểm chứng B1–B4A
 
 ```powershell
 python -m unittest discover -s tests/integration -v
 ```
 
-Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`; fixture patient tại `.runtime/fixtures/b1-patient.json`. Nếu file fixture có nhưng hồ sơ tương ứng mất, test fail thay vì tạo lại bệnh nhân để che mất dữ liệu.
+Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b3-integration.json` và `b4a-integration.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.

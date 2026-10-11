@@ -243,6 +243,26 @@ class ConfigurationRegressionTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             validate_config(config, self.baseline, self.settings)
 
+    def test_initializer_person_attribute_patch_is_built_into_backend(self):
+        source = (ROOT / "infra/backend/postgresql/initializer/PersonAttributeTypesCsvParser.java").read_text(
+            encoding="utf-8")
+        dockerfile = (ROOT / "infra/backend/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("type.setSortWeight(0.0)", source)
+        self.assertIn("initializer-2.12.0.omod", dockerfile)
+        self.assertIn("PersonAttributeTypesCsvParser.class", dockerfile)
+
+    def test_b2_internal_identifier_generation_is_versioned(self):
+        source = (ROOT / "infra/backend/configuration/idgen/vinshc/internal-patient-id.csv").read_text(
+            encoding="utf-8")
+        option = (ROOT / "infra/backend/configuration/autogenerationoptions/vinshc/internal-patient-id.csv").read_text(
+            encoding="utf-8")
+        self.assertIn("3bfdfcf4-987a-521d-8e5d-7d60e782b6fa", source)
+        self.assertIn("ca12ea64-d279-5cce-a2a9-e2c46446ac34", source)
+        self.assertIn("00000001,VSHC-,,13,13", source)
+        self.assertIn("3f790925-f744-5b56-92cd-237d0c54e187", option)
+        self.assertIn("feae71be-957c-4f94-b100-d84bc6915574", option)
+        self.assertIn(",false,true,", option)
+
 
 class DatabaseRegressionTests(unittest.TestCase):
     def test_wrong_database_version_or_missing_extension_is_rejected(self):
