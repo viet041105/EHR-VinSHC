@@ -1,0 +1,38 @@
+{
+  "version": "1.0.0",
+  "status": "synthetic_fixture_not_installed",
+  "source": "VinSHC development fixture; no real staff",
+  "records": [
+    {
+      "providerCode": "VSHC-TEST-NURSE-001",
+      "providerUuid": "35df9441-ace8-54b0-9fbc-088280b303b6",
+      "roleCode": "nurse",
+      "encounterRoleUuid": "3d09e225-5185-5db6-a9cc-89a6962dc014",
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "active": true,
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "display": "Synthetic nurse",
+      "synthetic": true,
+      "installed": false
+    },
+    {
+      "providerCode": "VSHC-TEST-DOCTOR-001",
+      "providerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+      "roleCode": "doctor",
+      "encounterRoleUuid": "21dc99b5-a544-5c12-9dcc-3d12fe1d164b",
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "active": true,
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "display": "Synthetic doctor",
+      "synthetic": true,
+      "installed": false
+    }
+  ],
+  "rules": [
+    "providerUuid is fixture identity candidate; BE must explicitly provision/verify it, not assume existing",
+    "providerCode is stable identifier; role not a Core privilege",
+    "production roster configured privately at B5"
+  ]
+}

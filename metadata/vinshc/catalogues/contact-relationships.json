@@ -1,0 +1,80 @@
+{
+  "schemaVersion": 1,
+  "version": "1.0.0",
+  "effectiveFrom": "2026-10-11",
+  "source": "Quy ước nội bộ VinSHC cho người liên hệ; không tuyên bố là danh mục quốc gia/HL7",
+  "direction": "Contact relationship to patient",
+  "retirementPolicy": "Không tái sử dụng code; retire bằng effectiveTo. Mã thay thế ghi replacedBy; lịch sử giữ code/name/version snapshot. OTHER chỉ cho quan hệ thật sự khác, không thay unknown.",
+  "items": [
+    {
+      "code": "FATHER",
+      "nameVi": "Cha",
+      "source": "VinSHC internal convention",
+      "version": "1.0.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "retired": false,
+      "replacedBy": []
+    },
+    {
+      "code": "MOTHER",
+      "nameVi": "Mẹ",
+      "source": "VinSHC internal convention",
+      "version": "1.0.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "retired": false,
+      "replacedBy": []
+    },
+    {
+      "code": "SPOUSE",
+      "nameVi": "Vợ/chồng",
+      "source": "VinSHC internal convention",
+      "version": "1.0.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "retired": false,
+      "replacedBy": []
+    },
+    {
+      "code": "CHILD",
+      "nameVi": "Con",
+      "source": "VinSHC internal convention",
+      "version": "1.0.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "retired": false,
+      "replacedBy": []
+    },
+    {
+      "code": "SIBLING",
+      "nameVi": "Anh/chị/em",
+      "source": "VinSHC internal convention",
+      "version": "1.0.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "retired": false,
+      "replacedBy": []
+    },
+    {
+      "code": "GUARDIAN",
+      "nameVi": "Người giám hộ",
+      "source": "VinSHC internal convention",
+      "version": "1.0.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "retired": false,
+      "replacedBy": []
+    },
+    {
+      "code": "OTHER",
+      "nameVi": "Khác",
+      "source": "VinSHC internal convention",
+      "version": "1.0.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "retired": false,
+      "replacedBy": []
+    }
+  ]
+}
