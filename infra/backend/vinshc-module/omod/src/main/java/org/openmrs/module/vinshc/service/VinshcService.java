@@ -25,6 +25,7 @@ import org.openmrs.Encounter;
 import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
+import org.openmrs.PersonAddress;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -73,7 +74,9 @@ public class VinshcService {
 	    "vitals.nhip_tho", "vitals.can_nang", "vitals.chieu_cao");
 	
 	private final JdbcTemplate jdbc;
-	
+
+	private final SessionFactory sessionFactory;
+
 	private volatile Map<String, Map<String, Object>> addressRecords;
 	
 	private volatile Map<String, Map<String, Object>> relationshipRecords;
@@ -84,6 +87,7 @@ public class VinshcService {
 		ConnectionProvider provider = ((SessionFactoryImplementor) sessionFactory).getServiceRegistry()
 		        .getService(ConnectionProvider.class);
 		this.jdbc = new JdbcTemplate(provider.unwrap(javax.sql.DataSource.class));
+		this.sessionFactory = sessionFactory;
 	}
 	
 	public Map<String, Object> identity(String patientUuid, boolean includeHistory) {
@@ -301,7 +305,9 @@ public class VinshcService {
 		    new Timestamp(System.currentTimeMillis()));
 		if (hasNonNull(body, "addressText", "address_text"))
 			clearCurrentState(patient.getPatientId(), "patient.dia_chi", "address", key);
-		return current("vinshc_address_snapshot", "row_key", key);
+		Map<String, Object> saved = current("vinshc_address_snapshot", "row_key", key);
+		projectAddress(patient, saved);
+		return saved;
 	}
 	
 	public Map<String, Object> configurationStatus() {
@@ -337,7 +343,64 @@ public class VinshcService {
 		    "INSERT INTO vinshc_address_snapshot(row_key,version_number,patient_id,address_text,legacy_address_text,province_code,province_name,commune_code,commune_name,catalogue_version,address_as_of_date,source_kind,source_document_uuid,source_page,source_row_code,source_reference,recorded_at,status,void_reason,is_current,creator,date_created) SELECT row_key,version_number+1,patient_id,address_text,legacy_address_text,province_code,province_name,commune_code,commune_name,catalogue_version,address_as_of_date,source_kind,source_document_uuid,source_page,source_row_code,source_reference,?, 'void', ?, true, ?, ? FROM vinshc_address_snapshot WHERE address_id=?",
 		    Timestamp.from(Instant.now()), reason.trim(), actor(), new Timestamp(System.currentTimeMillis()),
 		    old.get("address_id"));
-		return current("vinshc_address_snapshot", "row_key", canonicalUuid(rowKey));
+		Map<String, Object> saved = current("vinshc_address_snapshot", "row_key", canonicalUuid(rowKey));
+		projectAddress(resolvePatient(Collections.<String, Object> emptyMap(), saved), saved);
+		return saved;
+	}
+	
+	/**
+	 * Mirrors the current snapshot into a native PersonAddress whose UUID equals the snapshot row key,
+	 * so REST/FHIR Patient reads show the current address. The snapshot table remains the source of
+	 * history; legacy-only or voided snapshots void the projection instead of exposing old text as
+	 * current.
+	 */
+	private void projectAddress(Patient patient, Map<String, Object> snapshot) {
+		String rowKey = string(snapshot.get("row_key"));
+		boolean active = "active".equals(snapshot.get("status")) && snapshot.get("address_text") != null;
+		PersonAddress address = Context.getPersonService().getPersonAddressByUuid(rowKey);
+		if (address != null && !address.getPerson().getPersonId().equals(patient.getPersonId()))
+			throw new IllegalStateException("address projection belongs to another person: " + rowKey);
+		if (!active) {
+			if (address != null && !address.getVoided()) {
+				Context.getPersonService().voidPersonAddress(address,
+				    snapshot.get("void_reason") == null ? "VinSHC address has no current text"
+				            : string(snapshot.get("void_reason")));
+				evictAddressCache(patient);
+			}
+			return;
+		}
+		if (address == null) {
+			address = new PersonAddress();
+			address.setUuid(rowKey);
+			patient.addAddress(address);
+		} else if (address.getVoided()) {
+			address = Context.getPersonService().unvoidPersonAddress(address);
+		}
+		for (PersonAddress other : patient.getAddresses())
+			if (!other.getVoided() && !rowKey.equals(other.getUuid()) && Boolean.TRUE.equals(other.getPreferred())) {
+				other.setPreferred(false);
+				Context.getPersonService().savePersonAddress(other);
+			}
+		address.setPreferred(true);
+		address.setAddress1(string(snapshot.get("address_text")));
+		address.setCityVillage(snapshot.get("commune_name") == null ? null : string(snapshot.get("commune_name")));
+		address.setStateProvince(snapshot.get("province_name") == null ? null : string(snapshot.get("province_name")));
+		address.setCountry("Việt Nam");
+		address.setStartDate((java.util.Date) snapshot.get("address_as_of_date"));
+		Context.getPersonService().savePersonAddress(address);
+		evictAddressCache(patient);
+	}
+
+	/**
+	 * Person.addresses is an inverse collection with a read-write second-level cache. Writes through
+	 * PersonService do not invalidate it, so FHIR Patient reads kept returning the old address list
+	 * (observed on Core 2.8.8). Flush, then evict the collection and owner explicitly.
+	 */
+	private void evictAddressCache(Patient patient) {
+		Context.flushSession();
+		sessionFactory.getCache().evictCollectionData(Person.class.getName() + ".addresses", patient.getPersonId());
+		sessionFactory.getCache().evictEntityData(Person.class, patient.getPersonId());
+		sessionFactory.getCache().evictEntityData(Patient.class, patient.getPatientId());
 	}
 	
 	@Transactional
@@ -603,8 +666,8 @@ public class VinshcService {
 			throw bad("patient does not exist");
 		return patient;
 	}
-
-	private static void requireDirectPrivilege(String privilege) {
+	
+	static void requireDirectPrivilege(String privilege) {
 		if (!Context.isAuthenticated() || Context.getAuthenticatedUser() == null
 		        || !Context.getAuthenticatedUser().hasPrivilege(privilege))
 			throw new APIAuthenticationException("Privileges required: " + privilege);
@@ -640,7 +703,7 @@ public class VinshcService {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private static Map<String, Object> objectMap(Object value) {
+	static Map<String, Object> objectMap(Object value) {
 		if (value == null)
 			return Collections.emptyMap();
 		if (!(value instanceof Map))
@@ -715,7 +778,7 @@ public class VinshcService {
 		return Timestamp.from(Instant.now());
 	}
 	
-	private static Instant parseInstant(String value) {
+	static Instant parseInstant(String value) {
 		try {
 			return OffsetDateTime.parse(value).toInstant();
 		}
@@ -724,7 +787,7 @@ public class VinshcService {
 		}
 	}
 	
-	private static String canonicalUuid(String value) {
+	static String canonicalUuid(String value) {
 		try {
 			return UUID.fromString(value).toString();
 		}
@@ -733,14 +796,14 @@ public class VinshcService {
 		}
 	}
 	
-	private static String requiredString(Map<String, Object> map, String... keys) {
+	static String requiredString(Map<String, Object> map, String... keys) {
 		String value = optionalString(map, keys);
 		if (value == null || value.trim().isEmpty())
 			throw bad(keys[0] + " is required");
 		return value;
 	}
 	
-	private static String optionalString(Map<String, Object> map, String... keys) {
+	static String optionalString(Map<String, Object> map, String... keys) {
 		for (String key : keys)
 			if (map.containsKey(key) && map.get(key) != null)
 				return string(map.get(key));
@@ -768,28 +831,28 @@ public class VinshcService {
 		return false;
 	}
 	
-	private static Number number(Object value) {
+	static Number number(Object value) {
 		return (Number) value;
 	}
 	
-	private static String string(Object value) {
+	static String string(Object value) {
 		return String.valueOf(value);
 	}
 	
-	private static void limit(String value, int maximum, String field) {
+	static void limit(String value, int maximum, String field) {
 		if (value != null && value.length() > maximum)
 			throw bad(field + " exceeds " + maximum + " characters");
 	}
 	
-	private static IllegalArgumentException bad(String message) {
+	static IllegalArgumentException bad(String message) {
 		return new IllegalArgumentException(message);
 	}
 	
-	private static Set<String> set(String... values) {
+	static Set<String> set(String... values) {
 		return Collections.unmodifiableSet(Arrays.stream(values).collect(Collectors.toSet()));
 	}
 	
-	private static Map<String, String> map(String... values) {
+	static Map<String, String> map(String... values) {
 		Map<String, String> map = new LinkedHashMap<>();
 		for (int i = 0; i < values.length; i += 2)
 			map.put(values[i], values[i + 1]);

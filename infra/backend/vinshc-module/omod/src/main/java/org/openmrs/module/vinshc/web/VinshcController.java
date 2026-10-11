@@ -1,17 +1,13 @@
 package org.openmrs.module.vinshc.web;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.module.vinshc.service.VinshcService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,7 +21,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @Controller
 @RequestMapping("/rest/v1/vinshc")
 @ResponseBody
-public class VinshcController {
+public class VinshcController extends BaseVinshcController {
 	
 	private final VinshcService service;
 	
@@ -98,21 +94,5 @@ public class VinshcController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Map<String, Object> recordVitals(@RequestBody Map<String, Object> body) {
 		return service.recordVitals(body);
-	}
-	
-	@ExceptionHandler(IllegalArgumentException.class)
-	public ResponseEntity<Map<String, String>> badRequest(IllegalArgumentException error) {
-		return ResponseEntity.badRequest().body(Collections.singletonMap("error", error.getMessage()));
-	}
-	
-	@ExceptionHandler(APIAuthenticationException.class)
-	public ResponseEntity<Map<String, String>> forbidden(APIAuthenticationException error) {
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.singletonMap("error", "forbidden"));
-	}
-	
-	@ExceptionHandler(IllegalStateException.class)
-	public ResponseEntity<Map<String, String>> configurationError(IllegalStateException error) {
-		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-		        .body(Collections.singletonMap("error", error.getMessage()));
 	}
 }

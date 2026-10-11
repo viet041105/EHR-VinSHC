@@ -6,4 +6,7 @@
   <bean id="vinshcService" class="org.openmrs.module.vinshc.service.VinshcService">
     <constructor-arg ref="sessionFactory"/>
   </bean>
+  <bean id="vinshcClinicalService" class="org.openmrs.module.vinshc.service.ClinicalService">
+    <constructor-arg ref="sessionFactory"/>
+  </bean>
 </beans>

@@ -70,8 +70,13 @@ jobs:
         run: python scripts/check_database.py
       - name: Verify APIs and create synthetic patient and clinical data
         run: python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
-      - name: Verify B1 session, patient, visit and runtime error contracts
-        run: python -m unittest discover -s tests/integration -v
+      - name: Verify B1-B4 API, extension and clinical contracts
+        # Explicit order: test_b23 needs the B2/B3 fixtures, but discover sorts it before test_b2_.
+        run: >-
+          python -m unittest -v
+          tests.integration.test_b1_contract tests.integration.test_b2_patient
+          tests.integration.test_b3_vitals tests.integration.test_b23_extensions
+          tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical
       - name: Recreate containers and retain named volumes
         run: |
           docker compose down
@@ -80,6 +85,11 @@ jobs:
         run: |
           python scripts/check_database.py
           python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
+      - name: Re-read B3/B4 fixtures after recreate
+        run: >-
+          python -m unittest -v
+          tests.integration.test_b3_vitals tests.integration.test_b4a_consultation
+          tests.integration.test_b4b_clinical
       - name: Collect redacted diagnostics
         if: always()
         run: python scripts/collect_diagnostics.py
