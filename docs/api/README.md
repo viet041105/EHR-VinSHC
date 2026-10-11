@@ -8,6 +8,7 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | [Patient và identifier](patient-identifier.md) | B2 runtime: IDGen, CRUD/search/phân trang, tên có dấu, trùng mã/tên, thuộc tính, REST–FHIR và sai quyền |
 | [Visit và lịch sử](visit.md) | B3 runtime: mở/kết thúc, encounter, provider, lịch sử và cô lập patient |
 | [Encounter và observation](encounter-obs.md) | B3 runtime: bộ sinh hiệu chính thức, nhóm/trạng thái thiếu, sửa/void và REST–FHIR |
+| [Phiếu khám B4A](consultation.md) | B4A runtime: encounter bác sĩ, Obs khám, trạng thái thiếu, sửa và hai lượt khám |
 | [Diagnosis và allergy](diagnosis-allergy.md) | Capability mới; chưa có fixture nghiệp vụ |
 | [Medication và order](medication-order.md) | Capability mới; chưa có fixture nghiệp vụ |
 | [Xử lý lỗi](error-handling.md) | Runtime: 400/401/403/404 |
@@ -33,10 +34,10 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | Patient/visit/encounter/obs | Response của request tạo, sau đó lưu dưới `.runtime/` để đọc lại |
 | Metadata Việt Nam 0.1.0 | Đã nạp và kiểm tra runtime 78/78 identity; catalogue ICD-10/thuốc/dịch vụ/địa giới vẫn chưa bàn giao |
 
-## Chạy kiểm chứng B1–B3
+## Chạy kiểm chứng B1–B4A
 
 ```powershell
 python -m unittest discover -s tests/integration -v
 ```
 
-Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json` và `b3-integration.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3 phụ thuộc fixture hai patient của B2. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.
+Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b3-integration.json` và `b4a-integration.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.

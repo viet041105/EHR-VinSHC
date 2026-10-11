@@ -134,10 +134,23 @@ Từ 09/10/2026, BE-03, BE-07, BE-09 và BE-12 (appointments, service queues, t�
 
 **Đầu vào:** B3; từ điển dữ liệu khám, concept, thuốc/đơn vị và quyết định workflow từ nhóm metadata/FE. **Đầu ra:** bác sĩ có thể ghi và xem lại một lần khám hoàn chỉnh.
 
-- [ ] Xác định dữ liệu nào là obs/form, diagnosis/condition, allergy, order/medication; ghi rõ liên hệ với encounter và trạng thái bản ghi. Cùng nhóm metadata chốt sự khác nhau giữa `chưa hỏi`, `không có`, `không biết` cho dị ứng/tiền sử.
-- [ ] Kiểm thử lưu/mở lại triệu chứng, khám, chẩn đoán ICD-10 (chính, kèm theo, mức độ chắc chắn), dị ứng và lời dặn theo form đã chốt; tránh mất dữ liệu khi chỉnh sửa hoặc khi bệnh nhân tái khám.
+- [ ] Xác định dữ liệu nào là obs/form, diagnosis/condition, allergy, order/medication; ghi rõ liên hệ với encounter và trạng thái bản ghi. Cùng nhóm metadata chốt sự khác nhau giữa `chưa hỏi`, `không có`, `không biết` cho dị ứng/tiền sử. **B4A đã đạt:** bệnh sử/khám/lời dặn/tái khám và trạng thái sàng lọc lưu trong `group.consultation`; các trạng thái `not_asked`, `unknown`, `none_reported`, `present`, `no_known_allergy` được giữ riêng. **Còn mở:** Diagnosis, Allergy chi tiết và DrugOrder native.
+- [ ] Kiểm thử lưu/mở lại triệu chứng, khám, chẩn đoán ICD-10 (chính, kèm theo, mức độ chắc chắn), dị ứng và lời dặn theo form đã chốt; tránh mất dữ liệu khi chỉnh sửa hoặc khi bệnh nhân tái khám. **B4A đã đạt:** round-trip các Obs khám, sửa tạo phiên bản mới không mất bản cũ, hai lần khám không ghi đè nhau. Chẩn đoán ICD-10 và Allergy native chưa làm vì chưa có catalogue.
 - [ ] Kiểm thử kê đơn với danh mục thuốc, liều, đơn vị, đường dùng, tần suất, số ngày, số lượng và trạng thái. Đơn phải đủ dữ liệu cho mẫu in theo [VIETNAM_COMPLIANCE.md](VIETNAM_COMPLIANCE.md#2-yêu-cầu-thiết-kế-rút-ra), gồm thông tin người kê đơn (số chứng chỉ hành nghề) và cơ sở. Xác minh API REST và FHIR cho **đúng** thao tác cần dùng; `CapabilityStatement` là điểm bắt đầu, còn create/update/read phải được test trên fixture thật. Nếu FHIR chỉ hỗ trợ đọc cho nghiệp vụ đó, ghi giới hạn và dùng REST phù hợp cho FE.
-- [ ] Đối chiếu lần khám thứ hai của cùng bệnh nhân: hồ sơ cũ vẫn đọc được, dữ liệu mới không ghi đè hoặc đổi nguồn gốc bản ghi cũ.
+- [x] Đối chiếu lần khám thứ hai của cùng bệnh nhân: hồ sơ cũ vẫn đọc được, dữ liệu mới không ghi đè hoặc đổi nguồn gốc bản ghi cũ. Fixture B4A dùng visit ngoại trú và visit tái khám, hai encounter/group UUID riêng; sửa lời dặn void bản cũ và tạo Obs thay thế trong đúng group.
+
+#### B4A đã hoàn thành và phần còn phải chờ dữ liệu
+
+- [x] **Phiếu khám dạng Obs:** encounter type khám, provider role người khám, `group.consultation`, lý do khám, bệnh sử, tiền sử, triệu chứng, khám, tóm tắt, hướng điều trị, lời dặn và ngày/lời dặn tái khám đã được ghi/đọc thật qua REST.
+- [x] **Trạng thái thiếu và sàng lọc dị ứng:** test phân biệt `not_asked`, `unknown`, `none_reported`, `present` và `no_known_allergy`; lượt sau chưa biết dị ứng không xóa hay đổi câu trả lời của lượt trước.
+- [x] **Lịch sử, restart và FHIR trong phạm vi B4A:** hai lượt khám của cùng patient tồn tại độc lập và đọc lại đúng sau restart/recreate backend; parent Consultation Observation đọc được qua FHIR với đúng patient, encounter và `hasMember`. OpenMRS Visit vẫn chỉ đọc qua REST.
+- [ ] **ICD-10/Diagnosis:** cần catalogue ICD-10 có nguồn, system URI, phiên bản, tên tiếng Việt và hiệu lực; sau đó nạp/mapping concept và kiểm thử primary/secondary, provisional/confirmed, sửa/void và FHIR Condition. Không dùng free text để giả làm ICD-10.
+- [ ] **Allergy chi tiết:** cần catalogue tác nhân, phản ứng, mức độ và quyết định cho dị ứng non-coded; sau đó thống nhất native Allergy/FHIR AllergyIntolerance với Obs sàng lọc. `no_known_allergy` hoặc `unknown` không được tự xóa allergy list cũ.
+- [ ] **Đơn thuốc:** cần danh mục thuốc cơ sở cùng dose/quantity units, route, frequency và duration units. Runtime hiện có Drug Order type/care setting nhưng không có Drug hoặc Order Frequency để tạo đơn hợp lệ.
+- [ ] **Form và validation adapter:** `forms.json` là handoff spec, chưa phải O3 Form schema. Cần chọn O3 Form hay FE riêng và thêm server-side validation cho điều kiện `present` cần nội dung, trạng thái final, correction/void và provenance.
+- [ ] **Provider/cơ sở/quyền production:** fixture dùng bác sĩ synthetic. Số chứng chỉ hành nghề, thông tin cơ sở và quyền bác sĩ thuộc metadata/B5 trước khi xác nhận hoặc in đơn.
+
+Bộ test B4A nằm tại [`test_b4a_consultation.py`](../tests/integration/test_b4a_consultation.py), báo cáo local tại `.runtime/reports/b4a-integration.json`; hợp đồng runtime ở [`consultation.md`](api/consultation.md).
 
 Chỉ định CLS, lịch hẹn, hàng đợi, thu tiền và mẫu in thuộc mốc B8.
 
