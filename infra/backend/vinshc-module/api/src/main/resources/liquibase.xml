@@ -104,4 +104,31 @@
     <createIndex tableName="vinshc_clinical_event" indexName="ix_vinshc_event_encounter"><column name="encounter_id"/></createIndex>
     <createIndex tableName="vinshc_clinical_event" indexName="ix_vinshc_event_patient"><column name="patient_id"/></createIndex>
   </changeSet>
+  <changeSet id="vinshc-0.3.0-workspace-authorization" author="vinshc" dbms="postgresql">
+    <createTable tableName="vinshc_workspace_assignment">
+      <column name="assignment_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="assignment_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_workspace_assignment_uuid"/></column>
+      <column name="user_id" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_workspace_user"/></column>
+      <column name="role_name" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="facility_location_id" type="INT"><constraints nullable="false" references="location(location_id)" foreignKeyName="fk_vinshc_workspace_location"/></column>
+      <column name="active" type="BOOLEAN"><constraints nullable="false"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_workspace_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+    </createTable>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_workspace_active ON vinshc_workspace_assignment(user_id, role_name, facility_location_id) WHERE active</sql>
+    <createTable tableName="vinshc_access_event">
+      <column name="event_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="event_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_access_event_uuid"/></column>
+      <column name="resource_type" type="VARCHAR(64)"><constraints nullable="false"/></column>
+      <column name="patient_id" type="INT"><constraints references="patient(patient_id)" foreignKeyName="fk_vinshc_access_patient"/></column>
+      <column name="encounter_id" type="INT"><constraints references="encounter(encounter_id)" foreignKeyName="fk_vinshc_access_encounter"/></column>
+      <column name="entity_uuid" type="VARCHAR(38)"/>
+      <column name="action" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="detail" type="VARCHAR(1000)"/>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_access_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+    </createTable>
+    <createIndex tableName="vinshc_access_event" indexName="ix_vinshc_access_patient"><column name="patient_id"/><column name="date_created"/></createIndex>
+    <createIndex tableName="vinshc_access_event" indexName="ix_vinshc_access_encounter"><column name="encounter_id"/><column name="date_created"/></createIndex>
+  </changeSet>
 </databaseChangeLog>

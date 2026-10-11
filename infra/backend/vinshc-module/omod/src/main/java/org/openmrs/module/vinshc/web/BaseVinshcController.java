@@ -26,7 +26,10 @@ public abstract class BaseVinshcController {
 	
 	@ExceptionHandler(APIAuthenticationException.class)
 	public ResponseEntity<Map<String, String>> forbidden(APIAuthenticationException error) {
-		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(Collections.singletonMap("error", "forbidden"));
+		Map<String, String> body = new java.util.LinkedHashMap<>();
+		body.put("error", "forbidden");
+		body.put("detail", error.getMessage());
+		return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
 	}
 	
 	@ExceptionHandler(IllegalStateException.class)

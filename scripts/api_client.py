@@ -20,7 +20,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 class Client:
     """HTTP client restricted to a loopback OpenMRS test instance."""
 
-    def __init__(self, base_url, username, password):
+    def __init__(self, base_url, username, password, *, default_headers=None):
         parsed = urllib.parse.urlsplit(base_url)
         if (parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
                 or parsed.username or parsed.password or parsed.path not in {"", "/"}
@@ -29,10 +29,11 @@ class Client:
         self.base_url = base_url.rstrip("/")
         self.username = username
         self.password = password
+        self.default_headers = dict(default_headers or {})
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
 
     def request(self, path, *, method="GET", payload=None, auth=True, password=None, timeout=10):
-        headers = {"Accept": "application/json, application/fhir+json"}
+        headers = {"Accept": "application/json, application/fhir+json", **self.default_headers}
         data = None
         if payload is not None:
             data = json.dumps(payload).encode("utf-8")
