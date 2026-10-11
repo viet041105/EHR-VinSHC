@@ -9,10 +9,10 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | [Mở rộng hành chính VinSHC](patient-administration.md) | B2/B3: contacts, fieldStates, DATA-08, provenance, privilege và validated vital write |
 | [Visit và lịch sử](visit.md) | B3 runtime: mở/kết thúc, encounter, provider, lịch sử và cô lập patient |
 | [Encounter và observation](encounter-obs.md) | B3 runtime: bộ sinh hiệu chính thức, nhóm/trạng thái thiếu, sửa/void và REST–FHIR |
-| [Phiếu khám B4A](consultation.md) | B4A runtime: encounter bác sĩ, Obs khám, trạng thái thiếu, sửa và hai lượt khám |
-| [Diagnosis và allergy](diagnosis-allergy.md) | Capability mới; chưa có fixture nghiệp vụ |
-| [Medication và order](medication-order.md) | Capability mới; chưa có fixture nghiệp vụ |
-| [Xử lý lỗi](error-handling.md) | Runtime: 400/401/403/404 |
+| [Phiếu khám B4](consultation.md) | B4A runtime: Obs khám native. B4 (module 0.3.0): ghi có kiểm tra, chốt phiếu, clinical-summary, nhật ký |
+| [Diagnosis và allergy](diagnosis-allergy.md) | B4 runtime với danh mục giả: chẩn đoán có mã, một chẩn đoán chính, dị ứng có mã, FHIR AllergyIntolerance |
+| [Medication và order](medication-order.md) | B4 runtime với danh mục giả: kê đơn có kiểm tra, xung đột dị ứng, ngừng thuốc, FHIR MedicationRequest đọc lại |
+| [Xử lý lỗi](error-handling.md) | Runtime: 400/401/403/404/503; quy tắc FHIR 500 khi thiếu quyền |
 | [FHIR mapping](fhir-mapping.md) | Runtime: Patient/Encounter/Observation; phần khác giới hạn rõ |
 | [Ma trận capability](capabilities.md) | B0: module/API/metadata/mức thử/khoảng trống |
 
@@ -35,10 +35,14 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | Patient/visit/encounter/obs | Response của request tạo, sau đó lưu dưới `.runtime/` để đọc lại |
 | Metadata Việt Nam 0.1.0 | Đã nạp và kiểm tra runtime 78/78 identity; catalogue ICD-10/thuốc/dịch vụ/địa giới vẫn chưa bàn giao |
 
-## Chạy kiểm chứng B1–B4A
+## Chạy kiểm chứng B1–B4
+
+`test_b23_extensions.py` cần fixture của B2 và B3, nhưng `discover` chạy theo thứ tự tên file (`test_b23` đứng trước `test_b2_`). Trên database mới, chạy theo thứ tự:
 
 ```powershell
-python -m unittest discover -s tests/integration -v
+python -m unittest -v tests.integration.test_b1_contract tests.integration.test_b2_patient tests.integration.test_b3_vitals tests.integration.test_b23_extensions tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical
 ```
 
-Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b23-extension-integration.json`, `b3-integration.json` và `b4a-integration.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.
+Khi đã có fixture, `python -m unittest discover -s tests/integration -v` chạy lại được.
+
+Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b23-extension-integration.json`, `b3-integration.json`, `b4a-integration.json` và `b4b-clinical.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2; B4B tạo patient synthetic mới mỗi lần chạy và đọc lại encounter của lần trước. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.

@@ -201,12 +201,26 @@ class B23ExtensionTests(unittest.TestCase):
         )
         self.assertEqual(updated["legacy_address_text"], "12 Hoa, địa chỉ giấy cũ")
         self.assertEqual(updated["version_number"], 2)
+        # The current snapshot is projected into a native PersonAddress with UUID = row key.
+        native = self.client.json(
+            f"/openmrs/ws/rest/v1/person/{self.patient}/address/{created['row_key']}?v=full")
+        self.assertEqual(native["address1"], "Số 12A, đường Hoa")
+        self.assertEqual(native["cityVillage"], commune["name"])
+        self.assertEqual(native["stateProvince"], province["name"])
+        self.assertTrue(native["preferred"])
+        fhir = self.client.json(f"/openmrs/ws/fhir2/R4/Patient/{self.patient}")
+        projected = next(item for item in fhir.get("address", []) if item.get("id") == created["row_key"])
+        self.assertEqual(projected.get("city"), commune["name"])
+        self.assertEqual(projected.get("state"), province["name"])
+        self.assertNotIn("12 Hoa, địa chỉ giấy cũ", json.dumps(projected, ensure_ascii=False))
         voided = self.client.json(
             f"/openmrs/ws/rest/v1/vinshc/address/{created['row_key']}?reason=integration%20complete",
             method="DELETE",
         )
         self.assertEqual(voided["status"], "void")
-        self.record("DATA-08 parent validation and immutable current/legacy address history",
+        fhir = self.client.json(f"/openmrs/ws/fhir2/R4/Patient/{self.patient}")
+        self.assertNotIn(created["row_key"], {item.get("id") for item in fhir.get("address", [])})
+        self.record("DATA-08 parent validation, immutable current/legacy history and FHIR address projection",
                     rowKey=created["row_key"])
 
     def test_04_validated_vital_write_rules_and_round_trip(self):

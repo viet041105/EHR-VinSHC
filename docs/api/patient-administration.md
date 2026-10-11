@@ -84,6 +84,23 @@ Server đọc trực tiếp 37 policy `b2Missing` từ metadata pack: field `for
 
 Server xác minh code/version/ngày hiệu lực và quan hệ xã → tỉnh, rồi đóng băng cả code, label, raw, legacy và version. Raw-only được phép khi không có code/version giả. Catalogue đồng thời được nạp vào Address Hierarchy bằng Initializer với 3.356 entry có `userGeneratedId` ổn định (`VN`, 34 mã tỉnh, 3.321 mã xã).
 
+### Chiếu sang PersonAddress và FHIR Patient (module 0.3.0)
+
+Snapshot là nguồn lịch sử; bản hiện hành được chiếu sang một `PersonAddress` native có **UUID bằng `row_key`**, để REST `person/{uuid}/address` và FHIR `Patient.address` đọc được địa chỉ hiện hành:
+
+| Snapshot | PersonAddress |
+| --- | --- |
+| `address_text` | `address1` |
+| `commune_name` | `cityVillage` (FHIR `city`) |
+| `province_name` | `stateProvince` (FHIR `state`) |
+| hằng `Việt Nam` | `country` |
+| `address_as_of_date` | `startDate` |
+
+- Bản chiếu mới nhất được đặt `preferred=true`; các địa chỉ native khác của người bệnh chuyển `preferred=false`, không bị void.
+- `legacyAddressText` **không** được chiếu, để địa chỉ cũ không hiển thị như địa chỉ hiện hành. Snapshot chỉ có địa chỉ cũ, hoặc snapshot đã void, sẽ void bản chiếu (lý do void lấy từ snapshot).
+- Snapshot tạo trước module 0.3.0 chỉ được chiếu ở lần cập nhật kế tiếp; không có job chiếu bù.
+- Không sửa `PersonAddress` có UUID trùng `row_key` bằng `/person/{uuid}/address`: lần ghi snapshot kế tiếp sẽ ghi đè.
+
 ## Ghi sinh hiệu đã validation
 
 ```http

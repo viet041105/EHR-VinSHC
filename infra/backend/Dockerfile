@@ -3,7 +3,7 @@ WORKDIR /src
 COPY infra/backend/vinshc-module/ ./
 RUN --mount=type=cache,target=/root/.m2 \
     mvn --batch-mode --no-transfer-progress -DskipTests -Dlicense.skip=true -Dspotless.check.skip=true -Dmaven.buildNumber.skip=true package \
-    && test -f /src/omod/target/vinshc-0.2.0.omod
+    && test -f /src/omod/target/vinshc-0.3.0.omod
 
 # Stable upstream release with checked-in PostgreSQL compatibility resources.
 FROM openmrs/openmrs-reference-application-3-backend:3.7.1@sha256:929cfe5dca5f221460e0f4a57abb9294614df5f74fbb3bb865e01b8dfe7a985b
@@ -62,7 +62,7 @@ RUN test -d /openmrs/distribution/openmrs_config \
     && find /openmrs/distribution/openmrs_config -type d -name referenceapplication-demo -prune -exec rm -rf -- {} + \
     && rm -f /openmrs/distribution/openmrs_modules/referencedemodata-*.omod \
     && sed -i '/^content.referenceapplication-demo=/d; /^omod.referencedemodata=/d' /openmrs/distribution/openmrs-distro.properties
-COPY --from=vinshc-module-build --chown=1001:0 /src/omod/target/vinshc-0.2.0.omod /openmrs/distribution/openmrs_modules/vinshc-0.2.0.omod
+COPY --from=vinshc-module-build --chown=1001:0 /src/omod/target/vinshc-0.3.0.omod /openmrs/distribution/openmrs_modules/vinshc-0.3.0.omod
 COPY --chown=1001:0 metadata/vinshc/catalogues/address-vn-19-2025.json /openmrs/distribution/vinshc_metadata/address-vn-19-2025.json
 COPY --chown=1001:0 metadata/vinshc/catalogues/contact-relationships.json /openmrs/distribution/vinshc_metadata/contact-relationships.json
 COPY --chown=1001:0 metadata/vinshc/pack.json /openmrs/distribution/vinshc_metadata/pack.json
