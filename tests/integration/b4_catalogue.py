@@ -25,6 +25,7 @@ REST = "/openmrs/ws/rest/v1"
 SYNTHETIC_GLOBAL_PROPERTIES = (
     "vinshc.diagnosis.icd10ConceptSourceUuid",
     "vinshc.diagnosis.icd10CatalogueVersion",
+    "vinshc.diagnosis.icd10SelectableConceptSetUuid",
     "vinshc.allergy.allergenConceptSetUuid.drug",
     "vinshc.allergy.allergenConceptSetUuid.food",
     "vinshc.allergy.allergenConceptSetUuid.environment",
@@ -147,6 +148,8 @@ def ensure(client):
     days = _concept(client, "VinSHC synthetic duration day", CLASS_MISC,
                     mappings=[{**same_as[0], "conceptReferenceTerm": day_term}])
     sets = {
+        "selectableDiagnoses": _concept(client, "VinSHC synthetic selectable diagnoses",
+                                         CLASS_CONVSET, members=[dx["a"], dx["b"], dx["c"]]),
         "drugAllergens": _concept(client, "VinSHC synthetic drug allergens", CLASS_CONVSET,
                                   members=[drug_concepts["a"]]),
         "foodAllergens": _concept(client, "VinSHC synthetic food allergens", CLASS_CONVSET,
@@ -177,6 +180,7 @@ def ensure(client):
     for name, value in (
         ("vinshc.diagnosis.icd10ConceptSourceUuid", icd_source),
         ("vinshc.diagnosis.icd10CatalogueVersion", SYNTHETIC_VERSION),
+        ("vinshc.diagnosis.icd10SelectableConceptSetUuid", sets["selectableDiagnoses"]),
         ("vinshc.allergy.allergenConceptSetUuid.drug", sets["drugAllergens"]),
         ("vinshc.allergy.allergenConceptSetUuid.food", sets["foodAllergens"]),
         ("vinshc.allergy.allergenConceptSetUuid.environment", sets["environmentAllergens"]),
@@ -191,6 +195,10 @@ def ensure(client):
     return {
         "icdSource": icd_source, "diagnoses": dx, "drugConcepts": drug_concepts, "drugs": drugs,
         "food": food, "environment": environment, "reaction": reaction, "severity": severity,
-        "route": route, "routeNotInSet": other_route, "tablet": tablet, "days": days,
+        "route": route, "routeNotInSet": other_route, "tablet": tablet,
+        "doseUnit": tablet, "quantityUnit": tablet, "days": days,
         "frequency": frequency, "sets": sets, "globalPropertiesWritten": applied,
+        "codes": {"a": "SYN-001", "b": "SYN-002", "c": "SYN-003"},
+        "version": SYNTHETIC_VERSION,
+        "description": "synthetic (b4_catalogue.py); not ICD-10, not a facility formulary",
     }

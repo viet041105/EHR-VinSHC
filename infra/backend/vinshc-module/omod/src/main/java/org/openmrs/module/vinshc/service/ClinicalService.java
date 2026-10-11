@@ -76,6 +76,8 @@ public class ClinicalService {
 	public static final String GP_ICD10_SOURCE = "vinshc.diagnosis.icd10ConceptSourceUuid";
 	
 	public static final String GP_ICD10_VERSION = "vinshc.diagnosis.icd10CatalogueVersion";
+
+	public static final String GP_ICD10_SELECTABLE_SET = "vinshc.diagnosis.icd10SelectableConceptSetUuid";
 	
 	public static final String GP_ALLERGEN_SET_PREFIX = "vinshc.allergy.allergenConceptSetUuid.";
 	
@@ -467,6 +469,7 @@ public class ClinicalService {
 		if (concept == null || concept.getRetired())
 			throw bad("diagnosis concept does not exist or is retired");
 		icd10Code(concept);
+		setMember(conceptSet(GP_ICD10_SELECTABLE_SET), concept.getUuid(), "concept");
 		String rankCode = requiredString(body, "rank");
 		if (!"primary".equals(rankCode) && !"secondary".equals(rankCode))
 			throw bad("rank must be primary or secondary");
@@ -889,7 +892,11 @@ public class ClinicalService {
 		Map<String, Object> diagnosis = new LinkedHashMap<>();
 		diagnosis.put(GP_ICD10_SOURCE, globalProperty(GP_ICD10_SOURCE));
 		diagnosis.put(GP_ICD10_VERSION, globalProperty(GP_ICD10_VERSION));
-		diagnosis.put("ready", ready(() -> icd10Source()));
+		diagnosis.put(GP_ICD10_SELECTABLE_SET, setStatus(GP_ICD10_SELECTABLE_SET));
+		diagnosis.put("ready", ready(() -> {
+			icd10Source();
+			conceptSet(GP_ICD10_SELECTABLE_SET);
+		}));
 		status.put("diagnosis", diagnosis);
 		Map<String, Object> allergy = new LinkedHashMap<>();
 		for (String type : new String[] { "drug", "food", "environment" })

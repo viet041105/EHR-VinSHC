@@ -1,7 +1,7 @@
 {
   "fromVersion": "0.3.0",
   "toVersion": "0.3.1",
-  "basePackSha256": "9deccf54a2748ae5076228f18ec936b6e8f6ebcb79b6428196b6b1e69bd1e722",
+  "basePackSha256": "9f21f5a9b9c75360f1f4b59999bc809f8f6aefec0c7ae84d95e9224a8d450cb3",
   "entityKey": "vitals.mach",
   "entityUuid": "263e4d0b-61d2-5517-bcb1-992cfb60675b",
   "beforeLabel": "Mạch",

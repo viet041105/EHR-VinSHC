@@ -13,10 +13,10 @@ d440cfeb-e005-53f8-b1b9-64a9c2ffecfc,false,VinSHC medunit.quantity.capsule,VinSH
 20df4708-7b4f-5f95-9222-e78f4d774aa8,false,VinSHC medunit.dosageForms.tablet,VinSHC test Viên (medunit.dosageForms.tablet),Test only; key=medunit.dosageForms.tablet; v0.3.0,Misc,Text,,
 4b1941f5-1212-5497-8d8b-9b455f5cb259,false,VinSHC medunit.dosageForms.capsule,VinSHC test Viên nang (medunit.dosageForms.capsule),Test only; key=medunit.dosageForms.capsule; v0.3.0,Misc,Text,,
 771f7a8a-3e60-5cd9-808f-8607bc33931c,false,VinSHC medunit.dosageForms.liquid,VinSHC test Dung dịch (medunit.dosageForms.liquid),Test only; key=medunit.dosageForms.liquid; v0.3.0,Misc,Text,,
-655ca5ef-21c3-514e-9450-d58243ebb125,false,VinSHC medunit.frequencies.qd,VinSHC test Một lần/ngày (medunit.frequencies.qd),Test only; key=medunit.frequencies.qd; v0.3.0,Misc,Text,,
-67178298-65f0-5486-b6e9-b2fde7de27ed,false,VinSHC medunit.frequencies.bid,VinSHC test Hai lần/ngày (medunit.frequencies.bid),Test only; key=medunit.frequencies.bid; v0.3.0,Misc,Text,,
-e477e9ef-3d67-5c62-86b6-01471119e72a,false,VinSHC medunit.frequencies.tid,VinSHC test Ba lần/ngày (medunit.frequencies.tid),Test only; key=medunit.frequencies.tid; v0.3.0,Misc,Text,,
-f8583b58-8829-5b0a-a789-566e38ef7718,false,VinSHC medunit.frequencies.prn,VinSHC test Khi cần (medunit.frequencies.prn),Test only; key=medunit.frequencies.prn; v0.3.0,Misc,Text,,
+655ca5ef-21c3-514e-9450-d58243ebb125,false,VinSHC medunit.frequencies.qd,VinSHC test Một lần/ngày (medunit.frequencies.qd),Test only; key=medunit.frequencies.qd; v0.3.0,Frequency,Text,,
+67178298-65f0-5486-b6e9-b2fde7de27ed,false,VinSHC medunit.frequencies.bid,VinSHC test Hai lần/ngày (medunit.frequencies.bid),Test only; key=medunit.frequencies.bid; v0.3.0,Frequency,Text,,
+e477e9ef-3d67-5c62-86b6-01471119e72a,false,VinSHC medunit.frequencies.tid,VinSHC test Ba lần/ngày (medunit.frequencies.tid),Test only; key=medunit.frequencies.tid; v0.3.0,Frequency,Text,,
+f8583b58-8829-5b0a-a789-566e38ef7718,false,VinSHC medunit.frequencies.prn,VinSHC test Khi cần (medunit.frequencies.prn),Test only; key=medunit.frequencies.prn; v0.3.0,Frequency,Text,,
 55bb6671-7bf0-5b3f-980c-c1929eb7b485,false,VinSHC ingredient.s01-plavix-75,VinSHC test Clopidogrel base (ingredient.s01-plavix-75),Test only; key=ingredient.s01-plavix-75; v0.3.0,Drug,Text,,
 9081d504-0409-50a3-82d0-1f6a2c4afbce,false,VinSHC drugconcept.s01-plavix-75,VinSHC test Plavix 75mg (drugconcept.s01-plavix-75),Test only; key=drugconcept.s01-plavix-75; v0.3.0,Drug,Text,,
 add7d9cc-e8c1-5c6f-a5ec-d281b6522cec,false,VinSHC ingredient.s01-lipitor-20,VinSHC test Atorvastatin (ingredient.s01-lipitor-20),Test only; key=ingredient.s01-lipitor-20; v0.3.0,Drug,Text,,
@@ -51,8 +51,8 @@ d114f6a8-8a4b-5900-af8b-c9bb470c848b,false,VinSHC serviceconcept.lab-glu,VinSHC 
 e0f130e2-cf5e-5373-8bf4-6cf753de6e60,false,VinSHC serviceconcept.ecg-bed,VinSHC test Ghi điện tim cấp cứu tại giường (serviceconcept.ecg-bed),Test only; key=serviceconcept.ecg-bed; v0.3.0,Misc,Text,,
 94cafaff-8d79-588e-937d-97b6b7434b09,false,VinSHC serviceconcept.proc-test,VinSHC test Thủ thuật mô phỏng kiểm thử (serviceconcept.proc-test),Test only; key=serviceconcept.proc-test; v0.3.0,Misc,Text,,
 d4b0f211-4c8e-5ef7-bd0d-e6aa743a8b76,false,VinSHC serviceconcept.lab-panel-test,VinSHC test Panel hóa sinh kiểm thử (serviceconcept.lab-panel-test),Test only; key=serviceconcept.lab-panel-test; v0.3.0,Test,Text,,
-42ac7593-f43f-5b6e-8e82-537dd2b0950c,false,VinSHC testresult.glu,VinSHC test Glucose (testresult.glu),Test only; key=testresult.glu; v0.3.0,LabTest,Numeric,mmol/L,true
-d461b041-d1b7-5657-baf3-43d214eaed41,false,VinSHC testresult.crea,VinSHC test Creatinin (testresult.crea),Test only; key=testresult.crea; v0.3.0,LabTest,Numeric,umol/L,true
+42ac7593-f43f-5b6e-8e82-537dd2b0950c,false,VinSHC testresult.glu,VinSHC test Glucose (testresult.glu),Test only; key=testresult.glu; v0.3.0,Test,Numeric,mmol/L,true
+d461b041-d1b7-5657-baf3-43d214eaed41,false,VinSHC testresult.crea,VinSHC test Creatinin (testresult.crea),Test only; key=testresult.crea; v0.3.0,Test,Numeric,umol/L,true
 51cf5b2e-8268-5f86-80c8-e07fa7504deb,false,VinSHC diagnosiscode.e11,VinSHC test Bệnh đái tháo đường típ 2 (diagnosiscode.e11),Test only; key=diagnosiscode.e11; v0.3.0,Diagnosis,Text,,
 217f51b2-3a0d-5c5a-aa98-87ba01f3c847,false,VinSHC diagnosiscode.e11_9,"VinSHC test Bệnh đái tháo đường típ 2, không kèm biến chứng (diagnosiscode.e11_9)",Test only; key=diagnosiscode.e11_9; v0.3.0,Diagnosis,Text,,
 b4fe079c-c1ac-5dab-9615-d490a28d60f3,false,VinSHC diagnosiscode.i10,VinSHC test Bệnh tăng huyết áp vô căn (nguyên phát) (diagnosiscode.i10),Test only; key=diagnosiscode.i10; v0.3.0,Diagnosis,Text,,

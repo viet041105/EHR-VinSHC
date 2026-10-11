@@ -58,6 +58,11 @@
     <description>Version label of the approved ICD-10 catalogue, returned with every diagnosis.</description>
   </globalProperty>
   <globalProperty>
+    <property>vinshc.diagnosis.icd10SelectableConceptSetUuid</property>
+    <defaultValue></defaultValue>
+    <description>Concept set containing selectable ICD-10 diagnosis concepts.</description>
+  </globalProperty>
+  <globalProperty>
     <property>vinshc.allergy.allergenConceptSetUuid.drug</property>
     <defaultValue></defaultValue>
     <description>Concept set of approved drug allergens.</description>

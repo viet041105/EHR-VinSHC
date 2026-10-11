@@ -7,6 +7,7 @@ re-read first to prove persistence across restarts.
 
 from datetime import date, datetime, timedelta, timezone
 import json
+import os
 from pathlib import Path
 import sys
 import unittest
@@ -20,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from api_client import Client
 from common import read_settings
 import b4_catalogue
+import b4_metadata_catalogue
 
 REST = "/openmrs/ws/rest/v1"
 VINSHC = REST + "/vinshc"
@@ -38,10 +40,14 @@ class B4ClinicalTests(unittest.TestCase):
         cls.entities = json.loads(
             (ROOT / "metadata/vinshc/frontend-map.json").read_text(encoding="utf-8")
         )["entities"]
-        try:
-            cls.catalogue = b4_catalogue.ensure(cls.client)
-        except b4_catalogue.RealCatalogueConfigured as error:
-            raise unittest.SkipTest(f"Real catalogue configured; synthetic B4 suite skipped: {error}")
+        catalogue_mode = os.environ.get("VINSHC_B4_CATALOGUE", "synthetic").lower()
+        if catalogue_mode == "metadata":
+            cls.catalogue = b4_metadata_catalogue.ensure(cls.client)
+        else:
+            try:
+                cls.catalogue = b4_catalogue.ensure(cls.client)
+            except b4_catalogue.RealCatalogueConfigured as error:
+                raise unittest.SkipTest(f"Real catalogue configured; synthetic B4 suite skipped: {error}")
         cls.fixture_path = ROOT / ".runtime/fixtures/b4b-clinical.json"
         cls.previous = (json.loads(cls.fixture_path.read_text(encoding="utf-8"))
                         if cls.fixture_path.is_file() else None)
@@ -49,7 +55,7 @@ class B4ClinicalTests(unittest.TestCase):
         cls.evidence = {
             "startedAt": datetime.now(timezone.utc).isoformat(),
             "passed": False,
-            "catalogue": "synthetic (b4_catalogue.py); not ICD-10, not a facility formulary",
+            "catalogue": cls.catalogue["description"],
             "globalPropertiesWritten": cls.catalogue["globalPropertiesWritten"],
             "run": cls.ctx,
             "checks": [],
@@ -142,10 +148,10 @@ class B4ClinicalTests(unittest.TestCase):
         payload = {
             "patient": self.ctx["patientUuid"], "encounter": self.ctx["encounterUuid"],
             "orderer": self.ctx["providerUuid"], "drug": self.catalogue["drugs"][drug],
-            "dose": 1, "doseUnits": self.catalogue["tablet"], "route": self.catalogue["route"],
+            "dose": 1, "doseUnits": self.catalogue["doseUnit"], "route": self.catalogue["route"],
             "frequency": self.catalogue["frequency"], "duration": 5,
             "durationUnits": self.catalogue["days"], "quantity": 10,
-            "quantityUnits": self.catalogue["tablet"], "numRefills": 0,
+            "quantityUnits": self.catalogue["quantityUnit"], "numRefills": 0,
             "dosingInstructions": "Uống sau ăn",
         }
         payload.update(overrides)
@@ -274,8 +280,12 @@ class B4ClinicalTests(unittest.TestCase):
         status, primary = self.call(path, method="POST", payload={
             **base, "concept": dx["a"], "rank": "primary", "certainty": "confirmed"})
         self.assertEqual(status, 201, primary)
-        self.assertEqual(primary["code"], "SYN-001")
-        self.assertEqual(primary["system"]["version"], b4_catalogue.SYNTHETIC_VERSION)
+        self.assertEqual(primary["code"], self.catalogue["codes"]["a"])
+        self.assertEqual(primary["system"]["version"], self.catalogue["version"])
+        if "restricted" in dx:
+            self.rejected(path, {**base, "concept": dx["restricted"], "rank": "secondary",
+                                 "certainty": "confirmed"},
+                          "concept is not in the configured catalogue")
         self.rejected(path, {**base, "concept": dx["b"], "rank": "primary",
                              "certainty": "confirmed"}, "already has a primary diagnosis")
         self.rejected(path, {**base, "concept": dx["a"], "rank": "secondary",
