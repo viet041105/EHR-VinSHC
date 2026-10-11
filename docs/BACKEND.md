@@ -94,12 +94,12 @@ Từ 09/10/2026, BE-03, BE-07, BE-09 và BE-12 (appointments, service queues, t�
 
 **Đầu vào:** B1 và quy ước identifier từ nhóm metadata (DATA-04). **Đầu ra:** luồng patient được kiểm thử và bàn giao cho FE.
 
-- [ ] Xác định các identifier type theo [DATA_DICTIONARY.md](DATA_DICTIONARY.md#2-bệnh-nhân-và-định-danh): mã hồ sơ nội bộ của phòng khám (bắt buộc, duy nhất, hệ thống sinh), CCCD và mã BHXH/BHYT (tùy chọn, kiểm tra định dạng). Ghi nơi cấp, quy tắc bắt buộc/duy nhất và cách phát sinh mã. Nếu dùng module ID Generation, kiểm tra hành vi thật trên PostgreSQL trước khi bật trên form/API.
-- [ ] Kiểm thử tạo, đọc, cập nhật, tìm theo mã/CCCD/tên, phân trang và các trường tối thiểu. Xác nhận tạo hai bệnh nhân cùng tên vẫn là hai UUID khác nhau; trường hợp nghi trùng được phát hiện/đưa ra quy trình xử lý chứ không tự gộp. Kiểm tra tìm kiếm tên tiếng Việt có dấu.
-- [ ] Kiểm tra FHIR `Patient` có đúng identifier, tên, nguồn định danh; ghi các trường REST chưa được map hoặc có khác biệt. Kiểm tra request sai, mã trùng và người dùng không có quyền.
+- [x] Xác định các identifier type theo [DATA_DICTIONARY.md](DATA_DICTIONARY.md#2-bệnh-nhân-và-định-danh): mã hồ sơ nội bộ của phòng khám (bắt buộc, duy nhất, hệ thống sinh), CCCD và mã BHXH/BHYT (tùy chọn, kiểm tra định dạng). Ghi nơi cấp, quy tắc bắt buộc/duy nhất và cách phát sinh mã. Nếu dùng module ID Generation, kiểm tra hành vi thật trên PostgreSQL trước khi bật trên form/API. Đã cấu hình và thử IDGen tuần tự `VSHC-########` trên PostgreSQL; hợp đồng nằm trong [patient-identifier.md](api/patient-identifier.md).
+- [x] Kiểm thử tạo, đọc, cập nhật, tìm theo mã/CCCD/tên, phân trang và các trường tối thiểu. Xác nhận tạo hai bệnh nhân cùng tên vẫn là hai UUID khác nhau; trường hợp nghi trùng được phát hiện/đưa ra quy trình xử lý chứ không tự gộp. Kiểm tra tìm kiếm tên tiếng Việt có dấu. Bộ test nằm tại [`test_b2_patient.py`](../tests/integration/test_b2_patient.py).
+- [x] Kiểm tra FHIR `Patient` có đúng identifier, tên, nguồn định danh; ghi các trường REST chưa được map hoặc có khác biệt. Kiểm tra request sai, mã trùng và người dùng không có quyền. Đã ghi rõ khác biệt `identifier.system` và lỗi FHIR2 trả 500 thay vì 403 khi thiếu quyền trong [patient-identifier.md](api/patient-identifier.md).
 - [ ] Phối hợp metadata/FE để định nghĩa các trường phụ như số điện thoại, người liên hệ và quy tắc thông tin thiếu. Địa chỉ dùng danh mục tỉnh → xã hiện hành qua Address Hierarchy (DATA-08); kiểm tra cảnh báo cấu hình Address Hierarchy còn ghi trong [VALIDATION.md](VALIDATION.md#giới-hạn). Không đặt CCCD làm khóa định danh toàn mạng nếu chưa có chính sách được chốt.
 
-**Đạt khi:** tạo và tìm lại đúng một hồ sơ bằng REST, đọc được cùng UUID/identifier qua FHIR, trường hợp trùng tên và sai quyền có test.
+**Đạt khi:** tạo và tìm lại đúng một hồ sơ bằng REST, đọc được cùng UUID/identifier qua FHIR, trường hợp trùng tên và sai quyền có test. Đã đạt local ngày 11/10/2026 với 5/5 kiểm tra B2; báo cáo ở `.runtime/reports/b2-integration.json`. Mục contact person và Address Hierarchy vẫn để mở cho tới khi có contract/catalogue DATA-08.
 
 ### Mốc B3 — Visit, encounter và sinh hiệu
 

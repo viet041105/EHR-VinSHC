@@ -2,6 +2,10 @@
 
 Reference Application 3.7.1 / Core 2.8.8 needs compatibility repairs on a fresh PostgreSQL 16 database: Appointments 2.1.0 uses MySQL-only migration SQL, Hibernate reads metadata `TEXT` columns as PostgreSQL large-object OIDs (`Bad value for type long`), native ID generation references an absent `hibernate_sequence`, explicit seed IDs leave sequences behind, and two module binary columns use OIDs instead of bytes. Stock Management also performs expensive schema-wide checks. Switching only the Compose database image is insufficient.
 
+## Initializer person attribute types
+
+Initializer 2.12.0 creates `PersonAttributeType` objects without a sort weight and its documented CSV format has no sort-weight header. Core 2.8.8 unboxes that nullable value while saving, so every new person attribute type fails with `NullPointerException`. The checked-in replacement `initializer/PersonAttributeTypesCsvParser.java` preserves the upstream parser behavior and assigns `0.0` only when the value is absent. The Docker build verifies the original Initializer OMOD SHA-256 (`76aced661d7d1f980b61ab85c0feac1171f0e9fe7439a23c2fe57e716b6cf8ad`), compiles the replacement against the pinned WAR/OMOD, and replaces that class in the nested API JAR. Runtime metadata verification must confirm all configured person attribute type UUIDs after every upgrade.
+
 ## Appointments migration resources
 
 `appointments/liquibase.xml` and `patientPastAppointmentsPostgreSql.sql` backport [Bahmni PR #162](https://github.com/Bahmni/openmrs-module-appointments/pull/162), pinned to commit `8bcacb87dd8eea27a6a8e3ae108b23d4cb00a80d`. The upstream patch applies to the resources embedded in Appointments 2.1.0; its four subsequent changesets are retained. The Docker build verifies the original OMOD SHA-256 (`602e16960918893ca9b54b9b23e0a0cd0cc59c078b9d19189cf2f430b3082acd`) and replaces resources in both the OMOD and nested API JAR. Java application code is unchanged. Upstream license is included in `appointments/LICENSE`.
