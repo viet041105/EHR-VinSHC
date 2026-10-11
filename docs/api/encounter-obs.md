@@ -70,7 +70,7 @@ FE nên lấy toàn bộ UUID, gồm companion status, từ `frontend-map.json`,
 ## Dữ liệu thiếu, validation và chỉnh sửa
 
 - Khi không biết một chỉ số, chỉ ghi companion status với answer `data_status.unknown`; không tạo numeric Obs. Thiếu cả value và status có nghĩa là chưa ghi, không tự đổi thành `unknown`.
-- Core từ chối chuỗi không phải số bằng HTTP 400, nhưng vẫn nhận SpO2 101 và số âm. Vì vậy write adapter VinSHC phải thực thi `R_NUM`, `R_POS`, `R_PERCENT` và `R_BP` từ `metadata/vinshc/fields.csv`; FE validation không thay cho backend validation.
+- Core REST trực tiếp vẫn chỉ kiểm tra datatype và có thể nhận SpO2 101 hoặc số âm. Luồng ứng dụng phải dùng `POST /openmrs/ws/rest/v1/vinshc/vitals`: adapter đã thực thi `R_NUM`, `R_POS`, `R_PERCENT`, `R_BP`, quyền `VinSHC: Record vitals` và ghi group Obs native. FE validation không thay cho backend validation; không dùng Core `/obs` làm write API của ứng dụng.
 - `POST /obs/{uuid}` để sửa value tạo một Obs thay thế có UUID mới và void phiên bản cũ. Không sửa tại chỗ hoặc ghi đè lịch sử.
 - `DELETE /obs/{uuid}?reason=...` trả HTTP 204 và void bản ghi. Không hard-delete dữ liệu lâm sàng.
 - Metadata chưa định nghĩa ngưỡng bình thường/cảnh báo lâm sàng; backend không được tự suy diễn từ khoảng toán học.
@@ -83,4 +83,4 @@ FE nên lấy toàn bộ UUID, gồm companion status, từ `frontend-map.json`,
 - Coded status child có `valueCodeableConcept` với UUID answer.
 - Chưa có mapping LOINC đã nạp nên `Observation.code` hiện là UUID concept OpenMRS. Huyết áp chưa được xuất thành panel/components chuẩn. Đây là khoảng trống B3/B7, không được FE giả định đã tương thích đầy đủ FHIR Vital Signs.
 
-Bộ kiểm thử và bằng chứng: `tests/integration/test_b3_vitals.py`, `.runtime/reports/b3-integration.json`.
+Bộ kiểm thử và bằng chứng: `tests/integration/test_b3_vitals.py`, `tests/integration/test_b23_extensions.py`, `.runtime/reports/b3-integration.json` và `.runtime/reports/b23-extension-integration.json`.

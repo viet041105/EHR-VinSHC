@@ -6,6 +6,7 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | --- | --- |
 | [Session và xác thực](session-auth.md) | Runtime: đăng nhập, location, 401 |
 | [Patient và identifier](patient-identifier.md) | B2 runtime: IDGen, CRUD/search/phân trang, tên có dấu, trùng mã/tên, thuộc tính, REST–FHIR và sai quyền |
+| [Mở rộng hành chính VinSHC](patient-administration.md) | B2/B3: contacts, fieldStates, DATA-08, provenance, privilege và validated vital write |
 | [Visit và lịch sử](visit.md) | B3 runtime: mở/kết thúc, encounter, provider, lịch sử và cô lập patient |
 | [Encounter và observation](encounter-obs.md) | B3 runtime: bộ sinh hiệu chính thức, nhóm/trạng thái thiếu, sửa/void và REST–FHIR |
 | [Phiếu khám B4A](consultation.md) | B4A runtime: encounter bác sĩ, Obs khám, trạng thái thiếu, sửa và hai lượt khám |
@@ -40,4 +41,4 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 python -m unittest discover -s tests/integration -v
 ```
 
-Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b3-integration.json` và `b4a-integration.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.
+Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b23-extension-integration.json`, `b3-integration.json` và `b4a-integration.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.

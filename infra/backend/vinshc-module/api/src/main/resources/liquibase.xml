@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+  <changeSet id="vinshc-0.2.0-extension-storage" author="vinshc" dbms="postgresql">
+    <createTable tableName="vinshc_contact">
+      <column name="contact_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="row_key" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="version_number" type="INT"><constraints nullable="false"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_contact_patient"/></column>
+      <column name="full_name" type="VARCHAR(255)"/>
+      <column name="relationship_code" type="VARCHAR(64)"/>
+      <column name="relationship_name" type="VARCHAR(255)"/>
+      <column name="relationship_version" type="VARCHAR(64)"/>
+      <column name="phone_raw" type="VARCHAR(64)"/>
+      <column name="phone_normalized" type="VARCHAR(32)"/>
+      <column name="phone_normalization_status" type="VARCHAR(32)"/>
+      <column name="address_text" type="VARCHAR(2000)"/>
+      <column name="priority" type="INT"/>
+      <column name="is_primary" type="BOOLEAN"><constraints nullable="false"/></column>
+      <column name="emergency_contact" type="BOOLEAN"><constraints nullable="false"/></column>
+      <column name="linked_person_id" type="INT"/>
+      <column name="source_kind" type="VARCHAR(32)"/><column name="source_document_uuid" type="VARCHAR(38)"/>
+      <column name="source_page" type="VARCHAR(64)"/><column name="source_reference" type="VARCHAR(255)"/>
+      <column name="recorded_at" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="status" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="void_reason" type="VARCHAR(1000)"/>
+      <column name="is_current" type="BOOLEAN"><constraints nullable="false"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_contact_creator"/></column>
+      <column name="date_created" type="TIMESTAMP"><constraints nullable="false"/></column>
+    </createTable>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_contact_current ON vinshc_contact(row_key) WHERE is_current</sql>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_contact_primary ON vinshc_contact(patient_id) WHERE is_current AND status='active' AND is_primary</sql>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_contact_priority ON vinshc_contact(patient_id, priority) WHERE is_current AND status='active'</sql>
+    <createIndex tableName="vinshc_contact" indexName="ix_vinshc_contact_patient"><column name="patient_id"/><column name="is_current"/></createIndex>
+
+    <createTable tableName="vinshc_field_state">
+      <column name="field_state_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="version_number" type="INT"><constraints nullable="false"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_state_patient"/></column>
+      <column name="field_code" type="VARCHAR(128)"><constraints nullable="false"/></column>
+      <column name="row_key" type="VARCHAR(38)"/>
+      <column name="context" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="data_status" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="source_kind" type="VARCHAR(32)"/><column name="source_reference" type="VARCHAR(255)"/>
+      <column name="recorded_at" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="is_current" type="BOOLEAN"><constraints nullable="false"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_state_creator"/></column>
+      <column name="date_created" type="TIMESTAMP"><constraints nullable="false"/></column>
+    </createTable>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_state_current ON vinshc_field_state(patient_id, field_code, context, COALESCE(row_key, '')) WHERE is_current</sql>
+    <createIndex tableName="vinshc_field_state" indexName="ix_vinshc_state_patient"><column name="patient_id"/><column name="is_current"/></createIndex>
+
+    <createTable tableName="vinshc_address_snapshot">
+      <column name="address_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="row_key" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="version_number" type="INT"><constraints nullable="false"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_address_patient"/></column>
+      <column name="address_text" type="VARCHAR(2000)"/>
+      <column name="legacy_address_text" type="VARCHAR(2000)"/>
+      <column name="province_code" type="VARCHAR(2)"/><column name="province_name" type="VARCHAR(255)"/>
+      <column name="commune_code" type="VARCHAR(5)"/><column name="commune_name" type="VARCHAR(255)"/>
+      <column name="catalogue_version" type="VARCHAR(64)"/><column name="address_as_of_date" type="DATE"/>
+      <column name="source_kind" type="VARCHAR(32)"/><column name="source_reference" type="VARCHAR(255)"/>
+      <column name="recorded_at" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="status" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="void_reason" type="VARCHAR(1000)"/><column name="is_current" type="BOOLEAN"><constraints nullable="false"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_address_creator"/></column>
+      <column name="date_created" type="TIMESTAMP"><constraints nullable="false"/></column>
+    </createTable>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_address_current ON vinshc_address_snapshot(row_key) WHERE is_current</sql>
+    <createIndex tableName="vinshc_address_snapshot" indexName="ix_vinshc_address_patient"><column name="patient_id"/><column name="is_current"/></createIndex>
+  </changeSet>
+  <changeSet id="vinshc-0.2.1-complete-source-provenance" author="vinshc" dbms="postgresql">
+    <addColumn tableName="vinshc_contact">
+      <column name="source_row_code" type="VARCHAR(255)"/>
+    </addColumn>
+    <addColumn tableName="vinshc_field_state">
+      <column name="source_document_uuid" type="VARCHAR(38)"/>
+      <column name="source_page" type="VARCHAR(64)"/>
+      <column name="source_row_code" type="VARCHAR(255)"/>
+    </addColumn>
+    <addColumn tableName="vinshc_address_snapshot">
+      <column name="source_document_uuid" type="VARCHAR(38)"/>
+      <column name="source_page" type="VARCHAR(64)"/>
+      <column name="source_row_code" type="VARCHAR(255)"/>
+    </addColumn>
+  </changeSet>
+</databaseChangeLog>
