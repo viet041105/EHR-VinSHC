@@ -1,0 +1,184 @@
+{
+  "version": "0.2.0",
+  "status": "metadata_contract_ready_not_deployed_adapter",
+  "contacts": {
+    "collection": "contacts[]",
+    "cardinality": "0..n",
+    "maxRowsPerRequest": 100,
+    "countPolicy": "0..n contacts per patient; request cap is transport protection, not clinical limit",
+    "rowKey": "Server-assigned immutable canonical lowercase UUID; never array index/name/phone. Existing rowKey belongs to exact patient. Client new-row keys are remapped atomically by server.",
+    "primary": "0..1 active isPrimary=true; when voiding primary, no automatic promotion; replacement selection is audited",
+    "emergency": "0..n active emergencyContact=true, independent of isPrimary. No auto dial/message",
+    "priority": "positive integer <=9999, unique among active rows; sort by priority then rowKey; void rows excluded",
+    "statusValues": [
+      "active",
+      "void"
+    ],
+    "voidPolicy": "Requires voidReason, actor and time. Retain rowKey/history; no hard delete; does not void linked Person",
+    "personLinkPolicy": "Administrative record by default. linkedPersonUuid is optional explicitly selected existing Person after access/existence check; no auto create Person/Patient, no merge by contact name/phone. Link does not grant chart access.",
+    "requiredOnActive": [
+      "rowKey",
+      "fullName",
+      "priority",
+      "isPrimary",
+      "emergencyContact",
+      "status",
+      "source",
+      "recordedAt",
+      "phoneNormalizationStatus"
+    ],
+    "defaultsForNewRows": {
+      "isPrimary": false,
+      "emergencyContact": false,
+      "status": "active"
+    },
+    "propertyToFieldCode": {
+      "fullName": "contact.ho_ten",
+      "relationshipCode": "contact.quan_he",
+      "phone": "contact.dien_thoai",
+      "addressText": "contact.dia_chi",
+      "rowKey": "contact.row_key",
+      "phoneNormalized": "contact.dien_thoai_chuan_hoa",
+      "phoneNormalizationStatus": "contact.trang_thai_chuan_hoa_dien_thoai",
+      "priority": "contact.uu_tien",
+      "isPrimary": "contact.lien_he_chinh",
+      "emergencyContact": "contact.lien_he_khan_cap",
+      "status": "contact.trang_thai",
+      "linkedPersonUuid": "contact.person_lien_ket_uuid",
+      "source": "contact.nguon",
+      "recordedAt": "contact.thoi_diem_ghi_nhan",
+      "voidReason": "contact.ly_do_void",
+      "relationshipVersion": "contact.quan_he_phien_ban",
+      "relationshipName": "contact.quan_he_nhan"
+    },
+    "fieldLimits": {
+      "fullName": 255,
+      "addressText": 2000,
+      "voidReason": 1000,
+      "phone": 64
+    },
+    "relationshipCatalogue": "metadata/vinshc/catalogues/contact-relationships.json",
+    "source": {
+      "required": [
+        "kind",
+        "recordedAt"
+      ],
+      "kindValues": [
+        "manual",
+        "paper",
+        "legacy_import",
+        "migration",
+        "api"
+      ],
+      "optional": [
+        "documentUuid",
+        "page",
+        "sourceRowCode",
+        "sourceReference"
+      ],
+      "rules": "paper requires documentUuid/page; legacy_import/migration require sourceReference; actor from authenticated server session; source time is not clinical time"
+    },
+    "patch": "Omitted row/property leaves unchanged. Explicit row void or primary reassignment is audited; reject duplicate rowKey and cross-patient reference.",
+    "relationshipSnapshot": "If relationshipCode has a value, server saves relationshipName and relationshipVersion from selected reviewed catalogue; if code is null, both snapshots are null. Existing snapshots remain unchanged on catalogue updates."
+  },
+  "fieldStates": {
+    "fields": "Per-field b2Missing policy in pack.json, generated docs/data/B2_FIELD_STATES.md",
+    "requiredProperties": [
+      "fieldCode",
+      "rowKey",
+      "context",
+      "dataStatus",
+      "source",
+      "recordedAt"
+    ],
+    "contextValues": [
+      "patient",
+      "contact",
+      "identifier",
+      "address"
+    ],
+    "rowKey": "null only for patient singleton. contact/identifier/address use stable UUID for the repeated row; not ordinal",
+    "source": "Same provenance schema as contacts.source; actor set by server",
+    "invariants": [
+      "field_states: explicit null requires exactly one matching reason; value and reason cannot coexist",
+      "null_only: null/absent allowed, fieldStates forbidden",
+      "forbidden: value required when applicable; fieldStates/null forbidden",
+      "PATCH omission leaves stored value and state unchanged; clearing value requires null plus permitted state",
+      "POST omitted optional field may be initialized as not_recorded by server with source.kind=api and sourceReference=server:registration:default_missing; never assumed not_asked/unknown/negative",
+      "Absent optional collection is empty, no invented placeholder contact; collection null rejected",
+      "Changing back to value clears current missing reason atomically; preserve audit history"
+    ]
+  },
+  "phone": {
+    "rawProperty": "phone",
+    "normalizedProperty": "phoneNormalized",
+    "statusProperty": "phoneNormalizationStatus",
+    "defaultCountry": "VN",
+    "countryCallingCode": "84",
+    "keepRaw": true,
+    "normalization": "Remove ASCII spaces, dots, hyphens and parentheses for parsing only. VN domestic 0 + 9/10 significant digits => +84; 0084 => +84; +international retains code. Never prepend +84 to ambiguous bare digits.",
+    "vnSyntax": "^\\+84[1-9][0-9]{8,9}$",
+    "internationalSyntax": "^\\+[1-9][0-9]{7,14}$",
+    "scope": "Application syntax, not allocated-prefix/ownership/reachability verification; international minimum length is project policy, E.164 maximum is 15 digits",
+    "legacyInvalid": "Keep raw; normalized=null and needs_review. New manual input must pass syntax. Empty/unknown/refused has raw=null, normalized=null, missing status plus fieldStates for raw field.",
+    "identity": "Phone is searchable only with proper access; never automatic patient merge/key",
+    "sources": [
+      "https://www.itu.int/oth/T02020000E4/en",
+      "https://www.itu.int/rec/T-REC-E.164"
+    ]
+  },
+  "identifierSystems": {
+    "identifier.internal": {
+      "system": "urn:uuid:ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "identifierTypeUuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.cccd": {
+      "system": "urn:uuid:4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+      "identifierTypeUuid": "4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.bhxh": {
+      "system": "urn:uuid:d7902062-a695-5bf3-8764-acf7f43e3238",
+      "identifierTypeUuid": "d7902062-a695-5bf3-8764-acf7f43e3238",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.bhyt": {
+      "system": "urn:uuid:e2b901c3-d442-565b-bff5-841aff260d2d",
+      "identifierTypeUuid": "e2b901c3-d442-565b-bff5-841aff260d2d",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    }
+  },
+  "address": {
+    "catalogue": "metadata/vinshc/catalogues/address-vn-19-2025.json",
+    "codeTypes": "strings: province 2 digits, commune 5 digits",
+    "hierarchy": "province -> commune (ward/commune/special zone); no required district layer for this version",
+    "selection": "exact code+version+asOfDate; commune.parentCode must match provinceCode; never match by name alone",
+    "snapshotRequired": [
+      "rowKey",
+      "addressText",
+      "legacyAddressText",
+      "provinceCode",
+      "provinceName",
+      "communeCode",
+      "communeName",
+      "catalogueVersion",
+      "addressAsOfDate",
+      "recordedAt",
+      "source"
+    ],
+    "nullPolicy": "Raw-only historic/unknown address allowed: codes and catalogueVersion null, no fake code; retain raw and review reason. Current coded address requires supplied version/date",
+    "history": "Freeze labels/raw/legacy/version per recorded address. Catalogue upgrade never updates old clinical/address snapshots",
+    "legacy": "legacyMappings entries need prior code+version, target code+version, mappingType, evidence, effectiveFrom/To and review. Splits can be one-to-many. Empty list means no verified conversion, not absence of predecessors",
+    "retirement": "Reject new coded selections outside version/effective interval. Allow historic read with original version. Unknown effectiveTo is not proof of perpetual legal validity",
+    "productionGate": "Confirm pinned version against official amendments and supply any required legacy conversions before pilot"
+  }
+}

@@ -27,25 +27,42 @@ Nguồn S01 là nhãn/cấu trúc liên quan, không chứng minh field hệ th�
 | `patient.do_chinh_xac_ngay_sinh`<br>Độ chính xác ngày sinh | coded | on_create / 1 | person_attribute: person.attributes[].value<br>`6abda66e-da8a-5cd6-bd91-fa4199332d9f` | birth_precision<br>R_CHOICE, R_DOB | K05 (tr. 1); K06 (tr. 5) |
 | `patient.nam_sinh`<br>Năm sinh | integer | if_birth_precision_year_or_month / 0..1 | person_attribute: person.attributes[].value<br>`e87a0244-d7e5-5f32-915c-96be9320a0bb` | —<br>R_DOB | K06 (tr. 5) |
 | `patient.thang_sinh`<br>Tháng sinh | integer | if_birth_precision_month / 0..1 | person_attribute: person.attributes[].value<br>`8a36009d-bebd-5d87-b625-f35f55e165d3` | —<br>R_DOB | K05 (tr. 1) |
-| `patient.dien_thoai`<br>Điện thoại người bệnh | text | optional / 0..1 | person_attribute: person.attributes[].value<br>`1aeef034-d2a0-56b4-a4c8-d856f17dc261` | —<br>R_ID | MVP / hệ thống bổ sung |
+| `patient.dien_thoai`<br>Điện thoại người bệnh | text | optional / 0..1 | person_attribute: person.attributes[].value<br>`1aeef034-d2a0-56b4-a4c8-d856f17dc261` | —<br>R_PHONE | MVP / hệ thống bổ sung |
 | Ghi chú | Không lấy điện thoại người nhà K29 thay điện thoại người bệnh; chuỗi giữ +/0, xác minh riêng. | | | | |
 | `patient.nghe_nghiep`<br>Nghề nghiệp nguyên văn | text | optional / 0..1 | person_attribute: person.attributes[].value<br>`f3dbdece-1705-5587-a3f9-eb492606fc8b` | —<br>R_TEXT | K09 (tr. 1, 5) |
 | `patient.dia_chi`<br>Địa chỉ có cấu trúc | object | optional / 0..n | native: Person.addresses[] | —<br>R_ADDRESS | K15 (tr. 1); K16 (tr. 1); K17 (tr. 1); K19 (tr. 1) |
 | Ghi chú | address1/cityVillage/stateProvince tương thích Core; mã tỉnh/xã và phiên bản cần extension/hierarchy được BE kiểm chứng. | | | | |
 | `patient.dia_chi_nguon`<br>Địa chỉ nguyên văn | text | optional / 0..1 | person_attribute: person.attributes[].value<br>`b0591671-9096-5c68-a12b-a334646b8856` | —<br>R_ADDRESS | K20 (tr. 5) |
 | `patient.dia_chi_cu`<br>Địa chỉ theo giấy tờ cũ | text | optional / 0..1 | person_attribute: person.attributes[].value<br>`3437b782-2af8-5e10-85fb-87b8335b0821` | —<br>R_ADDRESS | K18 (tr. 1); K20 (tr. 5) |
+| `patient.dien_thoai_chuan_hoa`<br>Điện thoại chuẩn hóa | text | optional / 0..1 | adapter_contract: PatientIdentity.phoneNormalized | —<br>R_PHONE | MVP / hệ thống bổ sung |
+| `patient.trang_thai_chuan_hoa_dien_thoai`<br>Trạng thái chuẩn hóa điện thoại | coded | on_create / 1 | adapter_contract: PatientIdentity.phoneNormalizationStatus | phone_normalization_status<br>R_CHOICE | MVP / hệ thống bổ sung |
 ## contact
 
 | Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
 | --- | --- | --- | --- | --- | --- |
-| `contact.ho_ten`<br>Tên người liên hệ | text | optional / 0..n | adapter_contract: PatientIdentity.contacts[].ho_ten | —<br>R_TEXT | K27 (tr. 1, 5) |
-| Ghi chú | Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà. | | | | |
-| `contact.quan_he`<br>Quan hệ với bệnh nhân | text | optional / 0..n | adapter_contract: PatientIdentity.contacts[].quan_he | —<br>R_TEXT | K30 (tr. 125, 149) |
-| Ghi chú | Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà. | | | | |
-| `contact.dien_thoai`<br>Điện thoại người liên hệ | text | optional / 0..n | adapter_contract: PatientIdentity.contacts[].dien_thoai | —<br>R_TEXT | K29 (tr. 1, 5) |
-| Ghi chú | Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà. | | | | |
-| `contact.dia_chi`<br>Địa chỉ người liên hệ | text | optional / 0..n | adapter_contract: PatientIdentity.contacts[].dia_chi | —<br>R_TEXT | K28 (tr. 1, 5) |
-| Ghi chú | Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà. | | | | |
+| `contact.ho_ten`<br>Tên người liên hệ | text | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].fullName | —<br>R_TEXT, R_CONTACT | K27 (tr. 1, 5) |
+| Ghi chú | Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n. Không tự tạo Patient cho người nhà. | | | | |
+| `contact.quan_he`<br>Quan hệ với bệnh nhân | coded | optional / 0..1 | adapter_contract: PatientIdentity.contacts[].relationshipCode | contact_relationship<br>R_CHOICE, R_CONTACT | K30 (tr. 125, 149) |
+| Ghi chú | Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n. | | | | |
+| `contact.dien_thoai`<br>Điện thoại người liên hệ | text | optional / 0..1 | adapter_contract: PatientIdentity.contacts[].phone | —<br>R_PHONE, R_CONTACT | K29 (tr. 1, 5) |
+| Ghi chú | Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n. | | | | |
+| `contact.dia_chi`<br>Địa chỉ người liên hệ | text | optional / 0..1 | adapter_contract: PatientIdentity.contacts[].addressText | —<br>R_ADDRESS, R_CONTACT | K28 (tr. 1, 5) |
+| Ghi chú | Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n. | | | | |
+| `contact.row_key`<br>Khóa dòng người liên hệ | uuid | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].rowKey | —<br>R_UUID | MVP / hệ thống bổ sung |
+| `contact.dien_thoai_chuan_hoa`<br>Điện thoại liên hệ chuẩn hóa | text | optional / 0..1 | adapter_contract: PatientIdentity.contacts[].phoneNormalized | —<br>R_PHONE | MVP / hệ thống bổ sung |
+| `contact.trang_thai_chuan_hoa_dien_thoai`<br>Trạng thái chuẩn hóa điện thoại liên hệ | coded | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].phoneNormalizationStatus | phone_normalization_status<br>R_CHOICE | MVP / hệ thống bổ sung |
+| `contact.uu_tien`<br>Thứ tự ưu tiên liên hệ | integer | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].priority | —<br>R_POS, R_CONTACT | MVP / hệ thống bổ sung |
+| `contact.lien_he_chinh`<br>Người liên hệ chính | boolean | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].isPrimary | —<br>R_CONTACT | MVP / hệ thống bổ sung |
+| `contact.lien_he_khan_cap`<br>Người liên hệ khẩn cấp | boolean | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].emergencyContact | —<br>R_CONTACT | MVP / hệ thống bổ sung |
+| `contact.trang_thai`<br>Trạng thái bản ghi liên hệ | coded | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].status | contact_status<br>R_CHOICE | MVP / hệ thống bổ sung |
+| `contact.person_lien_ket_uuid`<br>Person đã tồn tại được liên kết | uuid | optional / 0..1 | adapter_contract: PatientIdentity.contacts[].linkedPersonUuid | —<br>R_UUID, R_CONTACT | MVP / hệ thống bổ sung |
+| `contact.nguon`<br>Nguồn ghi nhận liên hệ | object | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].source | —<br>R_PROVENANCE | MVP / hệ thống bổ sung |
+| `contact.thoi_diem_ghi_nhan`<br>Thời điểm ghi nhận liên hệ | datetime | on_contact_create / 1 | adapter_contract: PatientIdentity.contacts[].recordedAt | —<br>R_TIME, R_PROVENANCE | MVP / hệ thống bổ sung |
+| `contact.ly_do_void`<br>Lý do hủy bản ghi liên hệ | text | if_contact_void / 0..1 | adapter_contract: PatientIdentity.contacts[].voidReason | —<br>R_TEXT, R_FINAL | MVP / hệ thống bổ sung |
+| `contact.quan_he_phien_ban`<br>Phiên bản quan hệ liên hệ | text | optional / 0..1 | adapter_contract: PatientIdentity.contacts[].relationshipVersion | —<br>R_CHOICE, R_FINAL | MVP / hệ thống bổ sung |
+| Ghi chú | Snapshot code/name/version khi ghi contact; không ghi đè khi catalogue đổi nhãn. | | | | |
+| `contact.quan_he_nhan`<br>Nhãn quan hệ khi ghi nhận | text | optional / 0..1 | adapter_contract: PatientIdentity.contacts[].relationshipName | —<br>R_CHOICE, R_FINAL | MVP / hệ thống bổ sung |
+| Ghi chú | Snapshot code/name/version khi ghi contact; không ghi đè khi catalogue đổi nhãn. | | | | |
 ## visit
 
 | Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |

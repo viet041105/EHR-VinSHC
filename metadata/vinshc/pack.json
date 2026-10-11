@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "version": "0.1.0",
-  "date": "2026-10-10",
+  "version": "0.2.0",
+  "date": "2026-10-11",
   "namespaceSeed": "https://github.com/viet041105/EHR-VinSHC/metadata",
   "scope": {
     "mvp1": "Ngoại trú: đăng ký, tiếp nhận, sinh hiệu, khám, dị ứng, chẩn đoán, kê đơn, kết thúc và lịch sử.",
@@ -823,9 +823,9 @@
         "kind": "native",
         "path": "Patient.uuid",
         "missingState": {
-          "kind": "provenance_adapter_contract",
-          "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -836,7 +836,16 @@
       ],
       "sourceRows": [],
       "sourceKind": "mvp_or_system",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "server_generated"
+      }
     },
     {
       "code": "patient.ma_noi_bo",
@@ -851,9 +860,9 @@
         "path": "Patient.identifiers[]",
         "uuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34",
         "missingState": {
-          "kind": "provenance_adapter_contract",
-          "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -866,7 +875,16 @@
       ],
       "sourceKind": "sample_or_derived",
       "description": "",
-      "example": "NB-GIA-000001"
+      "example": "NB-GIA-000001",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "on_create"
+      }
     },
     {
       "code": "patient.cccd",
@@ -881,9 +899,9 @@
         "path": "Patient.identifiers[]",
         "uuid": "4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -895,7 +913,24 @@
         "K21"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "Chỉ loại CCCD 12 số; CMND/hộ chiếu là identifier type khác nếu nhóm mở rộng."
+      "description": "Chỉ loại CCCD 12 số; CMND/hộ chiếu là identifier type khác nếu nhóm mở rộng.",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.ma_bhxh",
@@ -910,9 +945,9 @@
         "path": "Patient.identifiers[]",
         "uuid": "d7902062-a695-5bf3-8764-acf7f43e3238",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -922,7 +957,24 @@
       ],
       "sourceRows": [],
       "sourceKind": "mvp_or_system",
-      "description": "Tách riêng BHXH và số thẻ BHYT; chưa hardcode quy tắc nghiệp vụ khi chưa có danh mục phiên bản."
+      "description": "Tách riêng BHXH và số thẻ BHYT; chưa hardcode quy tắc nghiệp vụ khi chưa có danh mục phiên bản.",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.ma_bhyt",
@@ -937,9 +989,9 @@
         "path": "Patient.identifiers[]",
         "uuid": "e2b901c3-d442-565b-bff5-841aff260d2d",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -951,7 +1003,24 @@
         "K24"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "identifier",
+        "rowKeyRequired": true,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.ho_ten",
@@ -964,9 +1033,9 @@
         "kind": "native",
         "path": "Person.names[]",
         "missingState": {
-          "kind": "provenance_adapter_contract",
-          "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -979,7 +1048,16 @@
         "K04"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "Giữ tên hiển thị; adapter tách familyName/givenName/middleName, không đảo từ và không dùng tên làm khóa."
+      "description": "Giữ tên hiển thị; adapter tách familyName/givenName/middleName, không đảo từ và không dùng tên làm khóa.",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "on_create"
+      }
     },
     {
       "code": "patient.gioi_tinh",
@@ -992,9 +1070,9 @@
         "kind": "native",
         "path": "Person.gender",
         "missingState": {
-          "kind": "provenance_adapter_contract",
-          "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1006,7 +1084,16 @@
         "K08"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "Adapter xác nhận M/F/O/U trên baseline; không suy từ tên. FHIR male/female/other/unknown là mapping đích."
+      "description": "Adapter xác nhận M/F/O/U trên baseline; không suy từ tên. FHIR male/female/other/unknown là mapping đích.",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "on_create"
+      }
     },
     {
       "code": "patient.ngay_sinh",
@@ -1019,9 +1106,9 @@
         "kind": "native",
         "path": "Person.birthdate",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1034,7 +1121,24 @@
         "K05"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "if_birth_precision_day"
+      }
     },
     {
       "code": "patient.ngay_sinh_uoc_luong",
@@ -1047,9 +1151,9 @@
         "kind": "native",
         "path": "Person.birthdateEstimated",
         "missingState": {
-          "kind": "provenance_adapter_contract",
-          "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1059,7 +1163,16 @@
       ],
       "sourceRows": [],
       "sourceKind": "mvp_or_system",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.ngay_sinh_nguon",
@@ -1074,9 +1187,9 @@
         "path": "person.attributes[].value",
         "uuid": "a4e0addf-5506-52d0-a6a8-d139d663d251",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1090,7 +1203,23 @@
       ],
       "sourceKind": "sample_or_derived",
       "description": "",
-      "example": "1990"
+      "example": "1990",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.do_chinh_xac_ngay_sinh",
@@ -1105,9 +1234,9 @@
         "path": "person.attributes[].value",
         "uuid": "6abda66e-da8a-5cd6-bd91-fa4199332d9f",
         "missingState": {
-          "kind": "provenance_adapter_contract",
-          "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1121,7 +1250,16 @@
         "K06"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "on_create"
+      }
     },
     {
       "code": "patient.nam_sinh",
@@ -1136,9 +1274,9 @@
         "path": "person.attributes[].value",
         "uuid": "e87a0244-d7e5-5f32-915c-96be9320a0bb",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1150,7 +1288,24 @@
         "K06"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "if_birth_precision_year_or_month"
+      }
     },
     {
       "code": "patient.thang_sinh",
@@ -1165,9 +1320,9 @@
         "path": "person.attributes[].value",
         "uuid": "8a36009d-bebd-5d87-b625-f35f55e165d3",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1179,7 +1334,24 @@
         "K05"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "if_birth_precision_month"
+      }
     },
     {
       "code": "patient.dien_thoai",
@@ -1194,19 +1366,36 @@
         "path": "person.attributes[].value",
         "uuid": "1aeef034-d2a0-56b4-a4c8-d856f17dc261",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
       "codeList": null,
       "rules": [
-        "R_ID"
+        "R_PHONE"
       ],
       "sourceRows": [],
       "sourceKind": "mvp_or_system",
-      "description": "Không lấy điện thoại người nhà K29 thay điện thoại người bệnh; chuỗi giữ +/0, xác minh riêng."
+      "description": "Không lấy điện thoại người nhà K29 thay điện thoại người bệnh; chuỗi giữ +/0, xác minh riêng.",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.nghe_nghiep",
@@ -1221,9 +1410,9 @@
         "path": "person.attributes[].value",
         "uuid": "f3dbdece-1705-5587-a3f9-eb492606fc8b",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1235,7 +1424,23 @@
         "K09"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.dia_chi",
@@ -1248,9 +1453,9 @@
         "kind": "native",
         "path": "Person.addresses[]",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1265,7 +1470,24 @@
         "K19"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "address1/cityVillage/stateProvince tương thích Core; mã tỉnh/xã và phiên bản cần extension/hierarchy được BE kiểm chứng."
+      "description": "address1/cityVillage/stateProvince tương thích Core; mã tỉnh/xã và phiên bản cần extension/hierarchy được BE kiểm chứng.",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "address",
+        "rowKeyRequired": true,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.dia_chi_nguon",
@@ -1280,9 +1502,9 @@
         "path": "person.attributes[].value",
         "uuid": "b0591671-9096-5c68-a12b-a334646b8856",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1294,7 +1516,23 @@
         "K20"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "patient.dia_chi_cu",
@@ -1309,9 +1547,9 @@
         "path": "person.attributes[].value",
         "uuid": "3437b782-2af8-5e10-85fb-87b8335b0821",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
@@ -1324,119 +1562,730 @@
         "K20"
       ],
       "sourceKind": "sample_or_derived",
-      "description": ""
+      "description": "",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
+    },
+    {
+      "code": "patient.dien_thoai_chuan_hoa",
+      "label": "Điện thoại chuẩn hóa",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.phoneNormalized",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "null_only",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PHONE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "null_only",
+        "allowedStates": [],
+        "nullable": true,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "optional"
+      }
+    },
+    {
+      "code": "patient.trang_thai_chuan_hoa_dien_thoai",
+      "label": "Trạng thái chuẩn hóa điện thoại",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.phoneNormalizationStatus",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": "phone_normalization_status",
+      "rules": [
+        "R_CHOICE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "patient",
+        "rowKeyRequired": false,
+        "sourceRequired": false,
+        "conditionalRequired": "on_create"
+      }
     },
     {
       "code": "contact.ho_ten",
       "label": "Tên người liên hệ",
       "dataType": "text",
       "mvp": "MVP-1",
-      "cardinality": "0..n",
-      "required": "optional",
+      "cardinality": "1",
+      "required": "on_contact_create",
       "storage": {
         "kind": "adapter_contract",
-        "path": "PatientIdentity.contacts[].ho_ten",
-        "verification": "B1/B4/B8 required; not native REST schema",
+        "path": "PatientIdentity.contacts[].fullName",
+        "verification": "B2 adapter contract; persistence and runtime round-trip still required.",
         "missingState": {
-          "kind": "provenance_adapter_contract",
-          "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
       "codeList": null,
       "rules": [
-        "R_TEXT"
+        "R_TEXT",
+        "R_CONTACT"
       ],
       "sourceRows": [
         "K27"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+      "description": "Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n. Không tự tạo Patient cho người nhà.",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
     },
     {
       "code": "contact.quan_he",
       "label": "Quan hệ với bệnh nhân",
-      "dataType": "text",
+      "dataType": "coded",
       "mvp": "MVP-1",
-      "cardinality": "0..n",
+      "cardinality": "0..1",
       "required": "optional",
       "storage": {
         "kind": "adapter_contract",
-        "path": "PatientIdentity.contacts[].quan_he",
-        "verification": "B1/B4/B8 required; not native REST schema",
+        "path": "PatientIdentity.contacts[].relationshipCode",
+        "verification": "B2 adapter contract; persistence and runtime round-trip still required.",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
-      "codeList": null,
+      "codeList": "contact_relationship",
       "rules": [
-        "R_TEXT"
+        "R_CHOICE",
+        "R_CONTACT"
       ],
       "sourceRows": [
         "K30"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+      "description": "Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n.",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "contact.dien_thoai",
       "label": "Điện thoại người liên hệ",
       "dataType": "text",
       "mvp": "MVP-1",
-      "cardinality": "0..n",
+      "cardinality": "0..1",
       "required": "optional",
       "storage": {
         "kind": "adapter_contract",
-        "path": "PatientIdentity.contacts[].dien_thoai",
-        "verification": "B1/B4/B8 required; not native REST schema",
+        "path": "PatientIdentity.contacts[].phone",
+        "verification": "B2 adapter contract; persistence and runtime round-trip still required.",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
       "codeList": null,
       "rules": [
-        "R_TEXT"
+        "R_PHONE",
+        "R_CONTACT"
       ],
       "sourceRows": [
         "K29"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+      "description": "Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n.",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "contact.dia_chi",
       "label": "Địa chỉ người liên hệ",
       "dataType": "text",
       "mvp": "MVP-1",
-      "cardinality": "0..n",
+      "cardinality": "0..1",
       "required": "optional",
       "storage": {
         "kind": "adapter_contract",
-        "path": "PatientIdentity.contacts[].dia_chi",
-        "verification": "B1/B4/B8 required; not native REST schema",
+        "path": "PatientIdentity.contacts[].addressText",
+        "verification": "B2 adapter contract; persistence and runtime round-trip still required.",
         "missingState": {
-          "kind": "provenance_adapter_contract",
+          "kind": "field_states",
           "path": "fieldStates[].dataStatus",
-          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
         }
       },
       "unit": null,
       "codeList": null,
       "rules": [
-        "R_TEXT"
+        "R_ADDRESS",
+        "R_CONTACT"
       ],
       "sourceRows": [
         "K28"
       ],
       "sourceKind": "sample_or_derived",
-      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+      "description": "Một giá trị trong mỗi contacts[] row; toàn bộ collection 0..n.",
+      "b2Missing": {
+        "mode": "field_states",
+        "allowedStates": [
+          "not_recorded",
+          "not_asked",
+          "unknown",
+          "refused",
+          "not_applicable",
+          "masked",
+          "unreadable"
+        ],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": true,
+        "conditionalRequired": "optional"
+      }
+    },
+    {
+      "code": "contact.row_key",
+      "label": "Khóa dòng người liên hệ",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].rowKey",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.dien_thoai_chuan_hoa",
+      "label": "Điện thoại liên hệ chuẩn hóa",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].phoneNormalized",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "null_only",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PHONE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "null_only",
+        "allowedStates": [],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "optional"
+      }
+    },
+    {
+      "code": "contact.trang_thai_chuan_hoa_dien_thoai",
+      "label": "Trạng thái chuẩn hóa điện thoại liên hệ",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].phoneNormalizationStatus",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": "phone_normalization_status",
+      "rules": [
+        "R_CHOICE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.uu_tien",
+      "label": "Thứ tự ưu tiên liên hệ",
+      "dataType": "integer",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].priority",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_POS",
+        "R_CONTACT"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.lien_he_chinh",
+      "label": "Người liên hệ chính",
+      "dataType": "boolean",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].isPrimary",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_CONTACT"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.lien_he_khan_cap",
+      "label": "Người liên hệ khẩn cấp",
+      "dataType": "boolean",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].emergencyContact",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_CONTACT"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.trang_thai",
+      "label": "Trạng thái bản ghi liên hệ",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].status",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": "contact_status",
+      "rules": [
+        "R_CHOICE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.person_lien_ket_uuid",
+      "label": "Person đã tồn tại được liên kết",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].linkedPersonUuid",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "null_only",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_CONTACT"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "null_only",
+        "allowedStates": [],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "optional"
+      }
+    },
+    {
+      "code": "contact.nguon",
+      "label": "Nguồn ghi nhận liên hệ",
+      "dataType": "object",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].source",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PROVENANCE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.thoi_diem_ghi_nhan",
+      "label": "Thời điểm ghi nhận liên hệ",
+      "dataType": "datetime",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_contact_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].recordedAt",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "forbidden",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TIME",
+        "R_PROVENANCE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "forbidden",
+        "allowedStates": [],
+        "nullable": false,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "on_contact_create"
+      }
+    },
+    {
+      "code": "contact.ly_do_void",
+      "label": "Lý do hủy bản ghi liên hệ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "if_contact_void",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].voidReason",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "null_only",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "b2Missing": {
+        "mode": "null_only",
+        "allowedStates": [],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "if_contact_void"
+      }
+    },
+    {
+      "code": "contact.quan_he_phien_ban",
+      "label": "Phiên bản quan hệ liên hệ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].relationshipVersion",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "null_only",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_CHOICE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot code/name/version khi ghi contact; không ghi đè khi catalogue đổi nhãn.",
+      "b2Missing": {
+        "mode": "null_only",
+        "allowedStates": [],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "optional"
+      }
+    },
+    {
+      "code": "contact.quan_he_nhan",
+      "label": "Nhãn quan hệ khi ghi nhận",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].relationshipName",
+        "verification": "B2 adapter contract; not a native REST property",
+        "missingState": {
+          "kind": "null_only",
+          "path": null,
+          "note": "B2 explicit field policy. PATCH omission leaves old value/state unchanged."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_CHOICE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot code/name/version khi ghi contact; không ghi đè khi catalogue đổi nhãn.",
+      "b2Missing": {
+        "mode": "null_only",
+        "allowedStates": [],
+        "nullable": true,
+        "context": "contact",
+        "rowKeyRequired": true,
+        "sourceRequired": false,
+        "conditionalRequired": "optional"
+      }
     },
     {
       "code": "visit.uuid",
@@ -5940,6 +6789,60 @@
         "code": "conflict",
         "label": "Nguồn mâu thuẫn"
       }
+    ],
+    "contact_relationship": [
+      {
+        "code": "FATHER",
+        "label": "Cha"
+      },
+      {
+        "code": "MOTHER",
+        "label": "Mẹ"
+      },
+      {
+        "code": "SPOUSE",
+        "label": "Vợ/chồng"
+      },
+      {
+        "code": "CHILD",
+        "label": "Con"
+      },
+      {
+        "code": "SIBLING",
+        "label": "Anh/chị/em"
+      },
+      {
+        "code": "GUARDIAN",
+        "label": "Người giám hộ"
+      },
+      {
+        "code": "OTHER",
+        "label": "Khác"
+      }
+    ],
+    "contact_status": [
+      {
+        "code": "active",
+        "label": "Đang sử dụng"
+      },
+      {
+        "code": "void",
+        "label": "Đã hủy bản ghi"
+      }
+    ],
+    "phone_normalization_status": [
+      {
+        "code": "normalized",
+        "label": "Đã chuẩn hóa cú pháp"
+      },
+      {
+        "code": "missing",
+        "label": "Chưa có số điện thoại"
+      },
+      {
+        "code": "needs_review",
+        "label": "Cần kiểm tra chuỗi nguồn"
+      }
     ]
   },
   "rules": {
@@ -5954,7 +6857,7 @@
     "R_DOB": "Giữ birth_raw và birth_precision. Chỉ gán native birthdate khi biết ngày đầy đủ; năm/tháng thiếu không tự điền 01/01.",
     "R_CHOICE": "Chỉ nhận mã trong codeList đã version hóa; nhãn không thay thế mã.",
     "R_MISSING": "state=recorded phải có value đúng kiểu; state khác recorded không có value. Không chuyển ô trống thành phủ định.",
-    "R_BP": "Tâm thu/tâm trương cùng nhóm và measuredAt; không tự đoán thành phần thiếu. So sánh tâm thu/tâm trương chỉ cảnh báo cần xác minh, không tự sửa số.",
+    "R_BP": "Ràng buộc cuối cùng: mỗi số BP hữu hạn >0; systolic/diastolic thuộc cùng patient, visit, encounter, group và measuredAt. Cho phép một số đo, giữ lý do thiếu số còn lại. Không tạo panel từ hai lần đo khác nhau. systolic<=diastolic chỉ cờ cần xác minh, không tự sửa hoặc từ chối theo ngưỡng lâm sàng.",
     "R_HISTORY": "none_reported là đã hỏi; không suy từ text trống. present có nội dung; unknown/not_asked giữ trạng thái riêng.",
     "R_ALLERGY": "present cần ít nhất một bản ghi tác nhân hoặc mô tả non-coded có xác minh. Không xóa dị ứng cũ khi cập nhật sàng lọc; đồng bộ với allergy native theo hợp đồng B4.",
     "R_DX": "Một hoặc nhiều diagnosis; mỗi dòng có code/concept hay non-coded text theo khả năng API, certainty và rank. Không coi chẩn đoán phân biệt là CONFIRMED. Khi chốt, đúng một chẩn đoán PRIMARY.",
@@ -5968,7 +6871,9 @@
     "R_ORDER": "Chỉ kết quả của order đúng patient/visit/assignee; không hoàn tất order đã hủy. Chưa có kết quả không tạo số 0/âm tính.",
     "R_PROVENANCE": "Giữ nguồn gốc, người nhập, thời điểm nhập, nguồn trang và trạng thái xác minh; không dùng thời gian in thay thời điểm y khoa.",
     "R_ADDRESS": "Mã địa chỉ đi cùng phiên bản/hiệu lực; giữ địa chỉ cũ nguyên văn. Không tự map sang địa chỉ mới bằng phép so chuỗi.",
-    "R_NATIVE": "Kiểu DTO là hợp đồng ứng dụng; adapter phải chuyển sang schema native và chứng minh round-trip trên baseline."
+    "R_NATIVE": "Kiểu DTO là hợp đồng ứng dụng; adapter phải chuyển sang schema native và chứng minh round-trip trên baseline.",
+    "R_CONTACT": "Contacts 0..n; rowKey UUID ổn định; tối đa một isPrimary active; priority số nguyên dương không trùng giữa row active; không tự tạo/gộp Person/Patient.",
+    "R_PHONE": "Giữ phone raw; phoneNormalized chỉ suy từ định dạng hợp lệ theo contract B2. Không gộp hồ sơ qua phone; thiếu raw dùng fieldStates."
   },
   "sources": {
     "S01": {
@@ -6041,8 +6946,8 @@
       ]
     },
     "address": {
-      "source": "Danh mục tỉnh/xã hiện hành có mã, phiên bản, hiệu lực và quan hệ địa chỉ cũ.",
-      "status": "awaiting_versioned_catalogue",
+      "source": "Quyết định 19/2025/QĐ-TTg, Phụ lục I/II, hai phần Công báo chính thức",
+      "status": "pinned_official_snapshot_available; later changes and legacy conversion require review",
       "requiredFor": [
         "coded_address_selection"
       ],
@@ -6055,7 +6960,9 @@
         "effectiveFrom",
         "effectiveTo",
         "legacyMappings"
-      ]
+      ],
+      "path": "metadata/vinshc/catalogues/address-vn-19-2025.json",
+      "version": "VN-19-2025-2025-07-01"
     }
   },
   "namespaceUuid": "56d54326-c47e-57b8-b692-ef6ec3c5daa7",
@@ -6083,7 +6990,9 @@
     "on_bill_create": "Bắt buộc khi lập phí; server chụp snapshot tên/giá và tính tổng.",
     "on_payment": "Bắt buộc khi thu hoặc hoàn tiền; server tính giới hạn và idempotency.",
     "if_refund": "Bắt buộc khi hoàn tiền: lý do và giao dịch gốc.",
-    "on_dispense_confirm": "Bắt buộc khi xác nhận cấp thuốc theo đơn đã xác nhận."
+    "on_dispense_confirm": "Bắt buộc khi xác nhận cấp thuốc theo đơn đã xác nhận.",
+    "on_contact_create": "Bắt buộc khi tạo contact active; một row có rowKey/name/priority/flags/status/source/recordedAt. Không tạo Patient người nhà.",
+    "if_contact_void": "Bắt buộc lý do khi void contact; không hard-delete hoặc tự void Person liên kết."
   },
   "operations": {
     "patient.create": {
@@ -6147,6 +7056,51 @@
       "dependencies": [
         "B3/B8 workflow closure reason policy"
       ]
+    }
+  },
+  "reviewedBackend": {
+    "branch": "clinic-backend",
+    "commit": "9a16734",
+    "date": "2026-10-11",
+    "evidence": "Read B2/B3 contracts/tests on remote; not execution of those tests on this branch."
+  },
+  "contracts": {
+    "b2": "metadata/vinshc/contracts/b2.json",
+    "b3": "metadata/vinshc/contracts/b3.json"
+  },
+  "catalogues": {
+    "relationships": "metadata/vinshc/catalogues/contact-relationships.json",
+    "address": "metadata/vinshc/catalogues/address-vn-19-2025.json",
+    "syntheticProviders": "metadata/vinshc/catalogues/providers.synthetic.json"
+  },
+  "identifierSystems": {
+    "identifier.internal": {
+      "system": "urn:uuid:ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "identifierTypeUuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.cccd": {
+      "system": "urn:uuid:4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+      "identifierTypeUuid": "4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.bhxh": {
+      "system": "urn:uuid:d7902062-a695-5bf3-8764-acf7f43e3238",
+      "identifierTypeUuid": "d7902062-a695-5bf3-8764-acf7f43e3238",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.bhyt": {
+      "system": "urn:uuid:e2b901c3-d442-565b-bff5-841aff260d2d",
+      "identifierTypeUuid": "e2b901c3-d442-565b-bff5-841aff260d2d",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
     }
   }
 }

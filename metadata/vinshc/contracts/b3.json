@@ -1,0 +1,307 @@
+{
+  "version": "0.2.0",
+  "status": "contract_ready_terminology_import_gated",
+  "terminology": {
+    "system": "http://loinc.org",
+    "targetVersion": "2.83",
+    "releaseSource": "https://loinc.org/news/category/loinc-release",
+    "checkedOn": "2026-10-11",
+    "versionEvidence": "2.83 release announced 2026-08-19; public code pages checked. Archive/terminology lookup by release and clinical equivalence must be verified before import.",
+    "mappingTypePolicy": "Candidate SAME-AS is not approved equivalence; narrower local meaning must use NARROWER-THAN toward broad target. Only approved entries with method evidence can be imported.",
+    "mappings": [
+      {
+        "fieldCode": "vitals.mach",
+        "openmrsUuid": "263e4d0b-61d2-5517-bcb1-992cfb60675b",
+        "unit": "/min",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "8867-4",
+        "display": "Heart rate",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "Confirm heart rate vs palpated peripheral pulse; choose code based on actual measurement",
+        "methodStatus": "awaiting_measurement_confirmation",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/8867-4",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      },
+      {
+        "fieldCode": "vitals.ha_tam_thu",
+        "openmrsUuid": "f8da18ad-2e26-55cd-954b-51d6e0738815",
+        "unit": "mm[Hg]",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "8480-6",
+        "display": "Systolic blood pressure",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "Keep cuff/device/site/body position if known; no invented method",
+        "methodStatus": "awaiting_measurement_confirmation",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/8480-6",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      },
+      {
+        "fieldCode": "vitals.ha_tam_truong",
+        "openmrsUuid": "f97478e4-cce6-5cc5-89fa-cfd10bfe8794",
+        "unit": "mm[Hg]",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "8462-4",
+        "display": "Diastolic blood pressure",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "Same measurement episode/method as systolic",
+        "methodStatus": "awaiting_measurement_confirmation",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/8462-4",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      },
+      {
+        "fieldCode": "vitals.nhiet_do",
+        "openmrsUuid": "55a6de05-e371-5a48-9440-a81d7ef2e364",
+        "unit": "Cel",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "8310-5",
+        "display": "Body temperature",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "Keep oral/axillary/rectal/forehead site and device if known; do not infer",
+        "methodStatus": "awaiting_measurement_confirmation",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/8310-5",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      },
+      {
+        "fieldCode": "vitals.nhip_tho",
+        "openmrsUuid": "b82f1a4a-bbc9-55f0-8204-079bf1130457",
+        "unit": "/min",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "9279-1",
+        "display": "Respiratory rate",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "Keep counting/device method if known",
+        "methodStatus": "awaiting_measurement_confirmation",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/9279-1",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      },
+      {
+        "fieldCode": "vitals.spo2",
+        "openmrsUuid": "4ebf4ddf-fcbe-5bed-893b-114d6ec5f739",
+        "unit": "%",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "59408-5",
+        "display": "Oxygen saturation by pulse oximetry",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "pulse_oximetry",
+        "methodStatus": "confirmed_by_project_user",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/59408-5",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      },
+      {
+        "fieldCode": "vitals.can_nang",
+        "openmrsUuid": "88853161-b7db-5a20-b5c5-666b69999a25",
+        "unit": "kg",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "29463-7",
+        "display": "Body weight",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "Keep scale/device/clothing context if known",
+        "methodStatus": "awaiting_measurement_confirmation",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/29463-7",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      },
+      {
+        "fieldCode": "vitals.chieu_cao",
+        "openmrsUuid": "e13865bd-3100-5aca-8e82-e8a6fb58321d",
+        "unit": "cm",
+        "codingSystem": "http://loinc.org",
+        "terminologyVersion": "2.83",
+        "candidateCode": "8302-2",
+        "display": "Body height",
+        "candidateMappingType": "SAME-AS",
+        "mappingDirection": "OpenMRS concept -> LOINC",
+        "measurementRequirement": "Confirm standing stature vs recumbent length; review more-specific code if needed",
+        "methodStatus": "awaiting_measurement_confirmation",
+        "approval": {
+          "status": "awaiting_clinical_approval",
+          "approvedBy": null,
+          "approvedAt": null,
+          "evidenceReference": null
+        },
+        "enabledForImport": false,
+        "sources": [
+          "https://loinc.org/8302-2",
+          "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+        ]
+      }
+    ]
+  },
+  "spo2": {
+    "method": "pulse_oximetry",
+    "methodConfirmation": {
+      "status": "confirmed_by_project_user",
+      "date": "2026-10-11",
+      "evidence": "Direct user reply in metadata handoff conversation",
+      "clinicalApprover": null
+    },
+    "specificCoding": {
+      "system": "http://loinc.org",
+      "code": "59408-5",
+      "version": "2.83",
+      "mappingTypeCandidate": "SAME-AS"
+    },
+    "fhirR4GenericCoding": {
+      "system": "http://loinc.org",
+      "code": "2708-6",
+      "version": "2.83",
+      "mappingTypeCandidate": "NARROWER-THAN",
+      "rule": "R4 oxygen-saturation profile uses 2708-6; retain confirmed pulse-ox specific 59408-5 as additional coding after approval"
+    },
+    "doNotInfer": [
+      "Arterial blood gas method",
+      "room-air/supplemental oxygen",
+      "device/site"
+    ]
+  },
+  "bloodPressure": {
+    "decision": "FHIR R4 BP panel with systolic/diastolic components",
+    "profile": "http://hl7.org/fhir/StructureDefinition/bp",
+    "panel": {
+      "system": "http://loinc.org",
+      "code": "85354-9",
+      "version": "2.83"
+    },
+    "components": [
+      {
+        "fieldCode": "vitals.ha_tam_thu",
+        "code": "8480-6"
+      },
+      {
+        "fieldCode": "vitals.ha_tam_truong",
+        "code": "8462-4"
+      }
+    ],
+    "quantitySystem": "http://unitsofmeasure.org",
+    "quantityCode": "mm[Hg]",
+    "nativeGroupRef": "group.vitals",
+    "nativeGroupUuid": "7a7cebb3-1a82-5aab-975e-58d93c68eafc",
+    "projection": "Keep existing native vitals group. Adapter creates one derived BP panel per native measurement group, with stable ID derived from parent group UUID; links both source Obs in derivedFrom and resolves encounter through parent. Other vital Obs remain separate. No additional numeric storage/rewrite.",
+    "partial": "Always emit both coded components. Known one has valueQuantity; missing one has dataAbsentReason and source state preserved. No top-level value[x]. Both missing: retain native assessment/status; no numeric BP panel synthesized.",
+    "absentReasonSystem": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+    "absentReasonMap": {
+      "not_recorded": "unknown",
+      "not_asked": "not-asked",
+      "unknown": "unknown",
+      "refused": "asked-declined",
+      "not_applicable": "not-applicable",
+      "masked": "masked",
+      "unreadable": "unknown"
+    },
+    "sourceStatePreservation": "Keep original status in internal provenance/adapter contract; FHIR absent reason is broader for some source states. Custom extension requires B7 definition before claiming lossless FHIR export. Do not emit asked-unknown or error without evidence of an actual asked question/system error.",
+    "runtimeStatus": "Native FHIR2 hasMember observed by BE; panel projection not implemented/verified",
+    "sources": [
+      "https://hl7.org/fhir/R4/bp.html",
+      "https://hl7.org/fhir/R4/observation-vitalsigns.html"
+    ]
+  },
+  "validation": {
+    "status": "metadata_contract_final",
+    "hardRules": [
+      "R_NUM: actual finite JSON number; no bool/string/NaN/Infinity",
+      "R_POS: pulse/respiratory/weight/height/BP >0",
+      "R_PERCENT: SpO2 between 0 and 100 inclusive",
+      "R_BP: components share patient/visit/encounter/group/measuredAt; explicit missing status for absent partner"
+    ],
+    "bpComparison": "systolic <= diastolic: non-blocking needs-verification flag, no automatic correction/rejection",
+    "clinicalRanges": null,
+    "sources": "pack.json.rules; mathematical validation only"
+  },
+  "providers": {
+    "catalogue": "metadata/vinshc/catalogues/providers.synthetic.json",
+    "requiredFields": [
+      "providerCode",
+      "providerUuid",
+      "roleCode",
+      "encounterRoleUuid",
+      "locationUuid",
+      "active",
+      "effectiveFrom",
+      "effectiveTo"
+    ],
+    "roleCodes": [
+      "nurse",
+      "doctor"
+    ],
+    "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+    "authorization": "Nurse can record when B5 grant exists; doctor can record only with explicit vitals-record grant. Provider role/metadata alone is not authorization. Resolve logged-in actor to allowed Provider on server.",
+    "productionGate": "Actual staff registry/access grants supplied through protected administration in B5; no real staff identifiers/names in Git fixtures"
+  },
+  "updateFixture": "metadata/vinshc/fixtures/update-label.json"
+}

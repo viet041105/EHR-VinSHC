@@ -20,6 +20,11 @@ from urllib.parse import urlparse
 from urllib.request import Request, urlopen
 import uuid
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from metadata_b2_b3 import (check_contracts, check_handoff_cases, contract_tables, prepare_update_pack,
+                            read_json, validate_contacts, validate_field_states,
+                            validate_address_selection, validate_bp_measurement,
+                            normalize_phone)
 ROOT = Path(__file__).resolve().parents[1]
 PACK_PATH = ROOT / "metadata/vinshc/pack.json"
 CONFIG = "infra/backend/configuration"
@@ -121,7 +126,10 @@ def validate_pack(pack, root=ROOT):
         if forms["version"] != pack["version"]:
             errors.append("Form spec version mismatch")
         for form in forms["forms"]:
-            for code in form["fields"]:
+            form_fields = list(form["fields"])
+            for section in form.get("repeatableSections", []):
+                form_fields += section["fields"]
+            for code in form_fields:
                 if code not in {f["code"] for f in fields}:
                     errors.append("Unknown form field: " + code)
     permissions_file = root / "metadata/vinshc/permissions.json"
@@ -141,6 +149,10 @@ def validate_pack(pack, root=ROOT):
         for code, unit in re.findall(r"code:'(vitals\.[^']+)'.*?unit:'([^']+)'", frontend.read_text(encoding="utf-8")):
             if code not in by_code or by_code[code].get("unit") != unit:
                 errors.append("Existing FE mapping incompatible: " + code)
+    try:
+        errors.extend(check_contracts(pack, root))
+    except (KeyError, TypeError, ValueError, OSError) as error:
+        errors.append("B2/B3 contract invalid: " + str(error))
     return errors
 
 
@@ -169,7 +181,7 @@ def compile_outputs(pack, root=ROOT):
             for e in entities:
                 row = {"Uuid": e["uuid"], "Void/Retire": "false", "Fully specified name:en": "VinSHC " + e["key"],
                        "Fully specified name:vi": "VinSHC " + (e.get("answerList", "") + " " if e.get("answerList") else "") + e["label"],
-                       "Short name:vi": e["label"], "Description:en": "VinSHC metadata v" + pack["version"] + "; key=" + e["key"],
+                       "Short name:vi": e["label"], "Description:en": "VinSHC metadata v" + pack["version"] + "; key=" + e["key"] + ("; " + e["note"] if e.get("note") else ""),
                        "Data class": e["class"], "Data type": e["dataType"], "Units": e.get("unit") or ""}
                 if e["dataType"] == "Numeric":
                     row["Allow decimals"] = str(e.get("allowDecimals", True)).lower()
@@ -214,6 +226,9 @@ def compile_outputs(pack, root=ROOT):
                "required_when": f["required"], "storage_kind": s["kind"], "storage_path": s["path"], "metadata_ref": s.get("ref", ""),
                "metadata_uuid": s.get("uuid", ""), "obs_group": s.get("group", ""), "unit_ucum": f.get("unit") or "",
                "missing_state_storage": s.get("missingState", {}).get("ref") or s.get("missingState", {}).get("kind", ""),
+               "b2_missing_mode": f.get("b2Missing", {}).get("mode", ""),
+               "b2_allowed_missing_states": ";".join(f.get("b2Missing", {}).get("allowedStates", [])),
+               "b2_state_context": f.get("b2Missing", {}).get("context", ""),
                "code_list": f.get("codeList") or "", "rules": ";".join(f["rules"]), "source_rows_pages": source, "note": f["description"]}
         field_rows.append(row)
         prefix = f["code"].split(".")[0]
@@ -233,8 +248,10 @@ def compile_outputs(pack, root=ROOT):
     fe = {"version": pack["version"], "packSha256": hashlib.sha256(json.dumps(pack, ensure_ascii=False, sort_keys=True).encode()).hexdigest(),
           "concepts": {f["code"]: f["storage"]["uuid"] for f in pack["fields"] if f.get("frontendKey")},
           "entities": {e["key"]: e["uuid"] for e in pack["entities"]},
+          "identifierSystems": pack.get("identifierSystems", {}),
           "status": "Expected identities. Backend must verify imported metadata before exposing this map to FE."}
     outputs["metadata/vinshc/frontend-map.json"] = json.dumps(fe, ensure_ascii=False, indent=2) + "\n"
+    outputs.update(contract_tables(pack, root))
     return outputs
 
 
@@ -257,6 +274,9 @@ def validate_values(values, pack):
         if cell["state"] != "recorded":
             if "value" in cell:
                 errors.append(code + ": missing state must not contain value")
+            policy = f.get("b2Missing")
+            if policy and cell["state"] not in policy["allowedStates"]:
+                errors.append(code + ": missing state not allowed for this B2 field")
             continue
         if "value" not in cell or cell["value"] is None:
             errors.append(code + ": recorded requires value")
@@ -412,11 +432,39 @@ def main():
     parser.add_argument("--verify-url")
     parser.add_argument("--settings-file", default=str(ROOT / ".env"))
     parser.add_argument("--report")
+    parser.add_argument("--prepare-update", type=Path,
+                        help="Write controlled 0.2.1 test overlay to a NEW directory under .runtime")
     args = parser.parse_args()
     pack = load_pack()
     errors = validate_pack(pack)
     if errors:
         raise ValueError("\n".join(errors))
+    if args.prepare_update:
+        destination = args.prepare_update.resolve()
+        if not destination.is_relative_to((ROOT / ".runtime").resolve()) or destination.exists():
+            raise ValueError("Update destination must be a new directory under .runtime")
+        import shutil
+        recipe = read_json(ROOT, "metadata/vinshc/fixtures/update-label.json")
+        updated = prepare_update_pack(pack, recipe)
+        shutil.copytree(ROOT / "metadata/vinshc", destination / "metadata/vinshc")
+        shutil.copytree(ROOT / "docs/data", destination / "docs/data")
+        for relative in ["metadata/vinshc/pack.json", "metadata/vinshc/forms.json", "metadata/vinshc/permissions.json",
+                         "metadata/vinshc/contracts/b2.json", "metadata/vinshc/contracts/b3.json"]:
+            obj = updated if relative.endswith("/pack.json") else read_json(destination, relative)
+            obj["version"] = updated["version"]
+            (destination / relative).write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+        changelog = destination / "metadata/vinshc/CHANGELOG.md"
+        changelog.write_text("# Test update 0.2.1\n\n" + recipe["changelogEntry"] + "\n\n" + changelog.read_text(encoding="utf-8"), encoding="utf-8")
+        for relative, content in compile_outputs(updated, destination).items():
+            path = destination / relative
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8", newline="")
+        errors = validate_pack(updated, destination)
+        if errors:
+            raise ValueError("Update overlay invalid: " + "; ".join(errors))
+        print(json.dumps({"status": "Prepared controlled update; not imported", "version": updated["version"],
+                          "destination": str(destination), "entityUuid": recipe["entityUuid"]}))
+        return
     outputs = compile_outputs(pack)
     for relative, content in outputs.items():
         path = ROOT / relative
@@ -432,6 +480,10 @@ def main():
         if bool(actual) == case["valid"]:
             raise ValueError("Unexpected fixture validation: " + case["id"])
     result = {"version": pack["version"], "fields": len(pack["fields"]), "entities": len(pack["entities"]), "outputs": len(outputs), "fixtures": len(cases), "status": "PASS (structural)"}
+    handoff_errors, handoff_count = check_handoff_cases(pack, ROOT)
+    if handoff_errors:
+        raise ValueError("; ".join(handoff_errors))
+    result["b2b3Fixtures"] = handoff_count
     if args.verify_url:
         result["runtime"] = verify_remote(pack, args.verify_url, args.settings_file)
     if args.report:
