@@ -1,12 +1,14 @@
 # Bộ metadata VinSHC cho BE và FE
 
-**Phiên bản:** `0.2.0` · **Ngày:** 11/10/2026 · **Nhánh làm việc:** `role-3-metadata`.
+**Phiên bản:** `0.3.0` · **Ngày:** 11/10/2026 · **Nhánh làm việc:** `role-3-metadata`.
 
 Người 3 và BE đã chốt chuyển sang bước metadata. Bộ này cụ thể hóa phạm vi ngoại trú trong `BACKEND.md`: MVP-1 lõi khám và hợp đồng dữ liệu MVP-2 vận hành. Các ngưỡng lâm sàng, nguồn/phiên bản danh mục và quyền kỹ thuật được nghiệm thu riêng theo các mốc bên dưới.
 
-Đây là bộ bàn giao để triển khai, gồm **180 trường**, **78 đối tượng metadata** có UUID ổn định, danh mục trạng thái/quan hệ, mẫu biểu, ma trận quyền và dữ liệu giả. Nó bổ sung cho khảo sát 983 dòng của PDF 195 trang; không yêu cầu BE tạo 983 cột hoặc triển khai toàn bộ nội trú.
+Đây là bộ bàn giao để triển khai, gồm **205 trường**, **234 identity metadata** có UUID ổn định (78 nền giữ nguyên + 156 bổ sung test), danh mục trạng thái/quan hệ, mẫu biểu, ma trận quyền và dữ liệu giả. Nó bổ sung cho khảo sát 983 dòng của PDF 195 trang; không yêu cầu BE tạo 983 cột hoặc triển khai toàn bộ nội trú.
 
 Bản 0.2.0 bổ sung contacts, fieldStates theo từng trường B2, phone raw/normalized, identifier.system, catalogue tỉnh/xã bản gốc, mapping sinh hiệu chờ chuyên môn, BP panel, provider giả và overlay đổi nhãn. Đọc [bàn giao B2/B3](METADATA_B2_B3.md) để xem đủ từng yêu cầu và điều kiện còn mở. Đã đối chiếu code/tài liệu `clinic-backend@9a16734`; không chạy thay kiểm thử backend của nhánh đó.
+
+Bản 0.3.0 bổ sung [gói B4–B9](METADATA_B4_B9.md): ICD allowlist chính thức, thuốc/dịch vụ/giá lấy nhãn mẫu và synthetic, cơ sở/provider giả, quyền chi tiết, FHIR, queue/appointment, in/báo cáo, CSV test và manifest provision. Đã đối chiếu `clinic-backend@6c407f1`; 156 identity test không tự nạp vào configuration runtime. Catalogue/mapping chưa duyệt vẫn tắt production. Recipe hiện hành là 0.3.0→0.3.1, khác recipe lịch sử B2/B3.
 
 ## 1. Đọc file nào và dùng vào việc gì
 
@@ -16,7 +18,7 @@ Bản 0.2.0 bổ sung contacts, fieldStates theo từng trường B2, phone raw/
 | [pack.json](../metadata/vinshc/pack.json) | Nguồn chuẩn của trường, entity, UUID, code list, quy tắc và phụ thuộc danh mục; sửa tại đây |
 | [fields.csv](../metadata/vinshc/fields.csv) | Bảng phẳng để nhóm lọc/import vào công cụ quản lý; file sinh, không sửa tay |
 | [frontend-map.json](../metadata/vinshc/frontend-map.json) | UUID sinh hiệu đúng mã FE đang dùng; server phải kiểm tra metadata đã nạp trước khi bàn giao map |
-| [forms.json](../metadata/vinshc/forms.json) | Ba đặc tả form: tiếp nhận, sinh hiệu và khám. Đây là hợp đồng trường, **chưa phải schema form engine O3** |
+| [forms.json](../metadata/vinshc/forms.json) | 9 đặc tả form: tiếp nhận/sinh hiệu/khám và 6 nhóm B4–B9. Đây là hợp đồng trường, **chưa phải schema form engine O3** |
 | [permissions.json](../metadata/vinshc/permissions.json) | Ma trận nghiệp vụ cho 8 role; **chưa tự cấp privilege hoặc thực thi bảo mật trên Core** |
 | [cases.json](../metadata/vinshc/fixtures/cases.json) | 28 ca giả cho validator cấu trúc; không phải request REST trực tiếp |
 | [workflows.json](../metadata/vinshc/fixtures/workflows.json) | Kịch bản tích hợp cho BE/người 4: hai bệnh nhân trùng tên, nhiều lượt, quyền, hủy/hoàn/cấp trùng |
@@ -24,6 +26,8 @@ Bản 0.2.0 bổ sung contacts, fieldStates theo từng trường B2, phone raw/
 | [B3_TERMINOLOGY.md](data/B3_TERMINOLOGY.md) | 8 mapping có UUID/code/release/nguồn và trạng thái duyệt |
 | [b2.json](../metadata/vinshc/contracts/b2.json), [b3.json](../metadata/vinshc/contracts/b3.json) | Contract contacts/phone/address/FHIR/provider và yêu cầu BE triển khai |
 | [configuration](../infra/backend/configuration/) | CSV thực sự để Initializer nạp khi build/khởi động backend |
+| [import-manifest.json](../metadata/vinshc/import-manifest.json), [initializer-test](../metadata/vinshc/initializer-test/) | 7 CSV mới và kế hoạch adapter provision cho instance test riêng, không tự nạp theo build |
+| [b4-b9 fixtures](../metadata/vinshc/fixtures/b4-b9.json), [backend acceptance](../metadata/vinshc/fixtures/backend-acceptance.json) | 159 tình huống validator và 5 scenario BE cần chạy trên API/DB thật |
 
 Không đổi các mã trường `patient.ma_noi_bo`, `patient.ma_bhxh`, `vitals.mach`… để đổi nhãn. `patient.ma_bhxh` chỉ là mã BHXH; số thẻ BHYT được tách thành `patient.ma_bhyt`.
 
@@ -38,10 +42,10 @@ Không đổi các mã trường `patient.ma_noi_bo`, `patient.ma_bhxh`, `vitals
 | Encounter role | Người khám, điều dưỡng ghi nhận, tác giả kết quả; khác account role |
 | Person attribute type | Điện thoại, ngày sinh nguyên văn/độ chính xác/năm/tháng, nghề nghiệp, địa chỉ nguyên văn/cũ |
 | Concept | Numeric, Text, Date, Coded, answer và ba nhóm Obs; các answer phải nạp trước question, group nạp sau member |
-| Form, role/privilege | Đặc tả phối hợp FE/BE. Không copy `forms.json` vào một domain không hỗ trợ hoặc coi ma trận nghiệp vụ là quyền đã chạy |
-| ICD-10, thuốc, dịch vụ | Contract danh mục trong `externalCatalogues`; nguồn/phiên bản và dữ liệu cơ sở cần được cung cấp trước nghiệm thu chức năng tương ứng |
+| Form, role/privilege | Form là đặc tả phối hợp FE/BE. Custom role/privilege có CSV test ngoài live config; ma trận vẫn cần scoped adapter enforcement |
+| ICD-10, thuốc, dịch vụ | Catalogue test có code/UUID/source/version; ICD chỉ 9 dòng allowlist, thuốc/giá chưa được cơ sở duyệt production |
 | Tỉnh/xã | Đủ bản gốc 34 tỉnh/thành và 3.321 đơn vị cấp xã theo 19/2025/QĐ-TTg, pin version/hiệu lực; conversion cũ-mới và thay đổi sau bản gốc cần nguồn/xác nhận riêng |
-| Lịch hẹn/queue, billing/dispensing | DTO cần B8/BE-08/BE-12 ánh xạ; cấu hình appointments/queue thuộc người 4, không có thay đổi ở vùng đó |
+| Lịch hẹn/queue, billing/dispensing | Contract/variant/fixture B4–B9 để B8/BE-08/BE-12 ánh xạ; runtime module schema/config do BE/người 4 tích hợp |
 
 Trong bảng trường, `native` là path thuộc mô hình OpenMRS; `person_attribute`/`identifier` tham chiếu type đã cấp UUID; `obs` tham chiếu concept và group; `adapter_contract` cần adapter/module được kiểm chứng. Path DTO không phải lời khẳng định REST nhận đúng tên/path đó.
 
@@ -160,7 +164,7 @@ python tools/metadata.py
 python -m unittest discover -s metadata/tests -v
 ```
 
-Kiểm tra UUID/key, answer/member, mã trường/đơn vị với FE, nguồn khảo sát, catalogue/contract/file sinh, 28 ca gốc và 47 ca B2/B3. Đây là kiểm tra cấu trúc, không thay kiểm chứng native API hoặc quyền.
+Kiểm tra UUID/key, answer/member, mã trường/đơn vị với FE, nguồn khảo sát, catalogue/contract/file sinh, 28 ca gốc, 47 B2/B3 và 159 B4–B9. Đây là kiểm tra cấu trúc, không thay kiểm chứng native API hoặc quyền.
 
 Khi chỉnh nguồn:
 
@@ -181,7 +185,7 @@ docker compose up -d --wait --wait-timeout 2400
 python tools/metadata.py --verify-url http://127.0.0.1:8080/openmrs --report .runtime/reports/metadata-import.json
 ```
 
-Lệnh verify chỉ GET metadata trên HTTP loopback, đọc credential từ `.env`, không in credential hoặc ghi patient. Có thể chọn `--settings-file` cho instance test khác. Nó kiểm tra entity UUID, retired, concept datatype/unit/answer/member, không kết luận đã chạy clinical workflow.
+Lệnh verify chỉ GET 78 identity nền trên HTTP loopback, đọc credential từ `.env`, không in credential hoặc ghi patient. Có thể chọn `--settings-file` cho instance test khác. Nó kiểm tra entity UUID, retired, concept datatype/unit/answer/member; 156 identity test được loại khỏi phạm vi và cần BE xác minh riêng theo manifest.
 
 ### Tiêu chí nghiệm thu tích hợp cho BE/người 4
 
@@ -194,9 +198,9 @@ Lệnh verify chỉ GET metadata trên HTTP loopback, đọc credential từ `.e
 
 ## 8. BE cần nhận và còn cần cung cấp
 
-BE có thể tiếp tục B2/B3 bằng identifier/attribute/type/concept CSV, map và [bàn giao bổ sung](METADATA_B2_B3.md). B4/B8 dùng từ điển, form/role/DTO contract để chốt adapter. Các nguồn cần điền tiếp là ICD-10 có phiên bản, danh mục thuốc cơ sở, dịch vụ/giá; địa giới đã có snapshot chính thức và còn cần kiểm tra thay đổi/conversion cũ-mới. Tên thuốc/giá trong một PDF không thay các nguồn này.
+BE tiếp tục B2/B3 bằng identifier/attribute/type/concept CSV, map và [bàn giao bổ sung](METADATA_B2_B3.md). B4–B9 dùng catalogue/contract/manifest/fixtures mới theo [hướng dẫn riêng](METADATA_B4_B9.md). ICD có nguồn quốc gia và allowlist test; catalogue thuốc/giá/provider production vẫn cần cơ sở duyệt. Địa giới giữ snapshot chính thức và còn cần kiểm tra thay đổi/conversion cũ-mới.
 
-Người 3 chủ trì ý nghĩa/danh mục/UUID; người 1 nạp và xử lý module; người 4 xác nhận API/FHIR, role, round-trip và mock; người 2 đưa vào form. Bộ này không sửa CI, schema PostgreSQL, adapter FE hay cấu hình appointments/queue của người khác.
+Người 3 chủ trì ý nghĩa/danh mục/UUID; người 1 nạp và xử lý module; người 4 xác nhận API/FHIR, role, round-trip và mock; người 2 đưa vào form. [Patch CI](patches/metadata-ci-checks.patch) thêm metadata validator/unit tests, chưa áp dụng vì token push thiếu scope workflow. Schema/adapter/module workflow cần được nhóm tích hợp riêng.
 
 ## 9. Nguồn kỹ thuật
 

@@ -1,0 +1,204 @@
+{
+  "version": "0.3.0",
+  "testOnly": true,
+  "diagnosis": {
+    "catalogue": "metadata/vinshc/catalogues/icd10-mvp.json",
+    "primary": "0..1 active rank=1 per encounter; exactly one on clinical finalize; secondary ranks>=2 unique",
+    "certaintyValues": [
+      "provisional",
+      "confirmed"
+    ],
+    "freeTextAllowed": true,
+    "freeTextRule": "Exactly one of code or nonCodedText; keep text, no invented ICD code; final clinical diagnosis is clinician decision; coded claims need correct catalogue",
+    "native": {
+      "coded": "Diagnosis.diagnosis.coded=conceptUuid",
+      "nonCoded": "Diagnosis.diagnosis.nonCoded",
+      "primary": "Diagnosis.rank=1",
+      "secondary": "Diagnosis.rank>=2",
+      "certainty": {
+        "provisional": "PROVISIONAL",
+        "confirmed": "CONFIRMED"
+      }
+    },
+    "history": "Diagnosis belongs to patient+visit+encounter; no automatic carry to subsequent encounters. Update creates audited revision; void needs reason and retains prior version"
+  },
+  "allergy": {
+    "catalogue": "metadata/vinshc/catalogues/allergies.json",
+    "clinicalStatus": [
+      "active",
+      "inactive",
+      "resolved"
+    ],
+    "verificationStatus": [
+      "unconfirmed",
+      "confirmed",
+      "refuted",
+      "entered-in-error"
+    ],
+    "appStatus": [
+      "active",
+      "inactive",
+      "resolved",
+      "entered-in-error"
+    ],
+    "nonCodedAllowed": true,
+    "nonCodedRule": "Code absent requires original allergen text and category; OTHER requires text; reactions OTHER require text",
+    "screening": {
+      "not_asked": "No statement about allergy list; retain all prior allergies",
+      "unknown": "Keep previous allergy list and unknown screening",
+      "no_known_allergy": "Encounter-scoped screening assertion only; never delete/resolve/void prior list automatically; flag conflict if active allergies exist",
+      "present": "Detailed allergy entries or linked existing entries with confirmation; do not create empty placeholder"
+    },
+    "enteredInError": "Native void plus reason; FHIR.verificationStatus=entered-in-error, omit clinicalStatus",
+    "resolved": "Adapter lifecycle state, not native void; no automatic resolution from a new screening",
+    "severity": "Event severity mild/moderate/severe or null plus unknown reason; criticality estimates future risk separately",
+    "nativeLimits": "Core Allergy has patient/allergen/severity/reactions/comments/encounter; lifecycle, category-other and missing states require adapter persistence"
+  },
+  "prescription": {
+    "catalogue": "metadata/vinshc/catalogues/medications.json",
+    "units": "metadata/vinshc/catalogues/medication-units.json",
+    "states": [
+      "draft",
+      "confirmed",
+      "cancelled",
+      "discontinued"
+    ],
+    "transitions": {
+      "draft": [
+        "confirmed",
+        "cancelled"
+      ],
+      "confirmed": [
+        "discontinued"
+      ],
+      "cancelled": [],
+      "discontinued": []
+    },
+    "rounding": "Decimal arithmetic, never binary floats. Keep exact dose; explicit quantity rounded UP to quantityStep with reason/confirmation, never silently change dose. No automatic dose from amount dispensed",
+    "fractionalDose": "Only synthetic splitAllowed tablet can use fractions of tablets in tests; sample products cannot be assumed splittable. No mass/volume conversion without verified concentration",
+    "quantity": "Explicit positive quantity with matching unit. Fixed-frequency test calculation may compare dose*frequency*days in identical units; PRN requires explicit quantity and max/day, never invent frequency",
+    "revision": "Confirmed prescription immutable snapshot; corrections create new prescription/DrugOrder REVISE with previousOrder; discontinue obsolete active order, no in-place overwrite",
+    "cancel": "Unconfirmed draft cancellation stays adapter-only. Confirmed active order requires explicit discontinue/action=DISCONTINUE plus reason; void only entered-in-error, not ordinary cancellation",
+    "dispense": "Confirmed immutable snapshot only, reject cancelled visit or discontinued order; partial allowed up to remaining total, exact Decimal step; idempotency key scoped facility+prescription+line and payload hash; same key/different payload=409; row lock/unique DB constraint",
+    "native": {
+      "draft": "adapter only; do not activate native DrugOrder",
+      "confirmed": "DrugOrder action NEW/REVISE; dateActivated; patient/encounter/orderer/careSetting required",
+      "cancelled": "draft only",
+      "discontinued": "DrugOrder DISCONTINUE referencing previousOrder"
+    }
+  },
+  "billing": {
+    "currency": "VND",
+    "moneyType": "integer >=0, <=9007199254740991; bool rejected",
+    "discount": "Explicit integer VND per line; 0..line gross. No percentage taxes/BHYT inference; snapshot gross-discount=net",
+    "rounding": "VND has no fractional amount in this application. Quantity integer for service bills; medication fractional dispensing has separate priced line calculation requiring explicit approved rounding",
+    "snapshot": [
+      "serviceUuid",
+      "serviceCode",
+      "serviceName",
+      "priceUuid",
+      "priceVersion",
+      "unitPriceVnd",
+      "quantity",
+      "discountVnd",
+      "netVnd",
+      "facilityUuid",
+      "recordedAt"
+    ],
+    "cancel": "Unpaid bill can cancel with reason; paid bill needs explicit linked refund, never delete payment",
+    "refund": "Positive refund amount, linked successful receipt, <=remaining refundable amount; no automatic refund on visit/order cancel",
+    "paymentMethods": [
+      "cash",
+      "bank_transfer"
+    ],
+    "paymentConfirmation": "bank_transfer stays pending until settlement confirmed; exclude pending from revenue",
+    "prepay": "Service execution needs paid matching bill before start; clinical registration/vitals can proceed; no bypass inferred from FE flag",
+    "postpay": "Service can execute before collection; outstanding bill survives visit close"
+  },
+  "attachments": {
+    "proposal": {
+      "mimeTypes": [
+        "application/pdf",
+        "image/jpeg",
+        "image/png"
+      ],
+      "maxBytes": 20971520
+    },
+    "approval": {
+      "status": "pending_technical_confirmation",
+      "approvedBy": null,
+      "approvedAt": null
+    },
+    "productionUploadEnabled": false,
+    "checks": [
+      "Size of actual stream, reject empty/over limit",
+      "MIME sniff and allowlist, reject HTML/SVG/executables",
+      "patient/order/result linkage and RBAC for read/print/download",
+      "Private object storage, opaque key, hash, quarantine/scanning, no trust in filename or user Content-Type"
+    ]
+  },
+  "orderResult": {
+    "orderStates": [
+      "requested",
+      "assigned",
+      "in_progress",
+      "completed",
+      "cancelled",
+      "entered-in-error"
+    ],
+    "orderTransitions": {
+      "requested": [
+        "assigned",
+        "cancelled",
+        "entered-in-error"
+      ],
+      "assigned": [
+        "in_progress",
+        "cancelled",
+        "entered-in-error"
+      ],
+      "in_progress": [
+        "completed",
+        "cancelled",
+        "entered-in-error"
+      ],
+      "completed": [],
+      "cancelled": [],
+      "entered-in-error": []
+    },
+    "resultStates": [
+      "draft",
+      "preliminary",
+      "final",
+      "corrected",
+      "entered-in-error"
+    ],
+    "resultTransitions": {
+      "draft": [
+        "preliminary",
+        "final",
+        "entered-in-error"
+      ],
+      "preliminary": [
+        "final",
+        "entered-in-error"
+      ],
+      "final": [
+        "corrected",
+        "entered-in-error"
+      ],
+      "corrected": [
+        "corrected",
+        "entered-in-error"
+      ],
+      "entered-in-error": []
+    },
+    "correction": "New revision with reason, previous result reference, author/reviewer/time; retain previous final, lock optimistic revision; no in-place overwrite",
+    "native": "Assignment/in_progress/completed are execution extension states; OpenMRS Order activation/discontinuation/void alone does not mean result complete"
+  },
+  "sources": {
+    "coreDiagnosis": "https://raw.githubusercontent.com/openmrs/openmrs-core/2.8.8/api/src/main/java/org/openmrs/Diagnosis.java",
+    "coreAllergy": "https://raw.githubusercontent.com/openmrs/openmrs-core/2.8.8/api/src/main/java/org/openmrs/Allergy.java",
+    "FHIR": "https://hl7.org/fhir/R4/"
+  }
+}

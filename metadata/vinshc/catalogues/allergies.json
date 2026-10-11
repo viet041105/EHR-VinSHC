@@ -1,0 +1,215 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0",
+  "effectiveFrom": "2026-10-11",
+  "testOnly": true,
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "production": "pending_facility_and_clinical_review"
+  },
+  "records": [
+    {
+      "uuid": "3809f9da-afa9-56bf-a7f4-8eb812fdf0c8",
+      "code": "MED-TEST",
+      "name": "Tác nhân thuốc kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "0d4ecebb-0367-5582-a242-6585eb1973af",
+      "category": "medication",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    },
+    {
+      "uuid": "410a4714-7596-54f0-b65f-bf7549c1305a",
+      "code": "FOOD-TEST",
+      "name": "Tác nhân thực phẩm kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "ac33c568-0477-597e-adaa-9572011f8947",
+      "category": "food",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    },
+    {
+      "uuid": "f283b6eb-9852-5d31-a9be-e54480efa70a",
+      "code": "ENV-TEST",
+      "name": "Tác nhân môi trường kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "bb1d767d-d5c4-5d1e-abe4-9f6f095170e2",
+      "category": "environment",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    },
+    {
+      "uuid": "a11d3d15-feed-5e36-8920-49620550ea3e",
+      "code": "BIO-TEST",
+      "name": "Tác nhân sinh học kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "417ab98e-ffa9-54cc-a1f5-5ab4da6608c4",
+      "category": "biologic",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    },
+    {
+      "uuid": "e71b8d01-26a0-58f3-9329-b0411ff3c6cf",
+      "code": "OTHER",
+      "name": "Tác nhân khác, ghi nguyên văn",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "0f9a0b82-5acc-5e68-917f-57aa3de23e34",
+      "category": "other",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    }
+  ],
+  "reactions": [
+    {
+      "uuid": "41d0ed86-20d7-59b3-b9a6-7422ac86e5a2",
+      "code": "RASH",
+      "name": "Ban da",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "e4a68f5a-8194-5602-a2bd-efc345d3e446",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    },
+    {
+      "uuid": "94473633-a26e-5c27-b3b4-aa8cbeecae9b",
+      "code": "ITCH",
+      "name": "Ngứa",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "4c469142-086d-5aab-bc62-db3cd6ac5f73",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    },
+    {
+      "uuid": "29f5fa47-6647-525d-8c85-381bd141ca7d",
+      "code": "OTHER",
+      "name": "Phản ứng khác, ghi nguyên văn",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "55b7a7f0-036f-5e95-9134-7c2a8d39fd38",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5"
+    }
+  ],
+  "severities": [
+    {
+      "uuid": "4e0f0b5f-ca73-5a38-b6c5-c0079e55c233",
+      "code": "mild",
+      "name": "Nhẹ",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "b7ec4437-5bfc-5d92-b5f2-f1f89d72e84c",
+      "system": "http://hl7.org/fhir/reaction-event-severity"
+    },
+    {
+      "uuid": "0d94f568-11f4-51d5-be77-d609275db75e",
+      "code": "moderate",
+      "name": "Vừa",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "d545a5a9-dd35-5268-98b6-a9f09188518a",
+      "system": "http://hl7.org/fhir/reaction-event-severity"
+    },
+    {
+      "uuid": "88a72efc-414e-59e7-9fac-bab866b94f87",
+      "code": "severe",
+      "name": "Nặng",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "99dbb5e5-ddde-579e-b6ca-f228477dade7",
+      "system": "http://hl7.org/fhir/reaction-event-severity"
+    }
+  ],
+  "criticalities": [
+    "low",
+    "high",
+    "unable-to-assess"
+  ],
+  "otherCategoryRule": "Preserve category=other internally; omit FHIR.category and retain local extension; never assert biologic by default"
+}

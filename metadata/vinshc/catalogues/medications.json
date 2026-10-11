@@ -1,0 +1,385 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0",
+  "effectiveFrom": "2026-10-11",
+  "testOnly": true,
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "production": "pending_facility_and_clinical_review"
+  },
+  "records": [
+    {
+      "uuid": "b3b53d01-7a94-5b2a-8627-9890eda7d1d0",
+      "code": "S01-PLAVIX-75",
+      "name": "Plavix 75mg",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          123
+        ],
+        "use": "Catalogue labels only; no patient/prescriber identities or prescription doses copied"
+      },
+      "conceptUuid": "9081d504-0409-50a3-82d0-1f6a2c4afbce",
+      "ingredients": [
+        {
+          "name": "Clopidogrel base",
+          "conceptUuid": "55bb6671-7bf0-5b3f-980c-c1929eb7b485",
+          "strength": "75",
+          "unit": "mg",
+          "basis": "Label in S01; salt equivalence retained in rawSource, not inferred"
+        }
+      ],
+      "strength": {
+        "value": "75",
+        "unit": "mg"
+      },
+      "rawSource": "Plavix 75mg",
+      "dosageFormCode": "TABLET",
+      "dosageFormDetail": "Viên theo PDF; loại bao/phóng thích chưa xác minh",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "TABLET"
+      ],
+      "quantityUnitCode": "TABLET",
+      "quantityStep": "1",
+      "splitAllowed": false,
+      "synthetic": false,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "9fbae6e0-948b-5f75-9752-82e81ea205e4",
+      "code": "S01-LIPITOR-20",
+      "name": "Lipitor 20mg",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          123
+        ],
+        "use": "Catalogue labels only; no patient/prescriber identities or prescription doses copied"
+      },
+      "conceptUuid": "b1fe3885-976d-5506-8091-8bc3891182cb",
+      "ingredients": [
+        {
+          "name": "Atorvastatin",
+          "conceptUuid": "add7d9cc-e8c1-5c6f-a5ec-d281b6522cec",
+          "strength": "20",
+          "unit": "mg",
+          "basis": "Label in S01; salt equivalence retained in rawSource, not inferred"
+        }
+      ],
+      "strength": {
+        "value": "20",
+        "unit": "mg"
+      },
+      "rawSource": "Lipitor 20mg",
+      "dosageFormCode": "TABLET",
+      "dosageFormDetail": "Viên theo PDF; loại bao/phóng thích chưa xác minh",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "TABLET"
+      ],
+      "quantityUnitCode": "TABLET",
+      "quantityStep": "1",
+      "splitAllowed": false,
+      "synthetic": false,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "94710b6f-71c1-5585-befb-d988e4e57bb3",
+      "code": "S01-MOBIC-7_5",
+      "name": "Mobic 7,5mg",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          123
+        ],
+        "use": "Catalogue labels only; no patient/prescriber identities or prescription doses copied"
+      },
+      "conceptUuid": "c8e395e6-9922-541d-97ba-e22510e2bf15",
+      "ingredients": [
+        {
+          "name": "Meloxicam",
+          "conceptUuid": "dc25ba96-8067-5588-9b4f-57ecbf754f68",
+          "strength": "7.5",
+          "unit": "mg",
+          "basis": "Label in S01; salt equivalence retained in rawSource, not inferred"
+        }
+      ],
+      "strength": {
+        "value": "7.5",
+        "unit": "mg"
+      },
+      "rawSource": "Mobic 7,5mg",
+      "dosageFormCode": "TABLET",
+      "dosageFormDetail": "Viên theo PDF; loại bao/phóng thích chưa xác minh",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "TABLET"
+      ],
+      "quantityUnitCode": "TABLET",
+      "quantityStep": "1",
+      "splitAllowed": false,
+      "synthetic": false,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "6629e21b-d892-5693-8e7a-6fd55845399d",
+      "code": "S01-COLCHICIN-1",
+      "name": "Colchicina Seid 1mg Tablet",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          123
+        ],
+        "use": "Catalogue labels only; no patient/prescriber identities or prescription doses copied"
+      },
+      "conceptUuid": "acad252a-c124-5c9e-b673-cd8401ebb94a",
+      "ingredients": [
+        {
+          "name": "Colchicin",
+          "conceptUuid": "524bf8d5-239d-5b0d-ad55-0d90d4aff5b8",
+          "strength": "1",
+          "unit": "mg",
+          "basis": "Label in S01; salt equivalence retained in rawSource, not inferred"
+        }
+      ],
+      "strength": {
+        "value": "1",
+        "unit": "mg"
+      },
+      "rawSource": "Colchicina Seid 1mg Tablet",
+      "dosageFormCode": "TABLET",
+      "dosageFormDetail": "Viên theo PDF; loại bao/phóng thích chưa xác minh",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "TABLET"
+      ],
+      "quantityUnitCode": "TABLET",
+      "quantityStep": "1",
+      "splitAllowed": false,
+      "synthetic": false,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "a92bd67b-6ce0-5409-a5e1-91b6b0311930",
+      "code": "S01-PANTOLOC-20",
+      "name": "Pantoloc 20mg",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          123
+        ],
+        "use": "Catalogue labels only; no patient/prescriber identities or prescription doses copied"
+      },
+      "conceptUuid": "b31f8103-bc48-5173-ae82-1d8259487583",
+      "ingredients": [
+        {
+          "name": "Pantoprazole",
+          "conceptUuid": "bbc407b9-34e8-5b08-83d6-afeff6bde75e",
+          "strength": "20",
+          "unit": "mg",
+          "basis": "Label in S01; salt equivalence retained in rawSource, not inferred"
+        }
+      ],
+      "strength": {
+        "value": "20",
+        "unit": "mg"
+      },
+      "rawSource": "Pantoloc 20mg",
+      "dosageFormCode": "TABLET",
+      "dosageFormDetail": "Viên theo PDF; loại bao/phóng thích chưa xác minh",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "TABLET"
+      ],
+      "quantityUnitCode": "TABLET",
+      "quantityStep": "1",
+      "splitAllowed": false,
+      "synthetic": false,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "37e62d0d-4ae2-5e93-b8c1-47bddd063398",
+      "code": "S01-TEBONIN-120",
+      "name": "Tebonin 120mg",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          123
+        ],
+        "use": "Catalogue labels only; no patient/prescriber identities or prescription doses copied"
+      },
+      "conceptUuid": "bbe919b2-368b-5e52-9909-403180962c7c",
+      "ingredients": [
+        {
+          "name": "Cao khô từ lá Ginkgo biloba",
+          "conceptUuid": "9a9818aa-68d8-5c9a-a486-1b02336b1fb8",
+          "strength": "120",
+          "unit": "mg",
+          "basis": "Label in S01; salt equivalence retained in rawSource, not inferred"
+        }
+      ],
+      "strength": {
+        "value": "120",
+        "unit": "mg"
+      },
+      "rawSource": "Tebonin 120mg",
+      "dosageFormCode": "TABLET",
+      "dosageFormDetail": "Viên theo PDF; loại bao/phóng thích chưa xác minh",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "TABLET"
+      ],
+      "quantityUnitCode": "TABLET",
+      "quantityStep": "1",
+      "splitAllowed": false,
+      "synthetic": false,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "03114c09-6243-5fac-a13d-cc33f9980466",
+      "code": "SYN-TABLET-A",
+      "name": "Thuốc giả SYN-TABLET-A",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "382c0e1f-1795-5838-9cf2-a049024a7025",
+      "ingredients": [
+        {
+          "name": "Hoạt chất giả SYN-TABLET-A",
+          "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+          "strength": "10",
+          "unit": "mg"
+        }
+      ],
+      "strength": {
+        "value": "10",
+        "unit": "mg"
+      },
+      "rawSource": null,
+      "dosageFormCode": "TABLET",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "TABLET"
+      ],
+      "quantityUnitCode": "TABLET",
+      "quantityStep": "0.5",
+      "splitAllowed": true,
+      "synthetic": true,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "a6981596-3b73-5ae6-ab46-75c3a9f4addf",
+      "code": "SYN-LIQUID-B",
+      "name": "Thuốc giả SYN-LIQUID-B",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "4389f47a-66c5-5d3c-b3da-dea6032f1719",
+      "ingredients": [
+        {
+          "name": "Hoạt chất giả SYN-LIQUID-B",
+          "conceptUuid": "a9756ae9-42fb-573d-a7c3-dee9dd0c0937",
+          "strength": "1",
+          "unit": "mg/mL"
+        }
+      ],
+      "strength": {
+        "value": "1",
+        "unit": "mg/mL"
+      },
+      "rawSource": null,
+      "dosageFormCode": "LIQUID",
+      "routeCodes": [
+        "ORAL"
+      ],
+      "doseUnitCodes": [
+        "ML"
+      ],
+      "quantityUnitCode": "ML",
+      "quantityStep": "0.1",
+      "splitAllowed": false,
+      "synthetic": true,
+      "clinicalUseApproved": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    }
+  ],
+  "scope": "Six labelled products from S01 page 123, two invented products solely for structural tests; no dosing recommendations",
+  "sourceSalts": {
+    "S01-PLAVIX-75": "Clopidogrel hydrogen sulphate 97,875mg tương đương Clopidogrel base 75mg",
+    "S01-LIPITOR-20": "Atorvastatin Hemi-calci.1,5H2O",
+    "S01-PANTOLOC-20": "Pantoprazole sodium sesquihydrate"
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "status": "contract_ready_terminology_import_gated",
   "terminology": {
     "system": "http://loinc.org",

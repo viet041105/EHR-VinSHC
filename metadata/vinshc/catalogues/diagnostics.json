@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0",
+  "effectiveFrom": "2026-10-11",
+  "testOnly": true,
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "production": "pending_facility_and_clinical_review"
+  },
+  "records": [
+    {
+      "uuid": "7f4d5a05-4e04-58d1-92af-33f230aada99",
+      "code": "GLU",
+      "name": "Glucose",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Test indicator definition; S01 supports result-form structure, not verified method/unit mapping",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "42ac7593-f43f-5b6e-8e82-537dd2b0950c",
+      "serviceCode": "LAB-GLU",
+      "valueType": "number",
+      "unit": "mmol/L",
+      "specimenCode": "BLOOD",
+      "method": null,
+      "referenceRange": null,
+      "standardCoding": null,
+      "sampleStructureReference": {
+        "document": "S01",
+        "pages": [
+          74,
+          99,
+          100
+        ]
+      },
+      "unitProvenance": "Synthetic test assignment; clinical verification required"
+    },
+    {
+      "uuid": "05940533-e017-5be1-93c7-7fc86c94a111",
+      "code": "CREA",
+      "name": "Creatinin",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Test indicator definition; S01 supports result-form structure, not verified method/unit mapping",
+        "recordedOn": "2026-10-11"
+      },
+      "conceptUuid": "d461b041-d1b7-5657-baf3-43d214eaed41",
+      "serviceCode": "LAB-CREA",
+      "valueType": "number",
+      "unit": "umol/L",
+      "specimenCode": "BLOOD",
+      "method": null,
+      "referenceRange": null,
+      "standardCoding": null,
+      "sampleStructureReference": {
+        "document": "S01",
+        "pages": [
+          74,
+          99,
+          100
+        ]
+      },
+      "unitProvenance": "Synthetic test assignment; clinical verification required"
+    }
+  ],
+  "panels": [
+    {
+      "uuid": "9c8ea693-e042-51d0-8192-872ed85ba956",
+      "code": "CHEM-TEST",
+      "name": "Panel hóa sinh kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "serviceCode": "LAB-PANEL-TEST",
+      "members": [
+        "GLU",
+        "CREA"
+      ]
+    }
+  ],
+  "specimens": [
+    {
+      "uuid": "0eb289a0-e124-5491-884c-218d3585a9bf",
+      "code": "BLOOD",
+      "name": "Máu",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      }
+    },
+    {
+      "uuid": "dcb0dfcb-dbdd-549d-b231-167c721cbfc0",
+      "code": "NONE",
+      "name": "Không cần mẫu",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      }
+    }
+  ],
+  "imaging": [
+    {
+      "serviceCode": "US-ABD",
+      "resultType": "text_document"
+    },
+    {
+      "serviceCode": "ECG-BED",
+      "resultType": "text_document"
+    }
+  ],
+  "procedures": [
+    {
+      "serviceCode": "PROC-TEST",
+      "resultType": "text_document",
+      "synthetic": true
+    }
+  ],
+  "referencePolicy": "null means unavailable; do not calculate abnormal flags without method/population/source and professional approval"
+}

@@ -1,0 +1,15 @@
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index c26b27e..bf55224 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -31,6 +31,10 @@ jobs:
+         run: python scripts/check_config.py
+       - name: Test bootstrap and smoke failure handling
+         run: python -m unittest discover -s tests -v
++      - name: Validate metadata sources, generated files and synthetic fixtures
++        run: python tools/metadata.py
++      - name: Test metadata contracts
++        run: python -m unittest discover -s metadata/tests -v
+       - name: Validate GitHub Actions workflow
+         shell: bash
+         run: |

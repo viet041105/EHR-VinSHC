@@ -316,8 +316,9 @@ def prepare_update_pack(pack, recipe):
     digest = hashlib.sha256(json.dumps(pack, ensure_ascii=False, sort_keys=True).encode()).hexdigest()
     if recipe["fromVersion"] != pack["version"] or recipe["basePackSha256"] != digest:
         raise ValueError("Update recipe does not match exact base pack")
-    if recipe["toVersion"] != "0.2.1" or pack["version"] != "0.2.0":
-        raise ValueError("Only the controlled 0.2.0 -> 0.2.1 test update is supported")
+    version = pack["version"].split(".")
+    if len(version) != 3 or not all(v.isdigit() for v in version) or recipe["toVersion"] != ".".join(version[:2] + [str(int(version[2]) + 1)]):
+        raise ValueError("Only the exact controlled next patch-version test update is supported")
     updated = copy.deepcopy(pack)
     entity = next(e for e in updated["entities"] if e["key"] == recipe["entityKey"])
     if entity["uuid"] != recipe["entityUuid"] or entity["label"] != recipe["beforeLabel"]:

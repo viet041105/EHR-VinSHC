@@ -1,0 +1,61 @@
+{
+  "version": "0.3.0",
+  "sources": [
+    {
+      "id": "S01",
+      "kind": "private_sample",
+      "sha256": "557e41ae324a6ffb1f109db74e650e9b1d5de3b140105e47dc2825ff55deb1d4",
+      "gitPolicy": "PDF/identifiers/prescriber identities/signatures/patient values excluded. Reuse generic product/service labels and historical unit prices only",
+      "pagesUsed": [
+        64,
+        73,
+        74,
+        99,
+        100,
+        115,
+        123,
+        147,
+        184,
+        185,
+        188,
+        189
+      ]
+    },
+    {
+      "id": "ICD-VN-2026",
+      "kind": "official",
+      "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf",
+      "sha256": "8639f5eeb77b571363dc841923095895d2498748f9bc6620f50710a6da9159e2",
+      "version": "06/2026/TT-BYT",
+      "effectiveFrom": "2026-07-01",
+      "pagesUsed": [
+        224,
+        225,
+        398,
+        413,
+        429,
+        465,
+        544,
+        1205
+      ]
+    },
+    {
+      "id": "INITIALIZER",
+      "kind": "upstream",
+      "version": "2.12.0",
+      "url": "https://github.com/mekomsolutions/openmrs-module-initializer/tree/2.12.0"
+    },
+    {
+      "id": "FHIR",
+      "kind": "standard",
+      "version": "4.0.1",
+      "url": "https://hl7.org/fhir/R4/"
+    },
+    {
+      "id": "SYNTHETIC",
+      "kind": "project_decision",
+      "date": "2026-10-11",
+      "scope": "User-authorized test supplements; no medical/legal/technical approval inferred"
+    }
+  ]
+}

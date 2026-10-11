@@ -360,3 +360,85 @@ Nguồn S01 là nhãn/cấu trúc liên quan, không chứng minh field hệ th�
 | `provenance.ma_truong_nguon`<br>Mã khảo sát trường nguồn | text | optional / 0..1 | adapter_contract: Provenance.sourceField | —<br>R_PROVENANCE, R_FINAL | MVP / hệ thống bổ sung |
 | `provenance.trang_thai_xac_minh`<br>Trạng thái xác minh | coded | optional / 0..1 | adapter_contract: Provenance.reviewStatus | review_status<br>R_PROVENANCE, R_FINAL | MVP / hệ thống bổ sung |
 | `provenance.ly_do_sua`<br>Lý do sửa | text | optional / 0..1 | adapter_contract: Audit.reason | —<br>R_PROVENANCE, R_FINAL | MVP / hệ thống bổ sung |
+## allergy
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `allergy.clinical_status`<br>Trạng thái lâm sàng dị ứng | coded | optional / 0..1 | adapter_contract: AllergyLifecycle.clinicalStatus | allergy_clinical_status<br> | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `allergy.verification_status`<br>Trạng thái xác minh dị ứng | coded | optional / 0..1 | adapter_contract: AllergyLifecycle.verificationStatus | allergy_verification_status<br> | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `allergy.tac_nhan_nguyen_van`<br>Tác nhân nguyên văn | text | optional / 0..1 | adapter_contract: Allergy.allergen.nonCoded | —<br>R_TEXT | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `allergy.criticality`<br>Nguy cơ dị ứng tương lai | coded | optional / 0..1 | adapter_contract: AllergyLifecycle.criticality | allergy_criticality<br> | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+## dx
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `dx.uuid`<br>UUID chẩn đoán | uuid | optional / 0..1 | adapter_contract: Diagnosis.uuid | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `dx.encounter_uuid`<br>Encounter chẩn đoán | uuid | optional / 0..1 | adapter_contract: Diagnosis.encounter | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `dx.catalogue_version`<br>Phiên bản danh mục bệnh | text | optional / 0..1 | adapter_contract: DiagnosisCodingSnapshot.catalogueVersion | —<br>R_TEXT | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `dx.revision`<br>Phiên bản chẩn đoán | integer | optional / 0..1 | adapter_contract: DiagnosisRevision.number | —<br>R_NUM | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+## rx
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `rx.snapshot_uuid`<br>UUID bản chụp đơn | uuid | optional / 0..1 | adapter_contract: PrescriptionSnapshot.uuid | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `rx.revision`<br>Phiên bản đơn | integer | optional / 0..1 | adapter_contract: PrescriptionSnapshot.revision | —<br>R_NUM | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `rx.previous_order_uuid`<br>DrugOrder trước | uuid | optional / 0..1 | adapter_contract: DrugOrder.previousOrder | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+## result
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `result.revision`<br>Phiên bản kết quả | integer | optional / 0..1 | adapter_contract: ResultRevision.number | —<br>R_NUM | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `result.previous_revision_uuid`<br>Kết quả trước đính chính | uuid | optional / 0..1 | adapter_contract: ResultRevision.previousUuid | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `result.ly_do_dinh_chinh`<br>Lý do đính chính | text | optional / 0..1 | adapter_contract: ResultRevision.correctionReason | —<br>R_TEXT | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+## bill
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `bill.price_uuid`<br>UUID giá chụp | uuid | optional / 0..1 | adapter_contract: BillLine.priceUuid | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `bill.price_version`<br>Phiên bản giá chụp | text | optional / 0..1 | adapter_contract: BillLine.priceVersion | —<br>R_TEXT | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `bill.giam_gia_vnd`<br>Giảm giá VND | integer | optional / 0..1 | adapter_contract: BillLine.discountVnd | —<br>R_NUM | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+## appointment
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `appointment.service_uuid`<br>Dịch vụ lịch hẹn | uuid | optional / 0..1 | adapter_contract: Appointment.serviceUuid | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `appointment.type_code`<br>Loại hẹn | coded | optional / 0..1 | adapter_contract: Appointment.typeCode | appointment_type<br> | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+## queue
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `queue.uuid`<br>UUID hàng đợi | uuid | optional / 0..1 | adapter_contract: QueueEntry.uuid | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `queue.service_point_uuid`<br>Điểm phục vụ | uuid | optional / 0..1 | adapter_contract: QueueEntry.servicePointUuid | —<br>R_UUID | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `queue.trang_thai`<br>Trạng thái hàng đợi | coded | optional / 0..1 | adapter_contract: QueueEntry.status | queue_status<br> | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `queue.ly_do_roi`<br>Lý do hủy/bỏ hàng đợi | coded | optional / 0..1 | adapter_contract: QueueEntry.exitReason | queue_exit_reason<br> | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+## document
+
+| Mã / nhãn | Kiểu / đơn vị | Bắt buộc / số phần tử | Nơi lưu / UUID | Danh mục / kiểm tra | Nguồn liên quan |
+| --- | --- | --- | --- | --- | --- |
+| `document.template_version`<br>Phiên bản mẫu in | text | optional / 0..1 | adapter_contract: Document.templateVersion | —<br>R_TEXT | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
+| `document.so_chung_tu`<br>Số chứng từ | text | optional / 0..1 | adapter_contract: Document.number | —<br>R_TEXT | MVP / hệ thống bổ sung |
+| Ghi chú | Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint. | | | | |
