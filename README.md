@@ -8,6 +8,8 @@ Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại V
 
 Đọc [kế hoạch triển khai và phân công công việc](PROJECT_PLAN.md) để nắm phạm vi MVP, đầu việc của 4 thành viên, thứ tự phối hợp và tiêu chí nghiệm thu.
 
+Đọc [từ điển dữ liệu và bảng bàn giao cho BE](docs/DATA_DICTIONARY.md) để tra các trường từ hồ sơ mẫu 195 trang, trang nguồn và những điểm còn cần xác nhận. Người phụ trách metadata bắt đầu ở mục 1; mục 10 giữ khung dữ liệu MVP của nhóm.
+
 | Tài liệu | Nội dung |
 | --- | --- |
 | [Quy trình phòng khám](docs/CLINIC_WORKFLOW.md) | Vai trò, luồng khám, giấy tờ đầu ra |
@@ -16,6 +18,8 @@ Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại V
 | [Từ điển dữ liệu](docs/DATA_DICTIONARY.md) | Trường dữ liệu, ánh xạ FHIR/openEHR |
 | [Quyết định kiến trúc](docs/decisions/) | ADR, gồm vai trò OpenMRS/openEHR |
 | [Đóng góp](CONTRIBUTING.md) · [Bảo mật](SECURITY.md) | Quy tắc PR và báo lỗ hổng |
+
+Bộ metadata Việt Nam: [hướng dẫn bàn giao](docs/METADATA.md), [bảng trường MVP](docs/data/MVP_METADATA_FIELDS.md), [kết quả kiểm tra](docs/METADATA_VALIDATION.md). Kiểm tra bằng `python tools/metadata.py`.
 
 ## Chạy baseline OpenMRS
 

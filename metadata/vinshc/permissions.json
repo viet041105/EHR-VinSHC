@@ -1,0 +1,280 @@
+{
+  "version": "0.1.0",
+  "status": "business_access_contract_not_deployed_security",
+  "default": "deny",
+  "multiRole": true,
+  "roleComposition": "Union of granted actions, with every operation still subject to facility/object/state scope; explicit deny and backend security policies take precedence.",
+  "fieldGroups": {
+    "patient_identity": [
+      "patient.*",
+      "contact.*"
+    ],
+    "administrative_visit": [
+      "visit.uuid",
+      "visit.patient_uuid",
+      "visit.loai",
+      "visit.co_so_uuid",
+      "visit.bat_dau",
+      "visit.ket_thuc",
+      "visit.trang_thai",
+      "visit.ly_do_ket_thuc",
+      "visit.ghi_chu_ket_thuc"
+    ],
+    "clinical_vitals": [
+      "vitals.*"
+    ],
+    "clinical_exam": [
+      "history.*",
+      "exam.*",
+      "visit.ly_do_kham",
+      "allergy.*",
+      "dx.*",
+      "followup.*"
+    ],
+    "prescription": [
+      "rx.*"
+    ],
+    "diagnostic_order": [
+      "order.*"
+    ],
+    "diagnostic_result": [
+      "result.*",
+      "document.*"
+    ],
+    "billing": [
+      "bill.*",
+      "payment.*"
+    ],
+    "dispensing": [
+      "dispense.*"
+    ],
+    "appointment": [
+      "appointment.*"
+    ],
+    "metadata_admin": [
+      "catalogues",
+      "form_drafts",
+      "accounts",
+      "facility_config"
+    ],
+    "reports": [
+      "aggregated_reports"
+    ]
+  },
+  "roles": {
+    "reception": {
+      "label": "Tiếp đón",
+      "grants": {
+        "patient_identity": [
+          "read",
+          "create",
+          "update"
+        ],
+        "administrative_visit": [
+          "read",
+          "create",
+          "update",
+          "close"
+        ],
+        "appointment": [
+          "read",
+          "create",
+          "update",
+          "cancel"
+        ]
+      },
+      "conditions": [
+        "same_facility",
+        "administrative_projection_only"
+      ],
+      "note": "Không đọc chart/obs khám/thuốc/kết quả hay file y tế; mở Visit không xác nhận thanh toán."
+    },
+    "cashier": {
+      "label": "Thu ngân",
+      "grants": {
+        "billing": [
+          "read",
+          "create",
+          "collect",
+          "refund",
+          "cancel"
+        ],
+        "patient_identity": [
+          "read_minimal"
+        ],
+        "administrative_visit": [
+          "read_minimal"
+        ]
+      },
+      "conditions": [
+        "same_facility",
+        "billing_projection_only",
+        "refund_requires_original_transaction_and_reason"
+      ],
+      "note": "Không sửa nội dung lâm sàng; hủy lượt không tự hoàn tiền."
+    },
+    "nurse": {
+      "label": "Điều dưỡng",
+      "grants": {
+        "patient_identity": [
+          "read_minimal"
+        ],
+        "administrative_visit": [
+          "read"
+        ],
+        "clinical_vitals": [
+          "read",
+          "create",
+          "update",
+          "void_with_reason"
+        ],
+        "clinical_exam": [
+          "read_care_context"
+        ],
+        "prescription": [
+          "read"
+        ],
+        "diagnostic_result": [
+          "read_care_context"
+        ]
+      },
+      "conditions": [
+        "same_facility",
+        "assigned_care_scope",
+        "audit_reason_on_correction"
+      ],
+      "note": "Không kê đơn hoặc xác nhận chẩn đoán; bác sĩ ghi sinh hiệu khi được cấp quyền kiêm nhiệm."
+    },
+    "doctor": {
+      "label": "Bác sĩ",
+      "grants": {
+        "patient_identity": [
+          "read"
+        ],
+        "administrative_visit": [
+          "read",
+          "close"
+        ],
+        "clinical_vitals": [
+          "read",
+          "create_if_granted"
+        ],
+        "clinical_exam": [
+          "read",
+          "create",
+          "update",
+          "finalize",
+          "correct_with_reason"
+        ],
+        "prescription": [
+          "read",
+          "create",
+          "confirm",
+          "cancel"
+        ],
+        "diagnostic_order": [
+          "read",
+          "create",
+          "assign",
+          "cancel"
+        ],
+        "diagnostic_result": [
+          "read"
+        ],
+        "appointment": [
+          "read",
+          "create"
+        ]
+      },
+      "conditions": [
+        "same_facility",
+        "assigned_patient_scope",
+        "final_records_require_new_version"
+      ],
+      "note": "Không sửa phiếu thu; bản tóm tắt không thay dữ liệu gốc."
+    },
+    "lab": {
+      "label": "Kỹ thuật viên CLS",
+      "grants": {
+        "patient_identity": [
+          "read_minimal"
+        ],
+        "diagnostic_order": [
+          "read_assigned",
+          "start_assigned"
+        ],
+        "diagnostic_result": [
+          "read_assigned",
+          "create_assigned",
+          "finalize_assigned",
+          "correct_with_reason"
+        ]
+      },
+      "conditions": [
+        "same_facility",
+        "assigned_order_only",
+        "patient_order_links_match"
+      ],
+      "note": "Không truy cập toàn bộ chart; download/print cùng phạm vi order."
+    },
+    "pharmacy": {
+      "label": "Dược/quầy thuốc",
+      "grants": {
+        "patient_identity": [
+          "read_minimal"
+        ],
+        "prescription": [
+          "read_confirmed_snapshot"
+        ],
+        "dispensing": [
+          "read",
+          "confirm"
+        ]
+      },
+      "conditions": [
+        "same_facility",
+        "confirmed_prescription_only",
+        "idempotent_dispense"
+      ],
+      "note": "Không sửa DrugOrder; kho/lô/hạn dùng do BE-08 mở rộng."
+    },
+    "manager": {
+      "label": "Quản lý",
+      "grants": {
+        "reports": [
+          "read",
+          "export"
+        ]
+      },
+      "conditions": [
+        "same_facility",
+        "aggregate_only_no_patient_names"
+      ],
+      "note": "Muốn đọc chart phải có role lâm sàng riêng; không trả dữ liệu bệnh án xuống FE rồi giấu."
+    },
+    "admin": {
+      "label": "Quản trị",
+      "grants": {
+        "metadata_admin": [
+          "read",
+          "create",
+          "update",
+          "retire"
+        ],
+        "reports": [
+          "read_operational"
+        ]
+      },
+      "conditions": [
+        "audit_all_admin_changes"
+      ],
+      "note": "Đây là role quản trị ứng dụng đề xuất, không đồng nhất Core System Developer/admin toàn quyền."
+    }
+  },
+  "backendRequirements": [
+    "Resolve actual Core/module privilege names on baseline before granting roles.",
+    "Enforce record-level scope at API/service, including reads/search/download/print.",
+    "Server sets actor from authenticated session; never trust supplied creator/provider blindly.",
+    "GET results must use role projections, not frontend-only filtering."
+  ]
+}

@@ -1,0 +1,9 @@
+Uuid,Void/Retire,Name,Description,Format,Searchable,_order:8100
+1aeef034-d2a0-56b4-a4c8-d856f17dc261,false,VinSHC Điện thoại,VinSHC key=attribute.phone,java.lang.String,true,
+a4e0addf-5506-52d0-a6a8-d139d663d251,false,VinSHC Ngày sinh nguyên văn,VinSHC key=attribute.birth_raw,java.lang.String,false,
+6abda66e-da8a-5cd6-bd91-fa4199332d9f,false,VinSHC Độ chính xác ngày sinh,VinSHC key=attribute.birth_precision,java.lang.String,false,
+e87a0244-d7e5-5f32-915c-96be9320a0bb,false,VinSHC Năm sinh,VinSHC key=attribute.birth_year,java.lang.String,false,
+8a36009d-bebd-5d87-b625-f35f55e165d3,false,VinSHC Tháng sinh,VinSHC key=attribute.birth_month,java.lang.String,false,
+f3dbdece-1705-5587-a3f9-eb492606fc8b,false,VinSHC Nghề nghiệp,VinSHC key=attribute.occupation,java.lang.String,false,
+b0591671-9096-5c68-a12b-a334646b8856,false,VinSHC Địa chỉ nguyên văn,VinSHC key=attribute.address_raw,java.lang.String,false,
+3437b782-2af8-5e10-85fb-87b8335b0821,false,VinSHC Địa chỉ giấy tờ cũ,VinSHC key=attribute.address_legacy,java.lang.String,false,

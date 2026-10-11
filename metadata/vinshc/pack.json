@@ -1,0 +1,6152 @@
+{
+  "schemaVersion": 1,
+  "version": "0.1.0",
+  "date": "2026-10-10",
+  "namespaceSeed": "https://github.com/viet041105/EHR-VinSHC/metadata",
+  "scope": {
+    "mvp1": "Ngoại trú: đăng ký, tiếp nhận, sinh hiệu, khám, dị ứng, chẩn đoán, kê đơn, kết thúc và lịch sử.",
+    "mvp2": "Hợp đồng dữ liệu cho lịch hẹn, CLS, tài liệu, thu phí và cấp thuốc; adapter/module do BE và người 4 triển khai.",
+    "excluded": [
+      "Nội trú/chuyển khoa/giường",
+      "Can thiệp chuyên sâu/thang điểm từ S01",
+      "Liên thông thực tế/BHYT/HĐĐT",
+      "Agent lâm sàng"
+    ]
+  },
+  "entities": [
+    {
+      "key": "location.development.clinic",
+      "domain": "locations",
+      "label": "VinSHC Development Clinic",
+      "uuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "managed": false,
+      "note": "Tái sử dụng location synthetic đã có, không thay bằng địa chỉ phòng khám thật."
+    },
+    {
+      "key": "identifier.internal",
+      "domain": "patientidentifiertypes",
+      "label": "VinSHC Internal Patient ID",
+      "format": "[A-Za-z0-9][A-Za-z0-9._-]{0,63}",
+      "locationBehavior": "REQUIRED",
+      "uniquenessBehavior": "LOCATION",
+      "required": false,
+      "note": "Bắt buộc trong patient.create của ứng dụng; Required=false tại Core để không phá fixture/upstream đã có. Idgen do BE cấu hình.",
+      "uuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34"
+    },
+    {
+      "key": "identifier.cccd",
+      "domain": "patientidentifiertypes",
+      "label": "VinSHC CCCD",
+      "format": "[0-9]{12}",
+      "locationBehavior": "NOT_USED",
+      "uniquenessBehavior": "NON_UNIQUE",
+      "required": false,
+      "note": "Định danh phụ, không tự merge hoặc dùng làm khóa toàn mạng.",
+      "uuid": "4e5406dc-8ff9-5486-98fa-5d95c6fe8233"
+    },
+    {
+      "key": "identifier.bhxh",
+      "domain": "patientidentifiertypes",
+      "label": "VinSHC BHXH",
+      "format": "[A-Za-z0-9-]{1,32}",
+      "locationBehavior": "NOT_USED",
+      "uniquenessBehavior": "NON_UNIQUE",
+      "required": false,
+      "note": "Định danh phụ, không tự merge hoặc dùng làm khóa toàn mạng.",
+      "uuid": "d7902062-a695-5bf3-8764-acf7f43e3238"
+    },
+    {
+      "key": "identifier.bhyt",
+      "domain": "patientidentifiertypes",
+      "label": "VinSHC BHYT",
+      "format": "[A-Za-z0-9-]{1,32}",
+      "locationBehavior": "NOT_USED",
+      "uniquenessBehavior": "NON_UNIQUE",
+      "required": false,
+      "note": "Định danh phụ, không tự merge hoặc dùng làm khóa toàn mạng.",
+      "uuid": "e2b901c3-d442-565b-bff5-841aff260d2d"
+    },
+    {
+      "key": "visit.outpatient",
+      "domain": "visittypes",
+      "label": "VinSHC Outpatient",
+      "uuid": "20a5a7e6-76e0-584c-9b28-e1f637660fee"
+    },
+    {
+      "key": "visit.followup",
+      "domain": "visittypes",
+      "label": "VinSHC Follow-up",
+      "uuid": "33478305-9827-573f-8c63-22bc136da6ba"
+    },
+    {
+      "key": "encounter.administrative",
+      "domain": "encountertypes",
+      "label": "VinSHC Administrative",
+      "uuid": "70ddd463-1bae-58c4-83d6-18a0391869d2"
+    },
+    {
+      "key": "encounter.vitals",
+      "domain": "encountertypes",
+      "label": "VinSHC Vitals",
+      "uuid": "8368ff74-1b50-592b-8e78-2f0f2ddc1e06"
+    },
+    {
+      "key": "encounter.consultation",
+      "domain": "encountertypes",
+      "label": "VinSHC Consultation",
+      "uuid": "c3dba376-453f-5f2c-bee7-70c09a2d5f61"
+    },
+    {
+      "key": "encounter.results",
+      "domain": "encountertypes",
+      "label": "VinSHC Diagnostic Results",
+      "uuid": "b6ba54a0-c595-5f17-88ff-29812ccad8d0"
+    },
+    {
+      "key": "encounter_role.clinician",
+      "domain": "encounterroles",
+      "label": "VinSHC Treating clinician",
+      "uuid": "21dc99b5-a544-5c12-9dcc-3d12fe1d164b"
+    },
+    {
+      "key": "encounter_role.nurse",
+      "domain": "encounterroles",
+      "label": "VinSHC Recording nurse",
+      "uuid": "3d09e225-5185-5db6-a9cc-89a6962dc014"
+    },
+    {
+      "key": "encounter_role.technician",
+      "domain": "encounterroles",
+      "label": "VinSHC Result author",
+      "uuid": "2dc83c7f-83bf-5c36-a769-433274c63809"
+    },
+    {
+      "key": "attribute.phone",
+      "domain": "personattributetypes",
+      "label": "VinSHC Điện thoại",
+      "format": "java.lang.String",
+      "searchable": true,
+      "uuid": "1aeef034-d2a0-56b4-a4c8-d856f17dc261"
+    },
+    {
+      "key": "attribute.birth_raw",
+      "domain": "personattributetypes",
+      "label": "VinSHC Ngày sinh nguyên văn",
+      "format": "java.lang.String",
+      "searchable": false,
+      "uuid": "a4e0addf-5506-52d0-a6a8-d139d663d251"
+    },
+    {
+      "key": "attribute.birth_precision",
+      "domain": "personattributetypes",
+      "label": "VinSHC Độ chính xác ngày sinh",
+      "format": "java.lang.String",
+      "searchable": false,
+      "uuid": "6abda66e-da8a-5cd6-bd91-fa4199332d9f"
+    },
+    {
+      "key": "attribute.birth_year",
+      "domain": "personattributetypes",
+      "label": "VinSHC Năm sinh",
+      "format": "java.lang.String",
+      "searchable": false,
+      "uuid": "e87a0244-d7e5-5f32-915c-96be9320a0bb"
+    },
+    {
+      "key": "attribute.birth_month",
+      "domain": "personattributetypes",
+      "label": "VinSHC Tháng sinh",
+      "format": "java.lang.String",
+      "searchable": false,
+      "uuid": "8a36009d-bebd-5d87-b625-f35f55e165d3"
+    },
+    {
+      "key": "attribute.occupation",
+      "domain": "personattributetypes",
+      "label": "VinSHC Nghề nghiệp",
+      "format": "java.lang.String",
+      "searchable": false,
+      "uuid": "f3dbdece-1705-5587-a3f9-eb492606fc8b"
+    },
+    {
+      "key": "attribute.address_raw",
+      "domain": "personattributetypes",
+      "label": "VinSHC Địa chỉ nguyên văn",
+      "format": "java.lang.String",
+      "searchable": false,
+      "uuid": "b0591671-9096-5c68-a12b-a334646b8856"
+    },
+    {
+      "key": "attribute.address_legacy",
+      "domain": "personattributetypes",
+      "label": "VinSHC Địa chỉ giấy tờ cũ",
+      "format": "java.lang.String",
+      "searchable": false,
+      "uuid": "3437b782-2af8-5e10-85fb-87b8335b0821"
+    },
+    {
+      "key": "visit.ly_do_kham",
+      "domain": "concepts",
+      "label": "Lý do khám",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "ce6ac27d-a555-5ddd-bd82-6dd575066adc"
+    },
+    {
+      "key": "visit.ly_do_ket_thuc",
+      "domain": "concepts",
+      "label": "Lý do kết thúc lượt",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "visit_close_reason",
+      "allowDecimals": false,
+      "uuid": "e54c1088-b2ad-534d-923e-8fb82019751f"
+    },
+    {
+      "key": "visit.ghi_chu_ket_thuc",
+      "domain": "concepts",
+      "label": "Ghi chú kết thúc/bỏ về/hủy",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "b3ccfa9b-2d9e-5f86-8816-70a74f30e6cf"
+    },
+    {
+      "key": "vitals.mach",
+      "domain": "concepts",
+      "label": "Mạch",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "/min",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "263e4d0b-61d2-5517-bcb1-992cfb60675b"
+    },
+    {
+      "key": "vitals.mach_trang_thai",
+      "domain": "concepts",
+      "label": "Mạch - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "1452453f-cf72-5b97-b366-7541414f42c9"
+    },
+    {
+      "key": "vitals.ha_tam_thu",
+      "domain": "concepts",
+      "label": "Huyết áp tâm thu",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "mm[Hg]",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "f8da18ad-2e26-55cd-954b-51d6e0738815"
+    },
+    {
+      "key": "vitals.ha_tam_thu_trang_thai",
+      "domain": "concepts",
+      "label": "Huyết áp tâm thu - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "a0e3f46e-b74e-5bcd-85b5-c8a3a385b964"
+    },
+    {
+      "key": "vitals.ha_tam_truong",
+      "domain": "concepts",
+      "label": "Huyết áp tâm trương",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "mm[Hg]",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "f97478e4-cce6-5cc5-89fa-cfd10bfe8794"
+    },
+    {
+      "key": "vitals.ha_tam_truong_trang_thai",
+      "domain": "concepts",
+      "label": "Huyết áp tâm trương - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "3f3c8a87-d446-59ba-a877-c03a1dcf82c0"
+    },
+    {
+      "key": "vitals.nhiet_do",
+      "domain": "concepts",
+      "label": "Nhiệt độ",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "Cel",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "55a6de05-e371-5a48-9440-a81d7ef2e364"
+    },
+    {
+      "key": "vitals.nhiet_do_trang_thai",
+      "domain": "concepts",
+      "label": "Nhiệt độ - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "78f5da85-8751-5492-a6a5-e5bdb1d61ea3"
+    },
+    {
+      "key": "vitals.nhip_tho",
+      "domain": "concepts",
+      "label": "Nhịp thở",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "/min",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "b82f1a4a-bbc9-55f0-8204-079bf1130457"
+    },
+    {
+      "key": "vitals.nhip_tho_trang_thai",
+      "domain": "concepts",
+      "label": "Nhịp thở - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "d3aa7eda-24b2-573b-91ad-1c8c4cdf8f57"
+    },
+    {
+      "key": "vitals.spo2",
+      "domain": "concepts",
+      "label": "SpO2",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "%",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "4ebf4ddf-fcbe-5bed-893b-114d6ec5f739"
+    },
+    {
+      "key": "vitals.spo2_trang_thai",
+      "domain": "concepts",
+      "label": "SpO2 - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "7002d377-77a5-5914-bcbc-90ddd8c5d47e"
+    },
+    {
+      "key": "vitals.can_nang",
+      "domain": "concepts",
+      "label": "Cân nặng",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "kg",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "88853161-b7db-5a20-b5c5-666b69999a25"
+    },
+    {
+      "key": "vitals.can_nang_trang_thai",
+      "domain": "concepts",
+      "label": "Cân nặng - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "6ad2f977-bd1a-5a3e-9f61-53a13c624a38"
+    },
+    {
+      "key": "vitals.chieu_cao",
+      "domain": "concepts",
+      "label": "Chiều cao",
+      "dataType": "Numeric",
+      "class": "Finding",
+      "unit": "cm",
+      "codeList": null,
+      "allowDecimals": true,
+      "uuid": "e13865bd-3100-5aca-8e82-e8a6fb58321d"
+    },
+    {
+      "key": "vitals.chieu_cao_trang_thai",
+      "domain": "concepts",
+      "label": "Chiều cao - trạng thái dữ liệu",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "data_status",
+      "allowDecimals": false,
+      "uuid": "a66b0680-1700-587e-9293-f62634761b4c"
+    },
+    {
+      "key": "history.benh_su",
+      "domain": "concepts",
+      "label": "Bệnh sử / quá trình bệnh lý",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "c331d296-34b5-55ba-891f-094eadc1a2fc"
+    },
+    {
+      "key": "history.tien_su_ban_than_trang_thai",
+      "domain": "concepts",
+      "label": "Trạng thái tiền sử bản thân",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "history_status",
+      "allowDecimals": false,
+      "uuid": "784c30c7-ccfc-5cf8-acb8-fbd50a583950"
+    },
+    {
+      "key": "history.tien_su_ban_than",
+      "domain": "concepts",
+      "label": "Tiền sử bản thân",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "93f6d05e-cddd-5583-a22a-9f9e42ece100"
+    },
+    {
+      "key": "history.tien_su_gia_dinh_trang_thai",
+      "domain": "concepts",
+      "label": "Trạng thái tiền sử gia đình",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "history_status",
+      "allowDecimals": false,
+      "uuid": "93c7f2b7-2d10-5f92-a0c1-7ef3fa25a504"
+    },
+    {
+      "key": "history.tien_su_gia_dinh",
+      "domain": "concepts",
+      "label": "Tiền sử gia đình",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "4ebc119d-8d35-5473-9260-1c916d3b5bca"
+    },
+    {
+      "key": "exam.trieu_chung",
+      "domain": "concepts",
+      "label": "Triệu chứng người bệnh kể",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "7e32942f-1118-517c-ada7-4792b19ad7a5"
+    },
+    {
+      "key": "exam.toan_than",
+      "domain": "concepts",
+      "label": "Khám toàn thân",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "796a194b-2788-5425-8246-2cfee4a22361"
+    },
+    {
+      "key": "exam.bo_phan",
+      "domain": "concepts",
+      "label": "Khám các bộ phận",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "11b9a3fe-13aa-5b06-912a-da794a785771"
+    },
+    {
+      "key": "exam.tom_tat",
+      "domain": "concepts",
+      "label": "Tóm tắt kết quả khám",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "bd983586-db24-5e35-9822-d08ea8ebbf30"
+    },
+    {
+      "key": "exam.huong_dieu_tri",
+      "domain": "concepts",
+      "label": "Hướng điều trị",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "3c89f03a-d6b8-5dcc-941d-b57af6718eb2"
+    },
+    {
+      "key": "exam.loi_dan",
+      "domain": "concepts",
+      "label": "Lời dặn",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "d4b6c86d-4dd7-5339-b4de-2c75b267e2bd"
+    },
+    {
+      "key": "allergy.trang_thai",
+      "domain": "concepts",
+      "label": "Trạng thái sàng lọc dị ứng",
+      "dataType": "Coded",
+      "class": "Question",
+      "unit": null,
+      "codeList": "allergy_status",
+      "allowDecimals": false,
+      "uuid": "2351112f-d130-58d9-a55b-8d1f7d6872eb"
+    },
+    {
+      "key": "followup.ngay_tai_kham",
+      "domain": "concepts",
+      "label": "Ngày dự kiến tái khám",
+      "dataType": "Date",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "16686840-88fc-514a-b30a-81bc1c7650c9"
+    },
+    {
+      "key": "followup.loi_dan",
+      "domain": "concepts",
+      "label": "Điều kiện/lời dặn tái khám",
+      "dataType": "Text",
+      "class": "Finding",
+      "unit": null,
+      "codeList": null,
+      "allowDecimals": false,
+      "uuid": "3dcc4c83-5342-5adc-87da-b8e9783bd367"
+    },
+    {
+      "key": "group.vitals",
+      "domain": "concepts",
+      "label": "Nhóm sinh hiệu một thời điểm",
+      "dataType": "N/A",
+      "class": "ConvSet",
+      "members": [
+        "vitals.mach",
+        "vitals.mach_trang_thai",
+        "vitals.ha_tam_thu",
+        "vitals.ha_tam_thu_trang_thai",
+        "vitals.ha_tam_truong",
+        "vitals.ha_tam_truong_trang_thai",
+        "vitals.nhiet_do",
+        "vitals.nhiet_do_trang_thai",
+        "vitals.nhip_tho",
+        "vitals.nhip_tho_trang_thai",
+        "vitals.spo2",
+        "vitals.spo2_trang_thai",
+        "vitals.can_nang",
+        "vitals.can_nang_trang_thai",
+        "vitals.chieu_cao",
+        "vitals.chieu_cao_trang_thai"
+      ],
+      "uuid": "7a7cebb3-1a82-5aab-975e-58d93c68eafc"
+    },
+    {
+      "key": "group.consultation",
+      "domain": "concepts",
+      "label": "Nhóm ghi nhận khám",
+      "dataType": "N/A",
+      "class": "ConvSet",
+      "members": [
+        "visit.ly_do_kham",
+        "history.benh_su",
+        "history.tien_su_ban_than_trang_thai",
+        "history.tien_su_ban_than",
+        "history.tien_su_gia_dinh_trang_thai",
+        "history.tien_su_gia_dinh",
+        "exam.trieu_chung",
+        "exam.toan_than",
+        "exam.bo_phan",
+        "exam.tom_tat",
+        "exam.huong_dieu_tri",
+        "exam.loi_dan",
+        "allergy.trang_thai",
+        "followup.ngay_tai_kham",
+        "followup.loi_dan"
+      ],
+      "uuid": "7e49bbc6-53c8-59aa-b2f0-6e1f247d701b"
+    },
+    {
+      "key": "group.administrative",
+      "domain": "concepts",
+      "label": "Nhóm kết thúc tiếp nhận",
+      "dataType": "N/A",
+      "class": "ConvSet",
+      "members": [
+        "visit.ly_do_ket_thuc",
+        "visit.ghi_chu_ket_thuc"
+      ],
+      "uuid": "cbc0dada-ce5e-5c76-9378-d4a02d2a8c0a"
+    },
+    {
+      "key": "answer.data_status.recorded",
+      "domain": "concepts",
+      "label": "Đã ghi nhận",
+      "uuid": "87756945-c977-581e-ac81-61886e594ff0",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "recorded"
+    },
+    {
+      "key": "answer.data_status.not_recorded",
+      "domain": "concepts",
+      "label": "Chưa ghi",
+      "uuid": "c6c1126e-1d5f-5029-948c-87c86be16bde",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "not_recorded"
+    },
+    {
+      "key": "answer.data_status.not_asked",
+      "domain": "concepts",
+      "label": "Chưa hỏi",
+      "uuid": "dd1df938-28dc-5c9d-997e-253ed6a57ac3",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "not_asked"
+    },
+    {
+      "key": "answer.data_status.unknown",
+      "domain": "concepts",
+      "label": "Không rõ",
+      "uuid": "d3dd7619-b5de-59d4-a843-f01029cef193",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "unknown"
+    },
+    {
+      "key": "answer.data_status.refused",
+      "domain": "concepts",
+      "label": "Từ chối cung cấp",
+      "uuid": "675d6c23-50b4-568b-a887-bd76e0e1c38f",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "refused"
+    },
+    {
+      "key": "answer.data_status.not_applicable",
+      "domain": "concepts",
+      "label": "Không áp dụng",
+      "uuid": "e8be81d1-f0a7-5859-a184-50e424050ad1",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "not_applicable"
+    },
+    {
+      "key": "answer.data_status.masked",
+      "domain": "concepts",
+      "label": "Bị che trong nguồn",
+      "uuid": "b609c06d-f653-5451-ae15-9a53b813c9e6",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "masked"
+    },
+    {
+      "key": "answer.data_status.unreadable",
+      "domain": "concepts",
+      "label": "Không đọc được",
+      "uuid": "2aa97847-e32b-5974-bfbc-cfed9e55d065",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "data_status",
+      "answerCode": "unreadable"
+    },
+    {
+      "key": "answer.history_status.not_asked",
+      "domain": "concepts",
+      "label": "Chưa hỏi",
+      "uuid": "8ea0e533-2ceb-58af-81df-36f941f3176e",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "history_status",
+      "answerCode": "not_asked"
+    },
+    {
+      "key": "answer.history_status.none_reported",
+      "domain": "concepts",
+      "label": "Đã hỏi, không ghi nhận",
+      "uuid": "43cebae2-7106-5c36-85f9-7bd21f8983fe",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "history_status",
+      "answerCode": "none_reported"
+    },
+    {
+      "key": "answer.history_status.present",
+      "domain": "concepts",
+      "label": "Có tiền sử",
+      "uuid": "0c7202e7-5fc0-5825-8ef2-0a19409e9986",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "history_status",
+      "answerCode": "present"
+    },
+    {
+      "key": "answer.history_status.unknown",
+      "domain": "concepts",
+      "label": "Không rõ",
+      "uuid": "7f353edf-c9d9-5975-9a6e-7dcec0f9cd53",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "history_status",
+      "answerCode": "unknown"
+    },
+    {
+      "key": "answer.allergy_status.not_asked",
+      "domain": "concepts",
+      "label": "Chưa hỏi",
+      "uuid": "49423217-efbd-5a55-958e-2d564725db06",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "allergy_status",
+      "answerCode": "not_asked"
+    },
+    {
+      "key": "answer.allergy_status.no_known_allergy",
+      "domain": "concepts",
+      "label": "Đã hỏi, không ghi nhận dị ứng",
+      "uuid": "211345e1-bf3a-5520-a2d6-0cad885b5302",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "allergy_status",
+      "answerCode": "no_known_allergy"
+    },
+    {
+      "key": "answer.allergy_status.present",
+      "domain": "concepts",
+      "label": "Có dị ứng",
+      "uuid": "8c2a214d-1eb2-5918-b01d-4946a2c3d674",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "allergy_status",
+      "answerCode": "present"
+    },
+    {
+      "key": "answer.allergy_status.unknown",
+      "domain": "concepts",
+      "label": "Không rõ",
+      "uuid": "dc642a73-0f1a-5b91-8709-7763ad1611e9",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "allergy_status",
+      "answerCode": "unknown"
+    },
+    {
+      "key": "answer.visit_close_reason.completed",
+      "domain": "concepts",
+      "label": "Kết thúc khám",
+      "uuid": "ce25786a-650f-588e-b554-3d42ac81bc33",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "visit_close_reason",
+      "answerCode": "completed"
+    },
+    {
+      "key": "answer.visit_close_reason.left_early",
+      "domain": "concepts",
+      "label": "Bỏ về trước khi khám xong",
+      "uuid": "cf8f5dc1-e869-5990-ab3d-e704fccf0707",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "visit_close_reason",
+      "answerCode": "left_early"
+    },
+    {
+      "key": "answer.visit_close_reason.cancelled",
+      "domain": "concepts",
+      "label": "Hủy tiếp nhận",
+      "uuid": "8ad6ff22-bfca-5a8d-aa90-06a2bbd7de4e",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "visit_close_reason",
+      "answerCode": "cancelled"
+    },
+    {
+      "key": "answer.visit_close_reason.referred",
+      "domain": "concepts",
+      "label": "Chuyển khám cơ sở khác",
+      "uuid": "5af6b517-7dae-526e-92f2-afff2ed64a5c",
+      "dataType": "N/A",
+      "class": "Misc",
+      "answerList": "visit_close_reason",
+      "answerCode": "referred"
+    }
+  ],
+  "fields": [
+    {
+      "code": "patient.uuid",
+      "label": "UUID bệnh nhân",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "server_generated",
+      "storage": {
+        "kind": "native",
+        "path": "Patient.uuid",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "patient.ma_noi_bo",
+      "label": "Mã bệnh nhân nội bộ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "identifier",
+        "ref": "identifier.internal",
+        "path": "Patient.identifiers[]",
+        "uuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ID"
+      ],
+      "sourceRows": [
+        "K01"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "",
+      "example": "NB-GIA-000001"
+    },
+    {
+      "code": "patient.cccd",
+      "label": "Số CCCD",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "identifier",
+        "ref": "identifier.cccd",
+        "path": "Patient.identifiers[]",
+        "uuid": "4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ID"
+      ],
+      "sourceRows": [
+        "K21"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Chỉ loại CCCD 12 số; CMND/hộ chiếu là identifier type khác nếu nhóm mở rộng."
+    },
+    {
+      "code": "patient.ma_bhxh",
+      "label": "Mã BHXH",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "identifier",
+        "ref": "identifier.bhxh",
+        "path": "Patient.identifiers[]",
+        "uuid": "d7902062-a695-5bf3-8764-acf7f43e3238",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ID"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tách riêng BHXH và số thẻ BHYT; chưa hardcode quy tắc nghiệp vụ khi chưa có danh mục phiên bản."
+    },
+    {
+      "code": "patient.ma_bhyt",
+      "label": "Số thẻ BHYT",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "identifier",
+        "ref": "identifier.bhyt",
+        "path": "Patient.identifiers[]",
+        "uuid": "e2b901c3-d442-565b-bff5-841aff260d2d",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ID"
+      ],
+      "sourceRows": [
+        "K24"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "patient.ho_ten",
+      "label": "Họ tên đầy đủ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Person.names[]",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_ID"
+      ],
+      "sourceRows": [
+        "K04"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Giữ tên hiển thị; adapter tách familyName/givenName/middleName, không đảo từ và không dùng tên làm khóa."
+    },
+    {
+      "code": "patient.gioi_tinh",
+      "label": "Giới tính hành chính",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Person.gender",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "gender",
+      "rules": [
+        "R_CHOICE"
+      ],
+      "sourceRows": [
+        "K08"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Adapter xác nhận M/F/O/U trên baseline; không suy từ tên. FHIR male/female/other/unknown là mapping đích."
+    },
+    {
+      "code": "patient.ngay_sinh",
+      "label": "Ngày sinh đủ ngày",
+      "dataType": "date",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "if_birth_precision_day",
+      "storage": {
+        "kind": "native",
+        "path": "Person.birthdate",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DATE",
+        "R_DOB"
+      ],
+      "sourceRows": [
+        "K05"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "patient.ngay_sinh_uoc_luong",
+      "label": "Cờ ngày sinh ước lượng",
+      "dataType": "boolean",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "native",
+        "path": "Person.birthdateEstimated",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DOB"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "patient.ngay_sinh_nguon",
+      "label": "Ngày sinh nguyên văn",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.birth_raw",
+        "path": "person.attributes[].value",
+        "uuid": "a4e0addf-5506-52d0-a6a8-d139d663d251",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DOB"
+      ],
+      "sourceRows": [
+        "K05",
+        "K06"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "",
+      "example": "1990"
+    },
+    {
+      "code": "patient.do_chinh_xac_ngay_sinh",
+      "label": "Độ chính xác ngày sinh",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.birth_precision",
+        "path": "person.attributes[].value",
+        "uuid": "6abda66e-da8a-5cd6-bd91-fa4199332d9f",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "birth_precision",
+      "rules": [
+        "R_CHOICE",
+        "R_DOB"
+      ],
+      "sourceRows": [
+        "K05",
+        "K06"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "patient.nam_sinh",
+      "label": "Năm sinh",
+      "dataType": "integer",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "if_birth_precision_year_or_month",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.birth_year",
+        "path": "person.attributes[].value",
+        "uuid": "e87a0244-d7e5-5f32-915c-96be9320a0bb",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DOB"
+      ],
+      "sourceRows": [
+        "K06"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "patient.thang_sinh",
+      "label": "Tháng sinh",
+      "dataType": "integer",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "if_birth_precision_month",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.birth_month",
+        "path": "person.attributes[].value",
+        "uuid": "8a36009d-bebd-5d87-b625-f35f55e165d3",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DOB"
+      ],
+      "sourceRows": [
+        "K05"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "patient.dien_thoai",
+      "label": "Điện thoại người bệnh",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.phone",
+        "path": "person.attributes[].value",
+        "uuid": "1aeef034-d2a0-56b4-a4c8-d856f17dc261",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ID"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Không lấy điện thoại người nhà K29 thay điện thoại người bệnh; chuỗi giữ +/0, xác minh riêng."
+    },
+    {
+      "code": "patient.nghe_nghiep",
+      "label": "Nghề nghiệp nguyên văn",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.occupation",
+        "path": "person.attributes[].value",
+        "uuid": "f3dbdece-1705-5587-a3f9-eb492606fc8b",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [
+        "K09"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "patient.dia_chi",
+      "label": "Địa chỉ có cấu trúc",
+      "dataType": "object",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "native",
+        "path": "Person.addresses[]",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ADDRESS"
+      ],
+      "sourceRows": [
+        "K15",
+        "K16",
+        "K17",
+        "K19"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "address1/cityVillage/stateProvince tương thích Core; mã tỉnh/xã và phiên bản cần extension/hierarchy được BE kiểm chứng."
+    },
+    {
+      "code": "patient.dia_chi_nguon",
+      "label": "Địa chỉ nguyên văn",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.address_raw",
+        "path": "person.attributes[].value",
+        "uuid": "b0591671-9096-5c68-a12b-a334646b8856",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ADDRESS"
+      ],
+      "sourceRows": [
+        "K20"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "patient.dia_chi_cu",
+      "label": "Địa chỉ theo giấy tờ cũ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "person_attribute",
+        "ref": "attribute.address_legacy",
+        "path": "person.attributes[].value",
+        "uuid": "3437b782-2af8-5e10-85fb-87b8335b0821",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ADDRESS"
+      ],
+      "sourceRows": [
+        "K18",
+        "K20"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "contact.ho_ten",
+      "label": "Tên người liên hệ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].ho_ten",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [
+        "K27"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+    },
+    {
+      "code": "contact.quan_he",
+      "label": "Quan hệ với bệnh nhân",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].quan_he",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [
+        "K30"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+    },
+    {
+      "code": "contact.dien_thoai",
+      "label": "Điện thoại người liên hệ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].dien_thoai",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [
+        "K29"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+    },
+    {
+      "code": "contact.dia_chi",
+      "label": "Địa chỉ người liên hệ",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PatientIdentity.contacts[].dia_chi",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [
+        "K28"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Quan hệ/contact lặp cần B2 chốt module/extension; không tạo Patient chỉ vì tên người nhà."
+    },
+    {
+      "code": "visit.uuid",
+      "label": "UUID lượt khám",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "server_generated",
+      "storage": {
+        "kind": "native",
+        "path": "Visit.uuid",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "visit.patient_uuid",
+      "label": "Bệnh nhân của lượt",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Visit.patient",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "visit.loai",
+      "label": "Loại lượt khám",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Visit.visitType",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "metadataRefs": [
+        "visit.outpatient",
+        "visit.followup"
+      ]
+    },
+    {
+      "code": "visit.co_so_uuid",
+      "label": "Cơ sở lượt khám",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Visit.location",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K31"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "visit.bat_dau",
+      "label": "Thời điểm bắt đầu lượt",
+      "dataType": "datetime",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Visit.startDatetime",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "K35"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "visit.ket_thuc",
+      "label": "Thời điểm kết thúc lượt",
+      "dataType": "datetime",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "on_close",
+      "storage": {
+        "kind": "native",
+        "path": "Visit.stopDatetime",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "K49"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Chỉ đóng sau xử lý workflow; stop không trước start."
+    },
+    {
+      "code": "visit.trang_thai",
+      "label": "Đang mở / đã đóng",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "native",
+        "path": "Derived from Visit.stopDatetime",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Trường suy ra, không ghi song song trạng thái khác với native stopDatetime."
+    },
+    {
+      "code": "visit.ly_do_kham",
+      "label": "Lý do khám",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "on_consultation_finalize",
+      "storage": {
+        "kind": "obs",
+        "ref": "visit.ly_do_kham",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "ce6ac27d-a555-5ddd-bd82-6dd575066adc",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K52"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Lưu trong encounter khám; tiếp đón dùng projection theo quyền, không đọc cả chart."
+    },
+    {
+      "code": "visit.ly_do_ket_thuc",
+      "label": "Lý do kết thúc lượt",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "on_close",
+      "storage": {
+        "kind": "obs",
+        "ref": "visit.ly_do_ket_thuc",
+        "path": "obs.value",
+        "group": "group.administrative",
+        "uuid": "e54c1088-b2ad-534d-923e-8fb82019751f",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "visit_close_reason",
+      "rules": [
+        "R_CHOICE",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K50"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "",
+      "group": "group.administrative"
+    },
+    {
+      "code": "visit.ghi_chu_ket_thuc",
+      "label": "Ghi chú kết thúc/bỏ về/hủy",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "if_close_reason_not_completed",
+      "storage": {
+        "kind": "obs",
+        "ref": "visit.ghi_chu_ket_thuc",
+        "path": "obs.value",
+        "group": "group.administrative",
+        "uuid": "b3ccfa9b-2d9e-5f86-8816-70a74f30e6cf",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K50"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "",
+      "group": "group.administrative"
+    },
+    {
+      "code": "encounter.uuid",
+      "label": "UUID lần ghi nhận",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "server_generated",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.uuid",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "encounter.patient_uuid",
+      "label": "Bệnh nhân",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.patient",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "encounter.visit_uuid",
+      "label": "Lượt khám",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.visit",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "encounter.location_uuid",
+      "label": "Địa điểm ghi nhận",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.location",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "encounter.loai",
+      "label": "Loại lần ghi nhận",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.encounterType",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "",
+      "metadataRefs": [
+        "encounter.administrative",
+        "encounter.vitals",
+        "encounter.consultation",
+        "encounter.results"
+      ]
+    },
+    {
+      "code": "encounter.thoi_diem",
+      "label": "Thời điểm khám/đo",
+      "dataType": "datetime",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "on_create",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.encounterDatetime",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "K35",
+        "DR001"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "encounter.provider_uuid",
+      "label": "Người thực hiện chuyên môn",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "1..n",
+      "required": "for_clinical_encounters",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.encounterProviders[].provider",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [
+        "K102"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Provider khác user tài khoản; mỗi dòng có encounterRole."
+    },
+    {
+      "code": "encounter.role_uuid",
+      "label": "Vai trò người thực hiện",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "with_provider",
+      "storage": {
+        "kind": "native",
+        "path": "Encounter.encounterProviders[].encounterRole",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [
+        "K102"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "",
+      "metadataRefs": [
+        "encounter_role.clinician",
+        "encounter_role.nurse",
+        "encounter_role.technician"
+      ]
+    },
+    {
+      "code": "vitals.mach",
+      "label": "Mạch",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.mach",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "263e4d0b-61d2-5517-bcb1-992cfb60675b",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.mach_trang_thai",
+          "uuid": "1452453f-cf72-5b97-b366-7541414f42c9"
+        }
+      },
+      "unit": "/min",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_POS"
+      ],
+      "sourceRows": [
+        "K72"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng.",
+      "group": "group.vitals",
+      "frontendKey": "pulse",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "8867-4",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "/min",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.mach_trang_thai",
+      "label": "Mạch - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.mach_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "1452453f-cf72-5b97-b366-7541414f42c9",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.ha_tam_thu",
+      "label": "Huyết áp tâm thu",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.ha_tam_thu",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "f8da18ad-2e26-55cd-954b-51d6e0738815",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.ha_tam_thu_trang_thai",
+          "uuid": "a0e3f46e-b74e-5bcd-85b5-c8a3a385b964"
+        }
+      },
+      "unit": "mm[Hg]",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_POS",
+        "R_BP"
+      ],
+      "sourceRows": [
+        "K74"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng.",
+      "group": "group.vitals",
+      "frontendKey": "systolic",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "8480-6",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "mm[Hg]",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.ha_tam_thu_trang_thai",
+      "label": "Huyết áp tâm thu - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.ha_tam_thu_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "a0e3f46e-b74e-5bcd-85b5-c8a3a385b964",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.ha_tam_truong",
+      "label": "Huyết áp tâm trương",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.ha_tam_truong",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "f97478e4-cce6-5cc5-89fa-cfd10bfe8794",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.ha_tam_truong_trang_thai",
+          "uuid": "3f3c8a87-d446-59ba-a877-c03a1dcf82c0"
+        }
+      },
+      "unit": "mm[Hg]",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_POS",
+        "R_BP"
+      ],
+      "sourceRows": [
+        "K75"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng.",
+      "group": "group.vitals",
+      "frontendKey": "diastolic",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "8462-4",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "mm[Hg]",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.ha_tam_truong_trang_thai",
+      "label": "Huyết áp tâm trương - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.ha_tam_truong_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "3f3c8a87-d446-59ba-a877-c03a1dcf82c0",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.nhiet_do",
+      "label": "Nhiệt độ",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.nhiet_do",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "55a6de05-e371-5a48-9440-a81d7ef2e364",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.nhiet_do_trang_thai",
+          "uuid": "78f5da85-8751-5492-a6a5-e5bdb1d61ea3"
+        }
+      },
+      "unit": "Cel",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_NUM"
+      ],
+      "sourceRows": [
+        "K73"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng.",
+      "group": "group.vitals",
+      "frontendKey": "temperature",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "8310-5",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "Cel",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.nhiet_do_trang_thai",
+      "label": "Nhiệt độ - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.nhiet_do_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "78f5da85-8751-5492-a6a5-e5bdb1d61ea3",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.nhip_tho",
+      "label": "Nhịp thở",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.nhip_tho",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "b82f1a4a-bbc9-55f0-8204-079bf1130457",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.nhip_tho_trang_thai",
+          "uuid": "d3aa7eda-24b2-573b-91ad-1c8c4cdf8f57"
+        }
+      },
+      "unit": "/min",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_POS"
+      ],
+      "sourceRows": [
+        "K76"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng.",
+      "group": "group.vitals",
+      "frontendKey": "respiratory",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "9279-1",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "/min",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.nhip_tho_trang_thai",
+      "label": "Nhịp thở - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.nhip_tho_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "d3aa7eda-24b2-573b-91ad-1c8c4cdf8f57",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.spo2",
+      "label": "SpO2",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.spo2",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "4ebf4ddf-fcbe-5bed-893b-114d6ec5f739",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.spo2_trang_thai",
+          "uuid": "7002d377-77a5-5914-bcbc-90ddd8c5d47e"
+        }
+      },
+      "unit": "%",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_PERCENT"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng. Mã 59408-5 chỉ phù hợp pulse oximetry; xác nhận phương pháp trước mapping SAME-AS, không suy từ nhãn SpO2.",
+      "group": "group.vitals",
+      "frontendKey": "spo2",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "59408-5",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "%",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.spo2_trang_thai",
+      "label": "SpO2 - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.spo2_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "7002d377-77a5-5914-bcbc-90ddd8c5d47e",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.can_nang",
+      "label": "Cân nặng",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.can_nang",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "88853161-b7db-5a20-b5c5-666b69999a25",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.can_nang_trang_thai",
+          "uuid": "6ad2f977-bd1a-5a3e-9f61-53a13c624a38"
+        }
+      },
+      "unit": "kg",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_POS"
+      ],
+      "sourceRows": [
+        "K77"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng.",
+      "group": "group.vitals",
+      "frontendKey": "weight",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "29463-7",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "kg",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.can_nang_trang_thai",
+      "label": "Cân nặng - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.can_nang_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "6ad2f977-bd1a-5a3e-9f61-53a13c624a38",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.chieu_cao",
+      "label": "Chiều cao",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.chieu_cao",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "e13865bd-3100-5aca-8e82-e8a6fb58321d",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "vitals.chieu_cao_trang_thai",
+          "uuid": "a66b0680-1700-587e-9293-f62634761b4c"
+        }
+      },
+      "unit": "cm",
+      "codeList": null,
+      "rules": [
+        "R_NUM",
+        "R_POS"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Lặp theo nhóm/lần đo; ngưỡng bình thường/cảnh báo không cấu hình khi chưa có quy tắc lâm sàng.",
+      "group": "group.vitals",
+      "frontendKey": "height",
+      "fhir": {
+        "resource": "Observation",
+        "system": "http://loinc.org",
+        "code": "8302-2",
+        "unitSystem": "http://unitsofmeasure.org",
+        "unitCode": "cm",
+        "verification": "reference_profile_only; roundtrip_required"
+      }
+    },
+    {
+      "code": "vitals.chieu_cao_trang_thai",
+      "label": "Chiều cao - trạng thái dữ liệu",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "vitals.chieu_cao_trang_thai",
+        "path": "obs.value",
+        "group": "group.vitals",
+        "uuid": "a66b0680-1700-587e-9293-f62634761b4c",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "data_status",
+      "rules": [
+        "R_CHOICE",
+        "R_MISSING"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Đi với giá trị cùng nhóm. Không có obs giá trị khi trạng thái khác recorded.",
+      "group": "group.vitals"
+    },
+    {
+      "code": "vitals.thoi_diem_do",
+      "label": "Thời điểm đo",
+      "dataType": "datetime",
+      "mvp": "MVP-1",
+      "cardinality": "1",
+      "required": "with_vitals_group",
+      "storage": {
+        "kind": "native",
+        "path": "Obs.obsDatetime",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "K72",
+        "K73"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Cùng thời điểm cho nhóm và các thành viên; tách dateCreated."
+    },
+    {
+      "code": "history.benh_su",
+      "label": "Bệnh sử / quá trình bệnh lý",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "history.benh_su",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "c331d296-34b5-55ba-891f-094eadc1a2fc",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K54"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "history.tien_su_ban_than_trang_thai",
+      "label": "Trạng thái tiền sử bản thân",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "history.tien_su_ban_than_trang_thai",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "784c30c7-ccfc-5cf8-acb8-fbd50a583950",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "history_status",
+      "rules": [
+        "R_CHOICE",
+        "R_HISTORY"
+      ],
+      "sourceRows": [
+        "K55"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "history.tien_su_ban_than",
+      "label": "Tiền sử bản thân",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "if_personal_history_present",
+      "storage": {
+        "kind": "obs",
+        "ref": "history.tien_su_ban_than",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "93f6d05e-cddd-5583-a22a-9f9e42ece100",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "history.tien_su_ban_than_trang_thai",
+          "uuid": "784c30c7-ccfc-5cf8-acb8-fbd50a583950"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_HISTORY"
+      ],
+      "sourceRows": [
+        "K55"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "history.tien_su_gia_dinh_trang_thai",
+      "label": "Trạng thái tiền sử gia đình",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "history.tien_su_gia_dinh_trang_thai",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "93c7f2b7-2d10-5f92-a0c1-7ef3fa25a504",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "history_status",
+      "rules": [
+        "R_CHOICE",
+        "R_HISTORY"
+      ],
+      "sourceRows": [
+        "K56"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "history.tien_su_gia_dinh",
+      "label": "Tiền sử gia đình",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "if_family_history_present",
+      "storage": {
+        "kind": "obs",
+        "ref": "history.tien_su_gia_dinh",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "4ebc119d-8d35-5473-9260-1c916d3b5bca",
+        "missingState": {
+          "kind": "coded_obs",
+          "ref": "history.tien_su_gia_dinh_trang_thai",
+          "uuid": "93c7f2b7-2d10-5f92-a0c1-7ef3fa25a504"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_HISTORY"
+      ],
+      "sourceRows": [
+        "K56"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "exam.trieu_chung",
+      "label": "Triệu chứng người bệnh kể",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "exam.trieu_chung",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "7e32942f-1118-517c-ada7-4792b19ad7a5",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K54"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "exam.toan_than",
+      "label": "Khám toàn thân",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "exam.toan_than",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "796a194b-2788-5425-8246-2cfee4a22361",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K60"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "exam.bo_phan",
+      "label": "Khám các bộ phận",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "exam.bo_phan",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "11b9a3fe-13aa-5b06-912a-da794a785771",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K71"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Bản MVP văn bản, không tự triển khai thang điểm/tất cả chuyên khoa trong S01."
+    },
+    {
+      "code": "exam.tom_tat",
+      "label": "Tóm tắt kết quả khám",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "exam.tom_tat",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "bd983586-db24-5e35-9822-d08ea8ebbf30",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K78"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "exam.huong_dieu_tri",
+      "label": "Hướng điều trị",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "exam.huong_dieu_tri",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "3c89f03a-d6b8-5dcc-941d-b57af6718eb2",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K93"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "exam.loi_dan",
+      "label": "Lời dặn",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "exam.loi_dan",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "d4b6c86d-4dd7-5339-b4de-2c75b267e2bd",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX015"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "allergy.trang_thai",
+      "label": "Trạng thái sàng lọc dị ứng",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "on_consultation_finalize",
+      "storage": {
+        "kind": "obs",
+        "ref": "allergy.trang_thai",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "2351112f-d130-58d9-a55b-8d1f7d6872eb",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "allergy_status",
+      "rules": [
+        "R_CHOICE",
+        "R_ALLERGY"
+      ],
+      "sourceRows": [
+        "K57",
+        "K58"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "allergy.uuid",
+      "label": "UUID dị ứng",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Allergy.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ALLERGY",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K57"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Mã severity/reaction từ dictionary đã duyệt; không tự tạo từ triệu chứng hay chấm mức độ."
+    },
+    {
+      "code": "allergy.tac_nhan",
+      "label": "Tác nhân dị ứng",
+      "dataType": "object",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "if_allergy_present",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Allergy.allergen",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ALLERGY",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K57"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Mã severity/reaction từ dictionary đã duyệt; không tự tạo từ triệu chứng hay chấm mức độ."
+    },
+    {
+      "code": "allergy.phan_ung",
+      "label": "Phản ứng ghi nhận",
+      "dataType": "array",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Allergy.reactions",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ALLERGY",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K57"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Mã severity/reaction từ dictionary đã duyệt; không tự tạo từ triệu chứng hay chấm mức độ."
+    },
+    {
+      "code": "allergy.muc_do",
+      "label": "Mức độ ghi nhận",
+      "dataType": "object",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Allergy.severity",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ALLERGY",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K57"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Mã severity/reaction từ dictionary đã duyệt; không tự tạo từ triệu chứng hay chấm mức độ."
+    },
+    {
+      "code": "allergy.ghi_chu",
+      "label": "Ghi chú dị ứng",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Allergy.comment",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ALLERGY",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K57"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Mã severity/reaction từ dictionary đã duyệt; không tự tạo từ triệu chứng hay chấm mức độ."
+    },
+    {
+      "code": "dx.chinh",
+      "label": "Chẩn đoán chính",
+      "dataType": "object",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "on_consultation_finalize",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.primary",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K83"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Dùng diagnosis native sau B4, không lưu chẩn đoán xác định bằng free-text obs để thay API diagnosis. Chính/kèm theo là DTO ứng dụng; native Diagnosis có một bản ghi mỗi dòng và primary/rank phải được adapter xác nhận."
+    },
+    {
+      "code": "dx.kem_theo",
+      "label": "Chẩn đoán kèm theo",
+      "dataType": "array",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.secondary[]",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K84"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Dùng diagnosis native sau B4, không lưu chẩn đoán xác định bằng free-text obs để thay API diagnosis."
+    },
+    {
+      "code": "dx.ma",
+      "label": "Mã chẩn đoán",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.diagnosis.coded",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K87"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Dùng diagnosis native sau B4, không lưu chẩn đoán xác định bằng free-text obs để thay API diagnosis."
+    },
+    {
+      "code": "dx.ten_nguon",
+      "label": "Tên chẩn đoán nguồn",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.diagnosis.nonCoded",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K81",
+        "K82"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Dùng diagnosis native sau B4, không lưu chẩn đoán xác định bằng free-text obs để thay API diagnosis."
+    },
+    {
+      "code": "dx.he_ma",
+      "label": "Hệ mã và phiên bản",
+      "dataType": "object",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.codeSystem",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K87"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Dùng diagnosis native sau B4, không lưu chẩn đoán xác định bằng free-text obs để thay API diagnosis."
+    },
+    {
+      "code": "dx.do_chac_chan",
+      "label": "Mức chắc chắn",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "on_consultation_finalize",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.certainty",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "diagnosis_certainty",
+      "rules": [
+        "R_DX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K85"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Dùng diagnosis native sau B4, không lưu chẩn đoán xác định bằng free-text obs để thay API diagnosis."
+    },
+    {
+      "code": "dx.vai_tro",
+      "label": "Chính/kèm theo",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "on_consultation_finalize",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.rank",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "diagnosis_rank",
+      "rules": [
+        "R_DX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "K83",
+        "K84"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Dùng diagnosis native sau B4, không lưu chẩn đoán xác định bằng free-text obs để thay API diagnosis."
+    },
+    {
+      "code": "followup.ngay_tai_kham",
+      "label": "Ngày dự kiến tái khám",
+      "dataType": "date",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "followup.ngay_tai_kham",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "16686840-88fc-514a-b30a-81bc1c7650c9",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_DATE",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX016"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Ngày đã chọn rõ; chưa có giờ/slot không tạo Appointment."
+    },
+    {
+      "code": "followup.loi_dan",
+      "label": "Điều kiện/lời dặn tái khám",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "obs",
+        "ref": "followup.loi_dan",
+        "path": "obs.value",
+        "group": "group.consultation",
+        "uuid": "3dcc4c83-5342-5adc-87da-b8e9783bd367",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX017"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "rx.uuid",
+      "label": "UUID dòng thuốc",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX002"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.thuoc",
+      "label": "Chế phẩm thuốc",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.drug",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX009",
+        "RX010"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.lieu_dung",
+      "label": "Liều mỗi lần",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.dose",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_POS",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "YL011"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.don_vi_lieu",
+      "label": "Đơn vị liều",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.doseUnits",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "YL011"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.duong_dung",
+      "label": "Đường dùng",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.route",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "YL010"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.tan_suat",
+      "label": "Tần suất",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.frequency",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "YL012"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.huong_dan_nguon",
+      "label": "Hướng dẫn dùng nguyên văn",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.dosingInstructions",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX013"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.so_luong",
+      "label": "Số lượng kê/cấp",
+      "dataType": "number",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.quantity",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_POS",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX011"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.don_vi_so_luong",
+      "label": "Đơn vị cấp",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.quantityUnits",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX012"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.so_ngay",
+      "label": "Thời gian dùng",
+      "dataType": "integer",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.duration",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK",
+        "R_POS"
+      ],
+      "sourceRows": [
+        "RX023"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Số ngày = duration + durationUnits ngày; không suy từ số viên."
+    },
+    {
+      "code": "rx.don_vi_thoi_gian",
+      "label": "Đơn vị thời gian dùng",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.durationUnits",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX023"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.bat_dau",
+      "label": "Thời điểm bắt đầu dùng",
+      "dataType": "datetime",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.dateActivated",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX023"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.ket_thuc",
+      "label": "Thời điểm kết thúc kê",
+      "dataType": "datetime",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.autoExpireDate",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX023"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.nguoi_ke_uuid",
+      "label": "Người kê",
+      "dataType": "uuid",
+      "mvp": "MVP-1",
+      "cardinality": "0..n",
+      "required": "on_prescription_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.orderer",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX006"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.loi_dan",
+      "label": "Lời dặn đơn thuốc",
+      "dataType": "text",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PrescriptionSnapshot.note",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "RX015"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "rx.trang_thai",
+      "label": "Trạng thái đơn",
+      "dataType": "coded",
+      "mvp": "MVP-1",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PrescriptionSnapshot.status",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "prescription_status",
+      "rules": [
+        "R_RX",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Schema native DrugOrder cần B4 xác nhận với careSetting, orderType, urgency, dosingType."
+    },
+    {
+      "code": "order.uuid",
+      "label": "UUID chỉ định",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Order.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "CD001"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "order.dich_vu",
+      "label": "Mã dịch vụ",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Order.concept",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "CD017"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "order.patient_uuid",
+      "label": "Bệnh nhân của chỉ định",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Order.patient",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "order.encounter_uuid",
+      "label": "Lần khám ra chỉ định",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Order.encounter",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "order.thoi_diem",
+      "label": "Thời điểm chỉ định",
+      "dataType": "datetime",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Order.dateActivated",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_LINK",
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "LB008"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "order.uu_tien",
+      "label": "Ưu tiên chỉ định",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Order.urgency",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "priority",
+      "rules": [
+        "R_ORDER",
+        "R_LINK"
+      ],
+      "sourceRows": [
+        "LB004"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "order.nguoi_thuc_hien_uuid",
+      "label": "KTV/đơn vị được giao",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "OrderAssignment.assignee",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "order.trang_thai",
+      "label": "Trạng thái thực hiện",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_order_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "OrderExecution.status",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "order_status",
+      "rules": [
+        "R_ORDER",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "result.order_uuid",
+      "label": "Chỉ định liên quan",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "on_result_save",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.order",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [
+        "LB003"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.chi_so",
+      "label": "Concept chỉ số",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "on_result_save",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Obs.concept",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [
+        "LB016"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.kieu_gia_tri",
+      "label": "Kiểu giá trị",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "on_result_save",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.valueType",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "result_type",
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [
+        "LB018"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.gia_tri_so",
+      "label": "Kết quả số",
+      "dataType": "number",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Obs.valueNumeric",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL",
+        "R_NUM"
+      ],
+      "sourceRows": [
+        "LB019"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.gia_tri_nguon",
+      "label": "Kết quả nguyên văn",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.rawValue",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [
+        "LB017"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.don_vi",
+      "label": "Đơn vị nguồn và mã UCUM",
+      "dataType": "object",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.unit",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [
+        "LB020"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.khoang_tham_chieu",
+      "label": "Khoảng tham chiếu theo phiếu",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.referenceText",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [
+        "LB021"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.lay_mau_luc",
+      "label": "Thời điểm lấy mẫu",
+      "dataType": "datetime",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.collectedAt",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL",
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "LB010"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.ket_qua_luc",
+      "label": "Thời điểm kết quả",
+      "dataType": "datetime",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Obs.obsDatetime",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL",
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "LB014"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.nguoi_duyet_uuid",
+      "label": "Người duyệt kết quả",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.verifiedBy",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [
+        "LB013"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.trang_thai",
+      "label": "Trạng thái kết quả",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.status",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "result_status",
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "result.tep_uuid",
+      "label": "Tài liệu kết quả",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..n",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Result.document",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_ORDER",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Khoảng tham chiếu thuộc phiếu/phương pháp, không phải giới hạn nhập hoặc kết luận của hệ thống."
+    },
+    {
+      "code": "document.uuid",
+      "label": "UUID tài liệu",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.patient_uuid",
+      "label": "Bệnh nhân tài liệu",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_upload",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.patient_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.visit_uuid",
+      "label": "Lượt khám liên quan",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.visit_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.loai",
+      "label": "Loại tài liệu",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.loai",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.mime",
+      "label": "MIME type",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_upload",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.mime",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.kich_thuoc",
+      "label": "Kích thước byte",
+      "dataType": "integer",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_upload",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.kich_thuoc",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL",
+        "R_POS"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.sha256",
+      "label": "Hash SHA-256",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_upload",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.sha256",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.trang_thai",
+      "label": "Trạng thái tài liệu",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.trang_thai",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "document_status",
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "document.phien_ban",
+      "label": "Phiên bản tài liệu",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ClinicalDocument.phien_ban",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_FILE",
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "appointment.uuid",
+      "label": "UUID lịch hẹn",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_appointment_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tên DTO, không giả là endpoint/enum native Appointments. Người 4 sở hữu cấu hình dịch vụ/queue và slot."
+    },
+    {
+      "code": "appointment.patient_uuid",
+      "label": "Bệnh nhân lịch hẹn",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_appointment_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.patient_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tên DTO, không giả là endpoint/enum native Appointments. Người 4 sở hữu cấu hình dịch vụ/queue và slot."
+    },
+    {
+      "code": "appointment.provider_uuid",
+      "label": "Người khám",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_appointment_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.provider_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tên DTO, không giả là endpoint/enum native Appointments. Người 4 sở hữu cấu hình dịch vụ/queue và slot."
+    },
+    {
+      "code": "appointment.location_uuid",
+      "label": "Cơ sở/phòng",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_appointment_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.location_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID",
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tên DTO, không giả là endpoint/enum native Appointments. Người 4 sở hữu cấu hình dịch vụ/queue và slot."
+    },
+    {
+      "code": "appointment.bat_dau",
+      "label": "Giờ bắt đầu hẹn",
+      "dataType": "datetime",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_appointment_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.bat_dau",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TIME",
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tên DTO, không giả là endpoint/enum native Appointments. Người 4 sở hữu cấu hình dịch vụ/queue và slot."
+    },
+    {
+      "code": "appointment.ket_thuc",
+      "label": "Giờ kết thúc hẹn",
+      "dataType": "datetime",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_appointment_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.ket_thuc",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TIME",
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tên DTO, không giả là endpoint/enum native Appointments. Người 4 sở hữu cấu hình dịch vụ/queue và slot."
+    },
+    {
+      "code": "appointment.trang_thai",
+      "label": "Trạng thái lịch hẹn",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_appointment_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.trang_thai",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "appointment_status",
+      "rules": [
+        "R_CHOICE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Tên DTO, không giả là endpoint/enum native Appointments. Người 4 sở hữu cấu hình dịch vụ/queue và slot."
+    },
+    {
+      "code": "bill.uuid",
+      "label": "UUID phiếu phí",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "1",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.patient_uuid",
+      "label": "Người bệnh thanh toán",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "1",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.patient_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.visit_uuid",
+      "label": "Lượt của phiếu phí",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "1",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.visit_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.dich_vu",
+      "label": "Mã dịch vụ dòng phí",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "1..n",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.dich_vu",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.ten_snapshot",
+      "label": "Tên dịch vụ lúc lập phí",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "1..n",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.ten_snapshot",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NATIVE"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.so_luong",
+      "label": "Số lượng dịch vụ",
+      "dataType": "number",
+      "mvp": "MVP-2",
+      "cardinality": "1..n",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.so_luong",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_POS"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.don_gia",
+      "label": "Đơn giá VND snapshot",
+      "dataType": "integer",
+      "mvp": "MVP-2",
+      "cardinality": "1..n",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.don_gia",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_MONEY"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.so_tien",
+      "label": "Thành tiền VND",
+      "dataType": "integer",
+      "mvp": "MVP-2",
+      "cardinality": "1",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.so_tien",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_MONEY"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "bill.trang_thai",
+      "label": "Trạng thái thu",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "1",
+      "required": "on_bill_create",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Bill.trang_thai",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "bill_status",
+      "rules": [
+        "R_CHOICE",
+        "R_PAY"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Snapshot giá có hiệu lực lúc lập; quy tắc làm tròn khi số lượng lẻ do cơ sở chốt, không hardcode."
+    },
+    {
+      "code": "payment.uuid",
+      "label": "UUID giao dịch",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "server_generated",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PAY"
+      ],
+      "sourceRows": [
+        "FI004"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "payment.bill_uuid",
+      "label": "Phiếu phí liên quan",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_payment",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.bill_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PAY"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "payment.loai",
+      "label": "Thu / hoàn",
+      "dataType": "coded",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_payment",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.loai",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "payment_kind",
+      "rules": [
+        "R_PAY"
+      ],
+      "sourceRows": [
+        "FI010"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "payment.so_tien",
+      "label": "Tiền giao dịch VND",
+      "dataType": "integer",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_payment",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.so_tien",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PAY",
+        "R_MONEY"
+      ],
+      "sourceRows": [
+        "FI012"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "payment.thoi_diem",
+      "label": "Thời điểm giao dịch",
+      "dataType": "datetime",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_payment",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.thoi_diem",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PAY",
+        "R_TIME"
+      ],
+      "sourceRows": [
+        "FI008"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": "Server ghi thời điểm giao dịch; không tin thời gian khách tự gửi làm timestamp thu tiền."
+    },
+    {
+      "code": "payment.giao_dich_goc_uuid",
+      "label": "Giao dịch bị hoàn",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "if_refund",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.giao_dich_goc_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PAY"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "payment.ly_do",
+      "label": "Lý do hoàn/hủy",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "if_refund",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.ly_do",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PAY"
+      ],
+      "sourceRows": [
+        "FI011"
+      ],
+      "sourceKind": "sample_or_derived",
+      "description": ""
+    },
+    {
+      "code": "payment.idempotency_key",
+      "label": "Khóa chống giao dịch trùng",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_payment",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PaymentTransaction.idempotency_key",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PAY"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "dispense.uuid",
+      "label": "UUID lần cấp thuốc",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_dispense_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Dispense.uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_PAY",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Không sửa đơn bác sĩ; cấp một lần theo snapshot MVP hiện có. Cấp một phần/lô/tồn cần hợp đồng mở rộng."
+    },
+    {
+      "code": "dispense.drug_order_uuid",
+      "label": "Dòng đơn đã xác nhận",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_dispense_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Dispense.drug_order_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_PAY",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Không sửa đơn bác sĩ; cấp một lần theo snapshot MVP hiện có. Cấp một phần/lô/tồn cần hợp đồng mở rộng."
+    },
+    {
+      "code": "dispense.so_luong",
+      "label": "Số lượng thực cấp",
+      "dataType": "number",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_dispense_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Dispense.so_luong",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_PAY",
+        "R_LINK",
+        "R_POS"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Không sửa đơn bác sĩ; cấp một lần theo snapshot MVP hiện có. Cấp một phần/lô/tồn cần hợp đồng mở rộng."
+    },
+    {
+      "code": "dispense.nguoi_cap_uuid",
+      "label": "Người cấp",
+      "dataType": "uuid",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_dispense_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Dispense.nguoi_cap_uuid",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_PAY",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Không sửa đơn bác sĩ; cấp một lần theo snapshot MVP hiện có. Cấp một phần/lô/tồn cần hợp đồng mở rộng."
+    },
+    {
+      "code": "dispense.thoi_diem",
+      "label": "Thời điểm cấp",
+      "dataType": "datetime",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_dispense_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Dispense.thoi_diem",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_PAY",
+        "R_LINK",
+        "R_TIME"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Không sửa đơn bác sĩ; cấp một lần theo snapshot MVP hiện có. Cấp một phần/lô/tồn cần hợp đồng mở rộng."
+    },
+    {
+      "code": "dispense.idempotency_key",
+      "label": "Khóa chống cấp trùng",
+      "dataType": "text",
+      "mvp": "MVP-2",
+      "cardinality": "0..1",
+      "required": "on_dispense_confirm",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Dispense.idempotency_key",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_RX",
+        "R_PAY",
+        "R_LINK"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": "Không sửa đơn bác sĩ; cấp một lần theo snapshot MVP hiện có. Cấp một phần/lô/tồn cần hợp đồng mở rộng."
+    },
+    {
+      "code": "provenance.nguoi_nhap_uuid",
+      "label": "Người nhập",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Audit.creator",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "provenance.nhap_luc",
+      "label": "Thời điểm nhập",
+      "dataType": "datetime",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Audit.dateCreated",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PROVENANCE",
+        "R_FINAL",
+        "R_TIME"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "provenance.nguon_tai_lieu_uuid",
+      "label": "Tài liệu nguồn",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Provenance.document",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "provenance.trang_nguon",
+      "label": "Trang vật lý trong nguồn",
+      "dataType": "integer",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Provenance.page",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "provenance.ma_truong_nguon",
+      "label": "Mã khảo sát trường nguồn",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Provenance.sourceField",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "provenance.trang_thai_xac_minh",
+      "label": "Trạng thái xác minh",
+      "dataType": "coded",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Provenance.reviewStatus",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": "review_status",
+      "rules": [
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    },
+    {
+      "code": "provenance.ly_do_sua",
+      "label": "Lý do sửa",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Audit.reason",
+        "verification": "B1/B4/B8 required; not native REST schema",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus",
+          "note": "Native null/absent value alone cannot distinguish all source missing states. Requires adapter persistence, not a loaded native feature."
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_PROVENANCE",
+        "R_FINAL"
+      ],
+      "sourceRows": [],
+      "sourceKind": "mvp_or_system",
+      "description": ""
+    }
+  ],
+  "codeLists": {
+    "data_status": [
+      {
+        "code": "recorded",
+        "label": "Đã ghi nhận",
+        "conceptRef": "answer.data_status.recorded"
+      },
+      {
+        "code": "not_recorded",
+        "label": "Chưa ghi",
+        "conceptRef": "answer.data_status.not_recorded"
+      },
+      {
+        "code": "not_asked",
+        "label": "Chưa hỏi",
+        "conceptRef": "answer.data_status.not_asked"
+      },
+      {
+        "code": "unknown",
+        "label": "Không rõ",
+        "conceptRef": "answer.data_status.unknown"
+      },
+      {
+        "code": "refused",
+        "label": "Từ chối cung cấp",
+        "conceptRef": "answer.data_status.refused"
+      },
+      {
+        "code": "not_applicable",
+        "label": "Không áp dụng",
+        "conceptRef": "answer.data_status.not_applicable"
+      },
+      {
+        "code": "masked",
+        "label": "Bị che trong nguồn",
+        "conceptRef": "answer.data_status.masked"
+      },
+      {
+        "code": "unreadable",
+        "label": "Không đọc được",
+        "conceptRef": "answer.data_status.unreadable"
+      }
+    ],
+    "birth_precision": [
+      {
+        "code": "day",
+        "label": "Đủ ngày tháng năm"
+      },
+      {
+        "code": "month",
+        "label": "Chỉ tháng/năm"
+      },
+      {
+        "code": "year",
+        "label": "Chỉ năm"
+      },
+      {
+        "code": "unknown",
+        "label": "Không rõ"
+      }
+    ],
+    "gender": [
+      {
+        "code": "M",
+        "label": "Nam"
+      },
+      {
+        "code": "F",
+        "label": "Nữ"
+      },
+      {
+        "code": "O",
+        "label": "Khác"
+      },
+      {
+        "code": "U",
+        "label": "Không rõ"
+      }
+    ],
+    "history_status": [
+      {
+        "code": "not_asked",
+        "label": "Chưa hỏi",
+        "conceptRef": "answer.history_status.not_asked"
+      },
+      {
+        "code": "none_reported",
+        "label": "Đã hỏi, không ghi nhận",
+        "conceptRef": "answer.history_status.none_reported"
+      },
+      {
+        "code": "present",
+        "label": "Có tiền sử",
+        "conceptRef": "answer.history_status.present"
+      },
+      {
+        "code": "unknown",
+        "label": "Không rõ",
+        "conceptRef": "answer.history_status.unknown"
+      }
+    ],
+    "allergy_status": [
+      {
+        "code": "not_asked",
+        "label": "Chưa hỏi",
+        "conceptRef": "answer.allergy_status.not_asked"
+      },
+      {
+        "code": "no_known_allergy",
+        "label": "Đã hỏi, không ghi nhận dị ứng",
+        "conceptRef": "answer.allergy_status.no_known_allergy"
+      },
+      {
+        "code": "present",
+        "label": "Có dị ứng",
+        "conceptRef": "answer.allergy_status.present"
+      },
+      {
+        "code": "unknown",
+        "label": "Không rõ",
+        "conceptRef": "answer.allergy_status.unknown"
+      }
+    ],
+    "visit_close_reason": [
+      {
+        "code": "completed",
+        "label": "Kết thúc khám",
+        "conceptRef": "answer.visit_close_reason.completed"
+      },
+      {
+        "code": "left_early",
+        "label": "Bỏ về trước khi khám xong",
+        "conceptRef": "answer.visit_close_reason.left_early"
+      },
+      {
+        "code": "cancelled",
+        "label": "Hủy tiếp nhận",
+        "conceptRef": "answer.visit_close_reason.cancelled"
+      },
+      {
+        "code": "referred",
+        "label": "Chuyển khám cơ sở khác",
+        "conceptRef": "answer.visit_close_reason.referred"
+      }
+    ],
+    "diagnosis_certainty": [
+      {
+        "code": "PROVISIONAL",
+        "label": "Sơ bộ"
+      },
+      {
+        "code": "CONFIRMED",
+        "label": "Xác định"
+      }
+    ],
+    "diagnosis_rank": [
+      {
+        "code": "PRIMARY",
+        "label": "Chính"
+      },
+      {
+        "code": "SECONDARY",
+        "label": "Kèm theo"
+      }
+    ],
+    "order_status": [
+      {
+        "code": "requested",
+        "label": "Đã chỉ định"
+      },
+      {
+        "code": "in_progress",
+        "label": "Đang thực hiện"
+      },
+      {
+        "code": "completed",
+        "label": "Hoàn tất"
+      },
+      {
+        "code": "cancelled",
+        "label": "Đã hủy"
+      }
+    ],
+    "result_status": [
+      {
+        "code": "preliminary",
+        "label": "Sơ bộ"
+      },
+      {
+        "code": "final",
+        "label": "Đã xác nhận"
+      },
+      {
+        "code": "corrected",
+        "label": "Đính chính"
+      },
+      {
+        "code": "cancelled",
+        "label": "Đã hủy"
+      }
+    ],
+    "prescription_status": [
+      {
+        "code": "draft",
+        "label": "Nháp"
+      },
+      {
+        "code": "ready",
+        "label": "Bác sĩ đã xác nhận"
+      },
+      {
+        "code": "dispensed",
+        "label": "Đã cấp thuốc"
+      },
+      {
+        "code": "cancelled",
+        "label": "Đã hủy"
+      }
+    ],
+    "appointment_status": [
+      {
+        "code": "scheduled",
+        "label": "Đã đặt"
+      },
+      {
+        "code": "arrived",
+        "label": "Đã đến"
+      },
+      {
+        "code": "cancelled",
+        "label": "Đã hủy"
+      }
+    ],
+    "bill_status": [
+      {
+        "code": "unpaid",
+        "label": "Chưa thu"
+      },
+      {
+        "code": "partial",
+        "label": "Thu một phần"
+      },
+      {
+        "code": "paid",
+        "label": "Đã thu đủ"
+      },
+      {
+        "code": "cancelled",
+        "label": "Đã hủy"
+      },
+      {
+        "code": "refunded",
+        "label": "Đã hoàn"
+      }
+    ],
+    "payment_kind": [
+      {
+        "code": "collect",
+        "label": "Thu tiền"
+      },
+      {
+        "code": "refund",
+        "label": "Hoàn tiền"
+      }
+    ],
+    "priority": [
+      {
+        "code": "routine",
+        "label": "Thường"
+      },
+      {
+        "code": "urgent",
+        "label": "Khẩn"
+      }
+    ],
+    "result_type": [
+      {
+        "code": "numeric",
+        "label": "Số"
+      },
+      {
+        "code": "coded",
+        "label": "Có mã"
+      },
+      {
+        "code": "text",
+        "label": "Văn bản"
+      },
+      {
+        "code": "file",
+        "label": "Tệp"
+      }
+    ],
+    "document_status": [
+      {
+        "code": "draft",
+        "label": "Nháp"
+      },
+      {
+        "code": "final",
+        "label": "Đã xác nhận"
+      },
+      {
+        "code": "superseded",
+        "label": "Bị thay thế"
+      },
+      {
+        "code": "entered_in_error",
+        "label": "Ghi nhầm"
+      }
+    ],
+    "review_status": [
+      {
+        "code": "unverified",
+        "label": "Chưa xác minh"
+      },
+      {
+        "code": "verified",
+        "label": "Đã đối chiếu"
+      },
+      {
+        "code": "conflict",
+        "label": "Nguồn mâu thuẫn"
+      }
+    ]
+  },
+  "rules": {
+    "R_ID": "Chuỗi định danh, giữ số 0 đầu, trim hai đầu; không gộp bệnh nhân theo tên/điện thoại.",
+    "R_UUID": "UUID tham chiếu phải tồn tại, còn hiệu lực và thuộc đúng patient/visit/facility; không chỉ kiểm tra cú pháp.",
+    "R_TEXT": "Chuỗi Unicode; trim hai đầu, không làm mất dòng; không gửi HTML thực thi; giới hạn mặc định 10000 ký tự trừ trường có giới hạn riêng.",
+    "R_NUM": "JSON number hữu hạn; không NaN/Infinity/chuỗi số. Không tự thay giá trị thiếu bằng 0.",
+    "R_POS": "Số hữu hạn > 0; ràng buộc toán học, không phải ngưỡng bình thường lâm sàng.",
+    "R_PERCENT": "Số hữu hạn từ 0 đến 100; không suy cảnh báo lâm sàng.",
+    "R_TIME": "ISO 8601 có Z hoặc offset; lưu instant, hiển thị Asia/Ho_Chi_Minh. Không tự thêm giờ cho nguồn chỉ có ngày.",
+    "R_DATE": "Ngày lịch hợp lệ YYYY-MM-DD; ngày không mang múi giờ.",
+    "R_DOB": "Giữ birth_raw và birth_precision. Chỉ gán native birthdate khi biết ngày đầy đủ; năm/tháng thiếu không tự điền 01/01.",
+    "R_CHOICE": "Chỉ nhận mã trong codeList đã version hóa; nhãn không thay thế mã.",
+    "R_MISSING": "state=recorded phải có value đúng kiểu; state khác recorded không có value. Không chuyển ô trống thành phủ định.",
+    "R_BP": "Tâm thu/tâm trương cùng nhóm và measuredAt; không tự đoán thành phần thiếu. So sánh tâm thu/tâm trương chỉ cảnh báo cần xác minh, không tự sửa số.",
+    "R_HISTORY": "none_reported là đã hỏi; không suy từ text trống. present có nội dung; unknown/not_asked giữ trạng thái riêng.",
+    "R_ALLERGY": "present cần ít nhất một bản ghi tác nhân hoặc mô tả non-coded có xác minh. Không xóa dị ứng cũ khi cập nhật sàng lọc; đồng bộ với allergy native theo hợp đồng B4.",
+    "R_DX": "Một hoặc nhiều diagnosis; mỗi dòng có code/concept hay non-coded text theo khả năng API, certainty và rank. Không coi chẩn đoán phân biệt là CONFIRMED. Khi chốt, đúng một chẩn đoán PRIMARY.",
+    "R_RX": "Mỗi dòng dùng drug đã duyệt, liều/đơn vị/đường/tần suất được kê; số lượng cấp khác liều mỗi lần. Không tự suy liều, số ngày hoặc lịch dùng.",
+    "R_MONEY": "VND số nguyên không âm, dùng số nguyên/Decimal ở BE; không dùng float để tính tiền. Giá/tên dịch vụ chụp snapshot khi lập phí.",
+    "R_LINK": "BE xác thực chuỗi patient → visit → encounter → order/result; UUID hợp lệ sai đối tượng vẫn bị từ chối.",
+    "R_FINAL": "Bản final/đã xác nhận không ghi đè; sửa bằng phiên bản mới và lý do, giữ tác giả/thời gian và nguồn.",
+    "R_FILE": "Lưu UUID tài liệu, MIME, kích thước, hash SHA-256; URL tải có kiểm tra quyền, không URL tệp công khai. Giới hạn MIME/size do cơ sở cấu hình.",
+    "R_AUTH": "Kiểm tra quyền + cơ sở + đối tượng + trạng thái tại API, cả download/print; FE guard không thay thế kiểm tra server.",
+    "R_PAY": "Idempotency key chống thu/cấp trùng; không thu quá còn nợ, không hoàn quá đã thu; lý do và transaction gốc bắt buộc khi hoàn.",
+    "R_ORDER": "Chỉ kết quả của order đúng patient/visit/assignee; không hoàn tất order đã hủy. Chưa có kết quả không tạo số 0/âm tính.",
+    "R_PROVENANCE": "Giữ nguồn gốc, người nhập, thời điểm nhập, nguồn trang và trạng thái xác minh; không dùng thời gian in thay thời điểm y khoa.",
+    "R_ADDRESS": "Mã địa chỉ đi cùng phiên bản/hiệu lực; giữ địa chỉ cũ nguyên văn. Không tự map sang địa chỉ mới bằng phép so chuỗi.",
+    "R_NATIVE": "Kiểu DTO là hợp đồng ứng dụng; adapter phải chuyển sang schema native và chứng minh round-trip trên baseline."
+  },
+  "sources": {
+    "S01": {
+      "type": "clinical_sample_review",
+      "pages": 195,
+      "review": "docs/DATA_DICTIONARY.md",
+      "distribution": "local_only",
+      "note": "Chỉ dùng nhãn và cấu trúc, không sao chép giá trị người bệnh."
+    },
+    "MVP": {
+      "type": "team_backlog",
+      "reference": "docs/BACKEND.md",
+      "note": "Phạm vi từ tài liệu repo; người dùng xác nhận đã chốt với BE. Chi tiết cuộc trao đổi không được cung cấp."
+    }
+  },
+  "externalCatalogues": {
+    "icd10": {
+      "source": "Danh mục nhóm lựa chọn theo yêu cầu Việt Nam; cần nguồn và phiên bản được nhóm xác nhận.",
+      "status": "awaiting_versioned_catalogue",
+      "requiredFor": [
+        "diagnosis.save"
+      ],
+      "fields": [
+        "code",
+        "displayVi",
+        "system",
+        "version",
+        "effectiveFrom",
+        "effectiveTo"
+      ]
+    },
+    "drugs": {
+      "source": "Danh mục chế phẩm của cơ sở; không suy từ tên thương mại trong PDF.",
+      "status": "awaiting_facility_catalogue",
+      "requiredFor": [
+        "prescription.confirm",
+        "dispense.confirm"
+      ],
+      "fields": [
+        "drugUuid",
+        "conceptUuid",
+        "code",
+        "name",
+        "ingredients",
+        "strength",
+        "dosageForm",
+        "route",
+        "active",
+        "source",
+        "version"
+      ]
+    },
+    "services": {
+      "source": "Danh mục dịch vụ + bảng giá theo cơ sở, tách snapshot giá khỏi danh mục.",
+      "status": "awaiting_facility_catalogue",
+      "requiredFor": [
+        "order.create",
+        "bill.create"
+      ],
+      "fields": [
+        "serviceUuid",
+        "code",
+        "displayVi",
+        "kind",
+        "orderConceptUuid",
+        "unit",
+        "active",
+        "source",
+        "version"
+      ]
+    },
+    "address": {
+      "source": "Danh mục tỉnh/xã hiện hành có mã, phiên bản, hiệu lực và quan hệ địa chỉ cũ.",
+      "status": "awaiting_versioned_catalogue",
+      "requiredFor": [
+        "coded_address_selection"
+      ],
+      "fields": [
+        "code",
+        "name",
+        "parentCode",
+        "level",
+        "version",
+        "effectiveFrom",
+        "effectiveTo",
+        "legacyMappings"
+      ]
+    }
+  },
+  "namespaceUuid": "56d54326-c47e-57b8-b692-ef6ec3c5daa7",
+  "requiredConditions": {
+    "optional": "Không bắt buộc; thiếu vẫn phải giữ trạng thái dữ liệu nếu có câu hỏi tương ứng.",
+    "server_generated": "Server sinh sau tạo; không yêu cầu UUID mới từ FE.",
+    "on_create": "Bắt buộc lúc tạo đối tượng cha chứa trường; UUID tham chiếu phải có thật.",
+    "on_close": "Bắt buộc khi đóng Visit; bỏ về/hủy có lý do riêng, không bắt nhập chẩn đoán giả.",
+    "on_consultation_finalize": "Bắt buộc khi bác sĩ xác nhận phiếu khám, không ép khi mới mở Visit hoặc đang nháp.",
+    "if_birth_precision_day": "Bắt buộc khi độ chính xác ngày sinh là day.",
+    "if_birth_precision_year_or_month": "Bắt buộc khi độ chính xác ngày sinh là year hoặc month.",
+    "if_birth_precision_month": "Bắt buộc tháng 1..12 khi độ chính xác ngày sinh là month.",
+    "for_clinical_encounters": "Cần provider cho encounter chuyên môn; encounter hành chính dùng tác giả user từ session.",
+    "with_provider": "Mỗi encounter provider cần encounterRole còn hiệu lực.",
+    "with_vitals_group": "Mỗi nhóm đo cần một thời điểm đo có offset; tất cả thành viên giữ cùng thời điểm.",
+    "if_close_reason_not_completed": "Cần ghi chú khi bỏ về, hủy tiếp nhận hoặc chuyển khám cơ sở khác.",
+    "if_personal_history_present": "Cần nội dung khi tiền sử bản thân là present.",
+    "if_family_history_present": "Cần nội dung khi tiền sử gia đình là present.",
+    "if_allergy_present": "Cần tác nhân/mô tả non-coded có xác minh khi sàng lọc là present.",
+    "on_prescription_confirm": "Bắt buộc khi bác sĩ xác nhận đơn; phụ thuộc danh mục thuốc/đơn vị/đường/tần suất đã duyệt.",
+    "on_order_create": "Bắt buộc lúc tạo chỉ định; native order và assignee/status extension do adapter ánh xạ.",
+    "on_result_save": "Bắt buộc khi nhập kết quả theo đúng order và kiểu giá trị.",
+    "on_upload": "Bắt buộc khi tạo tài liệu đã lưu: liên kết bệnh nhân, MIME, size và hash.",
+    "on_appointment_create": "Bắt buộc khi đặt lịch theo service/provider/location/slot hợp lệ.",
+    "on_bill_create": "Bắt buộc khi lập phí; server chụp snapshot tên/giá và tính tổng.",
+    "on_payment": "Bắt buộc khi thu hoặc hoàn tiền; server tính giới hạn và idempotency.",
+    "if_refund": "Bắt buộc khi hoàn tiền: lý do và giao dịch gốc.",
+    "on_dispense_confirm": "Bắt buộc khi xác nhận cấp thuốc theo đơn đã xác nhận."
+  },
+  "operations": {
+    "patient.create": {
+      "required": [
+        "patient.ma_noi_bo",
+        "patient.ho_ten",
+        "patient.gioi_tinh",
+        "patient.do_chinh_xac_ngay_sinh"
+      ],
+      "actor": "reception",
+      "dependencies": [
+        "B2 identifier/idgen/partial birthdate contract"
+      ]
+    },
+    "visit.open": {
+      "required": [
+        "visit.patient_uuid",
+        "visit.loai",
+        "visit.co_so_uuid",
+        "visit.bat_dau"
+      ],
+      "actor": "reception",
+      "dependencies": [
+        "B3 location/type imported"
+      ]
+    },
+    "vitals.save": {
+      "required": [
+        "encounter.patient_uuid",
+        "encounter.visit_uuid",
+        "encounter.location_uuid",
+        "encounter.provider_uuid",
+        "encounter.role_uuid",
+        "vitals.thoi_diem_do"
+      ],
+      "actor": "nurse_or_authorized_doctor",
+      "dependencies": [
+        "B3 parent link checks and obs group roundtrip"
+      ]
+    },
+    "exam.finalize": {
+      "required": [
+        "visit.ly_do_kham",
+        "allergy.trang_thai",
+        "dx.chinh",
+        "dx.do_chac_chan",
+        "dx.vai_tro"
+      ],
+      "actor": "doctor",
+      "dependencies": [
+        "B4 diagnosis/allergy native",
+        "Versioned ICD-10 catalogue"
+      ]
+    },
+    "visit.close": {
+      "required": [
+        "visit.ket_thuc",
+        "visit.ly_do_ket_thuc"
+      ],
+      "actor": "doctor_or_authorized_reception",
+      "dependencies": [
+        "B3/B8 workflow closure reason policy"
+      ]
+    }
+  }
+}

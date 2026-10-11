@@ -1,0 +1,5 @@
+Uuid,Void/Retire,Name,Description,_order:8100
+70ddd463-1bae-58c4-83d6-18a0391869d2,false,VinSHC Administrative,VinSHC key=encounter.administrative,
+8368ff74-1b50-592b-8e78-2f0f2ddc1e06,false,VinSHC Vitals,VinSHC key=encounter.vitals,
+c3dba376-453f-5f2c-bee7-70c09a2d5f61,false,VinSHC Consultation,VinSHC key=encounter.consultation,
+b6ba54a0-c595-5f17-88ff-29812ccad8d0,false,VinSHC Diagnostic Results,VinSHC key=encounter.results,
