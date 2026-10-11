@@ -21,8 +21,8 @@ services:
   backend:
     image: ehr-vinshc-backend:3.7.1-postgresql
     build:
-      context: ./infra/backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: infra/backend/Dockerfile
     pull_policy: build
     restart: unless-stopped
     depends_on:

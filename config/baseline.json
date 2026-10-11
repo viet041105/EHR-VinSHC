@@ -11,8 +11,9 @@
     "gateway": "openmrs/openmrs-reference-application-3-gateway:3.7.1@sha256:49070abbcda8aeced46f78ce0c1559236a2ba45bc624fe8485a59220cbd159a2"
   },
   "backendBuild": {
-    "context": "infra/backend",
-    "dockerfile": "Dockerfile",
+    "context": ".",
+    "dockerfile": "infra/backend/Dockerfile",
+    "builderImage": "maven:3.9.9-eclipse-temurin-17-alpine@sha256:c1b318f88ab1bcf7aae3e0fceff4f5890fe6f7c910ead1c538bd5cada01df6c6",
     "baseImage": "openmrs/openmrs-reference-application-3-backend:3.7.1@sha256:929cfe5dca5f221460e0f4a57abb9294614df5f74fbb3bb865e01b8dfe7a985b"
   },
   "upstreamComponents": {
@@ -35,7 +36,7 @@
     "Versions come from the fixed 3.7.1 images; REST reports the full artifact version 3.5.0.69fa31 at runtime, while the distro manifest says 3.5.0. Smoke tests check the exact runtime versions.",
     "PostgreSQL uses a pinned official 16.15 image with dedicated PostgreSQL and application volumes; compatibility is checked by fresh startup, module, API and persistence tests.",
     "Backend is derived from the fixed 3.7.1 release: large demo content and its generator are removed, base reference metadata is kept, and one synthetic login/facility/visit location is loaded with Initializer.",
-    "Upstream moving no-demo tags were not used because inspection showed snapshot components. Vietnamese clinical metadata is not implemented yet.",
+    "Upstream moving no-demo tags were not used because inspection showed snapshot components. VinSHC metadata 0.2.0 and the Java extension module are built from checked-in sources.",
     "The pinned backend includes checked-in PostgreSQL patches for Appointments Liquibase, TEXT/BYTEA Hibernate binding, two module OID-to-BYTEA columns, Core seed sequences and scoped Stock Management preconditions; see infra/backend/postgresql/README.md. Upstream component version numbers remain unchanged."
   ],
   "database": {

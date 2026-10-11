@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module configVersion="1.6">
+  <id>vinshc</id>
+  <name>VinSHC Backend Extensions</name>
+  <version>${project.parent.version}</version>
+  <package>org.openmrs.module.vinshc</package>
+  <author>VinSHC</author>
+  <description>${project.parent.description}</description>
+  <activator>org.openmrs.module.vinshc.VinshcActivator</activator>
+  <require_version>2.8.0</require_version>
+  <require_modules>
+    <require_module>org.openmrs.module.webservices.rest</require_module>
+  </require_modules>
+  <privilege>
+    <name>VinSHC: Read patient administration</name>
+    <description>Read VinSHC contact, field-state and address records.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Write patient administration</name>
+    <description>Create, update and void VinSHC contact, field-state and address records.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Record vitals</name>
+    <description>Record vital-sign observations through the validated VinSHC endpoint.</description>
+  </privilege>
+  <messages>
+    <lang>en</lang>
+    <file>messages.properties</file>
+  </messages>
+</module>

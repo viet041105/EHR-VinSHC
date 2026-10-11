@@ -1,0 +1,12 @@
+*
+!.dockerignore
+!infra/backend/Dockerfile
+!infra/backend/configuration/
+!infra/backend/configuration/**
+!infra/backend/postgresql/
+!infra/backend/postgresql/**
+!infra/backend/vinshc-module/
+!infra/backend/vinshc-module/**
+!metadata/vinshc/catalogues/address-vn-19-2025.json
+!metadata/vinshc/catalogues/contact-relationships.json
+!metadata/vinshc/pack.json

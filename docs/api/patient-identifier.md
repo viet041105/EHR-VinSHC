@@ -49,7 +49,7 @@ Nguồn tuần tự và autogeneration option được Initializer nạp từ `i
 }
 ```
 
-CCCD/BHXH/BHYT được thêm vào cùng mảng `identifiers`; ba loại phụ không dùng `location`. Số điện thoại, nghề nghiệp và địa chỉ nguyên văn dùng `person.attributes[]` với UUID trong frontend map. Địa chỉ Core dùng `person.addresses[]`, nhưng chưa được xem là địa chỉ danh mục tỉnh → xã cho tới khi DATA-08 cung cấp catalogue và Address Hierarchy hợp lệ.
+CCCD/BHXH/BHYT được thêm vào cùng mảng `identifiers`; ba loại phụ không dùng `location`. Số điện thoại và nghề nghiệp Core dùng `person.attributes[]` với UUID trong frontend map. Dữ liệu B2 mở rộng (contacts, fieldStates, snapshot địa chỉ nguyên văn/cũ và DATA-08) dùng module/REST riêng trong [patient-administration.md](patient-administration.md); không tách một contact thành nhiều Person Attribute rời.
 
 ## Đọc, cập nhật, tìm kiếm và phân trang
 
@@ -62,7 +62,9 @@ B2 đã tạo hai patient cùng tên `Bình An Nguyễn`; tìm tên có dấu tr
 
 ## FHIR R4
 
-`GET /openmrs/ws/fhir2/R4/Patient/{patientUuid}` trả cùng `Patient.id`, tên và giá trị identifier. Nguồn loại identifier được map ở `identifier[].type.coding[].code` bằng UUID identifier type; baseline hiện không trả `identifier.system`. Location của mã nội bộ nằm trong extension của identifier. Person attributes được FHIR2 trả dưới extension `http://fhir.openmrs.org/ext/person-attribute`.
+`GET /openmrs/ws/fhir2/R4/Patient/{patientUuid}` trả cùng `Patient.id`, tên và giá trị identifier. Initializer đã nạp bốn FHIR Patient Identifier System nên `identifier[].system` là namespace ổn định `urn:uuid:{identifierTypeUuid}`; `identifier[].type.coding[].code` vẫn là UUID identifier type. Location của mã nội bộ nằm trong extension của identifier. Person attributes được FHIR2 trả dưới extension `http://fhir.openmrs.org/ext/person-attribute`.
+
+Contact, field-state và lịch sử address snapshot hiện đọc qua REST VinSHC. Việc chiếu đầy đủ các extension này vào FHIR Patient chưa được tuyên bố hoàn tất; không suy diễn dữ liệu bị thiếu từ việc extension chưa xuất hiện trong FHIR.
 
 ## Lỗi đã kiểm tra
 

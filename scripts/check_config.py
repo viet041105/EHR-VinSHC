@@ -67,9 +67,11 @@ def validate_config(config, baseline, settings):
         raise ValueError("Backend must build from the reviewed Dockerfile/context.")
     dockerfile = (ROOT / expected_build["context"] / expected_build["dockerfile"]).read_text(encoding="utf-8")
     from_lines = re.findall(r"(?m)^FROM\s+(.+)$", dockerfile)
-    if (from_lines != [expected_build["baseImage"]]
-            or not re.search(r"@sha256:[a-f0-9]{64}$", expected_build["baseImage"])):
-        raise ValueError("Backend Dockerfile must use the reviewed upstream digest.")
+    from_images = [re.split(r"\s+[Aa][Ss]\s+", line, maxsplit=1)[0] for line in from_lines]
+    expected_images = [expected_build["builderImage"], expected_build["baseImage"]]
+    if (from_images != expected_images
+            or any(not re.search(r"@sha256:[a-f0-9]{64}$", image) for image in expected_images)):
+        raise ValueError("Backend Dockerfile must use the reviewed builder and upstream digests.")
     if services["backend"].get("pull_policy") != "build":
         raise ValueError("Backend must rebuild from the repository rather than pull an unrelated local tag.")
 
