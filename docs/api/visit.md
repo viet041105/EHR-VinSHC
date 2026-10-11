@@ -1,39 +1,39 @@
 # Visit và lịch sử
 
-Visit của OpenMRS là lượt khám nghiệp vụ; không mặc định tương đương FHIR Encounter.
+OpenMRS Visit là lượt khám nghiệp vụ gom nhiều encounter; nó không mặc định tương đương một FHIR Encounter. B3 dùng visit type ngoại trú `20a5a7e6-76e0-584c-9b28-e1f637660fee` và location development `feae71be-957c-4f94-b100-d84bc6915574` từ metadata chính thức.
 
 ## Mở visit
 
-`POST /openmrs/ws/rest/v1/visit` — runtime chấp nhận HTTP 200/201.
+`POST /openmrs/ws/rest/v1/visit` — HTTP 200/201.
 
 ```json
 {
-  "patient": "<created-patient-uuid>",
-  "visitType": "<loaded-visit-type-uuid>",
-  "location": "<loaded-location-uuid>",
-  "startDatetime": "2026-10-10T15:00:00.000+07:00"
+  "patient": "<patient-uuid>",
+  "visitType": "20a5a7e6-76e0-584c-9b28-e1f637660fee",
+  "location": "feae71be-957c-4f94-b100-d84bc6915574",
+  "startDatetime": "2026-10-11T13:00:00+07:00"
 }
 ```
 
-Hậu điều kiện: response có visit UUID; đọc lại visit phải trỏ đúng patient và visit type. UUID patient lấy từ response tạo/fixture; visit type synthetic và location phải tồn tại trên instance test.
+Đọc lại `GET /openmrs/ws/rest/v1/visit/{uuid}?v=full` phải trả đúng patient, visit type, location và start time. Encounter tạo trong visit phải dùng cùng patient; Core từ chối liên kết chéo bằng HTTP 400 `Encounter.visit.patients.dontMatch`.
 
 ## Kết thúc visit
 
-`POST /openmrs/ws/rest/v1/visit/{visitUuid}` — runtime trả HTTP 200.
+`POST /openmrs/ws/rest/v1/visit/{visitUuid}` — HTTP 200.
 
 ```json
-{ "stopDatetime": "2026-10-10T15:30:00.000+07:00" }
+{ "stopDatetime": "2026-10-11T13:30:00+07:00" }
 ```
 
-Hậu điều kiện: đọc lại chính UUID có `stopDatetime`, không tạo visit mới.
+Đọc lại cùng UUID phải có `stopDatetime`; thao tác không tạo visit mới. Lý do/ghi chú kết thúc đã có metadata nhưng workflow ghi các visit attribute này chưa nằm trong fixture B3.
 
 ## Đọc lịch sử
 
 - `GET /openmrs/ws/rest/v1/visit/{visitUuid}?v=full`
 - `GET /openmrs/ws/rest/v1/visit?patient={patientUuid}&v=full`
 
-Test xác nhận UUID visit vừa kết thúc xuất hiện trong `results` của đúng patient. `limit`/`startIndex`, lọc theo khoảng ngày, nhiều lượt đồng thời và quyền role thuộc B2/B3.
+B3 xác nhận visit đã kết thúc chỉ xuất hiện trong lịch sử đúng patient, cùng encounter và hai nhóm đo sinh hiệu vẫn đọc lại được. UUID không tồn tại trả 404; payload thiếu trường bắt buộc trả 400. Phân trang nhiều lượt, nhiều visit đồng thời và quyền theo 8 role vẫn cần kiểm tra ở B5/B9.
 
-## Lỗi liên quan
+FHIR `Encounter/{uuid}` trong tài liệu B3 là mapping của OpenMRS Encounter sinh hiệu nằm bên trong visit. Không dùng visit UUID để gọi FHIR Encounter và không gộp hai lifecycle này chỉ vì cùng hiển thị là “lượt khám”.
 
-UUID không tồn tại trả HTTP 404 với JSON `error.message`. Payload thiếu trường bắt buộc trả HTTP 400. Quyền tạo/sửa/kết thúc theo 8 role chưa được chốt; không dùng quyền admin của test làm contract production.
+Bộ kiểm thử và bằng chứng: `tests/integration/test_b3_vitals.py`, `.runtime/reports/b3-integration.json`.

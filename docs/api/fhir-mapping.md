@@ -5,8 +5,8 @@ Endpoint capability: `GET /openmrs/ws/fhir2/R4/metadata`. Runtime phải trả `
 | Resource | Capability công bố | Đã kiểm tra bằng fixture |
 | --- | --- | --- |
 | Patient | create/delete/patch/read/search/update | Read/search cùng UUID và identifier với REST |
-| Encounter | create/delete/patch/read/search/update | Read cùng encounter UUID và đúng patient |
-| Observation | create/delete/patch/read/search/update | Read cùng obs UUID, patient, encounter, value/unit hoặc text |
+| Encounter | create/delete/patch/read/search/update | B3 read cùng encounter UUID, đúng patient và period; resource này ánh xạ OpenMRS Encounter, không phải Visit |
+| Observation | create/delete/patch/read/search/update | B3 read nhóm sinh hiệu qua `hasMember`; parent có encounter, numeric child có UCUM quantity nhưng không có encounter trực tiếp |
 | Condition | create/delete/patch/read/search/update | Chưa; chờ ICD-10/mapping |
 | AllergyIntolerance | create/delete/patch/read/search/update | Chưa; chờ metadata dị ứng |
 | MedicationRequest | patch/read/search | Chưa; không công bố create/update |
@@ -18,4 +18,5 @@ Giới hạn quan trọng:
 
 - Visit OpenMRS không được coi là FHIR Encounter chỉ vì tên gần nhau.
 - Capability công bố không chứng minh payload ghi, validation, quyền hoặc mapping nghiệp vụ đúng.
-- B1 mới xác nhận Patient/Encounter/Observation synthetic. Mapping đầy đủ, provenance, timezone, sửa/void và nhiều lượt khám thuộc B7.
+- B3 đã xác nhận Encounter/Observation bằng metadata chính thức. Code hiện vẫn là UUID OpenMRS do chưa nạp mapping LOINC đã thẩm định; huyết áp chưa được biểu diễn thành panel/components chuẩn.
+- Sửa/void được kiểm tra qua REST Core; chưa tuyên bố tương đương update/delete qua FHIR. Mapping đầy đủ, provenance và nhiều lượt khám thuộc B7.
