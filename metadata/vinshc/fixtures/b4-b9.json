@@ -1,0 +1,4750 @@
+{
+  "version": "0.3.0",
+  "testOnly": true,
+  "synthetic": true,
+  "warning": "Pure contract simulations, not backend runtime/E2E proof or treatment guidance",
+  "identity": {
+    "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+    "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+    "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+    "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+  },
+  "cases": [
+    {
+      "id": "dx-create",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": true,
+      "finalize": true
+    },
+    {
+      "id": "dx-update",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "provisional",
+          "status": "active",
+          "revision": 2
+        }
+      ],
+      "valid": true,
+      "finalize": true
+    },
+    {
+      "id": "dx-void",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "void",
+          "revision": 1,
+          "reason": "Synthetic mistaken entry"
+        }
+      ],
+      "valid": true
+    },
+    {
+      "id": "dx-two-visits-not-merged",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        },
+        {
+          "uuid": "19b36e21-8d0e-5a48-b21c-0315698d9c19",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "841e162c-73fb-59d9-8ef0-cec06cdaa844",
+          "encounterUuid": "c089c125-760a-5b91-a0ec-c94f35fdce67",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": true,
+      "finalize": true
+    },
+    {
+      "id": "dx-secondary",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        },
+        {
+          "uuid": "a93c74f7-2aad-5a7d-bdd0-9b2c5b18fa4c",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "E11.9",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 2,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": true,
+      "finalize": true
+    },
+    {
+      "id": "dx-duplicate-primary",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        },
+        {
+          "uuid": "956c8206-5494-5d5d-8cdd-bc90a581dfcf",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false,
+      "finalize": true
+    },
+    {
+      "id": "dx-rank-bool",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": true,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false,
+      "finalize": true
+    },
+    {
+      "id": "dx-wrong-visit",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        },
+        {
+          "uuid": "93f71546-a0e0-5276-bab4-36468fd8dd4c",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "841e162c-73fb-59d9-8ef0-cec06cdaa844",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 2,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false,
+      "finalize": true
+    },
+    {
+      "id": "dx-missing-primary",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 2,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false,
+      "finalize": true
+    },
+    {
+      "id": "dx-empty-finalize",
+      "kind": "diagnosis",
+      "input": [],
+      "valid": false,
+      "finalize": true
+    },
+    {
+      "id": "dx-blocked-E11",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "E11",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "dx-blocked-M10.9",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "M10.9",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "dx-blocked-NOT-IN-ALLOWLIST",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "NOT-IN-ALLOWLIST",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "dx-selectable-M10.90",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "M10.90",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": true
+    },
+    {
+      "id": "dx-free-text",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": null,
+          "nonCodedText": "Chẩn đoán kiểm thử chưa mã hóa",
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": true
+    },
+    {
+      "id": "dx-both-code-text",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": "Synthetic",
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "dx-wrong-catalogue-version",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "invented",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "dx-void-no-reason",
+      "kind": "diagnosis",
+      "input": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "void",
+          "revision": 1
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "allergy-create",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "allergy-update",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": "moderate",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "allergy-resolve",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "resolved",
+        "clinicalStatus": "resolved",
+        "verificationStatus": "confirmed",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "allergy-void",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "entered-in-error",
+        "clinicalStatus": null,
+        "verificationStatus": "entered-in-error",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ],
+        "reason": "Synthetic error"
+      },
+      "valid": true
+    },
+    {
+      "id": "allergy-void-with-clinical-status",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "entered-in-error",
+        "clinicalStatus": "active",
+        "verificationStatus": "entered-in-error",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ],
+        "reason": "Synthetic"
+      },
+      "valid": false
+    },
+    {
+      "id": "allergy-free-text",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": null,
+        "allergenText": "Tác nhân giả chưa có mã",
+        "category": "other",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "allergy-uncoded-no-text",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": null,
+        "allergenText": null,
+        "category": "medication",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "allergy-missing-severity",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": null,
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ],
+        "severityMissing": "unknown"
+      },
+      "valid": true
+    },
+    {
+      "id": "allergy-missing-severity-no-state",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": null,
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "allergy-unknown-reaction",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "invented"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "allergy-revisit-not_asked",
+      "kind": "screening",
+      "input": {
+        "screening": "not_asked",
+        "previous": [
+          {
+            "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "status": "active",
+            "clinicalStatus": "active",
+            "verificationStatus": "confirmed",
+            "allergenCode": "MED-TEST",
+            "allergenText": null,
+            "category": "medication",
+            "severity": "mild",
+            "criticality": "unable-to-assess",
+            "reactions": [
+              {
+                "code": "RASH",
+                "text": null
+              }
+            ]
+          }
+        ]
+      },
+      "valid": true,
+      "conflict": false
+    },
+    {
+      "id": "allergy-revisit-unknown",
+      "kind": "screening",
+      "input": {
+        "screening": "unknown",
+        "previous": [
+          {
+            "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "status": "active",
+            "clinicalStatus": "active",
+            "verificationStatus": "confirmed",
+            "allergenCode": "MED-TEST",
+            "allergenText": null,
+            "category": "medication",
+            "severity": "mild",
+            "criticality": "unable-to-assess",
+            "reactions": [
+              {
+                "code": "RASH",
+                "text": null
+              }
+            ]
+          }
+        ]
+      },
+      "valid": true,
+      "conflict": false
+    },
+    {
+      "id": "allergy-revisit-no_known_allergy",
+      "kind": "screening",
+      "input": {
+        "screening": "no_known_allergy",
+        "previous": [
+          {
+            "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "status": "active",
+            "clinicalStatus": "active",
+            "verificationStatus": "confirmed",
+            "allergenCode": "MED-TEST",
+            "allergenText": null,
+            "category": "medication",
+            "severity": "mild",
+            "criticality": "unable-to-assess",
+            "reactions": [
+              {
+                "code": "RASH",
+                "text": null
+              }
+            ]
+          }
+        ]
+      },
+      "valid": true,
+      "conflict": true
+    },
+    {
+      "id": "allergy-revisit-present",
+      "kind": "screening",
+      "input": {
+        "screening": "present",
+        "previous": [
+          {
+            "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "status": "active",
+            "clinicalStatus": "active",
+            "verificationStatus": "confirmed",
+            "allergenCode": "MED-TEST",
+            "allergenText": null,
+            "category": "medication",
+            "severity": "mild",
+            "criticality": "unable-to-assess",
+            "reactions": [
+              {
+                "code": "RASH",
+                "text": null
+              }
+            ]
+          }
+        ]
+      },
+      "valid": true,
+      "conflict": false
+    },
+    {
+      "id": "rx-multiple-drugs",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "rx-confirmed",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "confirmed",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "rx-float-dose",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": 0.5,
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-fraction-source-unapproved",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "0.5",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-wrong-route",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "TOPICAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-wrong-unit",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "ML",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-negative-dose",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "-1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-nan-dose",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "NaN",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-prn-missing-max",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "PRN",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-bool-duration",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": true,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-quantity-zero",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "0",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-wrong-version",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "bad",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-not-effective-yet",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-10T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+            "drugCode": "S01-PLAVIX-75",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          },
+          {
+            "rowKey": "1a530208-c656-5ee9-bfc5-43869c3a714c",
+            "drugCode": "S01-LIPITOR-20",
+            "catalogueVersion": "0.3.0",
+            "dose": "1",
+            "doseUnitCode": "TABLET",
+            "quantity": "10",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "rx-synthetic-fraction",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "9961fe7e-4977-545d-a3f1-0e425568c698",
+            "drugCode": "SYN-TABLET-A",
+            "catalogueVersion": "0.3.0",
+            "dose": "0.5",
+            "doseUnitCode": "TABLET",
+            "quantity": "2.5",
+            "quantityUnitCode": "TABLET",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "BID",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị"
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "rx-synthetic-liquid-prn",
+      "kind": "prescription",
+      "input": {
+        "uuid": "9da9c1b0-63ae-5782-bf52-531394ed8a41",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "ordererUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "recordedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "lines": [
+          {
+            "rowKey": "16bc8ad4-af7a-5538-88b6-f83124d8fd92",
+            "drugCode": "SYN-LIQUID-B",
+            "catalogueVersion": "0.3.0",
+            "dose": "2.5",
+            "doseUnitCode": "ML",
+            "quantity": "12.5",
+            "quantityUnitCode": "ML",
+            "routeCode": "ORAL",
+            "duration": 5,
+            "durationUnitCode": "DAY",
+            "frequencyCode": "PRN",
+            "instructions": "Dữ liệu giả kiểm thử, không phải hướng dẫn điều trị",
+            "maxPerDay": "2"
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-confirm",
+      "kind": "transition",
+      "input": {
+        "machine": "prescription",
+        "before": "draft",
+        "after": "confirmed"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-cancel-draft",
+      "kind": "transition",
+      "input": {
+        "machine": "prescription",
+        "before": "draft",
+        "after": "cancelled",
+        "reason": "Synthetic"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-discontinue",
+      "kind": "transition",
+      "input": {
+        "machine": "prescription",
+        "before": "confirmed",
+        "after": "discontinued",
+        "reason": "Synthetic"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-cancel-confirmed",
+      "kind": "transition",
+      "input": {
+        "machine": "prescription",
+        "before": "confirmed",
+        "after": "cancelled",
+        "reason": "Synthetic"
+      },
+      "valid": false
+    },
+    {
+      "id": "transition-edit-confirmed",
+      "kind": "transition",
+      "input": {
+        "machine": "prescription",
+        "before": "confirmed",
+        "after": "draft"
+      },
+      "valid": false
+    },
+    {
+      "id": "transition-assign",
+      "kind": "transition",
+      "input": {
+        "machine": "order",
+        "before": "requested",
+        "after": "assigned"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-start",
+      "kind": "transition",
+      "input": {
+        "machine": "order",
+        "before": "assigned",
+        "after": "in_progress"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-complete",
+      "kind": "transition",
+      "input": {
+        "machine": "order",
+        "before": "in_progress",
+        "after": "completed"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-reopen-completed",
+      "kind": "transition",
+      "input": {
+        "machine": "order",
+        "before": "completed",
+        "after": "requested"
+      },
+      "valid": false
+    },
+    {
+      "id": "transition-preliminary",
+      "kind": "transition",
+      "input": {
+        "machine": "result",
+        "before": "draft",
+        "after": "preliminary"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-final",
+      "kind": "transition",
+      "input": {
+        "machine": "result",
+        "before": "preliminary",
+        "after": "final"
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-correction",
+      "kind": "transition",
+      "input": {
+        "machine": "result",
+        "before": "final",
+        "after": "corrected",
+        "reason": "Synthetic correction",
+        "newRevision": true
+      },
+      "valid": true
+    },
+    {
+      "id": "transition-overwrite-final",
+      "kind": "transition",
+      "input": {
+        "machine": "result",
+        "before": "final",
+        "after": "corrected",
+        "reason": "Synthetic"
+      },
+      "valid": false
+    },
+    {
+      "id": "permission-allow-reception",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "1d61c080-3058-5b6e-86af-39847c03dfb5",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "reception",
+          "roles": [
+            "reception"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "patient_identity",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "administrative",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "1d61c080-3058-5b6e-86af-39847c03dfb5",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-allow-cashier",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "cashier",
+          "roles": [
+            "cashier"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "payment",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "billing",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-allow-nurse",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "2b81852e-d9eb-5d8f-8dc6-20daa91ec3ee",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "nurse",
+          "roles": [
+            "nurse"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "vitals",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "care",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "2b81852e-d9eb-5d8f-8dc6-20daa91ec3ee",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-allow-doctor",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnosis",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-allow-lab",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "cf3bd98b-a2ec-5e49-9fa9-56b1ed9149b9",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "lab",
+          "roles": [
+            "lab"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnostic_result",
+        "action": "update",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "assigned_order",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "cf3bd98b-a2ec-5e49-9fa9-56b1ed9149b9",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-allow-pharmacy",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "7bfaff25-b5c7-5e74-9cc9-43d91f2747ce",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "pharmacy",
+          "roles": [
+            "pharmacy"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "dispensing",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "confirmed_prescription",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "7bfaff25-b5c7-5e74-9cc9-43d91f2747ce",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-allow-manager",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "6e8b833d-aaa2-5093-a244-2ff788b82496",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "manager",
+          "roles": [
+            "manager"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "reports",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "aggregate",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "6e8b833d-aaa2-5093-a244-2ff788b82496",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-allow-admin",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "10f59f5b-d56f-5f6b-b797-16bebb1d80c9",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "admin",
+          "roles": [
+            "admin"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "metadata_admin",
+        "action": "update",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "metadata",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "10f59f5b-d56f-5f6b-b797-16bebb1d80c9",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-deny-cashier-chart",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "cashier",
+          "roles": [
+            "cashier"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "clinical_chart",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "forbidden",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-cashier-chart-print",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "cashier",
+          "roles": [
+            "cashier"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "clinical_chart",
+        "action": "print",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "forbidden",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-admin-chart",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "10f59f5b-d56f-5f6b-b797-16bebb1d80c9",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "admin",
+          "roles": [
+            "admin"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "clinical_chart",
+        "action": "download",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "forbidden",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "10f59f5b-d56f-5f6b-b797-16bebb1d80c9",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-manager-chart",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "6e8b833d-aaa2-5093-a244-2ff788b82496",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "manager",
+          "roles": [
+            "manager"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "clinical_chart",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "forbidden",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "6e8b833d-aaa2-5093-a244-2ff788b82496",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-lab-ungranted-diagnosis",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "cf3bd98b-a2ec-5e49-9fa9-56b1ed9149b9",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "lab",
+          "roles": [
+            "lab"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnosis",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "forbidden",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "cf3bd98b-a2ec-5e49-9fa9-56b1ed9149b9",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-reception-rx",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "1d61c080-3058-5b6e-86af-39847c03dfb5",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "reception",
+          "roles": [
+            "reception"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "prescription",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "forbidden",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "1d61c080-3058-5b6e-86af-39847c03dfb5",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-cross-facility",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "clinical_chart",
+        "action": "read",
+        "context": {
+          "facilityUuid": "c1ea74d8-3663-53d1-b3f2-a6a4345a80e9",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-unassigned-patient",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "clinical_chart",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": false,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-unassigned-lab",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "cf3bd98b-a2ec-5e49-9fa9-56b1ed9149b9",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "lab",
+          "roles": [
+            "lab"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnostic_result",
+        "action": "update",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "assigned_order",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "ec040748-a403-55e2-a02d-7d790ce080df",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-draft-pharmacy",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "7bfaff25-b5c7-5e74-9cc9-43d91f2747ce",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "pharmacy",
+          "roles": [
+            "pharmacy"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "prescription",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "confirmed_prescription",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "7bfaff25-b5c7-5e74-9cc9-43d91f2747ce",
+          "prescriptionStatus": "draft",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-manager-identifiable",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "6e8b833d-aaa2-5093-a244-2ff788b82496",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "manager",
+          "roles": [
+            "manager"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "reports",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "aggregate",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "6e8b833d-aaa2-5093-a244-2ff788b82496",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": false,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-immutable-result",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "cf3bd98b-a2ec-5e49-9fa9-56b1ed9149b9",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "lab",
+          "roles": [
+            "lab"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnostic_result",
+        "action": "update",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "assigned_order",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "cf3bd98b-a2ec-5e49-9fa9-56b1ed9149b9",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": false,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-doctor-not-reviewer",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnostic_result",
+        "action": "update",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "clinical_assigned",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": false,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-closed-visit",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnosis",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "completed",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-deny-wrong-projection",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "cashier",
+          "roles": [
+            "cashier"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "patient_identity",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "clinical_assigned",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "f4462119-e308-56aa-a930-37e33cf33534",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-discontinue-immutable-rx",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "prescription",
+        "action": "cancel",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": false,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 200
+    },
+    {
+      "id": "permission-null-assignment",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": null,
+          "authenticated": true,
+          "active": true,
+          "activeRole": "lab",
+          "roles": [
+            "lab"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnostic_result",
+        "action": "read",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "assigned_order",
+          "patientAssigned": true,
+          "orderAssigneeUuid": null,
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-active-role-not-assigned",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "admin",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnosis",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    },
+    {
+      "id": "permission-anonymous",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": false,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnosis",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 401
+    },
+    {
+      "id": "permission-inactive",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": false,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnosis",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": true
+        }
+      },
+      "valid": true,
+      "expectedHttp": 401
+    },
+    {
+      "id": "dispense-partial-full-replay",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "4",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        },
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "4",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        },
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-2",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "6",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        200,
+        200
+      ],
+      "expectedEvents": 2
+    },
+    {
+      "id": "dispense-reused-key-conflict",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "4",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        },
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "5",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        409
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "dispense-over-total",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "4",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        },
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-2",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "7",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        400
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "dispense-reject-draft",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "draft",
+          "visitStatus": "open",
+          "quantity": "4",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        400
+      ],
+      "expectedEvents": 0
+    },
+    {
+      "id": "dispense-reject-cancelled-visit",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "cancelled",
+          "quantity": "4",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        400
+      ],
+      "expectedEvents": 0
+    },
+    {
+      "id": "dispense-reject-stopped-order",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "discontinued",
+          "visitStatus": "open",
+          "quantity": "4",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        400
+      ],
+      "expectedEvents": 0
+    },
+    {
+      "id": "dispense-reject-invalid-step",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "dispense",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "f6448b34-daca-5946-8b2c-12e3a25bc189",
+          "idempotencyKey": "disp-1",
+          "prescriptionStatus": "confirmed",
+          "visitStatus": "open",
+          "quantity": "0.5",
+          "prescribedQuantity": "10",
+          "quantityStep": "1"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        400
+      ],
+      "expectedEvents": 0
+    },
+    {
+      "id": "payment-refund-replay",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "refund",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "6f1dce53-8b9b-5573-8cea-b3e55d34ef8b",
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "refund-1",
+          "amountVnd": 10000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00",
+          "reason": "Synthetic service cancellation"
+        },
+        {
+          "kind": "refund",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "6f1dce53-8b9b-5573-8cea-b3e55d34ef8b",
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "refund-1",
+          "amountVnd": 10000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00",
+          "reason": "Synthetic service cancellation"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        200,
+        200,
+        200
+      ],
+      "expectedEvents": 2
+    },
+    {
+      "id": "refund-partial-full",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "refund",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "6f1dce53-8b9b-5573-8cea-b3e55d34ef8b",
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "refund-1",
+          "amountVnd": 10000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00",
+          "reason": "Synthetic service cancellation"
+        },
+        {
+          "kind": "refund",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "4469e3b1-9d7e-5ad7-8769-4ba96804d481",
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "refund-2",
+          "amountVnd": 40000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00",
+          "reason": "Synthetic service cancellation"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        200,
+        200
+      ],
+      "expectedEvents": 3
+    },
+    {
+      "id": "refund-over-remaining",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "refund",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "6f1dce53-8b9b-5573-8cea-b3e55d34ef8b",
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "refund-1",
+          "amountVnd": 10000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00",
+          "reason": "Synthetic service cancellation"
+        },
+        {
+          "kind": "refund",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "4469e3b1-9d7e-5ad7-8769-4ba96804d481",
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "refund-2",
+          "amountVnd": 40001,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00",
+          "reason": "Synthetic service cancellation"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        200,
+        400
+      ],
+      "expectedEvents": 2
+    },
+    {
+      "id": "refund-wrong-facility",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "refund",
+          "facilityUuid": "c1ea74d8-3663-53d1-b3f2-a6a4345a80e9",
+          "targetUuid": "6f1dce53-8b9b-5573-8cea-b3e55d34ef8b",
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "refund-1",
+          "amountVnd": 10000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00",
+          "reason": "Synthetic service cancellation"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        400
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "payment-reused-key-conflict",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 60000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        409
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "payment-bool-money",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-bool-money",
+          "amountVnd": true,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        400
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "payment-decimal-money",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-decimal-money",
+          "amountVnd": 1.5,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        400
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "payment-pending",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-pending",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "pending",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        400
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "payment-duplicate-uuid",
+      "kind": "ledger",
+      "input": [
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-1",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        },
+        {
+          "kind": "receipt",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "idempotencyKey": "receipt-duplicate-uuid",
+          "amountVnd": 50000,
+          "method": "cash",
+          "status": "settled",
+          "settledAt": "2026-10-11T09:00:00+07:00"
+        }
+      ],
+      "valid": true,
+      "expectedHttp": [
+        200,
+        409
+      ],
+      "expectedEvents": 1
+    },
+    {
+      "id": "bill-price-discount-snapshot",
+      "kind": "bill",
+      "input": {
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "lines": [
+          {
+            "priceUuid": "f2bc4683-5124-5a4c-b605-69b9efcd7d4d",
+            "priceVersion": "0.3.0",
+            "serviceUuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+            "serviceName": "Glucose",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "quantity": 2,
+            "unitPriceVnd": 22400,
+            "discountVnd": 4800,
+            "netVnd": 40000
+          }
+        ]
+      },
+      "valid": true,
+      "expectedTotal": 40000
+    },
+    {
+      "id": "bill-wrong-version",
+      "kind": "bill",
+      "input": {
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "lines": [
+          {
+            "priceUuid": "f2bc4683-5124-5a4c-b605-69b9efcd7d4d",
+            "priceVersion": "other",
+            "serviceUuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+            "serviceName": "Glucose",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "quantity": 2,
+            "unitPriceVnd": 22400,
+            "discountVnd": 4800,
+            "netVnd": 40000
+          }
+        ]
+      },
+      "valid": false,
+      "expectedTotal": 40000
+    },
+    {
+      "id": "bill-excess-discount",
+      "kind": "bill",
+      "input": {
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "lines": [
+          {
+            "priceUuid": "f2bc4683-5124-5a4c-b605-69b9efcd7d4d",
+            "priceVersion": "0.3.0",
+            "serviceUuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+            "serviceName": "Glucose",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "quantity": 2,
+            "unitPriceVnd": 22400,
+            "discountVnd": 44801,
+            "netVnd": -1
+          }
+        ]
+      },
+      "valid": false,
+      "expectedTotal": 40000
+    },
+    {
+      "id": "bill-wrong-net",
+      "kind": "bill",
+      "input": {
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "lines": [
+          {
+            "priceUuid": "f2bc4683-5124-5a4c-b605-69b9efcd7d4d",
+            "priceVersion": "0.3.0",
+            "serviceUuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+            "serviceName": "Glucose",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "quantity": 2,
+            "unitPriceVnd": 22400,
+            "discountVnd": 4800,
+            "netVnd": 44800
+          }
+        ]
+      },
+      "valid": false,
+      "expectedTotal": 40000
+    },
+    {
+      "id": "bill-float-quantity",
+      "kind": "bill",
+      "input": {
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "lines": [
+          {
+            "priceUuid": "f2bc4683-5124-5a4c-b605-69b9efcd7d4d",
+            "priceVersion": "0.3.0",
+            "serviceUuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+            "serviceName": "Glucose",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "quantity": 1.5,
+            "unitPriceVnd": 22400,
+            "discountVnd": 4800,
+            "netVnd": 40000
+          }
+        ]
+      },
+      "valid": false,
+      "expectedTotal": 40000
+    },
+    {
+      "id": "bill-bool-money",
+      "kind": "bill",
+      "input": {
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "lines": [
+          {
+            "priceUuid": "f2bc4683-5124-5a4c-b605-69b9efcd7d4d",
+            "priceVersion": "0.3.0",
+            "serviceUuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+            "serviceName": "Glucose",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "quantity": 2,
+            "unitPriceVnd": true,
+            "discountVnd": 4800,
+            "netVnd": 40000
+          }
+        ]
+      },
+      "valid": false,
+      "expectedTotal": 40000
+    },
+    {
+      "id": "appointment-arrive",
+      "kind": "workflow",
+      "input": {
+        "kind": "appointment",
+        "before": "confirmed",
+        "after": "arrived",
+        "startAt": "2026-10-11T09:00:00+07:00",
+        "endAt": "2026-10-11T09:20:00+07:00",
+        "eventAt": "2026-10-11T09:00:00+07:00"
+      },
+      "valid": true
+    },
+    {
+      "id": "appointment-no-show-after-start",
+      "kind": "workflow",
+      "input": {
+        "kind": "appointment",
+        "before": "confirmed",
+        "after": "no_show",
+        "startAt": "2026-10-11T09:00:00+07:00",
+        "endAt": "2026-10-11T09:20:00+07:00",
+        "eventAt": "2026-10-11T09:01:00+07:00"
+      },
+      "valid": true
+    },
+    {
+      "id": "appointment-premature-no-show",
+      "kind": "workflow",
+      "input": {
+        "kind": "appointment",
+        "before": "confirmed",
+        "after": "no_show",
+        "startAt": "2026-10-11T09:00:00+07:00",
+        "endAt": "2026-10-11T09:20:00+07:00",
+        "eventAt": "2026-10-11T08:59:00+07:00"
+      },
+      "valid": false
+    },
+    {
+      "id": "appointment-negative-duration",
+      "kind": "workflow",
+      "input": {
+        "kind": "appointment",
+        "before": "confirmed",
+        "after": "arrived",
+        "startAt": "2026-10-11T09:00:00+07:00",
+        "endAt": "2026-10-11T08:59:00+07:00",
+        "eventAt": "2026-10-11T09:00:00+07:00"
+      },
+      "valid": false
+    },
+    {
+      "id": "appointment-missing-offset",
+      "kind": "workflow",
+      "input": {
+        "kind": "appointment",
+        "before": "confirmed",
+        "after": "arrived",
+        "startAt": "2026-10-11T09:00:00",
+        "endAt": "2026-10-11T09:20:00+07:00",
+        "eventAt": "2026-10-11T09:00:00+07:00"
+      },
+      "valid": false
+    },
+    {
+      "id": "queue-call",
+      "kind": "workflow",
+      "input": {
+        "kind": "queue",
+        "before": "waiting",
+        "after": "called"
+      },
+      "valid": true
+    },
+    {
+      "id": "queue-left-reason",
+      "kind": "workflow",
+      "input": {
+        "kind": "queue",
+        "before": "waiting",
+        "after": "left",
+        "reason": "patient_requested"
+      },
+      "valid": true
+    },
+    {
+      "id": "queue-left-no-reason",
+      "kind": "workflow",
+      "input": {
+        "kind": "queue",
+        "before": "waiting",
+        "after": "left"
+      },
+      "valid": false
+    },
+    {
+      "id": "queue-reopen-completed",
+      "kind": "workflow",
+      "input": {
+        "kind": "queue",
+        "before": "completed",
+        "after": "called"
+      },
+      "valid": false
+    },
+    {
+      "id": "appointment-adjacent-slots",
+      "kind": "slots",
+      "input": [
+        {
+          "uuid": "5897d2e7-4fa7-5199-b1ff-ebdc5a46e9e5",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "providerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "startAt": "2026-10-11T09:00:00+07:00",
+          "endAt": "2026-10-11T09:20:00+07:00",
+          "status": "confirmed"
+        },
+        {
+          "uuid": "d5ddf6ed-ff00-5a4f-b4eb-7b2199e9775d",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "providerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "startAt": "2026-10-11T09:20:00+07:00",
+          "endAt": "2026-10-11T09:40:00+07:00",
+          "status": "confirmed"
+        }
+      ],
+      "valid": true
+    },
+    {
+      "id": "appointment-overlap",
+      "kind": "slots",
+      "input": [
+        {
+          "uuid": "5897d2e7-4fa7-5199-b1ff-ebdc5a46e9e5",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "providerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "startAt": "2026-10-11T09:00:00+07:00",
+          "endAt": "2026-10-11T09:20:00+07:00",
+          "status": "confirmed"
+        },
+        {
+          "uuid": "d5ddf6ed-ff00-5a4f-b4eb-7b2199e9775d",
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "providerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "startAt": "2026-10-11T09:10:00+07:00",
+          "endAt": "2026-10-11T09:20:00+07:00",
+          "status": "confirmed"
+        }
+      ],
+      "valid": false
+    },
+    {
+      "id": "prepay-unpaid-block",
+      "kind": "service_gate",
+      "input": {
+        "paymentMode": "prepay",
+        "stage": "lab",
+        "billStatus": "unpaid",
+        "billMatchesService": true,
+        "visitStatus": "open"
+      },
+      "valid": true,
+      "expected": false
+    },
+    {
+      "id": "prepay-paid-allow",
+      "kind": "service_gate",
+      "input": {
+        "paymentMode": "prepay",
+        "stage": "lab",
+        "billStatus": "paid",
+        "billMatchesService": true,
+        "visitStatus": "open"
+      },
+      "valid": true,
+      "expected": true
+    },
+    {
+      "id": "prepay-wrong-bill-block",
+      "kind": "service_gate",
+      "input": {
+        "paymentMode": "prepay",
+        "stage": "lab",
+        "billStatus": "paid",
+        "billMatchesService": false,
+        "visitStatus": "open"
+      },
+      "valid": true,
+      "expected": false
+    },
+    {
+      "id": "prepay-vitals-allow",
+      "kind": "service_gate",
+      "input": {
+        "paymentMode": "prepay",
+        "stage": "vitals",
+        "billStatus": "unpaid",
+        "billMatchesService": false,
+        "visitStatus": "open"
+      },
+      "valid": true,
+      "expected": true
+    },
+    {
+      "id": "postpay-lab-allow",
+      "kind": "service_gate",
+      "input": {
+        "paymentMode": "postpay",
+        "stage": "lab",
+        "billStatus": "unpaid",
+        "billMatchesService": false,
+        "visitStatus": "open"
+      },
+      "valid": true,
+      "expected": true
+    },
+    {
+      "id": "result-preliminary",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "preliminary"
+      },
+      "valid": true
+    },
+    {
+      "id": "result-final",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "final",
+        "reviewerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "verifiedAt": "2026-10-11T09:00:00+07:00"
+      },
+      "valid": true
+    },
+    {
+      "id": "result-corrected",
+      "kind": "result",
+      "input": {
+        "uuid": "21241513-5929-5585-bfbf-934ba96cb4f7",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.3",
+        "referenceRange": null,
+        "status": "corrected",
+        "reviewerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "verifiedAt": "2026-10-11T09:00:00+07:00",
+        "previousRevisionUuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "correctionReason": "Synthetic correction"
+      },
+      "valid": true
+    },
+    {
+      "id": "result-wrong-patient",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "bad41955-18e1-5a26-85e7-cd879e120f9b",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "preliminary"
+      },
+      "valid": false
+    },
+    {
+      "id": "result-invented-range",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": "4-6",
+        "status": "preliminary"
+      },
+      "valid": false
+    },
+    {
+      "id": "result-wrong-unit",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mg/dL",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "preliminary"
+      },
+      "valid": false
+    },
+    {
+      "id": "result-unreviewed-final",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "final"
+      },
+      "valid": false
+    },
+    {
+      "id": "result-float-value",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": 5.2,
+        "referenceRange": null,
+        "status": "preliminary"
+      },
+      "valid": false
+    },
+    {
+      "id": "result-unknown-status",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "done"
+      },
+      "valid": false
+    },
+    {
+      "id": "result-corrected-same-uuid",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "corrected",
+        "reviewerUuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "verifiedAt": "2026-10-11T09:00:00+07:00",
+        "previousRevisionUuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "correctionReason": "Synthetic"
+      },
+      "valid": false
+    },
+    {
+      "id": "attachment-test-pdf",
+      "kind": "attachment",
+      "input": {
+        "mime": "application/pdf",
+        "sniffedMime": "application/pdf",
+        "size": 1024
+      },
+      "valid": true
+    },
+    {
+      "id": "attachment-production-pending",
+      "kind": "attachment",
+      "input": {
+        "mime": "application/pdf",
+        "sniffedMime": "application/pdf",
+        "size": 1024
+      },
+      "valid": false,
+      "production": true
+    },
+    {
+      "id": "attachment-spoofed-mime",
+      "kind": "attachment",
+      "input": {
+        "mime": "application/pdf",
+        "sniffedMime": "text/html",
+        "size": 1024
+      },
+      "valid": false
+    },
+    {
+      "id": "attachment-over-size",
+      "kind": "attachment",
+      "input": {
+        "mime": "application/pdf",
+        "sniffedMime": "application/pdf",
+        "size": 20971521
+      },
+      "valid": false
+    },
+    {
+      "id": "attachment-empty",
+      "kind": "attachment",
+      "input": {
+        "mime": "application/pdf",
+        "sniffedMime": "application/pdf",
+        "size": 0
+      },
+      "valid": false
+    },
+    {
+      "id": "print-prescription",
+      "kind": "print",
+      "input": {
+        "templateCode": "prescription",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-prescription-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "confirmed",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01",
+          "birthDisplay": "Thông tin giả kiểm thử",
+          "addressText": "Thông tin giả kiểm thử"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "diagnoses": [
+          {
+            "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "code": "I10",
+            "nonCodedText": null,
+            "catalogueVersion": "VN-06-2026-2026-07-01",
+            "rank": 1,
+            "certainty": "confirmed",
+            "status": "active",
+            "revision": 1
+          }
+        ],
+        "note": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "drugCode": "SYN-TABLET-A",
+            "drugName": "Thuốc giả SYN-TABLET-A",
+            "ingredients": [
+              {
+                "name": "Hoạt chất giả SYN-TABLET-A",
+                "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+                "strength": "10",
+                "unit": "mg"
+              }
+            ],
+            "strength": {
+              "value": "10",
+              "unit": "mg"
+            },
+            "dose": "0.5",
+            "doseUnit": "Viên",
+            "route": "Uống",
+            "frequency": "BID (kiểm thử)",
+            "duration": "5 ngày",
+            "quantity": "2.5",
+            "quantityUnit": "Viên",
+            "instructions": "Dữ liệu giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "prescriber",
+            "signerUuid": "6be10703-5328-597c-a914-e17cabe9ac9b",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "print-receipt",
+      "kind": "print",
+      "input": {
+        "templateCode": "receipt",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-receipt-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "settled",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01"
+        },
+        "issuer": {
+          "uuid": "0d1a2fe9-35ec-5dcd-bc6c-6f6c522d2253",
+          "fullName": "Thông tin giả kiểm thử",
+          "title": "Thông tin giả kiểm thử",
+          "licenceNumber": null
+        },
+        "transactionUuid": "f3d9b533-d3ab-59ae-a6a2-2d58a5a7d7a6",
+        "billUuid": "1ca11e36-96ad-5fdf-a7fe-e96c304b50c7",
+        "amountVnd": 40000,
+        "amountInWords": "Bốn mươi nghìn đồng",
+        "paymentMethod": "cash",
+        "payerName": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "serviceCode": "Giá trị giả kiểm thử",
+            "serviceName": "Giá trị giả kiểm thử",
+            "quantity": 2,
+            "unitPriceVnd": 22400,
+            "discountVnd": 4800,
+            "netVnd": 40000
+          }
+        ],
+        "signatures": [
+          {
+            "role": "cashier",
+            "signerUuid": "d7e91b1b-26af-578d-af2c-835ca51794dd",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          },
+          {
+            "role": "payer",
+            "signerUuid": null,
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "print-refund",
+      "kind": "print",
+      "input": {
+        "templateCode": "refund",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-refund-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "settled",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01"
+        },
+        "issuer": {
+          "uuid": "0d1a2fe9-35ec-5dcd-bc6c-6f6c522d2253",
+          "fullName": "Thông tin giả kiểm thử",
+          "title": "Thông tin giả kiểm thử",
+          "licenceNumber": null
+        },
+        "transactionUuid": "f3d9b533-d3ab-59ae-a6a2-2d58a5a7d7a6",
+        "amountVnd": 40000,
+        "amountInWords": "Bốn mươi nghìn đồng",
+        "paymentMethod": "cash",
+        "lines": [
+          {
+            "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+            "amountVnd": 40000,
+            "reason": "Giá trị giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "cashier",
+            "signerUuid": "d7e91b1b-26af-578d-af2c-835ca51794dd",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          },
+          {
+            "role": "recipient",
+            "signerUuid": "2bc45a60-cdb6-5b56-b8ea-25253de442b5",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "print-order",
+      "kind": "print",
+      "input": {
+        "templateCode": "order",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-order-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "requested",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "orderUuid": "6fdd33d9-4d07-5a46-8f70-16970acdbb6e",
+        "encounterUuid": "593f5b91-04ac-5335-ab4d-93f7b9c8dfda",
+        "orderedAt": "2026-10-11T09:00:00+07:00",
+        "lines": [
+          {
+            "serviceCode": "Giá trị giả kiểm thử",
+            "serviceName": "Giá trị giả kiểm thử",
+            "specimen": "Giá trị giả kiểm thử",
+            "priority": "Giá trị giả kiểm thử",
+            "note": "Giá trị giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "orderer",
+            "signerUuid": "2a4ce0e2-4ff8-5590-b1c4-fa0159e8f46e",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "print-result",
+      "kind": "print",
+      "input": {
+        "templateCode": "result",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-result-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "final",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "orderUuid": "6fdd33d9-4d07-5a46-8f70-16970acdbb6e",
+        "resultUuid": "cdaf5862-7857-5d31-bcae-f4142e0246ed",
+        "revision": 1,
+        "previousRevision": null,
+        "correctionReason": null,
+        "collectedAt": "2026-10-11T09:00:00+07:00",
+        "verifiedAt": "2026-10-11T09:00:00+07:00",
+        "attachments": [],
+        "lines": [
+          {
+            "indicatorCode": "GLU",
+            "indicatorName": "Glucose",
+            "value": "5.2",
+            "valueType": "number",
+            "unit": "mmol/L",
+            "referenceRange": null,
+            "method": null
+          }
+        ],
+        "signatures": [
+          {
+            "role": "author",
+            "signerUuid": "dc8b7a34-c33f-5b53-8539-ade7e03adcc4",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          },
+          {
+            "role": "reviewer",
+            "signerUuid": "ae07ab57-6817-59fe-82e3-4ad9ce4854e7",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "print-appointment",
+      "kind": "print",
+      "input": {
+        "templateCode": "appointment",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-appointment-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "booked",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01"
+        },
+        "issuer": {
+          "uuid": "0d1a2fe9-35ec-5dcd-bc6c-6f6c522d2253",
+          "fullName": "Thông tin giả kiểm thử",
+          "title": "Thông tin giả kiểm thử",
+          "licenceNumber": null
+        },
+        "appointmentUuid": "b3e17145-d615-58ae-a756-29afdd07bcc2",
+        "startAt": "2026-10-11T09:00:00+07:00",
+        "endAt": "2026-10-11T09:00:00+07:00",
+        "timezone": "Asia/Ho_Chi_Minh",
+        "instructions": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "serviceCode": "Giá trị giả kiểm thử",
+            "serviceName": "Giá trị giả kiểm thử",
+            "locationName": "Giá trị giả kiểm thử",
+            "providerRole": "Giá trị giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "scheduler",
+            "signerUuid": "9b1284f2-c676-51e0-935a-c91a286cf349",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": true
+    },
+    {
+      "id": "print-missing-facility",
+      "kind": "print",
+      "input": {
+        "templateCode": "prescription",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-prescription-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "confirmed",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01",
+          "birthDisplay": "Thông tin giả kiểm thử",
+          "addressText": "Thông tin giả kiểm thử"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "diagnoses": [
+          {
+            "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "code": "I10",
+            "nonCodedText": null,
+            "catalogueVersion": "VN-06-2026-2026-07-01",
+            "rank": 1,
+            "certainty": "confirmed",
+            "status": "active",
+            "revision": 1
+          }
+        ],
+        "note": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "drugCode": "SYN-TABLET-A",
+            "drugName": "Thuốc giả SYN-TABLET-A",
+            "ingredients": [
+              {
+                "name": "Hoạt chất giả SYN-TABLET-A",
+                "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+                "strength": "10",
+                "unit": "mg"
+              }
+            ],
+            "strength": {
+              "value": "10",
+              "unit": "mg"
+            },
+            "dose": "0.5",
+            "doseUnit": "Viên",
+            "route": "Uống",
+            "frequency": "BID (kiểm thử)",
+            "duration": "5 ngày",
+            "quantity": "2.5",
+            "quantityUnit": "Viên",
+            "instructions": "Dữ liệu giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "prescriber",
+            "signerUuid": "6be10703-5328-597c-a914-e17cabe9ac9b",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "print-wrong-version",
+      "kind": "print",
+      "input": {
+        "templateCode": "prescription",
+        "templateVersion": "unknown",
+        "documentNumber": "TEST-prescription-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "confirmed",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01",
+          "birthDisplay": "Thông tin giả kiểm thử",
+          "addressText": "Thông tin giả kiểm thử"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "diagnoses": [
+          {
+            "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "code": "I10",
+            "nonCodedText": null,
+            "catalogueVersion": "VN-06-2026-2026-07-01",
+            "rank": 1,
+            "certainty": "confirmed",
+            "status": "active",
+            "revision": 1
+          }
+        ],
+        "note": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "drugCode": "SYN-TABLET-A",
+            "drugName": "Thuốc giả SYN-TABLET-A",
+            "ingredients": [
+              {
+                "name": "Hoạt chất giả SYN-TABLET-A",
+                "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+                "strength": "10",
+                "unit": "mg"
+              }
+            ],
+            "strength": {
+              "value": "10",
+              "unit": "mg"
+            },
+            "dose": "0.5",
+            "doseUnit": "Viên",
+            "route": "Uống",
+            "frequency": "BID (kiểm thử)",
+            "duration": "5 ngày",
+            "quantity": "2.5",
+            "quantityUnit": "Viên",
+            "instructions": "Dữ liệu giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "prescriber",
+            "signerUuid": "6be10703-5328-597c-a914-e17cabe9ac9b",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "print-draft-rx-block",
+      "kind": "print",
+      "input": {
+        "templateCode": "prescription",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-prescription-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "draft",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01",
+          "birthDisplay": "Thông tin giả kiểm thử",
+          "addressText": "Thông tin giả kiểm thử"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "diagnoses": [
+          {
+            "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "code": "I10",
+            "nonCodedText": null,
+            "catalogueVersion": "VN-06-2026-2026-07-01",
+            "rank": 1,
+            "certainty": "confirmed",
+            "status": "active",
+            "revision": 1
+          }
+        ],
+        "note": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "drugCode": "SYN-TABLET-A",
+            "drugName": "Thuốc giả SYN-TABLET-A",
+            "ingredients": [
+              {
+                "name": "Hoạt chất giả SYN-TABLET-A",
+                "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+                "strength": "10",
+                "unit": "mg"
+              }
+            ],
+            "strength": {
+              "value": "10",
+              "unit": "mg"
+            },
+            "dose": "0.5",
+            "doseUnit": "Viên",
+            "route": "Uống",
+            "frequency": "BID (kiểm thử)",
+            "duration": "5 ngày",
+            "quantity": "2.5",
+            "quantityUnit": "Viên",
+            "instructions": "Dữ liệu giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "prescriber",
+            "signerUuid": "6be10703-5328-597c-a914-e17cabe9ac9b",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "print-missing-drug-dose",
+      "kind": "print",
+      "input": {
+        "templateCode": "prescription",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-prescription-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "confirmed",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01",
+          "birthDisplay": "Thông tin giả kiểm thử",
+          "addressText": "Thông tin giả kiểm thử"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "diagnoses": [
+          {
+            "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "code": "I10",
+            "nonCodedText": null,
+            "catalogueVersion": "VN-06-2026-2026-07-01",
+            "rank": 1,
+            "certainty": "confirmed",
+            "status": "active",
+            "revision": 1
+          }
+        ],
+        "note": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "drugCode": "SYN-TABLET-A",
+            "drugName": "Thuốc giả SYN-TABLET-A",
+            "ingredients": [
+              {
+                "name": "Hoạt chất giả SYN-TABLET-A",
+                "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+                "strength": "10",
+                "unit": "mg"
+              }
+            ],
+            "strength": {
+              "value": "10",
+              "unit": "mg"
+            },
+            "doseUnit": "Viên",
+            "route": "Uống",
+            "frequency": "BID (kiểm thử)",
+            "duration": "5 ngày",
+            "quantity": "2.5",
+            "quantityUnit": "Viên",
+            "instructions": "Dữ liệu giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "prescriber",
+            "signerUuid": "6be10703-5328-597c-a914-e17cabe9ac9b",
+            "signerName": "Người ký giả",
+            "signedAt": null,
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "print-unverified-signature",
+      "kind": "print",
+      "input": {
+        "templateCode": "prescription",
+        "templateVersion": "0.3.0",
+        "documentNumber": "TEST-prescription-2026-0001",
+        "documentVersion": 1,
+        "issuedAt": "2026-10-11T09:00:00+07:00",
+        "status": "confirmed",
+        "synthetic": true,
+        "facility": {
+          "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "code": "VSHC-DEV",
+          "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+          "addressText": "Địa chỉ kiểm thử, Hà Nội",
+          "phone": "+84900000000",
+          "licenceNumber": "TEST-FACILITY-001",
+          "logoAsset": null
+        },
+        "patient": {
+          "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "identifier": "TEST-PATIENT-0001",
+          "fullName": "Người bệnh giả 01",
+          "birthDisplay": "Thông tin giả kiểm thử",
+          "addressText": "Thông tin giả kiểm thử"
+        },
+        "practitioner": {
+          "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+          "fullName": "Bác sĩ giả 01",
+          "title": "Bác sĩ",
+          "licenceNumber": "TEST-CCHN-DOCTOR"
+        },
+        "diagnoses": [
+          {
+            "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+            "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+            "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+            "recordedAt": "2026-10-11T09:00:00+07:00",
+            "code": "I10",
+            "nonCodedText": null,
+            "catalogueVersion": "VN-06-2026-2026-07-01",
+            "rank": 1,
+            "certainty": "confirmed",
+            "status": "active",
+            "revision": 1
+          }
+        ],
+        "note": "Thông tin giả kiểm thử",
+        "lines": [
+          {
+            "drugCode": "SYN-TABLET-A",
+            "drugName": "Thuốc giả SYN-TABLET-A",
+            "ingredients": [
+              {
+                "name": "Hoạt chất giả SYN-TABLET-A",
+                "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+                "strength": "10",
+                "unit": "mg"
+              }
+            ],
+            "strength": {
+              "value": "10",
+              "unit": "mg"
+            },
+            "dose": "0.5",
+            "doseUnit": "Viên",
+            "route": "Uống",
+            "frequency": "BID (kiểm thử)",
+            "duration": "5 ngày",
+            "quantity": "2.5",
+            "quantityUnit": "Viên",
+            "instructions": "Dữ liệu giả kiểm thử"
+          }
+        ],
+        "signatures": [
+          {
+            "role": "prescriber",
+            "signerUuid": "6be10703-5328-597c-a914-e17cabe9ac9b",
+            "signerName": "Người ký giả",
+            "signedAt": "2026-10-11T09:00:00+07:00",
+            "signatureReference": null
+          }
+        ]
+      },
+      "valid": false
+    },
+    {
+      "id": "report-local-boundary-refund-current-day",
+      "kind": "report",
+      "input": {
+        "date": "2026-10-11",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "receipts": [
+          {
+            "kind": "receipt",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "6e49993c-8127-5028-baab-af1732ab7e2d",
+            "idempotencyKey": "receipt-1",
+            "amountVnd": 50000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-10T16:59:59Z"
+          },
+          {
+            "kind": "receipt",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "f6510731-3616-544f-9aa6-0113757cefa9",
+            "idempotencyKey": "receipt-1",
+            "amountVnd": 50000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-10T17:00:00Z"
+          },
+          {
+            "kind": "receipt",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "804deb0a-5328-5bce-881a-7d6807efbbf0",
+            "idempotencyKey": "receipt-1",
+            "amountVnd": 50000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-11T17:00:00Z"
+          },
+          {
+            "kind": "receipt",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "c5267a0a-b597-53a2-a301-f026ba227118",
+            "idempotencyKey": "receipt-1",
+            "amountVnd": 50000,
+            "method": "cash",
+            "status": "pending",
+            "settledAt": "2026-10-11T09:00:00+07:00"
+          },
+          {
+            "kind": "receipt",
+            "facilityUuid": "c1ea74d8-3663-53d1-b3f2-a6a4345a80e9",
+            "targetUuid": "40279131-b458-5946-b189-38e26917c5aa",
+            "idempotencyKey": "receipt-1",
+            "amountVnd": 50000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-11T09:00:00+07:00"
+          }
+        ],
+        "refunds": [
+          {
+            "kind": "refund",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "6f1dce53-8b9b-5573-8cea-b3e55d34ef8b",
+            "originalReceiptUuid": "6e49993c-8127-5028-baab-af1732ab7e2d",
+            "idempotencyKey": "refund-1",
+            "amountVnd": 10000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-11T09:00:00+07:00",
+            "reason": "Synthetic service cancellation"
+          }
+        ],
+        "visits": [
+          {
+            "uuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "startAt": "2026-10-11T09:00:00+07:00",
+            "status": "completed",
+            "completedAt": "2026-10-11T12:00:00+07:00"
+          },
+          {
+            "uuid": "4ee24be0-d4c6-5838-9cf4-5b031d08ab87",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "startAt": "2026-10-10T09:00:00+07:00",
+            "status": "completed",
+            "completedAt": "2026-10-11T09:00:00+07:00"
+          }
+        ]
+      },
+      "valid": true,
+      "expected": {
+        "date": "2026-10-11",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "grossVnd": 50000,
+        "refundVnd": 10000,
+        "netVnd": 40000,
+        "openedVisits": 1,
+        "completedVisits": 2
+      }
+    },
+    {
+      "id": "report-duplicate-ledger-block",
+      "kind": "report",
+      "input": {
+        "date": "2026-10-11",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "receipts": [
+          {
+            "kind": "receipt",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+            "idempotencyKey": "receipt-1",
+            "amountVnd": 50000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-11T09:00:00+07:00"
+          },
+          {
+            "kind": "receipt",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+            "idempotencyKey": "receipt-1",
+            "amountVnd": 50000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-11T09:00:00+07:00"
+          }
+        ],
+        "refunds": [
+          {
+            "kind": "refund",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "targetUuid": "6f1dce53-8b9b-5573-8cea-b3e55d34ef8b",
+            "originalReceiptUuid": "6e49993c-8127-5028-baab-af1732ab7e2d",
+            "idempotencyKey": "refund-1",
+            "amountVnd": 10000,
+            "method": "cash",
+            "status": "settled",
+            "settledAt": "2026-10-11T09:00:00+07:00",
+            "reason": "Synthetic service cancellation"
+          }
+        ],
+        "visits": [
+          {
+            "uuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "startAt": "2026-10-11T09:00:00+07:00",
+            "status": "completed",
+            "completedAt": "2026-10-11T12:00:00+07:00"
+          },
+          {
+            "uuid": "4ee24be0-d4c6-5838-9cf4-5b031d08ab87",
+            "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+            "startAt": "2026-10-10T09:00:00+07:00",
+            "status": "completed",
+            "completedAt": "2026-10-11T09:00:00+07:00"
+          }
+        ]
+      },
+      "valid": false,
+      "expected": {}
+    },
+    {
+      "id": "allergy-value-plus-missing",
+      "kind": "allergy",
+      "input": {
+        "uuid": "e55f2ed1-44d9-5f45-bef0-5d7f4f1bc229",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "status": "active",
+        "clinicalStatus": "active",
+        "verificationStatus": "confirmed",
+        "allergenCode": "MED-TEST",
+        "allergenText": null,
+        "category": "medication",
+        "severity": "mild",
+        "criticality": "unable-to-assess",
+        "reactions": [
+          {
+            "code": "RASH",
+            "text": null
+          }
+        ],
+        "severityMissing": "unknown"
+      },
+      "valid": false
+    },
+    {
+      "id": "allergy-present-without-entry",
+      "kind": "screening",
+      "input": {
+        "screening": "present",
+        "previous": []
+      },
+      "conflict": false,
+      "valid": false
+    },
+    {
+      "id": "result-invented-method",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "preliminary",
+        "method": "Invented method"
+      },
+      "valid": false
+    },
+    {
+      "id": "result-entered-error-without-reason",
+      "kind": "result",
+      "input": {
+        "uuid": "797903c5-7c59-5e93-9306-53fb65b3c7df",
+        "orderUuid": "3640a2e8-ae32-5b26-8fe2-8cb28cf0f4ba",
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "orderPatientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "indicatorCode": "GLU",
+        "valueType": "number",
+        "unit": "mmol/L",
+        "value": "5.2",
+        "referenceRange": null,
+        "status": "entered-in-error"
+      },
+      "valid": false
+    },
+    {
+      "id": "permission-deny-unassigned-encounter",
+      "kind": "permission",
+      "input": {
+        "actor": {
+          "uuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "authenticated": true,
+          "active": true,
+          "activeRole": "doctor",
+          "roles": [
+            "doctor"
+          ],
+          "facilityUuids": [
+            "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+          ]
+        },
+        "resource": "diagnosis",
+        "action": "create",
+        "context": {
+          "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+          "projection": "chart",
+          "patientAssigned": true,
+          "orderAssigneeUuid": "091a0275-c59f-507e-8d92-b3bddc8b4079",
+          "prescriptionStatus": "confirmed",
+          "aggregateOnly": true,
+          "mutable": true,
+          "visitStatus": "open",
+          "authorizedResultReviewer": true,
+          "encounterAssigned": false
+        }
+      },
+      "valid": true,
+      "expectedHttp": 403
+    }
+  ]
+}

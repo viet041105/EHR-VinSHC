@@ -10,9 +10,9 @@ Khung trường MVP từ bản `main` mới nhất được giữ tại **mục 
 
 ## Metadata triển khai sau khi chốt với BE (cập nhật 11/10/2026)
 
-Bộ MVP `0.2.0` đã được cụ thể hóa tại [METADATA.md](METADATA.md) và [bảng 180 trường](data/MVP_METADATA_FIELDS.md). Bản [bổ sung B2/B3](METADATA_B2_B3.md) chốt contacts, fieldStates, điện thoại/URI định danh, bản gốc tỉnh/xã, mapping sinh hiệu chờ duyệt và gói update thử. Nguồn máy đọc nằm ở `metadata/vinshc/pack.json` và các contract/catalogue được tham chiếu; UUID, enum, required theo nghiệp vụ, validation và CSV Initializer được quản lý tại đó. Khảo sát 983 dòng S01 bên dưới vẫn giữ nguyên để tra nguồn; các CXT ở khảo sát không thay thế contract triển khai mới.
+Bộ MVP `0.3.0` đã được cụ thể hóa tại [METADATA.md](METADATA.md) và [bảng 205 trường](data/MVP_METADATA_FIELDS.md). Bản [bổ sung B2/B3](METADATA_B2_B3.md) chốt contacts, fieldStates, điện thoại/URI định danh, bản gốc tỉnh/xã, mapping sinh hiệu chờ duyệt. [Bàn giao B4–B9](METADATA_B4_B9.md) bổ sung catalogue test, quyền/FHIR/workflow/in/báo cáo và fixture. Nguồn máy đọc nằm ở `metadata/vinshc/pack.json` và các contract/catalogue được tham chiếu; UUID, enum, required theo nghiệp vụ, validation và CSV Initializer được quản lý tại đó. Khảo sát 983 dòng S01 bên dưới vẫn giữ nguyên để tra nguồn; các CXT ở khảo sát không thay thế contract triển khai mới.
 
-BE tiếp tục bằng identifier/attribute/type/concept đã cấp UUID và map 8 sinh hiệu khớp FE. Địa giới đã có bản gốc 19/2025/QĐ-TTg có nguồn/phiên bản; còn cần xác nhận thay đổi/conversion cũ-mới. Các danh mục ICD-10, thuốc, dịch vụ/giá cần nguồn cơ sở. Form/role/DTO/FHIR projection cần được FE/BE và người 4 tích hợp, không được tự coi là đã triển khai vì có file đặc tả. Kết quả kiểm chứng thực tế ghi tại [METADATA_VALIDATION.md](METADATA_VALIDATION.md).
+BE tiếp tục bằng identifier/attribute/type/concept đã cấp UUID và map 8 sinh hiệu khớp FE. Địa giới có bản gốc 19/2025/QĐ-TTg; còn cần xác nhận thay đổi/conversion cũ-mới. ICD allowlist dùng nguồn quốc gia; thuốc/dịch vụ/giá test tận dụng nhãn mẫu và synthetic, chờ cơ sở duyệt khi dùng production. Form/role/DTO/FHIR projection cần được FE/BE và người 4 tích hợp. Kết quả kiểm chứng thực tế ghi tại [METADATA_VALIDATION.md](METADATA_VALIDATION.md).
 
 ## 1. Người 3 nên đọc và làm gì trước
 

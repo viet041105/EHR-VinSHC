@@ -1,4 +1,26 @@
-# Kiểm chứng bộ metadata 0.2.0
+# Kiểm chứng bộ metadata 0.3.0
+
+Ngày 11/10/2026, nhánh `role-3-metadata`. Gói mới đối chiếu `main@53ba380`, `clinic-backend@6c407f1`; giữ nguyên baseline và 78 identity nền. Đọc [bàn giao B4–B9](METADATA_B4_B9.md) để phân biệt catalogue/contract với runtime đã triển khai.
+
+| Kiểm tra local gói 0.3.0 | Kết quả |
+| --- | --- |
+| `python tools/metadata.py` / `--write` | 205 field, 234 identity, 22 file sinh đồng bộ; 28 ca nền + 47 B2/B3 + 159 B4–B9 đạt kết quả mong đợi |
+| `python -m unittest discover -s metadata/tests -v` | 65 test pass, gồm 21 test B4–B9 về CSV dependency/hash, catalogue identity/update, phân quyền, idempotency/cấp/hoàn, decimal/VND, allergy history, ICD restrictions, provider/person binding, result revision, slot, upload gate, in/báo cáo |
+| `python -m unittest discover -s tests -v` | 25 regression test nền pass |
+| `python scripts/check_config.py` | Pass pinned baseline/config; schema/DB/module/API không được thay đổi bởi gói metadata |
+| Exact update overlay | CLI tạo 0.3.1 ở thư mục mới dưới `.runtime`; validate_pack pass, nhãn/note mạch đổi, key/UUID/field/unit và pinned catalogue versions giữ nguyên |
+| Reimport/update mô hình | UUID-based in-memory upsert lặp và đổi label không tạo trùng; đổi UUID của code hoặc tái sử dụng UUID cho code khác bị từ chối. Đây là mô hình, chưa chứng minh Initializer/DB |
+| Nguồn | Đối chiếu nhãn sản phẩm/giá/cấu trúc S01 và ảnh trang cần xác minh; ICD trích 9 dòng từ phụ lục 06/2026/TT-BYT, giữ restriction flags/source/page/SHA; không đưa PDF hoặc PHI vào gói |
+| Phạm vi activation | 156 identity mới ở 7 CSV test ngoài live config; production catalogue/mapping/upload còn tắt. CLI verify-url chỉ kiểm tra 78 identity nền và ghi rõ test identities bị loại khỏi phạm vi |
+| CI | Đã chuẩn bị `docs/patches/metadata-ci-checks.patch` thêm check/unit tests. GitHub từ chối sửa workflow do token thiếu scope workflow; workflow remote giữ nguyên, metadata checks chưa chạy tự động trên CI |
+
+**Chưa chạy trong lần bàn giao 0.3.0:** clean database test, Initializer import test CSV lần hai/overlay update, provider/ingredient/adapter provisioning, DB transaction/race/slot/balance tests, native/FHIR B4–B9 round-trip, scoped API RBAC và E2E/UI/in PDF. Năm scenario cụ thể ở `metadata/vinshc/fixtures/backend-acceptance.json`; BE/người 4 ghi report sau khi thực hiện.
+
+**Còn cần xác nhận:** reviewer/phương pháp thuật ngữ sinh hiệu, mapping LOINC, catalogue/giá/CCHN/pháp nhân cơ sở và MIME/size kỹ thuật. Người dùng đã cho phép synthetic để test và xác nhận SpO₂ pulse oximetry; không coi đó là phê duyệt chuyên môn/pháp lý hoặc production.
+
+## Lịch sử kiểm chứng 0.2.0
+
+Phần dưới giữ bằng chứng nền và báo cáo được bổ sung trước gói 0.3.0. Các con số 180/78/44/23, recipe 0.2.1 và runtime reports bên dưới thuộc **bản cũ**, không xác nhận catalogue/adapter mới đã chạy. Recipe hiện hành đã chuyển sang 0.3.0→0.3.1.
 
 **Ngày:** 11/10/2026. **Baseline đối chiếu:** RefApp 3.7.1, Core 2.8.8, Initializer 2.12.0. **Nhánh:** role-3-metadata. Đã đọc B2/B3 trên `clinic-backend@9a16734`, không chạy lại integration test của nhánh BE.
 

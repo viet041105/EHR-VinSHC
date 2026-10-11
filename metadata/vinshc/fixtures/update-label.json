@@ -1,12 +1,11 @@
 {
-  "fromVersion": "0.2.0",
-  "toVersion": "0.2.1",
-  "basePackSha256": "0c7e42483c176ef9b47529fb3ea41bad812d6d4efc41bd03f8883ff3c86aab72",
+  "fromVersion": "0.3.0",
+  "toVersion": "0.3.1",
+  "basePackSha256": "9deccf54a2748ae5076228f18ec936b6e8f6ebcb79b6428196b6b1e69bd1e722",
   "entityKey": "vitals.mach",
   "entityUuid": "263e4d0b-61d2-5517-bcb1-992cfb60675b",
   "beforeLabel": "Mạch",
   "afterLabel": "Mạch (lần/phút)",
-  "afterNote": "Controlled label update; same clinical meaning, numeric datatype and /min unit.",
-  "expected": "All entity keys/UUIDs and clinical fields remain unchanged. Only version/date/label/note plus generated version descriptions change. No LOINC mappings enabled.",
-  "changelogEntry": "0.2.1 test overlay: clarify pulse label; preserve every entity UUID/key/datatype/unit/answer/member; not production approval."
+  "afterNote": "Controlled metadata label update; clinical units and concept identity unchanged",
+  "changelogEntry": "0.3.1 test overlay: đổi nhãn/note mạch, giữ toàn bộ key/UUID/datatype/unit/catalogue và lịch sử; không phải báo cáo runtime."
 }

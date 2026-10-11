@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0",
+  "effectiveFrom": "2026-10-11",
+  "testOnly": true,
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "production": "pending_facility_and_clinical_review"
+  },
+  "records": [
+    {
+      "uuid": "3af54839-c356-5502-9cb0-d96b25dc1385",
+      "code": "CONSULT-TEST",
+      "name": "Khám ngoại trú kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "kind": "consultation",
+      "orderConceptUuid": "113d6e27-e05b-5f9c-b835-3734678cb892",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "unit": "Lần",
+      "synthetic": true,
+      "orderable": true,
+      "testPriceVnd": 100000
+    },
+    {
+      "uuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+      "code": "LAB-GLU",
+      "name": "Định lượng Glucose",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          188
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "kind": "laboratory",
+      "orderConceptUuid": "d114f6a8-8a4b-5900-af8b-c9bb470c848b",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "unit": "Lần",
+      "synthetic": false,
+      "orderable": true,
+      "testPriceVnd": 22400
+    },
+    {
+      "uuid": "5fed92b0-3212-5303-9368-8200e1f00318",
+      "code": "LAB-CREA",
+      "name": "Định lượng Creatinin (máu)",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          188
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "kind": "laboratory",
+      "orderConceptUuid": "34fc5350-3462-5c4a-9c26-888dc92ae5a8",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "unit": "Lần",
+      "synthetic": false,
+      "orderable": true,
+      "testPriceVnd": 22400
+    },
+    {
+      "uuid": "9a1dd6d0-762b-507c-b488-f9f425ede5ff",
+      "code": "US-ABD",
+      "name": "Siêu âm ổ bụng (gan mật, tụy, lách, thận)",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          189
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "kind": "imaging",
+      "orderConceptUuid": "970a9b87-c95e-5563-8742-f9e212e70f41",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "unit": "Lần",
+      "synthetic": false,
+      "orderable": true,
+      "testPriceVnd": 58600
+    },
+    {
+      "uuid": "9c1d2093-bc85-578d-aaf7-f4dc9399bd22",
+      "code": "ECG-BED",
+      "name": "Ghi điện tim cấp cứu tại giường",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          189
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "kind": "imaging",
+      "orderConceptUuid": "e0f130e2-cf5e-5373-8bf4-6cf753de6e60",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "unit": "Lần",
+      "synthetic": false,
+      "orderable": true,
+      "testPriceVnd": 39900
+    },
+    {
+      "uuid": "9163e39e-0e25-5dc9-ace9-25e7449012fa",
+      "code": "PROC-TEST",
+      "name": "Thủ thuật mô phỏng kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "kind": "procedure",
+      "orderConceptUuid": "94cafaff-8d79-588e-937d-97b6b7434b09",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "unit": "Lần",
+      "synthetic": true,
+      "orderable": true,
+      "testPriceVnd": 200000
+    },
+    {
+      "uuid": "94b38889-2b02-5297-929f-500b79dbe64a",
+      "code": "LAB-PANEL-TEST",
+      "name": "Panel hóa sinh kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "kind": "laboratory",
+      "orderConceptUuid": "d4b0f211-4c8e-5ef7-bd0d-e6aa743a8b76",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "unit": "Panel",
+      "synthetic": true,
+      "orderable": true,
+      "testPriceVnd": 44800
+    }
+  ]
+}

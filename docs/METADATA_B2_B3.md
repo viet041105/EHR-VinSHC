@@ -1,6 +1,8 @@
 # Bàn giao bổ sung metadata để nghiệm thu B2/B3
 
-**Gói 0.2.0, ngày 11/10/2026, nhánh role-3-metadata.** Đối chiếu nhánh BE thực tế `origin/clinic-backend` tại commit `9a16734`, gồm tài liệu API và test B2/B3. Remote không có branch tên `be` tại lúc đối chiếu. Bản này có 180 trường, giữ nguyên 78 UUID metadata đã có (1 location tham chiếu + 77 đối tượng do gói quản lý).
+**Bàn giao gốc B2/B3 của gói 0.2.0, ngày 11/10/2026, nhánh role-3-metadata.** Đối chiếu nhánh BE thực tế `origin/clinic-backend` tại commit `9a16734`, gồm tài liệu API và test B2/B3. Remote không có branch tên `be` tại lúc đối chiếu. Bản gốc có 180 trường, 78 UUID (1 location tham chiếu + 77 đối tượng do gói quản lý).
+
+**Cập nhật checkout hiện hành:** gói 0.3.0 giữ các contract B2/B3 và identity này, bổ sung [B4–B9](METADATA_B4_B9.md) thành 205 field/234 identity. Recipe update hiện tại là 0.3.0→0.3.1; tham chiếu 0.2.1 bên dưới là lịch sử của bản bàn giao gốc. Kiểm chứng runtime của gói mới tách tại [METADATA_VALIDATION.md](METADATA_VALIDATION.md).
 
 Phần bàn giao là contract/cấu hình/dữ liệu và kiểm tra cấu trúc. BE vẫn phải triển khai adapter, persistence, phân quyền và chứng minh round-trip. Báo cáo B2/B3 trên nhánh BE được đọc để đối chiếu; không coi đó là kết quả chạy gói 0.2.0 này.
 

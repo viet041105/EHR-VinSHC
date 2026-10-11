@@ -25,6 +25,7 @@ from metadata_b2_b3 import (check_contracts, check_handoff_cases, contract_table
                             read_json, validate_contacts, validate_field_states,
                             validate_address_selection, validate_bp_measurement,
                             normalize_phone)
+from metadata_b4_b9 import check_b4_b9, compile_test_outputs, run_fixtures
 ROOT = Path(__file__).resolve().parents[1]
 PACK_PATH = ROOT / "metadata/vinshc/pack.json"
 CONFIG = "infra/backend/configuration"
@@ -153,6 +154,10 @@ def validate_pack(pack, root=ROOT):
         errors.extend(check_contracts(pack, root))
     except (KeyError, TypeError, ValueError, OSError) as error:
         errors.append("B2/B3 contract invalid: " + str(error))
+    try:
+        errors.extend(check_b4_b9(pack, root))
+    except (KeyError, TypeError, ValueError, OSError) as error:
+        errors.append("B4-B9 contract invalid: " + str(error))
     return errors
 
 
@@ -249,9 +254,16 @@ def compile_outputs(pack, root=ROOT):
           "concepts": {f["code"]: f["storage"]["uuid"] for f in pack["fields"] if f.get("frontendKey")},
           "entities": {e["key"]: e["uuid"] for e in pack["entities"]},
           "identifierSystems": pack.get("identifierSystems", {}),
+          "catalogues": pack.get("catalogues", {}),
+          "catalogueVersions": pack.get("catalogueVersions", {}),
+          "contracts": pack.get("contracts", {}),
+          "testOnlyEntityKeys": [e["key"] for e in pack["entities"] if e.get("importPolicy") == "isolated_test_manifest_only"],
+          "releasePolicy": pack.get("releasePolicy", {}),
           "status": "Expected identities. Backend must verify imported metadata before exposing this map to FE."}
     outputs["metadata/vinshc/frontend-map.json"] = json.dumps(fe, ensure_ascii=False, indent=2) + "\n"
     outputs.update(contract_tables(pack, root))
+    if "b4b9" in pack.get("contracts", {}):
+        outputs.update(compile_test_outputs(pack, root))
     return outputs
 
 
@@ -390,6 +402,8 @@ def verify_remote(pack, base_url, settings_file):
     refs = {e["key"]: e for e in pack["entities"]}
     checked = []
     for e in pack["entities"]:
+        if e.get("importPolicy") == "isolated_test_manifest_only":
+            continue
         if e["domain"] not in endpoints:
             continue
         url = base_url.rstrip("/") + "/ws/rest/v1/" + endpoints[e["domain"]] + "/" + e["uuid"] + "?v=full"
@@ -423,7 +437,9 @@ def verify_remote(pack, base_url, settings_file):
                 if actual != {refs[k]["uuid"] for k in e["members"]}:
                     raise ValueError("Wrong group members: " + e["key"])
         checked.append(e["key"])
-    return {"version": pack["version"], "checked": len(checked), "identities": checked, "scope": "read-only imported metadata; no clinical workflow/security certification"}
+    return {"version": pack["version"], "checked": len(checked), "identities": checked,
+            "excludedTestCatalogueEntities": len([e for e in pack["entities"] if e.get("importPolicy") == "isolated_test_manifest_only"]),
+            "scope": "read-only base imported metadata; test manifest requires separate BE acceptance; no clinical workflow/security certification"}
 
 
 def main():
@@ -433,7 +449,7 @@ def main():
     parser.add_argument("--settings-file", default=str(ROOT / ".env"))
     parser.add_argument("--report")
     parser.add_argument("--prepare-update", type=Path,
-                        help="Write controlled 0.2.1 test overlay to a NEW directory under .runtime")
+                        help="Write the exact controlled patch-version test overlay to a NEW directory under .runtime")
     args = parser.parse_args()
     pack = load_pack()
     errors = validate_pack(pack)
@@ -448,13 +464,12 @@ def main():
         updated = prepare_update_pack(pack, recipe)
         shutil.copytree(ROOT / "metadata/vinshc", destination / "metadata/vinshc")
         shutil.copytree(ROOT / "docs/data", destination / "docs/data")
-        for relative in ["metadata/vinshc/pack.json", "metadata/vinshc/forms.json", "metadata/vinshc/permissions.json",
-                         "metadata/vinshc/contracts/b2.json", "metadata/vinshc/contracts/b3.json"]:
+        for relative in ["metadata/vinshc/pack.json", "metadata/vinshc/forms.json", "metadata/vinshc/permissions.json"] + list(updated["contracts"].values()):
             obj = updated if relative.endswith("/pack.json") else read_json(destination, relative)
             obj["version"] = updated["version"]
             (destination / relative).write_text(json.dumps(obj, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         changelog = destination / "metadata/vinshc/CHANGELOG.md"
-        changelog.write_text("# Test update 0.2.1\n\n" + recipe["changelogEntry"] + "\n\n" + changelog.read_text(encoding="utf-8"), encoding="utf-8")
+        changelog.write_text("# Test update " + updated["version"] + "\n\n" + recipe["changelogEntry"] + "\n\n" + changelog.read_text(encoding="utf-8"), encoding="utf-8")
         for relative, content in compile_outputs(updated, destination).items():
             path = destination / relative
             path.parent.mkdir(parents=True, exist_ok=True)
@@ -484,6 +499,11 @@ def main():
     if handoff_errors:
         raise ValueError("; ".join(handoff_errors))
     result["b2b3Fixtures"] = handoff_count
+    if "b4b9" in pack.get("contracts", {}):
+        fixture_errors, fixture_count = run_fixtures(pack, ROOT)
+        if fixture_errors:
+            raise ValueError("; ".join(fixture_errors))
+        result["b4b9Fixtures"] = fixture_count
     if args.verify_url:
         result["runtime"] = verify_remote(pack, args.verify_url, args.settings_file)
     if args.report:

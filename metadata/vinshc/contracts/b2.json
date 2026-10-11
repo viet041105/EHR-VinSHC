@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "status": "metadata_contract_ready_not_deployed_adapter",
   "contacts": {
     "collection": "contacts[]",

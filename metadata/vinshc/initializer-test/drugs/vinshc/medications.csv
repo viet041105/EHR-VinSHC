@@ -1,0 +1,9 @@
+Uuid,Void/Retire,Name,Description,Concept Drug,Concept Dosage Form,Strength
+b3b53d01-7a94-5b2a-8627-9890eda7d1d0,false,Plavix 75mg,Test only; S01-PLAVIX-75,9081d504-0409-50a3-82d0-1f6a2c4afbce,20df4708-7b4f-5f95-9222-e78f4d774aa8,75mg
+9fbae6e0-948b-5f75-9752-82e81ea205e4,false,Lipitor 20mg,Test only; S01-LIPITOR-20,b1fe3885-976d-5506-8091-8bc3891182cb,20df4708-7b4f-5f95-9222-e78f4d774aa8,20mg
+94710b6f-71c1-5585-befb-d988e4e57bb3,false,"Mobic 7,5mg",Test only; S01-MOBIC-7_5,c8e395e6-9922-541d-97ba-e22510e2bf15,20df4708-7b4f-5f95-9222-e78f4d774aa8,7.5mg
+6629e21b-d892-5693-8e7a-6fd55845399d,false,Colchicina Seid 1mg Tablet,Test only; S01-COLCHICIN-1,acad252a-c124-5c9e-b673-cd8401ebb94a,20df4708-7b4f-5f95-9222-e78f4d774aa8,1mg
+a92bd67b-6ce0-5409-a5e1-91b6b0311930,false,Pantoloc 20mg,Test only; S01-PANTOLOC-20,b31f8103-bc48-5173-ae82-1d8259487583,20df4708-7b4f-5f95-9222-e78f4d774aa8,20mg
+37e62d0d-4ae2-5e93-b8c1-47bddd063398,false,Tebonin 120mg,Test only; S01-TEBONIN-120,bbe919b2-368b-5e52-9909-403180962c7c,20df4708-7b4f-5f95-9222-e78f4d774aa8,120mg
+03114c09-6243-5fac-a13d-cc33f9980466,false,Thuốc giả SYN-TABLET-A,Test only; SYN-TABLET-A,382c0e1f-1795-5838-9cf2-a049024a7025,20df4708-7b4f-5f95-9222-e78f4d774aa8,10mg
+a6981596-3b73-5ae6-ab46-75c3a9f4addf,false,Thuốc giả SYN-LIQUID-B,Test only; SYN-LIQUID-B,4389f47a-66c5-5d3c-b3da-dea6032f1719,771f7a8a-3e60-5cd9-808f-8607bc33931c,1mg/mL

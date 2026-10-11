@@ -1,0 +1,512 @@
+{
+  "version": "0.3.0",
+  "testOnly": true,
+  "templates": [
+    {
+      "code": "prescription",
+      "uuid": "d6551063-9bff-551b-9c97-c1e038e964a6",
+      "name": "Đơn thuốc",
+      "version": "0.3.0",
+      "source": {
+        "kind": "sample_structure",
+        "document": "S01",
+        "pages": [
+          115,
+          123
+        ],
+        "supplement": "Missing keys/synthetic print identity supplied by project convention"
+      },
+      "required": [
+        "documentNumber",
+        "documentVersion",
+        "issuedAt",
+        "status",
+        "facility.uuid",
+        "facility.code",
+        "facility.legalName",
+        "facility.addressText",
+        "facility.phone",
+        "facility.licenceNumber",
+        "facility.logoAsset",
+        "patient.uuid",
+        "patient.identifier",
+        "patient.fullName",
+        "practitioner.uuid",
+        "practitioner.fullName",
+        "practitioner.title",
+        "practitioner.licenceNumber",
+        "diagnoses",
+        "patient.birthDisplay",
+        "patient.addressText",
+        "note"
+      ],
+      "nullable": [
+        "facility.logoAsset",
+        "facility.licenceNumber",
+        "practitioner.licenceNumber"
+      ],
+      "requiredLineFields": [
+        "drugCode",
+        "drugName",
+        "ingredients",
+        "strength",
+        "dose",
+        "doseUnit",
+        "route",
+        "frequency",
+        "duration",
+        "quantity",
+        "quantityUnit",
+        "instructions"
+      ],
+      "allowedStatus": [
+        "confirmed",
+        "discontinued"
+      ],
+      "signatures": [
+        {
+          "role": "prescriber",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        }
+      ],
+      "linePolicy": "Source immutable version/snapshot; correction/reprint never changes previous issued document; mark synthetic outputs prominently",
+      "numberPolicy": "Server-issued per facility+documentType+year, atomic sequence/unique constraint; do not derive from array position",
+      "signatureNullPolicy": "Wet-signature output may have signedAt/signatureReference both null until signed. Payer signerUuid may be null; never create Patient/Provider for signature only. Clinical signer UUID required."
+    },
+    {
+      "code": "receipt",
+      "uuid": "3babd7f3-add1-5691-b06f-e309d9a173f4",
+      "name": "Phiếu thu",
+      "version": "0.3.0",
+      "source": {
+        "kind": "sample_structure",
+        "document": "S01",
+        "pages": [
+          147,
+          184,
+          185
+        ],
+        "supplement": "Missing keys/synthetic print identity supplied by project convention"
+      },
+      "required": [
+        "documentNumber",
+        "documentVersion",
+        "issuedAt",
+        "status",
+        "facility.uuid",
+        "facility.code",
+        "facility.legalName",
+        "facility.addressText",
+        "facility.phone",
+        "facility.licenceNumber",
+        "facility.logoAsset",
+        "patient.uuid",
+        "patient.identifier",
+        "patient.fullName",
+        "issuer.uuid",
+        "issuer.fullName",
+        "issuer.title",
+        "issuer.licenceNumber",
+        "transactionUuid",
+        "billUuid",
+        "amountVnd",
+        "amountInWords",
+        "paymentMethod",
+        "payerName"
+      ],
+      "nullable": [
+        "facility.logoAsset",
+        "facility.licenceNumber",
+        "issuer.licenceNumber"
+      ],
+      "requiredLineFields": [
+        "serviceCode",
+        "serviceName",
+        "quantity",
+        "unitPriceVnd",
+        "discountVnd",
+        "netVnd"
+      ],
+      "allowedStatus": [
+        "settled"
+      ],
+      "signatures": [
+        {
+          "role": "cashier",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        },
+        {
+          "role": "payer",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        }
+      ],
+      "linePolicy": "Source immutable version/snapshot; correction/reprint never changes previous issued document; mark synthetic outputs prominently",
+      "numberPolicy": "Server-issued per facility+documentType+year, atomic sequence/unique constraint; do not derive from array position",
+      "issuerPolicy": "Administrative issuing actor, not a fabricated clinical Provider; medical licence nullable and no Practitioner created for cashier/reception.",
+      "signatureNullPolicy": "Wet-signature output may have signedAt/signatureReference both null until signed. Payer signerUuid may be null; never create Patient/Provider for signature only. Clinical signer UUID required."
+    },
+    {
+      "code": "refund",
+      "uuid": "740e72dc-d537-545d-bb77-70be5cfbcba5",
+      "name": "Phiếu hoàn tiền",
+      "version": "0.3.0",
+      "source": {
+        "kind": "sample_structure",
+        "document": "S01",
+        "pages": [
+          147,
+          184,
+          185
+        ],
+        "supplement": "Missing keys/synthetic print identity supplied by project convention"
+      },
+      "required": [
+        "documentNumber",
+        "documentVersion",
+        "issuedAt",
+        "status",
+        "facility.uuid",
+        "facility.code",
+        "facility.legalName",
+        "facility.addressText",
+        "facility.phone",
+        "facility.licenceNumber",
+        "facility.logoAsset",
+        "patient.uuid",
+        "patient.identifier",
+        "patient.fullName",
+        "issuer.uuid",
+        "issuer.fullName",
+        "issuer.title",
+        "issuer.licenceNumber",
+        "transactionUuid",
+        "amountVnd",
+        "amountInWords",
+        "paymentMethod"
+      ],
+      "nullable": [
+        "facility.logoAsset",
+        "facility.licenceNumber",
+        "issuer.licenceNumber"
+      ],
+      "requiredLineFields": [
+        "originalReceiptUuid",
+        "amountVnd",
+        "reason"
+      ],
+      "allowedStatus": [
+        "settled"
+      ],
+      "signatures": [
+        {
+          "role": "cashier",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        },
+        {
+          "role": "recipient",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        }
+      ],
+      "linePolicy": "Source immutable version/snapshot; correction/reprint never changes previous issued document; mark synthetic outputs prominently",
+      "numberPolicy": "Server-issued per facility+documentType+year, atomic sequence/unique constraint; do not derive from array position",
+      "issuerPolicy": "Administrative issuing actor, not a fabricated clinical Provider; medical licence nullable and no Practitioner created for cashier/reception.",
+      "signatureNullPolicy": "Wet-signature output may have signedAt/signatureReference both null until signed. Payer signerUuid may be null; never create Patient/Provider for signature only. Clinical signer UUID required."
+    },
+    {
+      "code": "order",
+      "uuid": "2bf10144-8129-52a9-a123-78ab5b8af112",
+      "name": "Phiếu chỉ định",
+      "version": "0.3.0",
+      "source": {
+        "kind": "sample_structure",
+        "document": "S01",
+        "pages": [
+          64,
+          73
+        ],
+        "supplement": "Missing keys/synthetic print identity supplied by project convention"
+      },
+      "required": [
+        "documentNumber",
+        "documentVersion",
+        "issuedAt",
+        "status",
+        "facility.uuid",
+        "facility.code",
+        "facility.legalName",
+        "facility.addressText",
+        "facility.phone",
+        "facility.licenceNumber",
+        "facility.logoAsset",
+        "patient.uuid",
+        "patient.identifier",
+        "patient.fullName",
+        "practitioner.uuid",
+        "practitioner.fullName",
+        "practitioner.title",
+        "practitioner.licenceNumber",
+        "orderUuid",
+        "encounterUuid",
+        "orderedAt"
+      ],
+      "nullable": [
+        "facility.logoAsset",
+        "facility.licenceNumber",
+        "practitioner.licenceNumber"
+      ],
+      "requiredLineFields": [
+        "serviceCode",
+        "serviceName",
+        "specimen",
+        "priority",
+        "note"
+      ],
+      "allowedStatus": [
+        "requested",
+        "assigned",
+        "in_progress",
+        "completed"
+      ],
+      "signatures": [
+        {
+          "role": "orderer",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        }
+      ],
+      "linePolicy": "Source immutable version/snapshot; correction/reprint never changes previous issued document; mark synthetic outputs prominently",
+      "numberPolicy": "Server-issued per facility+documentType+year, atomic sequence/unique constraint; do not derive from array position",
+      "signatureNullPolicy": "Wet-signature output may have signedAt/signatureReference both null until signed. Payer signerUuid may be null; never create Patient/Provider for signature only. Clinical signer UUID required."
+    },
+    {
+      "code": "result",
+      "uuid": "948dedde-924a-54d5-9c2f-079848e58509",
+      "name": "Phiếu kết quả",
+      "version": "0.3.0",
+      "source": {
+        "kind": "sample_structure",
+        "document": "S01",
+        "pages": [
+          74,
+          99,
+          100
+        ],
+        "supplement": "Missing keys/synthetic print identity supplied by project convention"
+      },
+      "required": [
+        "documentNumber",
+        "documentVersion",
+        "issuedAt",
+        "status",
+        "facility.uuid",
+        "facility.code",
+        "facility.legalName",
+        "facility.addressText",
+        "facility.phone",
+        "facility.licenceNumber",
+        "facility.logoAsset",
+        "patient.uuid",
+        "patient.identifier",
+        "patient.fullName",
+        "practitioner.uuid",
+        "practitioner.fullName",
+        "practitioner.title",
+        "practitioner.licenceNumber",
+        "orderUuid",
+        "resultUuid",
+        "revision",
+        "previousRevision",
+        "correctionReason",
+        "collectedAt",
+        "verifiedAt",
+        "attachments"
+      ],
+      "nullable": [
+        "facility.logoAsset",
+        "facility.licenceNumber",
+        "practitioner.licenceNumber",
+        "previousRevision",
+        "correctionReason",
+        "collectedAt"
+      ],
+      "requiredLineFields": [
+        "indicatorCode",
+        "indicatorName",
+        "value",
+        "valueType",
+        "unit",
+        "referenceRange",
+        "method"
+      ],
+      "allowedStatus": [
+        "final",
+        "corrected"
+      ],
+      "signatures": [
+        {
+          "role": "author",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        },
+        {
+          "role": "reviewer",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        }
+      ],
+      "linePolicy": "Source immutable version/snapshot; correction/reprint never changes previous issued document; mark synthetic outputs prominently",
+      "numberPolicy": "Server-issued per facility+documentType+year, atomic sequence/unique constraint; do not derive from array position",
+      "signatureNullPolicy": "Wet-signature output may have signedAt/signatureReference both null until signed. Payer signerUuid may be null; never create Patient/Provider for signature only. Clinical signer UUID required.",
+      "nullableLineFields": [
+        "referenceRange",
+        "method"
+      ]
+    },
+    {
+      "code": "appointment",
+      "uuid": "92d39c3f-9d0c-5744-a5b5-b4feac79a943",
+      "name": "Giấy hẹn",
+      "version": "0.3.0",
+      "source": {
+        "kind": "sample_structure",
+        "document": "S01",
+        "pages": [
+          123
+        ],
+        "supplement": "Missing keys/synthetic print identity supplied by project convention"
+      },
+      "required": [
+        "documentNumber",
+        "documentVersion",
+        "issuedAt",
+        "status",
+        "facility.uuid",
+        "facility.code",
+        "facility.legalName",
+        "facility.addressText",
+        "facility.phone",
+        "facility.licenceNumber",
+        "facility.logoAsset",
+        "patient.uuid",
+        "patient.identifier",
+        "patient.fullName",
+        "issuer.uuid",
+        "issuer.fullName",
+        "issuer.title",
+        "issuer.licenceNumber",
+        "appointmentUuid",
+        "startAt",
+        "endAt",
+        "timezone",
+        "instructions"
+      ],
+      "nullable": [
+        "facility.logoAsset",
+        "facility.licenceNumber",
+        "issuer.licenceNumber"
+      ],
+      "requiredLineFields": [
+        "serviceCode",
+        "serviceName",
+        "locationName",
+        "providerRole"
+      ],
+      "allowedStatus": [
+        "booked",
+        "confirmed"
+      ],
+      "signatures": [
+        {
+          "role": "scheduler",
+          "fields": [
+            "signerUuid",
+            "signerName",
+            "signedAt",
+            "signatureReference"
+          ],
+          "mode": "wet_signature_or_verified_e_signature_reference",
+          "syntheticOnly": true
+        }
+      ],
+      "linePolicy": "Source immutable version/snapshot; correction/reprint never changes previous issued document; mark synthetic outputs prominently",
+      "numberPolicy": "Server-issued per facility+documentType+year, atomic sequence/unique constraint; do not derive from array position",
+      "issuerPolicy": "Administrative issuing actor, not a fabricated clinical Provider; medical licence nullable and no Practitioner created for cashier/reception.",
+      "signatureNullPolicy": "Wet-signature output may have signedAt/signatureReference both null until signed. Payer signerUuid may be null; never create Patient/Provider for signature only. Clinical signer UUID required."
+    }
+  ],
+  "signaturePolicy": "No signature images copied from S01; synthetic unsigned/signed-state fixtures only. Legal/e-signature conformity reviewed separately",
+  "dailyReports": {
+    "timezone": "Asia/Ho_Chi_Minh",
+    "dateInterval": "local start-of-day inclusive, next local day exclusive",
+    "facilityPartitionRequired": true,
+    "visits": {
+      "opened": "count distinct visitUuid by startAt local date",
+      "completed": "count by completedAt local date with status=completed; cancellations/left separated; never count encounters as visits"
+    },
+    "revenue": {
+      "gross": "sum settled successful receipt amounts by settledAt, not bill totals",
+      "refund": "sum settled refunds by refund settledAt day, even if original receipt was earlier",
+      "net": "gross-refund; negative day allowed",
+      "exclude": [
+        "pending payments",
+        "cancelled bills",
+        "unsettled bank transfers",
+        "duplicate idempotent retries"
+      ]
+    },
+    "privacy": "Aggregate only; no patient/provider personal identities in manager output"
+  }
+}

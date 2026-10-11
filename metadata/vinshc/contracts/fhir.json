@@ -1,0 +1,1142 @@
+{
+  "version": "0.3.0",
+  "fhirVersion": "4.0.1",
+  "mappings": [
+    {
+      "key": "patient",
+      "openmrsSourceKey": "identifier.internal",
+      "openmrsSourceUuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "sourceKind": "native-object-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "Patient",
+      "path": "identifier.system",
+      "code": null,
+      "system": "urn:uuid:ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "terminologyVersion": null,
+      "unitUcum": null,
+      "statusMapping": {
+        "active": "true",
+        "void": "exclude ordinary query; retain protected audit"
+      },
+      "missingRepresentation": "Per-field B2 policies; native null insufficient",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "B2 REST/adapter writes verified by backend; FHIR writes need separate acceptance"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Patient.uuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Patient.names",
+          "targetPath": "name",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Patient.gender",
+          "targetPath": "gender",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Patient.birthdate",
+          "targetPath": "birthDate",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Patient.dead/deathDate",
+          "targetPath": "deceased[x]",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "contacts[]",
+          "targetPath": "contact[]",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "address snapshot",
+          "targetPath": "address[]",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "identifierType UUID + identifier value",
+          "targetPath": "identifier[].system/value",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "fieldStates[]",
+          "targetPath": "extension[field-state]",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "encounter",
+      "openmrsSourceKey": "encounter.consultation",
+      "openmrsSourceUuid": "c3dba376-453f-5f2c-bee7-70c09a2d5f61",
+      "sourceKind": "native-object-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "Encounter",
+      "path": "type.coding",
+      "code": "c3dba376-453f-5f2c-bee7-70c09a2d5f61",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "open": "in-progress",
+        "completed": "finished",
+        "cancelled": "cancelled"
+      },
+      "missingRepresentation": "Do not infer period.end when still open",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "FHIR Encounter maps OpenMRS Encounter, not Visit; writes via tested REST/adapter"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Encounter.uuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Encounter.patient.uuid",
+          "targetPath": "subject.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Encounter.encounterType.uuid",
+          "targetPath": "type.coding.code",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Encounter.encounterDatetime",
+          "targetPath": "period.start",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.completedAt",
+          "targetPath": "period.end",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Encounter.location.uuid",
+          "targetPath": "location.location.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Encounter.encounterProviders",
+          "targetPath": "participant.individual/type",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Visit.uuid",
+          "targetPath": "extension/local visit reference; never resource id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "observation",
+      "openmrsSourceKey": "group.consultation",
+      "openmrsSourceUuid": "7e49bbc6-53c8-59aa-b2f0-6e1f247d701b",
+      "sourceKind": "native-object-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "Observation",
+      "path": "hasMember",
+      "code": "7e49bbc6-53c8-59aa-b2f0-6e1f247d701b",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "recorded": "final",
+        "void": "entered-in-error"
+      },
+      "missingRepresentation": "Companion Obs state plus dataAbsentReason/provenance; no zero value placeholder",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Read native group/child; clinical write adapter; BP projection in B3"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Obs.uuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Obs.person/encounter",
+          "targetPath": "subject/encounter",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Obs.obsDatetime",
+          "targetPath": "effectiveDateTime",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Obs.concept UUID or reviewed mapping",
+          "targetPath": "code.coding",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Obs.valueNumeric + concept units",
+          "targetPath": "valueQuantity.value/code/system",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Obs.valueText",
+          "targetPath": "valueString",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Obs.valueCoded",
+          "targetPath": "valueCodeableConcept",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "group.vitals BP child values",
+          "targetPath": "component[systolic/diastolic] per B3",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.missingState",
+          "targetPath": "dataAbsentReason + field-state extension",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.result revision",
+          "targetPath": "status + derivedFrom/Provenance",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "condition",
+      "openmrsSourceKey": "diagnosiscode.i10",
+      "openmrsSourceUuid": "b4fe079c-c1ac-5dab-9615-d490a28d60f3",
+      "sourceKind": "catalogue-reference-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "Condition",
+      "path": "code.coding",
+      "code": "I10",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "unitUcum": null,
+      "statusMapping": {
+        "provisional": "verificationStatus=provisional",
+        "confirmed": "verificationStatus=confirmed",
+        "void": "verificationStatus=entered-in-error; no clinicalStatus"
+      },
+      "missingRepresentation": "Non-coded diagnosis: code.text only; no invented coding",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Diagnosis separate per encounter; no auto longitudinal Condition reconciliation; create/update unverified"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Diagnosis.uuid",
+          "targetPath": "id (adapter mapping acceptance required)",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Diagnosis.patient/encounter",
+          "targetPath": "subject/encounter",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Diagnosis.diagnosis.coded / nonCoded",
+          "targetPath": "code.coding / code.text",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Diagnosis.certainty",
+          "targetPath": "verificationStatus provisional/confirmed",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Diagnosis.rank",
+          "targetPath": "extension primary/secondary rank",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Diagnosis.voided",
+          "targetPath": "verificationStatus entered-in-error; omit clinicalStatus",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.original recordedAt",
+          "targetPath": "recordedDate",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "allergyintolerance",
+      "openmrsSourceKey": "allergen.med-test",
+      "openmrsSourceUuid": "0d4ecebb-0367-5582-a242-6585eb1973af",
+      "sourceKind": "catalogue-reference-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "AllergyIntolerance",
+      "path": "code.coding",
+      "code": "MED-TEST",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "active": "clinicalStatus=active",
+        "inactive": "clinicalStatus=inactive",
+        "resolved": "clinicalStatus=resolved",
+        "entered-in-error": "verificationStatus=entered-in-error; clinicalStatus omitted"
+      },
+      "missingRepresentation": "Screening not_asked/unknown separate Obs; no automatic native no-allergy negation",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Native lifecycle extensions required; create/update unverified"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Allergy.uuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Allergy.patient/encounter",
+          "targetPath": "patient/encounter",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Allergen.codedAllergen/nonCodedAllergen",
+          "targetPath": "code.coding / code.text",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Allergy.reactions",
+          "targetPath": "reaction.manifestation",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Allergy.severity",
+          "targetPath": "reaction.severity",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.criticality",
+          "targetPath": "criticality",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.clinicalStatus/verificationStatus",
+          "targetPath": "clinicalStatus/verificationStatus",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.category other",
+          "targetPath": "omit category; extension allergy-category-other",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "encounter.screening",
+          "targetPath": "separate screening Observation; not deletion of allergy resource",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "medicationrequest",
+      "openmrsSourceKey": "drug.syn-tablet-a",
+      "openmrsSourceUuid": "03114c09-6243-5fac-a13d-cc33f9980466",
+      "sourceKind": "catalogue-reference-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "MedicationRequest",
+      "path": "medicationReference",
+      "code": null,
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "draft": "draft",
+        "confirmed": "active",
+        "cancelled": "cancelled",
+        "discontinued": "stopped"
+      },
+      "missingRepresentation": "Missing dose/unit/route rejects confirmation; no guessed dosing",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Baseline advertises read/search/patch only; no create/update; write via DrugOrder adapter"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "DrugOrder.uuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.patient/encounter",
+          "targetPath": "subject/encounter",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.drug UUID",
+          "targetPath": "medication[x] reference/local code",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.orderer.uuid",
+          "targetPath": "requester.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.dateActivated",
+          "targetPath": "authoredOn",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.dose/doseUnits/route/frequency/duration",
+          "targetPath": "dosageInstruction",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.quantity/quantityUnits",
+          "targetPath": "dispenseRequest.quantity",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.previousOrder",
+          "targetPath": "priorPrescription.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.state",
+          "targetPath": "status draft/active/cancelled/stopped",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "DrugOrder.action NEW/REVISE",
+          "targetPath": "intent order; retain revision provenance",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "servicerequest",
+      "openmrsSourceKey": "serviceconcept.lab-glu",
+      "openmrsSourceUuid": "d114f6a8-8a4b-5900-af8b-c9bb470c848b",
+      "sourceKind": "catalogue-reference-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "ServiceRequest",
+      "path": "code.coding",
+      "code": "LAB-GLU",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "requested": "active",
+        "assigned": "active",
+        "in_progress": "active",
+        "completed": "completed",
+        "cancelled": "revoked",
+        "entered-in-error": "entered-in-error"
+      },
+      "missingRepresentation": "No absent test results fabricated; execution status separately retained",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Baseline read/search only; writes require tested native Order adapter"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Order.uuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Order.patient/encounter",
+          "targetPath": "subject/encounter",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Order.concept.uuid + service catalogue",
+          "targetPath": "code.coding",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Order.orderer.uuid",
+          "targetPath": "requester.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Order.dateActivated",
+          "targetPath": "authoredOn",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.assignee provider",
+          "targetPath": "performer.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.order state",
+          "targetPath": "status draft/active/completed/revoked/entered-in-error",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.specimen.uuid",
+          "targetPath": "specimen.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "adapter.execution time",
+          "targetPath": "occurrence[x]",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "location",
+      "openmrsSourceKey": "location.development.clinic",
+      "openmrsSourceUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "sourceKind": "catalogue-reference-uuid",
+      "instanceSource": "Use actual patient/encounter/obs/diagnosis/allergy/order UUID from runtime, not the metadata type/concept UUID as resource id",
+      "fhirResource": "Location",
+      "path": "identifier",
+      "code": "VSHC-DEV",
+      "system": "urn:uuid:05f96a5c-c4bf-571e-bf36-39cb4150c5de",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "active": "active",
+        "retired": "inactive"
+      },
+      "missingRepresentation": "Raw address kept; unavailable coordinates omitted",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Provision synthetic locations; native/FHIR read and write need backend acceptance"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Location.uuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Location.name",
+          "targetPath": "name",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Location.retired",
+          "targetPath": "status active/inactive",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Location.parentLocation.uuid",
+          "targetPath": "partOf.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "facility.addressText",
+          "targetPath": "address.text",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "facilityIdentifier.system/value",
+          "targetPath": "identifier[].system/value",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "practitioner",
+      "openmrsSourceKey": "provider.synthetic.doctor",
+      "openmrsSourceUuid": "9ffc97ef-0d94-57d1-a175-e9bf2ab70883",
+      "sourceKind": "provider-reference-pending-person-binding",
+      "instanceSource": "FHIR Practitioner id is verified Provider.person.uuid; provider UUID is identifier/source link, not automatically Practitioner.id",
+      "fhirResource": "Practitioner",
+      "path": "identifier",
+      "code": "VSHC-TEST-DOCTOR-001",
+      "system": "urn:uuid:687bf185-1f26-54d2-9aad-fc71264af8ea",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "active": "active=true",
+        "retired": "active=false"
+      },
+      "missingRepresentation": "Unknown licence withheld; never invent verified credential",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Provider fixture not deployed; verify Person/Provider-to-Practitioner implementation"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "Provider.person.uuid",
+          "targetPath": "id; provider-to-person binding must be verified",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "providerCode",
+          "targetPath": "identifier local system/value",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "PersonName",
+          "targetPath": "name",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider title",
+          "targetPath": "qualification.code.text",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider licence",
+          "targetPath": "qualification.identifier (test-only unverified)",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider active/effective dates",
+          "targetPath": "active + qualification.period",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    },
+    {
+      "key": "practitionerrole",
+      "openmrsSourceKey": "providerrole.synthetic.doctor",
+      "openmrsSourceUuid": "265a39f0-c0cc-514b-ab84-e6f5b5ad1d8c",
+      "sourceKind": "adapter-derived",
+      "instanceSource": "Adapter-issued role UUID; practitioner reference must resolve verified Provider.person UUID",
+      "fhirResource": "PractitionerRole",
+      "path": "practitioner/organization/location",
+      "code": "doctor",
+      "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+      "terminologyVersion": "0.3.0",
+      "unitUcum": null,
+      "statusMapping": {
+        "active": "active=true",
+        "retired": "active=false"
+      },
+      "missingRepresentation": "Missing role/location/period blocks clinical use",
+      "provenance": {
+        "resource": "Provenance",
+        "fields": [
+          "target",
+          "recorded",
+          "agent.who",
+          "entity.what"
+        ],
+        "rule": "Server audit actor/time and protected source reference; no invented clinical timestamp"
+      },
+      "limits": {
+        "create": "backend acceptance required",
+        "read": "scoped authorized projection; implementation needs runtime round-trip",
+        "update": "backend acceptance required",
+        "detail": "Adapter-derived role, no automatic write supported"
+      },
+      "approval": {
+        "status": "pending_backend_and_clinical_acceptance",
+        "approvedBy": null
+      },
+      "enabledForProduction": false,
+      "fieldMappings": [
+        {
+          "sourcePath": "adapter.practitionerRoleUuid",
+          "targetPath": "id",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "Provider.person.uuid",
+          "targetPath": "practitioner.reference",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider facility/locations",
+          "targetPath": "organization.reference/location[]",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider business roles",
+          "targetPath": "code[]",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider specialty",
+          "targetPath": "specialty.text",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider effective dates",
+          "targetPath": "period",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        },
+        {
+          "sourcePath": "provider active",
+          "targetPath": "active",
+          "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
+          "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
+        }
+      ]
+    }
+  ],
+  "extensions": [
+    {
+      "code": "contact-row",
+      "url": "urn:uuid:ccdbb23c-42a1-5f94-a69a-2a75babc1235",
+      "version": "0.3.0",
+      "status": "draft",
+      "context": [
+        "Patient.contact"
+      ],
+      "children": [
+        {
+          "name": "rowKey",
+          "type": "string",
+          "min": 1,
+          "max": "1",
+          "format": "uuid"
+        },
+        {
+          "name": "phoneRaw",
+          "type": "string",
+          "min": 0,
+          "max": "1"
+        },
+        {
+          "name": "phoneNormalized",
+          "type": "string",
+          "min": 0,
+          "max": "1"
+        },
+        {
+          "name": "sourceReference",
+          "type": "string",
+          "min": 1,
+          "max": "1"
+        },
+        {
+          "name": "recordedAt",
+          "type": "dateTime",
+          "min": 1,
+          "max": "1"
+        }
+      ],
+      "rules": "Row-key required for contact/address/repeated fieldState, absent for patient singleton. FieldState only for missing value, never alongside value. sourceReference resolves protected provenance, not public PDF URL.",
+      "publication": "Draft extension definitions; validate against full FHIR R4/IG tooling before production. No fake published URL"
+    },
+    {
+      "code": "address-snapshot",
+      "url": "urn:uuid:d164b484-a997-51f1-a495-d4948efbab63",
+      "version": "0.3.0",
+      "status": "draft",
+      "context": [
+        "Patient.address"
+      ],
+      "children": [
+        {
+          "name": "rowKey",
+          "type": "string",
+          "min": 1,
+          "max": "1",
+          "format": "uuid"
+        },
+        {
+          "name": "province",
+          "type": "Coding",
+          "min": 0,
+          "max": "1"
+        },
+        {
+          "name": "commune",
+          "type": "Coding",
+          "min": 0,
+          "max": "1"
+        },
+        {
+          "name": "catalogueVersion",
+          "type": "string",
+          "min": 1,
+          "max": "1"
+        },
+        {
+          "name": "addressAsOfDate",
+          "type": "date",
+          "min": 1,
+          "max": "1"
+        },
+        {
+          "name": "legacyAddressText",
+          "type": "string",
+          "min": 0,
+          "max": "1"
+        },
+        {
+          "name": "sourceReference",
+          "type": "string",
+          "min": 1,
+          "max": "1"
+        }
+      ],
+      "rules": "Row-key required for contact/address/repeated fieldState, absent for patient singleton. FieldState only for missing value, never alongside value. sourceReference resolves protected provenance, not public PDF URL.",
+      "publication": "Draft extension definitions; validate against full FHIR R4/IG tooling before production. No fake published URL"
+    },
+    {
+      "code": "field-state",
+      "url": "urn:uuid:881175de-19dd-547f-9c59-c10c9662c746",
+      "version": "0.3.0",
+      "status": "draft",
+      "context": [
+        "Patient",
+        "AllergyIntolerance",
+        "Condition"
+      ],
+      "children": [
+        {
+          "name": "fieldCode",
+          "type": "code",
+          "min": 1,
+          "max": "1"
+        },
+        {
+          "name": "rowKey",
+          "type": "string",
+          "min": 0,
+          "max": "1",
+          "format": "uuid"
+        },
+        {
+          "name": "context",
+          "type": "code",
+          "min": 1,
+          "max": "1"
+        },
+        {
+          "name": "dataStatus",
+          "type": "code",
+          "min": 1,
+          "max": "1"
+        },
+        {
+          "name": "sourceReference",
+          "type": "string",
+          "min": 1,
+          "max": "1"
+        },
+        {
+          "name": "recordedAt",
+          "type": "dateTime",
+          "min": 1,
+          "max": "1"
+        }
+      ],
+      "rules": "Row-key required for contact/address/repeated fieldState, absent for patient singleton. FieldState only for missing value, never alongside value. sourceReference resolves protected provenance, not public PDF URL.",
+      "publication": "Draft extension definitions; validate against full FHIR R4/IG tooling before production. No fake published URL"
+    },
+    {
+      "code": "allergy-category-other",
+      "url": "urn:uuid:f3ac326a-56a9-50df-9d83-167982e1d467",
+      "version": "0.3.0",
+      "status": "draft",
+      "context": [
+        "AllergyIntolerance"
+      ],
+      "children": [
+        {
+          "name": "categoryText",
+          "type": "string",
+          "min": 1,
+          "max": "1"
+        }
+      ],
+      "rules": "Use only for original category other, preserve categoryText; omit FHIR category when no standard enum fits",
+      "publication": "Draft extension definitions; validate against full FHIR R4/IG tooling before production. No fake published URL"
+    }
+  ],
+  "vitals": "contracts/b3.json is authoritative for 8 LOINC candidates, BP components, UCUM and approval; SpO2 method confirmed, terminology approval still absent",
+  "namespace": {
+    "currentFacility": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+    "internalIdentifierSystem": "urn:uuid:ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+    "facilityIdentifierSystem": "urn:uuid:05f96a5c-c4bf-571e-bf36-39cb4150c5de",
+    "facilityIdentifier": "VSHC-DEV",
+    "newIndependentIssuer": "Allocate new identifier.system URI per issuing facility before ingest; no shared local patient-number namespace without global uniqueness",
+    "nationalIds": {
+      "identifier.internal": {
+        "system": "urn:uuid:ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+        "identifierTypeUuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+        "namespaceOwner": "VinSHC project",
+        "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+        "environmentInvariant": true
+      },
+      "identifier.cccd": {
+        "system": "urn:uuid:4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+        "identifierTypeUuid": "4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+        "namespaceOwner": "VinSHC project",
+        "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+        "environmentInvariant": true
+      },
+      "identifier.bhxh": {
+        "system": "urn:uuid:d7902062-a695-5bf3-8764-acf7f43e3238",
+        "identifierTypeUuid": "d7902062-a695-5bf3-8764-acf7f43e3238",
+        "namespaceOwner": "VinSHC project",
+        "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+        "environmentInvariant": true
+      },
+      "identifier.bhyt": {
+        "system": "urn:uuid:e2b901c3-d442-565b-bff5-841aff260d2d",
+        "identifierTypeUuid": "e2b901c3-d442-565b-bff5-841aff260d2d",
+        "namespaceOwner": "VinSHC project",
+        "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+        "environmentInvariant": true
+      }
+    }
+  },
+  "deferred": {
+    "MPI": true,
+    "crossFacilitySharing": true,
+    "rule": "No auto merge by name/phone/CCCD; sharing consent/auth and MPI remain later milestone"
+  },
+  "sources": [
+    "https://hl7.org/fhir/R4/condition.html",
+    "https://hl7.org/fhir/R4/allergyintolerance.html",
+    "https://hl7.org/fhir/R4/medicationrequest.html",
+    "https://hl7.org/fhir/R4/servicerequest.html",
+    "https://hl7.org/fhir/R4/extensibility.html"
+  ],
+  "extensionVersion": "0.3.0",
+  "extensionPublication": "Draft complex-extension contracts; canonical URI stable across environments. BE must publish/validate StructureDefinition and test round-trip before exchange; not an implemented FHIR profile.",
+  "vitalSignsContract": {
+    "source": "metadata/vinshc/contracts/b3.json",
+    "unitsSource": "metadata/vinshc/fields.csv",
+    "rule": "Resolve eight per-concept UUID/LOINC/system/version/UCUM/method/approval rows from B3; BP component projection per B3. Pending standard mappings not imported."
+  }
+}

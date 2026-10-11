@@ -202,7 +202,7 @@ class HandoffMetadataTests(unittest.TestCase):
     def test_controlled_update_preserves_all_entity_semantics_except_label_note(self):
         recipe = B.read_json(ROOT, "metadata/vinshc/fixtures/update-label.json")
         updated = B.prepare_update_pack(self.pack, recipe)
-        self.assertEqual("0.2.1", updated["version"])
+        self.assertEqual(recipe["toVersion"], updated["version"])
         for before, after in zip(self.pack["entities"], updated["entities"]):
             self.assertEqual(before["uuid"], after["uuid"])
             expected = copy.deepcopy(before)

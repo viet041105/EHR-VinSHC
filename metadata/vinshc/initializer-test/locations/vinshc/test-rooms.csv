@@ -1,0 +1,4 @@
+Uuid,Void/Retire,Name,Description,Parent
+bce6f525-9ec2-5edb-ad86-10af87b9ce88,false,Phòng khám kiểm thử,Synthetic test room,feae71be-957c-4f94-b100-d84bc6915574
+671edb90-11b0-5d0f-b095-c77e1b1f7d78,false,Phòng CLS kiểm thử,Synthetic test room,feae71be-957c-4f94-b100-d84bc6915574
+1dd053ea-06f9-5b1f-9172-b103df9157fc,false,Quầy thuốc kiểm thử,Synthetic test room,feae71be-957c-4f94-b100-d84bc6915574

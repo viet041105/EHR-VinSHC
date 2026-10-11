@@ -1,0 +1,371 @@
+{
+  "version": "0.3.0",
+  "synthetic": true,
+  "documents": [
+    {
+      "templateCode": "prescription",
+      "templateVersion": "0.3.0",
+      "documentNumber": "TEST-prescription-2026-0001",
+      "documentVersion": 1,
+      "issuedAt": "2026-10-11T09:00:00+07:00",
+      "status": "confirmed",
+      "synthetic": true,
+      "facility": {
+        "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "code": "VSHC-DEV",
+        "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+        "addressText": "Địa chỉ kiểm thử, Hà Nội",
+        "phone": "+84900000000",
+        "licenceNumber": "TEST-FACILITY-001",
+        "logoAsset": null
+      },
+      "patient": {
+        "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "identifier": "TEST-PATIENT-0001",
+        "fullName": "Người bệnh giả 01",
+        "birthDisplay": "Thông tin giả kiểm thử",
+        "addressText": "Thông tin giả kiểm thử"
+      },
+      "practitioner": {
+        "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "fullName": "Bác sĩ giả 01",
+        "title": "Bác sĩ",
+        "licenceNumber": "TEST-CCHN-DOCTOR"
+      },
+      "diagnoses": [
+        {
+          "uuid": "55117436-c9b0-5d34-85c6-4acc1fa940c2",
+          "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+          "visitUuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+          "encounterUuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+          "recordedAt": "2026-10-11T09:00:00+07:00",
+          "code": "I10",
+          "nonCodedText": null,
+          "catalogueVersion": "VN-06-2026-2026-07-01",
+          "rank": 1,
+          "certainty": "confirmed",
+          "status": "active",
+          "revision": 1
+        }
+      ],
+      "note": "Thông tin giả kiểm thử",
+      "lines": [
+        {
+          "drugCode": "SYN-TABLET-A",
+          "drugName": "Thuốc giả SYN-TABLET-A",
+          "ingredients": [
+            {
+              "name": "Hoạt chất giả SYN-TABLET-A",
+              "conceptUuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+              "strength": "10",
+              "unit": "mg"
+            }
+          ],
+          "strength": {
+            "value": "10",
+            "unit": "mg"
+          },
+          "dose": "0.5",
+          "doseUnit": "Viên",
+          "route": "Uống",
+          "frequency": "BID (kiểm thử)",
+          "duration": "5 ngày",
+          "quantity": "2.5",
+          "quantityUnit": "Viên",
+          "instructions": "Dữ liệu giả kiểm thử"
+        }
+      ],
+      "signatures": [
+        {
+          "role": "prescriber",
+          "signerUuid": "6be10703-5328-597c-a914-e17cabe9ac9b",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        }
+      ]
+    },
+    {
+      "templateCode": "receipt",
+      "templateVersion": "0.3.0",
+      "documentNumber": "TEST-receipt-2026-0001",
+      "documentVersion": 1,
+      "issuedAt": "2026-10-11T09:00:00+07:00",
+      "status": "settled",
+      "synthetic": true,
+      "facility": {
+        "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "code": "VSHC-DEV",
+        "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+        "addressText": "Địa chỉ kiểm thử, Hà Nội",
+        "phone": "+84900000000",
+        "licenceNumber": "TEST-FACILITY-001",
+        "logoAsset": null
+      },
+      "patient": {
+        "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "identifier": "TEST-PATIENT-0001",
+        "fullName": "Người bệnh giả 01"
+      },
+      "issuer": {
+        "uuid": "0d1a2fe9-35ec-5dcd-bc6c-6f6c522d2253",
+        "fullName": "Thông tin giả kiểm thử",
+        "title": "Thông tin giả kiểm thử",
+        "licenceNumber": null
+      },
+      "transactionUuid": "f3d9b533-d3ab-59ae-a6a2-2d58a5a7d7a6",
+      "billUuid": "1ca11e36-96ad-5fdf-a7fe-e96c304b50c7",
+      "amountVnd": 40000,
+      "amountInWords": "Bốn mươi nghìn đồng",
+      "paymentMethod": "cash",
+      "payerName": "Thông tin giả kiểm thử",
+      "lines": [
+        {
+          "serviceCode": "Giá trị giả kiểm thử",
+          "serviceName": "Giá trị giả kiểm thử",
+          "quantity": 2,
+          "unitPriceVnd": 22400,
+          "discountVnd": 4800,
+          "netVnd": 40000
+        }
+      ],
+      "signatures": [
+        {
+          "role": "cashier",
+          "signerUuid": "d7e91b1b-26af-578d-af2c-835ca51794dd",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        },
+        {
+          "role": "payer",
+          "signerUuid": null,
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        }
+      ]
+    },
+    {
+      "templateCode": "refund",
+      "templateVersion": "0.3.0",
+      "documentNumber": "TEST-refund-2026-0001",
+      "documentVersion": 1,
+      "issuedAt": "2026-10-11T09:00:00+07:00",
+      "status": "settled",
+      "synthetic": true,
+      "facility": {
+        "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "code": "VSHC-DEV",
+        "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+        "addressText": "Địa chỉ kiểm thử, Hà Nội",
+        "phone": "+84900000000",
+        "licenceNumber": "TEST-FACILITY-001",
+        "logoAsset": null
+      },
+      "patient": {
+        "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "identifier": "TEST-PATIENT-0001",
+        "fullName": "Người bệnh giả 01"
+      },
+      "issuer": {
+        "uuid": "0d1a2fe9-35ec-5dcd-bc6c-6f6c522d2253",
+        "fullName": "Thông tin giả kiểm thử",
+        "title": "Thông tin giả kiểm thử",
+        "licenceNumber": null
+      },
+      "transactionUuid": "f3d9b533-d3ab-59ae-a6a2-2d58a5a7d7a6",
+      "amountVnd": 40000,
+      "amountInWords": "Bốn mươi nghìn đồng",
+      "paymentMethod": "cash",
+      "lines": [
+        {
+          "originalReceiptUuid": "2ddecda5-e9eb-507d-866b-a3982f2b443a",
+          "amountVnd": 40000,
+          "reason": "Giá trị giả kiểm thử"
+        }
+      ],
+      "signatures": [
+        {
+          "role": "cashier",
+          "signerUuid": "d7e91b1b-26af-578d-af2c-835ca51794dd",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        },
+        {
+          "role": "recipient",
+          "signerUuid": "2bc45a60-cdb6-5b56-b8ea-25253de442b5",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        }
+      ]
+    },
+    {
+      "templateCode": "order",
+      "templateVersion": "0.3.0",
+      "documentNumber": "TEST-order-2026-0001",
+      "documentVersion": 1,
+      "issuedAt": "2026-10-11T09:00:00+07:00",
+      "status": "requested",
+      "synthetic": true,
+      "facility": {
+        "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "code": "VSHC-DEV",
+        "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+        "addressText": "Địa chỉ kiểm thử, Hà Nội",
+        "phone": "+84900000000",
+        "licenceNumber": "TEST-FACILITY-001",
+        "logoAsset": null
+      },
+      "patient": {
+        "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "identifier": "TEST-PATIENT-0001",
+        "fullName": "Người bệnh giả 01"
+      },
+      "practitioner": {
+        "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "fullName": "Bác sĩ giả 01",
+        "title": "Bác sĩ",
+        "licenceNumber": "TEST-CCHN-DOCTOR"
+      },
+      "orderUuid": "6fdd33d9-4d07-5a46-8f70-16970acdbb6e",
+      "encounterUuid": "593f5b91-04ac-5335-ab4d-93f7b9c8dfda",
+      "orderedAt": "2026-10-11T09:00:00+07:00",
+      "lines": [
+        {
+          "serviceCode": "Giá trị giả kiểm thử",
+          "serviceName": "Giá trị giả kiểm thử",
+          "specimen": "Giá trị giả kiểm thử",
+          "priority": "Giá trị giả kiểm thử",
+          "note": "Giá trị giả kiểm thử"
+        }
+      ],
+      "signatures": [
+        {
+          "role": "orderer",
+          "signerUuid": "2a4ce0e2-4ff8-5590-b1c4-fa0159e8f46e",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        }
+      ]
+    },
+    {
+      "templateCode": "result",
+      "templateVersion": "0.3.0",
+      "documentNumber": "TEST-result-2026-0001",
+      "documentVersion": 1,
+      "issuedAt": "2026-10-11T09:00:00+07:00",
+      "status": "final",
+      "synthetic": true,
+      "facility": {
+        "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "code": "VSHC-DEV",
+        "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+        "addressText": "Địa chỉ kiểm thử, Hà Nội",
+        "phone": "+84900000000",
+        "licenceNumber": "TEST-FACILITY-001",
+        "logoAsset": null
+      },
+      "patient": {
+        "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "identifier": "TEST-PATIENT-0001",
+        "fullName": "Người bệnh giả 01"
+      },
+      "practitioner": {
+        "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+        "fullName": "Bác sĩ giả 01",
+        "title": "Bác sĩ",
+        "licenceNumber": "TEST-CCHN-DOCTOR"
+      },
+      "orderUuid": "6fdd33d9-4d07-5a46-8f70-16970acdbb6e",
+      "resultUuid": "cdaf5862-7857-5d31-bcae-f4142e0246ed",
+      "revision": 1,
+      "previousRevision": null,
+      "correctionReason": null,
+      "collectedAt": "2026-10-11T09:00:00+07:00",
+      "verifiedAt": "2026-10-11T09:00:00+07:00",
+      "attachments": [],
+      "lines": [
+        {
+          "indicatorCode": "GLU",
+          "indicatorName": "Glucose",
+          "value": "5.2",
+          "valueType": "number",
+          "unit": "mmol/L",
+          "referenceRange": null,
+          "method": null
+        }
+      ],
+      "signatures": [
+        {
+          "role": "author",
+          "signerUuid": "dc8b7a34-c33f-5b53-8539-ade7e03adcc4",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        },
+        {
+          "role": "reviewer",
+          "signerUuid": "ae07ab57-6817-59fe-82e3-4ad9ce4854e7",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        }
+      ]
+    },
+    {
+      "templateCode": "appointment",
+      "templateVersion": "0.3.0",
+      "documentNumber": "TEST-appointment-2026-0001",
+      "documentVersion": 1,
+      "issuedAt": "2026-10-11T09:00:00+07:00",
+      "status": "booked",
+      "synthetic": true,
+      "facility": {
+        "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+        "code": "VSHC-DEV",
+        "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+        "addressText": "Địa chỉ kiểm thử, Hà Nội",
+        "phone": "+84900000000",
+        "licenceNumber": "TEST-FACILITY-001",
+        "logoAsset": null
+      },
+      "patient": {
+        "uuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "identifier": "TEST-PATIENT-0001",
+        "fullName": "Người bệnh giả 01"
+      },
+      "issuer": {
+        "uuid": "0d1a2fe9-35ec-5dcd-bc6c-6f6c522d2253",
+        "fullName": "Thông tin giả kiểm thử",
+        "title": "Thông tin giả kiểm thử",
+        "licenceNumber": null
+      },
+      "appointmentUuid": "b3e17145-d615-58ae-a756-29afdd07bcc2",
+      "startAt": "2026-10-11T09:00:00+07:00",
+      "endAt": "2026-10-11T09:00:00+07:00",
+      "timezone": "Asia/Ho_Chi_Minh",
+      "instructions": "Thông tin giả kiểm thử",
+      "lines": [
+        {
+          "serviceCode": "Giá trị giả kiểm thử",
+          "serviceName": "Giá trị giả kiểm thử",
+          "locationName": "Giá trị giả kiểm thử",
+          "providerRole": "Giá trị giả kiểm thử"
+        }
+      ],
+      "signatures": [
+        {
+          "role": "scheduler",
+          "signerUuid": "9b1284f2-c676-51e0-935a-c91a286cf349",
+          "signerName": "Người ký giả",
+          "signedAt": null,
+          "signatureReference": null
+        }
+      ]
+    }
+  ]
+}

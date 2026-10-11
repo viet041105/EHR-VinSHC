@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "date": "2026-10-11",
   "namespaceSeed": "https://github.com/viet041105/EHR-VinSHC/metadata",
   "scope": {
@@ -809,6 +809,1384 @@
       "class": "Misc",
       "answerList": "visit_close_reason",
       "answerCode": "referred"
+    },
+    {
+      "key": "location.test.consultation",
+      "domain": "locations",
+      "uuid": "bce6f525-9ec2-5edb-ad86-10af87b9ce88",
+      "label": "Phòng khám kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "location.test.laboratory",
+      "domain": "locations",
+      "uuid": "671edb90-11b0-5d0f-b095-c77e1b1f7d78",
+      "label": "Phòng CLS kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "location.test.pharmacy",
+      "domain": "locations",
+      "uuid": "1dd053ea-06f9-5b1f-9172-b103df9157fc",
+      "label": "Quầy thuốc kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "encounter_role.result_reviewer",
+      "domain": "encounterroles",
+      "uuid": "ca39bcfc-eeef-5f69-aa79-decf5d78c529",
+      "label": "VinSHC Result reviewer",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "medunit.dose.tablet",
+      "domain": "concepts",
+      "uuid": "6fff5163-8020-5e91-bf8a-2080167ae29c",
+      "label": "Viên",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.dose.capsule",
+      "domain": "concepts",
+      "uuid": "4e272e19-5527-5c5f-8190-aad5152f87ef",
+      "label": "Viên nang",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.dose.mg",
+      "domain": "concepts",
+      "uuid": "5087bc0c-f9b8-5be1-b78f-857cc0350080",
+      "label": "mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.dose.ml",
+      "domain": "concepts",
+      "uuid": "305d99b8-b4d2-5153-865d-836c79e64d60",
+      "label": "mL",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.quantity.tablet",
+      "domain": "concepts",
+      "uuid": "92df0dbe-6b87-5eae-80d7-d82af3dd0039",
+      "label": "Viên",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.quantity.capsule",
+      "domain": "concepts",
+      "uuid": "d440cfeb-e005-53f8-b1b9-64a9c2ffecfc",
+      "label": "Viên nang",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.quantity.ml",
+      "domain": "concepts",
+      "uuid": "78e00aeb-a381-5b55-b953-aff612264477",
+      "label": "mL",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.duration.day",
+      "domain": "concepts",
+      "uuid": "1e480858-8aa4-5254-8358-f893c8f167e9",
+      "label": "Ngày",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.duration.week",
+      "domain": "concepts",
+      "uuid": "44bb03e4-b610-5f01-8b16-407510a127cb",
+      "label": "Tuần",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.routes.oral",
+      "domain": "concepts",
+      "uuid": "468d85b2-0ee0-587d-83fa-3603b51951b7",
+      "label": "Uống",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.routes.topical",
+      "domain": "concepts",
+      "uuid": "9c43e79c-b8f1-5136-8b40-155a138f1dcb",
+      "label": "Ngoài da",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.dosageForms.tablet",
+      "domain": "concepts",
+      "uuid": "20df4708-7b4f-5f95-9222-e78f4d774aa8",
+      "label": "Viên",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.dosageForms.capsule",
+      "domain": "concepts",
+      "uuid": "4b1941f5-1212-5497-8d8b-9b455f5cb259",
+      "label": "Viên nang",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.dosageForms.liquid",
+      "domain": "concepts",
+      "uuid": "771f7a8a-3e60-5cd9-808f-8607bc33931c",
+      "label": "Dung dịch",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "medunit.frequencies.qd",
+      "domain": "concepts",
+      "uuid": "655ca5ef-21c3-514e-9450-d58243ebb125",
+      "label": "Một lần/ngày",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "frequency.qd",
+      "domain": "orderfrequencies",
+      "uuid": "a0e7e5e4-6d3b-5ca5-b0b3-b2298a12e0e8",
+      "label": "Một lần/ngày",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "medunit.frequencies.bid",
+      "domain": "concepts",
+      "uuid": "67178298-65f0-5486-b6e9-b2fde7de27ed",
+      "label": "Hai lần/ngày",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "frequency.bid",
+      "domain": "orderfrequencies",
+      "uuid": "56df76b7-e6e3-5813-aca8-82e1750c051f",
+      "label": "Hai lần/ngày",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "medunit.frequencies.tid",
+      "domain": "concepts",
+      "uuid": "e477e9ef-3d67-5c62-86b6-01471119e72a",
+      "label": "Ba lần/ngày",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "frequency.tid",
+      "domain": "orderfrequencies",
+      "uuid": "45143b5d-a909-5307-a69a-53f443ba5186",
+      "label": "Ba lần/ngày",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "medunit.frequencies.prn",
+      "domain": "concepts",
+      "uuid": "f8583b58-8829-5b0a-a789-566e38ef7718",
+      "label": "Khi cần",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "frequency.prn",
+      "domain": "orderfrequencies",
+      "uuid": "ceeb2ef5-10a8-5398-822b-f4743f0bb473",
+      "label": "Khi cần",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.s01-plavix-75",
+      "domain": "concepts",
+      "uuid": "55bb6671-7bf0-5b3f-980c-c1929eb7b485",
+      "label": "Clopidogrel base",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.s01-plavix-75",
+      "domain": "concepts",
+      "uuid": "9081d504-0409-50a3-82d0-1f6a2c4afbce",
+      "label": "Plavix 75mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.s01-plavix-75",
+      "domain": "drugs",
+      "uuid": "b3b53d01-7a94-5b2a-8627-9890eda7d1d0",
+      "label": "Plavix 75mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.s01-lipitor-20",
+      "domain": "concepts",
+      "uuid": "add7d9cc-e8c1-5c6f-a5ec-d281b6522cec",
+      "label": "Atorvastatin",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.s01-lipitor-20",
+      "domain": "concepts",
+      "uuid": "b1fe3885-976d-5506-8091-8bc3891182cb",
+      "label": "Lipitor 20mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.s01-lipitor-20",
+      "domain": "drugs",
+      "uuid": "9fbae6e0-948b-5f75-9752-82e81ea205e4",
+      "label": "Lipitor 20mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.s01-mobic-7_5",
+      "domain": "concepts",
+      "uuid": "dc25ba96-8067-5588-9b4f-57ecbf754f68",
+      "label": "Meloxicam",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.s01-mobic-7_5",
+      "domain": "concepts",
+      "uuid": "c8e395e6-9922-541d-97ba-e22510e2bf15",
+      "label": "Mobic 7,5mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.s01-mobic-7_5",
+      "domain": "drugs",
+      "uuid": "94710b6f-71c1-5585-befb-d988e4e57bb3",
+      "label": "Mobic 7,5mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.s01-colchicin-1",
+      "domain": "concepts",
+      "uuid": "524bf8d5-239d-5b0d-ad55-0d90d4aff5b8",
+      "label": "Colchicin",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.s01-colchicin-1",
+      "domain": "concepts",
+      "uuid": "acad252a-c124-5c9e-b673-cd8401ebb94a",
+      "label": "Colchicina Seid 1mg Tablet",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.s01-colchicin-1",
+      "domain": "drugs",
+      "uuid": "6629e21b-d892-5693-8e7a-6fd55845399d",
+      "label": "Colchicina Seid 1mg Tablet",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.s01-pantoloc-20",
+      "domain": "concepts",
+      "uuid": "bbc407b9-34e8-5b08-83d6-afeff6bde75e",
+      "label": "Pantoprazole",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.s01-pantoloc-20",
+      "domain": "concepts",
+      "uuid": "b31f8103-bc48-5173-ae82-1d8259487583",
+      "label": "Pantoloc 20mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.s01-pantoloc-20",
+      "domain": "drugs",
+      "uuid": "a92bd67b-6ce0-5409-a5e1-91b6b0311930",
+      "label": "Pantoloc 20mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.s01-tebonin-120",
+      "domain": "concepts",
+      "uuid": "9a9818aa-68d8-5c9a-a486-1b02336b1fb8",
+      "label": "Cao khô từ lá Ginkgo biloba",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.s01-tebonin-120",
+      "domain": "concepts",
+      "uuid": "bbe919b2-368b-5e52-9909-403180962c7c",
+      "label": "Tebonin 120mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.s01-tebonin-120",
+      "domain": "drugs",
+      "uuid": "37e62d0d-4ae2-5e93-b8c1-47bddd063398",
+      "label": "Tebonin 120mg",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.syn-tablet-a",
+      "domain": "concepts",
+      "uuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+      "label": "Hoạt chất giả SYN-TABLET-A",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.syn-tablet-a",
+      "domain": "concepts",
+      "uuid": "382c0e1f-1795-5838-9cf2-a049024a7025",
+      "label": "Thuốc giả SYN-TABLET-A",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.syn-tablet-a",
+      "domain": "drugs",
+      "uuid": "03114c09-6243-5fac-a13d-cc33f9980466",
+      "label": "Thuốc giả SYN-TABLET-A",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "ingredient.syn-liquid-b",
+      "domain": "concepts",
+      "uuid": "a9756ae9-42fb-573d-a7c3-dee9dd0c0937",
+      "label": "Hoạt chất giả SYN-LIQUID-B",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drugconcept.syn-liquid-b",
+      "domain": "concepts",
+      "uuid": "4389f47a-66c5-5d3c-b3da-dea6032f1719",
+      "label": "Thuốc giả SYN-LIQUID-B",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Drug"
+    },
+    {
+      "key": "drug.syn-liquid-b",
+      "domain": "drugs",
+      "uuid": "a6981596-3b73-5ae6-ab46-75c3a9f4addf",
+      "label": "Thuốc giả SYN-LIQUID-B",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "allergen.med-test",
+      "domain": "concepts",
+      "uuid": "0d4ecebb-0367-5582-a242-6585eb1973af",
+      "label": "Tác nhân thuốc kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "allergen.food-test",
+      "domain": "concepts",
+      "uuid": "ac33c568-0477-597e-adaa-9572011f8947",
+      "label": "Tác nhân thực phẩm kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "allergen.env-test",
+      "domain": "concepts",
+      "uuid": "bb1d767d-d5c4-5d1e-abe4-9f6f095170e2",
+      "label": "Tác nhân môi trường kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "allergen.bio-test",
+      "domain": "concepts",
+      "uuid": "417ab98e-ffa9-54cc-a1f5-5ab4da6608c4",
+      "label": "Tác nhân sinh học kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "allergen.other",
+      "domain": "concepts",
+      "uuid": "0f9a0b82-5acc-5e68-917f-57aa3de23e34",
+      "label": "Tác nhân khác, ghi nguyên văn",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "reaction.rash",
+      "domain": "concepts",
+      "uuid": "e4a68f5a-8194-5602-a2bd-efc345d3e446",
+      "label": "Ban da",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "reaction.itch",
+      "domain": "concepts",
+      "uuid": "4c469142-086d-5aab-bc62-db3cd6ac5f73",
+      "label": "Ngứa",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "reaction.other",
+      "domain": "concepts",
+      "uuid": "55b7a7f0-036f-5e95-9134-7c2a8d39fd38",
+      "label": "Phản ứng khác, ghi nguyên văn",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "allergyseverity.mild",
+      "domain": "concepts",
+      "uuid": "b7ec4437-5bfc-5d92-b5f2-f1f89d72e84c",
+      "label": "Nhẹ",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "allergyseverity.moderate",
+      "domain": "concepts",
+      "uuid": "d545a5a9-dd35-5268-98b6-a9f09188518a",
+      "label": "Vừa",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "allergyseverity.severe",
+      "domain": "concepts",
+      "uuid": "99dbb5e5-ddde-579e-b6ca-f228477dade7",
+      "label": "Nặng",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "serviceconcept.consult-test",
+      "domain": "concepts",
+      "uuid": "113d6e27-e05b-5f9c-b835-3734678cb892",
+      "label": "Khám ngoại trú kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "serviceconcept.lab-glu",
+      "domain": "concepts",
+      "uuid": "d114f6a8-8a4b-5900-af8b-c9bb470c848b",
+      "label": "Định lượng Glucose",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Test"
+    },
+    {
+      "key": "serviceconcept.lab-crea",
+      "domain": "concepts",
+      "uuid": "34fc5350-3462-5c4a-9c26-888dc92ae5a8",
+      "label": "Định lượng Creatinin (máu)",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Test"
+    },
+    {
+      "key": "serviceconcept.us-abd",
+      "domain": "concepts",
+      "uuid": "970a9b87-c95e-5563-8742-f9e212e70f41",
+      "label": "Siêu âm ổ bụng (gan mật, tụy, lách, thận)",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "serviceconcept.ecg-bed",
+      "domain": "concepts",
+      "uuid": "e0f130e2-cf5e-5373-8bf4-6cf753de6e60",
+      "label": "Ghi điện tim cấp cứu tại giường",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "serviceconcept.proc-test",
+      "domain": "concepts",
+      "uuid": "94cafaff-8d79-588e-937d-97b6b7434b09",
+      "label": "Thủ thuật mô phỏng kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Misc"
+    },
+    {
+      "key": "serviceconcept.lab-panel-test",
+      "domain": "concepts",
+      "uuid": "d4b0f211-4c8e-5ef7-bd0d-e6aa743a8b76",
+      "label": "Panel hóa sinh kiểm thử",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Text",
+      "class": "Test"
+    },
+    {
+      "key": "testresult.glu",
+      "domain": "concepts",
+      "uuid": "42ac7593-f43f-5b6e-8e82-537dd2b0950c",
+      "label": "Glucose",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Numeric",
+      "class": "LabTest",
+      "unit": "mmol/L",
+      "allowDecimals": true
+    },
+    {
+      "key": "testresult.crea",
+      "domain": "concepts",
+      "uuid": "d461b041-d1b7-5657-baf3-43d214eaed41",
+      "label": "Creatinin",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only",
+      "dataType": "Numeric",
+      "class": "LabTest",
+      "unit": "umol/L",
+      "allowDecimals": true
+    },
+    {
+      "key": "role.reception",
+      "domain": "roles",
+      "uuid": "8ca9af35-fcb9-544f-a700-45effa98a741",
+      "label": "VinSHC App: reception",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.patient_identity.read",
+      "domain": "privileges",
+      "uuid": "a71386f4-6983-503a-a230-42bfeb599027",
+      "label": "VinSHC patient_identity read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.patient_identity.create",
+      "domain": "privileges",
+      "uuid": "b67f08d3-faf6-5585-97ef-b08ebad98454",
+      "label": "VinSHC patient_identity create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.patient_identity.update",
+      "domain": "privileges",
+      "uuid": "066f1210-1ced-5f11-a48a-fe754774baa6",
+      "label": "VinSHC patient_identity update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.visit.read",
+      "domain": "privileges",
+      "uuid": "e1596920-f1e1-597f-8dbc-fa5eb85374e7",
+      "label": "VinSHC visit read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.visit.create",
+      "domain": "privileges",
+      "uuid": "5ea632b9-de82-52d9-8310-e28e7f65f98d",
+      "label": "VinSHC visit create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.visit.update",
+      "domain": "privileges",
+      "uuid": "a254d235-9aa1-520b-ba86-e9090b996eea",
+      "label": "VinSHC visit update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.visit.cancel",
+      "domain": "privileges",
+      "uuid": "121b8a87-e8dd-5d97-aa24-4a61926845f3",
+      "label": "VinSHC visit cancel",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.appointment.read",
+      "domain": "privileges",
+      "uuid": "67d276da-afc6-5f8c-86fc-2dd4811f4903",
+      "label": "VinSHC appointment read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.appointment.create",
+      "domain": "privileges",
+      "uuid": "59415802-df82-5412-9bd9-6d1d7121cce5",
+      "label": "VinSHC appointment create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.appointment.update",
+      "domain": "privileges",
+      "uuid": "3bd1c9a9-e09b-598b-84c0-3bbb07e7e214",
+      "label": "VinSHC appointment update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.appointment.cancel",
+      "domain": "privileges",
+      "uuid": "b3af6463-8f8a-532a-9c90-2bbaa9d8a486",
+      "label": "VinSHC appointment cancel",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.appointment.print",
+      "domain": "privileges",
+      "uuid": "446d4a57-17e3-5df1-8208-e5eb2ce384f7",
+      "label": "VinSHC appointment print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.queue.read",
+      "domain": "privileges",
+      "uuid": "2618a5fc-cdb0-548e-8695-042df82fd1da",
+      "label": "VinSHC queue read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.queue.create",
+      "domain": "privileges",
+      "uuid": "1a73bdb2-e15e-5695-9c10-b46cbdba4e7e",
+      "label": "VinSHC queue create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.queue.update",
+      "domain": "privileges",
+      "uuid": "ba91cefe-3b04-5784-9d43-fc0afbcb04ed",
+      "label": "VinSHC queue update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.queue.cancel",
+      "domain": "privileges",
+      "uuid": "ae12b03c-9e8a-5991-b781-270bcbea7358",
+      "label": "VinSHC queue cancel",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "role.cashier",
+      "domain": "roles",
+      "uuid": "db9ec101-2135-55a8-9967-2483ac965bcc",
+      "label": "VinSHC App: cashier",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.billing.read",
+      "domain": "privileges",
+      "uuid": "8fa718a8-2bc9-510d-9bfe-a3e6e6434d93",
+      "label": "VinSHC billing read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.billing.create",
+      "domain": "privileges",
+      "uuid": "b0e90ded-a487-5a4a-8efa-0f755b7f44a9",
+      "label": "VinSHC billing create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.billing.cancel",
+      "domain": "privileges",
+      "uuid": "c5450ec3-c072-5072-81e2-742ec7c7e7ad",
+      "label": "VinSHC billing cancel",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.billing.print",
+      "domain": "privileges",
+      "uuid": "95563ca6-f8cd-5f11-a317-88f67b4c8c41",
+      "label": "VinSHC billing print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.billing.download",
+      "domain": "privileges",
+      "uuid": "83157668-7756-513b-83fb-0b8b3251fabf",
+      "label": "VinSHC billing download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.payment.read",
+      "domain": "privileges",
+      "uuid": "0cd61baa-837a-5fe5-b7c1-55056214cac2",
+      "label": "VinSHC payment read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.payment.create",
+      "domain": "privileges",
+      "uuid": "143f048b-a3d2-5c41-b7e1-c6801b87b94c",
+      "label": "VinSHC payment create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.payment.print",
+      "domain": "privileges",
+      "uuid": "b6eb3c07-acaa-58f0-a90c-947a1b571f39",
+      "label": "VinSHC payment print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.payment.download",
+      "domain": "privileges",
+      "uuid": "5ce716ee-6739-5091-b4fd-1049a5385e9f",
+      "label": "VinSHC payment download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "role.nurse",
+      "domain": "roles",
+      "uuid": "352df280-e484-5be5-83af-0582bd72911b",
+      "label": "VinSHC App: nurse",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.vitals.read",
+      "domain": "privileges",
+      "uuid": "cbf1f745-beee-5320-8331-0c5c13260eb1",
+      "label": "VinSHC vitals read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.vitals.create",
+      "domain": "privileges",
+      "uuid": "0be5704e-f41e-59da-9a73-9b685cbe8e29",
+      "label": "VinSHC vitals create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.vitals.update",
+      "domain": "privileges",
+      "uuid": "4a8b3f43-6bfd-5080-86de-ba06dbf52519",
+      "label": "VinSHC vitals update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.vitals.void",
+      "domain": "privileges",
+      "uuid": "daed5ace-4d1d-5335-a5f8-27389fefb869",
+      "label": "VinSHC vitals void",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.clinical_chart.read",
+      "domain": "privileges",
+      "uuid": "f16912ce-f4c0-5ec9-9d8d-85c1624020ff",
+      "label": "VinSHC clinical_chart read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "role.doctor",
+      "domain": "roles",
+      "uuid": "72c30efb-9b10-5103-a637-7eb81fb40172",
+      "label": "VinSHC App: doctor",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.clinical_chart.print",
+      "domain": "privileges",
+      "uuid": "40f09f5b-53e9-5c63-9873-d46db694aeaa",
+      "label": "VinSHC clinical_chart print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.clinical_chart.download",
+      "domain": "privileges",
+      "uuid": "52f884a7-360a-5582-8be8-9f06f785059c",
+      "label": "VinSHC clinical_chart download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnosis.read",
+      "domain": "privileges",
+      "uuid": "a5c23dd2-86a7-5d7d-9dac-561d69f00da8",
+      "label": "VinSHC diagnosis read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnosis.create",
+      "domain": "privileges",
+      "uuid": "fa77b6a5-7a78-5478-aca7-d105e4f7ba30",
+      "label": "VinSHC diagnosis create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnosis.update",
+      "domain": "privileges",
+      "uuid": "ea8c96ac-171f-5e0e-88de-642dc83bfd67",
+      "label": "VinSHC diagnosis update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnosis.void",
+      "domain": "privileges",
+      "uuid": "35f77f54-1b07-5f49-a78d-ee8f48875d9e",
+      "label": "VinSHC diagnosis void",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.allergy.read",
+      "domain": "privileges",
+      "uuid": "f8115d40-af0a-52b3-8624-5631d22e01ac",
+      "label": "VinSHC allergy read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.allergy.create",
+      "domain": "privileges",
+      "uuid": "74965d76-521e-53f1-aada-3badb59a8ba7",
+      "label": "VinSHC allergy create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.allergy.update",
+      "domain": "privileges",
+      "uuid": "f429b459-0d31-5e82-b2bc-734fc4e9c1ab",
+      "label": "VinSHC allergy update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.allergy.void",
+      "domain": "privileges",
+      "uuid": "c98f5846-b8a3-5d59-971b-b3726a0574ec",
+      "label": "VinSHC allergy void",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.prescription.read",
+      "domain": "privileges",
+      "uuid": "0b2a43ad-c0eb-5943-85ba-b2d34c106e48",
+      "label": "VinSHC prescription read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.prescription.create",
+      "domain": "privileges",
+      "uuid": "61b3c552-139d-5313-b8a1-3dbb75789a88",
+      "label": "VinSHC prescription create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.prescription.update",
+      "domain": "privileges",
+      "uuid": "ae12a609-2db4-52f8-a263-b08e570267db",
+      "label": "VinSHC prescription update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.prescription.cancel",
+      "domain": "privileges",
+      "uuid": "48bb24cc-3f11-5711-8c5b-f7a1259d5567",
+      "label": "VinSHC prescription cancel",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.prescription.print",
+      "domain": "privileges",
+      "uuid": "5c28b279-1792-568e-9e32-226991a9dee7",
+      "label": "VinSHC prescription print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.prescription.download",
+      "domain": "privileges",
+      "uuid": "db4b3754-996e-5d51-b87c-7eb16655183c",
+      "label": "VinSHC prescription download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_order.read",
+      "domain": "privileges",
+      "uuid": "d3e8b213-d034-5855-8fe8-db359b61afeb",
+      "label": "VinSHC diagnostic_order read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_order.create",
+      "domain": "privileges",
+      "uuid": "341d48ee-c87f-567b-ad9b-702e0cee0035",
+      "label": "VinSHC diagnostic_order create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_order.update",
+      "domain": "privileges",
+      "uuid": "2dff02b5-e88c-5aff-ad95-bd194bf47e98",
+      "label": "VinSHC diagnostic_order update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_order.cancel",
+      "domain": "privileges",
+      "uuid": "0e548c99-87b6-557f-93ab-db2eba1c88be",
+      "label": "VinSHC diagnostic_order cancel",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_order.print",
+      "domain": "privileges",
+      "uuid": "d6ebca36-85b5-59f4-8a4e-7dbde9c6d135",
+      "label": "VinSHC diagnostic_order print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_order.download",
+      "domain": "privileges",
+      "uuid": "b83b922f-7ffc-590d-a189-d9b676be29fd",
+      "label": "VinSHC diagnostic_order download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_result.read",
+      "domain": "privileges",
+      "uuid": "702e7def-06b5-55f4-814e-d8d5e3ec5b29",
+      "label": "VinSHC diagnostic_result read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_result.print",
+      "domain": "privileges",
+      "uuid": "0599280d-5e06-53c2-98e7-9b8111866705",
+      "label": "VinSHC diagnostic_result print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_result.download",
+      "domain": "privileges",
+      "uuid": "e52f4726-9720-5688-94f6-6c2ec6cda604",
+      "label": "VinSHC diagnostic_result download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "role.lab",
+      "domain": "roles",
+      "uuid": "136d88da-16ac-5077-9c42-080ac83ca356",
+      "label": "VinSHC App: lab",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_result.create",
+      "domain": "privileges",
+      "uuid": "203b4744-9b75-52f7-b50a-b69b6b0fec2c",
+      "label": "VinSHC diagnostic_result create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_result.update",
+      "domain": "privileges",
+      "uuid": "24ca3669-ed42-5a84-bbfb-d1ed050ee276",
+      "label": "VinSHC diagnostic_result update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.diagnostic_result.void",
+      "domain": "privileges",
+      "uuid": "95dade3e-f440-5b68-8029-d89abaeca35a",
+      "label": "VinSHC diagnostic_result void",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "role.pharmacy",
+      "domain": "roles",
+      "uuid": "5ff70d2c-13ad-52c2-9ec0-afffc5f972c9",
+      "label": "VinSHC App: pharmacy",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.dispensing.read",
+      "domain": "privileges",
+      "uuid": "a6ac1fc0-9981-57bd-ab00-bd903009bf1d",
+      "label": "VinSHC dispensing read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.dispensing.create",
+      "domain": "privileges",
+      "uuid": "36d9a7dc-1c40-5714-9bf0-72fde1779c50",
+      "label": "VinSHC dispensing create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.dispensing.print",
+      "domain": "privileges",
+      "uuid": "5522cafc-a3ea-597c-a6a8-ce6e2da6e9dc",
+      "label": "VinSHC dispensing print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.dispensing.download",
+      "domain": "privileges",
+      "uuid": "9edf3bae-40bf-55d1-86dc-ae1414c20ddc",
+      "label": "VinSHC dispensing download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "role.manager",
+      "domain": "roles",
+      "uuid": "037ef9b9-4780-54b8-9b2b-0266b5e31df2",
+      "label": "VinSHC App: manager",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.reports.read",
+      "domain": "privileges",
+      "uuid": "433aabbe-325a-535f-9b93-554b872d43ec",
+      "label": "VinSHC reports read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.reports.print",
+      "domain": "privileges",
+      "uuid": "f6be7f01-b163-550b-bbac-c7580bfd3f3e",
+      "label": "VinSHC reports print",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.reports.download",
+      "domain": "privileges",
+      "uuid": "7bbcdc7d-9e29-53ed-a32b-063d69169e3d",
+      "label": "VinSHC reports download",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "role.admin",
+      "domain": "roles",
+      "uuid": "545d9037-557e-5ea3-8557-1f70247768c1",
+      "label": "VinSHC App: admin",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.metadata_admin.read",
+      "domain": "privileges",
+      "uuid": "3a94b6bb-6efb-5ded-aed9-6f5ae3243842",
+      "label": "VinSHC metadata_admin read",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.metadata_admin.create",
+      "domain": "privileges",
+      "uuid": "eb1aaec3-68e9-5376-af16-af93eb880956",
+      "label": "VinSHC metadata_admin create",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.metadata_admin.update",
+      "domain": "privileges",
+      "uuid": "5a431849-a272-5be6-b4e0-b70bd1948be9",
+      "label": "VinSHC metadata_admin update",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "privilege.metadata_admin.void",
+      "domain": "privileges",
+      "uuid": "25dc216b-b7d0-59a7-82e2-8bd09f3d2045",
+      "label": "VinSHC metadata_admin void",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.e11",
+      "uuid": "51cf5b2e-8268-5f86-80c8-e07fa7504deb",
+      "domain": "concepts",
+      "label": "Bệnh đái tháo đường típ 2",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.e11_9",
+      "uuid": "217f51b2-3a0d-5c5a-aa98-87ba01f3c847",
+      "domain": "concepts",
+      "label": "Bệnh đái tháo đường típ 2, không kèm biến chứng",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.i10",
+      "uuid": "b4fe079c-c1ac-5dab-9615-d490a28d60f3",
+      "domain": "concepts",
+      "label": "Bệnh tăng huyết áp vô căn (nguyên phát)",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.i63_9",
+      "uuid": "965867e9-e28f-5c3a-bfe5-0b7844150340",
+      "domain": "concepts",
+      "label": "Nhồi máu não, không xác định",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.j06_9",
+      "uuid": "051e16f5-ec21-5aa6-8a0e-c6dd1f2b5999",
+      "domain": "concepts",
+      "label": "Nhiễm trùng đường hô hấp trên cấp tính, không xác định",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.k29_7",
+      "uuid": "a50154cb-ff53-5981-a7ee-a6a40f9252a1",
+      "domain": "concepts",
+      "label": "Viêm dạ dày, không xác định",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.m10_9",
+      "uuid": "f5c45dba-012f-5e36-a362-551b869eb7c8",
+      "domain": "concepts",
+      "label": "Bệnh gút, không xác định",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.z00_0",
+      "uuid": "071206ea-6647-50d6-8bd0-5d38f39dc623",
+      "domain": "concepts",
+      "label": "Khám sức khỏe tổng quát",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
+    },
+    {
+      "key": "diagnosiscode.m10_90",
+      "uuid": "f5fd2028-bfe6-5800-8cef-5261f13b09d0",
+      "domain": "concepts",
+      "label": "Bệnh gút, không xác định, nhiều vị trí",
+      "dataType": "Text",
+      "class": "Diagnosis",
+      "managed": false,
+      "importPolicy": "isolated_test_manifest_only"
     }
   ],
   "fields": [
@@ -6463,6 +7841,594 @@
       "sourceRows": [],
       "sourceKind": "mvp_or_system",
       "description": ""
+    },
+    {
+      "code": "allergy.clinical_status",
+      "label": "Trạng thái lâm sàng dị ứng",
+      "dataType": "coded",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "AllergyLifecycle.clinicalStatus",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": "allergy_clinical_status",
+      "rules": [],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "allergy.verification_status",
+      "label": "Trạng thái xác minh dị ứng",
+      "dataType": "coded",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "AllergyLifecycle.verificationStatus",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": "allergy_verification_status",
+      "rules": [],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "allergy.tac_nhan_nguyen_van",
+      "label": "Tác nhân nguyên văn",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Allergy.allergen.nonCoded",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "allergy.criticality",
+      "label": "Nguy cơ dị ứng tương lai",
+      "dataType": "coded",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "AllergyLifecycle.criticality",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": "allergy_criticality",
+      "rules": [],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "dx.uuid",
+      "label": "UUID chẩn đoán",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.uuid",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "dx.encounter_uuid",
+      "label": "Encounter chẩn đoán",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Diagnosis.encounter",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "dx.catalogue_version",
+      "label": "Phiên bản danh mục bệnh",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DiagnosisCodingSnapshot.catalogueVersion",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "dx.revision",
+      "label": "Phiên bản chẩn đoán",
+      "dataType": "integer",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DiagnosisRevision.number",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NUM"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "rx.snapshot_uuid",
+      "label": "UUID bản chụp đơn",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PrescriptionSnapshot.uuid",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "rx.revision",
+      "label": "Phiên bản đơn",
+      "dataType": "integer",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "PrescriptionSnapshot.revision",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NUM"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "rx.previous_order_uuid",
+      "label": "DrugOrder trước",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "DrugOrder.previousOrder",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "result.revision",
+      "label": "Phiên bản kết quả",
+      "dataType": "integer",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ResultRevision.number",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NUM"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "result.previous_revision_uuid",
+      "label": "Kết quả trước đính chính",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ResultRevision.previousUuid",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "result.ly_do_dinh_chinh",
+      "label": "Lý do đính chính",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "ResultRevision.correctionReason",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "bill.price_uuid",
+      "label": "UUID giá chụp",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "BillLine.priceUuid",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "bill.price_version",
+      "label": "Phiên bản giá chụp",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "BillLine.priceVersion",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "bill.giam_gia_vnd",
+      "label": "Giảm giá VND",
+      "dataType": "integer",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "BillLine.discountVnd",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_NUM"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "appointment.service_uuid",
+      "label": "Dịch vụ lịch hẹn",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.serviceUuid",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "appointment.type_code",
+      "label": "Loại hẹn",
+      "dataType": "coded",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Appointment.typeCode",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": "appointment_type",
+      "rules": [],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "queue.uuid",
+      "label": "UUID hàng đợi",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "QueueEntry.uuid",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "queue.service_point_uuid",
+      "label": "Điểm phục vụ",
+      "dataType": "uuid",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "QueueEntry.servicePointUuid",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_UUID"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "queue.trang_thai",
+      "label": "Trạng thái hàng đợi",
+      "dataType": "coded",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "QueueEntry.status",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": "queue_status",
+      "rules": [],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "queue.ly_do_roi",
+      "label": "Lý do hủy/bỏ hàng đợi",
+      "dataType": "coded",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "QueueEntry.exitReason",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": "queue_exit_reason",
+      "rules": [],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "document.template_version",
+      "label": "Phiên bản mẫu in",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Document.templateVersion",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
+    },
+    {
+      "code": "document.so_chung_tu",
+      "label": "Số chứng từ",
+      "dataType": "text",
+      "mvp": "MVP-1/MVP-2",
+      "cardinality": "0..1",
+      "required": "optional",
+      "storage": {
+        "kind": "adapter_contract",
+        "path": "Document.number",
+        "verification": "B4-B9 source contract; backend implementation/round-trip required",
+        "missingState": {
+          "kind": "provenance_adapter_contract",
+          "path": "fieldStates[].dataStatus"
+        }
+      },
+      "unit": null,
+      "codeList": null,
+      "rules": [
+        "R_TEXT"
+      ],
+      "sourceRows": [],
+      "description": "Bổ sung 0.3.0; contract chi tiết xác định conditional required, status và source; không coi đây là native endpoint."
     }
   ],
   "codeLists": {
@@ -6612,12 +8578,12 @@
     ],
     "diagnosis_certainty": [
       {
-        "code": "PROVISIONAL",
+        "code": "provisional",
         "label": "Sơ bộ"
       },
       {
-        "code": "CONFIRMED",
-        "label": "Xác định"
+        "code": "confirmed",
+        "label": "Đã xác nhận"
       }
     ],
     "diagnosis_rank": [
@@ -6636,6 +8602,10 @@
         "label": "Đã chỉ định"
       },
       {
+        "code": "assigned",
+        "label": "Đã phân công"
+      },
+      {
         "code": "in_progress",
         "label": "Đang thực hiện"
       },
@@ -6646,24 +8616,32 @@
       {
         "code": "cancelled",
         "label": "Đã hủy"
+      },
+      {
+        "code": "entered-in-error",
+        "label": "Ghi nhận nhầm"
       }
     ],
     "result_status": [
+      {
+        "code": "draft",
+        "label": "Nháp"
+      },
       {
         "code": "preliminary",
         "label": "Sơ bộ"
       },
       {
         "code": "final",
-        "label": "Đã xác nhận"
+        "label": "Đã chốt"
       },
       {
         "code": "corrected",
         "label": "Đính chính"
       },
       {
-        "code": "cancelled",
-        "label": "Đã hủy"
+        "code": "entered-in-error",
+        "label": "Ghi nhận nhầm"
       }
     ],
     "prescription_status": [
@@ -6672,30 +8650,42 @@
         "label": "Nháp"
       },
       {
-        "code": "ready",
-        "label": "Bác sĩ đã xác nhận"
-      },
-      {
-        "code": "dispensed",
-        "label": "Đã cấp thuốc"
+        "code": "confirmed",
+        "label": "Đã xác nhận"
       },
       {
         "code": "cancelled",
         "label": "Đã hủy"
+      },
+      {
+        "code": "discontinued",
+        "label": "Đã ngừng"
       }
     ],
     "appointment_status": [
       {
-        "code": "scheduled",
+        "code": "booked",
         "label": "Đã đặt"
+      },
+      {
+        "code": "confirmed",
+        "label": "Đã xác nhận"
       },
       {
         "code": "arrived",
         "label": "Đã đến"
       },
       {
+        "code": "fulfilled",
+        "label": "Đã thực hiện"
+      },
+      {
         "code": "cancelled",
         "label": "Đã hủy"
+      },
+      {
+        "code": "no_show",
+        "label": "Không đến"
       }
     ],
     "bill_status": [
@@ -6843,6 +8833,110 @@
         "code": "needs_review",
         "label": "Cần kiểm tra chuỗi nguồn"
       }
+    ],
+    "allergy_clinical_status": [
+      {
+        "code": "active",
+        "label": "active"
+      },
+      {
+        "code": "inactive",
+        "label": "inactive"
+      },
+      {
+        "code": "resolved",
+        "label": "resolved"
+      }
+    ],
+    "allergy_verification_status": [
+      {
+        "code": "unconfirmed",
+        "label": "unconfirmed"
+      },
+      {
+        "code": "confirmed",
+        "label": "confirmed"
+      },
+      {
+        "code": "refuted",
+        "label": "refuted"
+      },
+      {
+        "code": "entered-in-error",
+        "label": "entered-in-error"
+      }
+    ],
+    "allergy_criticality": [
+      {
+        "code": "low",
+        "label": "low"
+      },
+      {
+        "code": "high",
+        "label": "high"
+      },
+      {
+        "code": "unable-to-assess",
+        "label": "unable-to-assess"
+      }
+    ],
+    "queue_status": [
+      {
+        "code": "waiting",
+        "label": "waiting"
+      },
+      {
+        "code": "called",
+        "label": "called"
+      },
+      {
+        "code": "in_service",
+        "label": "in_service"
+      },
+      {
+        "code": "completed",
+        "label": "completed"
+      },
+      {
+        "code": "cancelled",
+        "label": "cancelled"
+      },
+      {
+        "code": "left",
+        "label": "left"
+      }
+    ],
+    "queue_exit_reason": [
+      {
+        "code": "patient_requested",
+        "label": "patient_requested"
+      },
+      {
+        "code": "duplicate_registration",
+        "label": "duplicate_registration"
+      },
+      {
+        "code": "service_unavailable",
+        "label": "service_unavailable"
+      },
+      {
+        "code": "referred_elsewhere",
+        "label": "referred_elsewhere"
+      },
+      {
+        "code": "other",
+        "label": "other"
+      }
+    ],
+    "appointment_type": [
+      {
+        "code": "FIRST",
+        "label": "FIRST"
+      },
+      {
+        "code": "FOLLOWUP",
+        "label": "FOLLOWUP"
+      }
     ]
   },
   "rules": {
@@ -6892,7 +8986,7 @@
   "externalCatalogues": {
     "icd10": {
       "source": "Danh mục nhóm lựa chọn theo yêu cầu Việt Nam; cần nguồn và phiên bản được nhóm xác nhận.",
-      "status": "awaiting_versioned_catalogue",
+      "status": "official_2026_scoped_mvp_allowlist_pending_clinical_use_review",
       "requiredFor": [
         "diagnosis.save"
       ],
@@ -6903,11 +8997,12 @@
         "version",
         "effectiveFrom",
         "effectiveTo"
-      ]
+      ],
+      "path": "metadata/vinshc/catalogues/icd10-mvp.json"
     },
     "drugs": {
       "source": "Danh mục chế phẩm của cơ sở; không suy từ tên thương mại trong PDF.",
-      "status": "awaiting_facility_catalogue",
+      "status": "sample_and_synthetic_test_catalogue_available_not_production",
       "requiredFor": [
         "prescription.confirm",
         "dispense.confirm"
@@ -6924,11 +9019,12 @@
         "active",
         "source",
         "version"
-      ]
+      ],
+      "path": "metadata/vinshc/catalogues/medications.json"
     },
     "services": {
       "source": "Danh mục dịch vụ + bảng giá theo cơ sở, tách snapshot giá khỏi danh mục.",
-      "status": "awaiting_facility_catalogue",
+      "status": "sample_and_synthetic_test_catalogue_available_not_production",
       "requiredFor": [
         "order.create",
         "bill.create"
@@ -6943,7 +9039,8 @@
         "active",
         "source",
         "version"
-      ]
+      ],
+      "path": "metadata/vinshc/catalogues/services.json"
     },
     "address": {
       "source": "Quyết định 19/2025/QĐ-TTg, Phụ lục I/II, hai phần Công báo chính thức",
@@ -7060,18 +9157,30 @@
   },
   "reviewedBackend": {
     "branch": "clinic-backend",
-    "commit": "9a16734",
+    "commit": "6c407f1",
     "date": "2026-10-11",
-    "evidence": "Read B2/B3 contracts/tests on remote; not execution of those tests on this branch."
+    "evidence": "Read code/API docs; runtime claims remain backend-owned"
   },
   "contracts": {
     "b2": "metadata/vinshc/contracts/b2.json",
-    "b3": "metadata/vinshc/contracts/b3.json"
+    "b3": "metadata/vinshc/contracts/b3.json",
+    "b4b9": "metadata/vinshc/contracts/b4-b9.json",
+    "fhir": "metadata/vinshc/contracts/fhir.json",
+    "printing": "metadata/vinshc/contracts/printing-reporting.json"
   },
   "catalogues": {
     "relationships": "metadata/vinshc/catalogues/contact-relationships.json",
     "address": "metadata/vinshc/catalogues/address-vn-19-2025.json",
-    "syntheticProviders": "metadata/vinshc/catalogues/providers.synthetic.json"
+    "syntheticProviders": "metadata/vinshc/catalogues/providers.synthetic.json",
+    "facilities": "metadata/vinshc/catalogues/facilities.json",
+    "medicationUnits": "metadata/vinshc/catalogues/medication-units.json",
+    "medications": "metadata/vinshc/catalogues/medications.json",
+    "allergies": "metadata/vinshc/catalogues/allergies.json",
+    "services": "metadata/vinshc/catalogues/services.json",
+    "prices": "metadata/vinshc/catalogues/prices.json",
+    "diagnostics": "metadata/vinshc/catalogues/diagnostics.json",
+    "workflow": "metadata/vinshc/contracts/workflow.json",
+    "icd10": "metadata/vinshc/catalogues/icd10-mvp.json"
   },
   "identifierSystems": {
     "identifier.internal": {
@@ -7102,5 +9211,40 @@
       "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
       "environmentInvariant": true
     }
+  },
+  "releasePolicy": {
+    "scope": "sample-derived and synthetic test package",
+    "productionEnabled": false,
+    "pending": [
+      "clinical terminology approval including LOINC",
+      "facility legal identity/formulary/prices",
+      "technical attachment limits",
+      "backend scoped security and integration acceptance"
+    ]
+  },
+  "catalogueVersions": {
+    "relationships": "1.0.0",
+    "address": "VN-19-2025-2025-07-01",
+    "syntheticProviders": "1.0.0",
+    "facilities": "0.3.0",
+    "medicationUnits": "0.3.0",
+    "medications": "0.3.0",
+    "allergies": "0.3.0",
+    "services": "0.3.0",
+    "prices": "0.3.0",
+    "diagnostics": "0.3.0",
+    "workflow": "0.3.0",
+    "icd10": "VN-06-2026-2026-07-01"
+  },
+  "versionPolicy": "Package/form/contract release version is separate from pinned catalogue, terminology, extension and print-template versions. A label-only package patch does not alter catalogue records or historical snapshots.",
+  "legacyCodePolicy": {
+    "version": "0.2.0",
+    "writePolicy": "Only current canonical enums accepted for new writes; preserve original raw code/version in legacy history",
+    "prescription.ready": "confirmed after checking confirmation snapshot/audit",
+    "prescription.dispensed": "confirmed plus independently verified dispensing ledger; never infer receipt or quantity from legacy state alone",
+    "appointment.scheduled": "booked after preserving original raw code/version",
+    "result.cancelled": "No automatic conversion. Preserve historical marker; clinician reviews whether entered-in-error or related order cancellation, with reason and audit",
+    "diagnosis.PROVISIONAL": "provisional at adapter boundary; native enum remains PROVISIONAL",
+    "diagnosis.CONFIRMED": "confirmed at adapter boundary; native enum remains CONFIRMED"
   }
 }

@@ -1,9 +1,9 @@
 {
-  "version": "0.2.0",
-  "status": "business_access_contract_not_deployed_security",
+  "version": "0.3.0",
+  "status": "importable_custom_privileges_plus_scoped_adapter_contract",
   "default": "deny",
   "multiRole": true,
-  "roleComposition": "Union of granted actions, with every operation still subject to facility/object/state scope; explicit deny and backend security policies take precedence.",
+  "roleComposition": "Union of assigned privileges; action additionally checked against an authenticated active workspace role and full resource scope; deny-by-default. No client-supplied scope trusted.",
   "fieldGroups": {
     "patient_identity": [
       "patient.*",
@@ -87,7 +87,12 @@
         "same_facility",
         "administrative_projection_only"
       ],
-      "note": "Không đọc chart/obs khám/thuốc/kết quả hay file y tế; mở Visit không xác nhận thanh toán."
+      "note": "Không đọc chart/obs khám/thuốc/kết quả hay file y tế; mở Visit không xác nhận thanh toán.",
+      "openmrs": {
+        "uuid": "8ca9af35-fcb9-544f-a700-45effa98a741",
+        "name": "VinSHC App: reception",
+        "inheritedRoles": []
+      }
     },
     "cashier": {
       "label": "Thu ngân",
@@ -111,7 +116,12 @@
         "billing_projection_only",
         "refund_requires_original_transaction_and_reason"
       ],
-      "note": "Không sửa nội dung lâm sàng; hủy lượt không tự hoàn tiền."
+      "note": "Không sửa nội dung lâm sàng; hủy lượt không tự hoàn tiền.",
+      "openmrs": {
+        "uuid": "db9ec101-2135-55a8-9967-2483ac965bcc",
+        "name": "VinSHC App: cashier",
+        "inheritedRoles": []
+      }
     },
     "nurse": {
       "label": "Điều dưỡng",
@@ -143,7 +153,12 @@
         "assigned_care_scope",
         "audit_reason_on_correction"
       ],
-      "note": "Không kê đơn hoặc xác nhận chẩn đoán; bác sĩ ghi sinh hiệu khi được cấp quyền kiêm nhiệm."
+      "note": "Không kê đơn hoặc xác nhận chẩn đoán; bác sĩ ghi sinh hiệu khi được cấp quyền kiêm nhiệm.",
+      "openmrs": {
+        "uuid": "352df280-e484-5be5-83af-0582bd72911b",
+        "name": "VinSHC App: nurse",
+        "inheritedRoles": []
+      }
     },
     "doctor": {
       "label": "Bác sĩ",
@@ -191,7 +206,12 @@
         "assigned_patient_scope",
         "final_records_require_new_version"
       ],
-      "note": "Không sửa phiếu thu; bản tóm tắt không thay dữ liệu gốc."
+      "note": "Không sửa phiếu thu; bản tóm tắt không thay dữ liệu gốc.",
+      "openmrs": {
+        "uuid": "72c30efb-9b10-5103-a637-7eb81fb40172",
+        "name": "VinSHC App: doctor",
+        "inheritedRoles": []
+      }
     },
     "lab": {
       "label": "Kỹ thuật viên CLS",
@@ -215,7 +235,12 @@
         "assigned_order_only",
         "patient_order_links_match"
       ],
-      "note": "Không truy cập toàn bộ chart; download/print cùng phạm vi order."
+      "note": "Không truy cập toàn bộ chart; download/print cùng phạm vi order.",
+      "openmrs": {
+        "uuid": "136d88da-16ac-5077-9c42-080ac83ca356",
+        "name": "VinSHC App: lab",
+        "inheritedRoles": []
+      }
     },
     "pharmacy": {
       "label": "Dược/quầy thuốc",
@@ -236,7 +261,12 @@
         "confirmed_prescription_only",
         "idempotent_dispense"
       ],
-      "note": "Không sửa DrugOrder; kho/lô/hạn dùng do BE-08 mở rộng."
+      "note": "Không sửa DrugOrder; kho/lô/hạn dùng do BE-08 mở rộng.",
+      "openmrs": {
+        "uuid": "5ff70d2c-13ad-52c2-9ec0-afffc5f972c9",
+        "name": "VinSHC App: pharmacy",
+        "inheritedRoles": []
+      }
     },
     "manager": {
       "label": "Quản lý",
@@ -250,7 +280,12 @@
         "same_facility",
         "aggregate_only_no_patient_names"
       ],
-      "note": "Muốn đọc chart phải có role lâm sàng riêng; không trả dữ liệu bệnh án xuống FE rồi giấu."
+      "note": "Muốn đọc chart phải có role lâm sàng riêng; không trả dữ liệu bệnh án xuống FE rồi giấu.",
+      "openmrs": {
+        "uuid": "037ef9b9-4780-54b8-9b2b-0266b5e31df2",
+        "name": "VinSHC App: manager",
+        "inheritedRoles": []
+      }
     },
     "admin": {
       "label": "Quản trị",
@@ -268,13 +303,2504 @@
       "conditions": [
         "audit_all_admin_changes"
       ],
-      "note": "Đây là role quản trị ứng dụng đề xuất, không đồng nhất Core System Developer/admin toàn quyền."
+      "note": "Đây là role quản trị ứng dụng đề xuất, không đồng nhất Core System Developer/admin toàn quyền.",
+      "openmrs": {
+        "uuid": "545d9037-557e-5ea3-8557-1f70247768c1",
+        "name": "VinSHC App: admin",
+        "inheritedRoles": []
+      }
     }
   },
   "backendRequirements": [
-    "Resolve actual Core/module privilege names on baseline before granting roles.",
-    "Enforce record-level scope at API/service, including reads/search/download/print.",
-    "Server sets actor from authenticated session; never trust supplied creator/provider blindly.",
-    "GET results must use role projections, not frontend-only filtering."
-  ]
+    "Load custom privilege/role CSV in isolated test runtime",
+    "Enforce same facility, verified assignment, record state and projection at API/service on all read/search/export/print paths",
+    "Do not inherit System Developer/Organizational: Doctor or broad Core Get Patients/Get Observations",
+    "Test 403 on direct Core/FHIR bypass with each app account; metadata is not a deployed authorization layer",
+    "Manager aggregate no patient names; admin no chart unless separately assigned clinical role and switching verified workspace"
+  ],
+  "actions": [
+    "read",
+    "create",
+    "update",
+    "void",
+    "cancel",
+    "print",
+    "download"
+  ],
+  "resources": [
+    "patient_identity",
+    "visit",
+    "vitals",
+    "clinical_chart",
+    "diagnosis",
+    "allergy",
+    "prescription",
+    "diagnostic_order",
+    "diagnostic_result",
+    "billing",
+    "payment",
+    "dispensing",
+    "appointment",
+    "queue",
+    "metadata_admin",
+    "reports"
+  ],
+  "matrix": [
+    {
+      "role": "reception",
+      "resource": "patient_identity",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC patient_identity read",
+          "privilegeUuid": "a71386f4-6983-503a-a230-42bfeb599027",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "create": {
+          "privilegeName": "VinSHC patient_identity create",
+          "privilegeUuid": "b67f08d3-faf6-5585-97ef-b08ebad98454",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "update": {
+          "privilegeName": "VinSHC patient_identity update",
+          "privilegeUuid": "066f1210-1ced-5f11-a48a-fe754774baa6",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "visit",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC visit read",
+          "privilegeUuid": "e1596920-f1e1-597f-8dbc-fa5eb85374e7",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "create": {
+          "privilegeName": "VinSHC visit create",
+          "privilegeUuid": "5ea632b9-de82-52d9-8310-e28e7f65f98d",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "update": {
+          "privilegeName": "VinSHC visit update",
+          "privilegeUuid": "a254d235-9aa1-520b-ba86-e9090b996eea",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "void": null,
+        "cancel": {
+          "privilegeName": "VinSHC visit cancel",
+          "privilegeUuid": "121b8a87-e8dd-5d97-aa24-4a61926845f3",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "vitals",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "diagnosis",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "allergy",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "prescription",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "billing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "payment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "dispensing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "appointment",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC appointment read",
+          "privilegeUuid": "67d276da-afc6-5f8c-86fc-2dd4811f4903",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "create": {
+          "privilegeName": "VinSHC appointment create",
+          "privilegeUuid": "59415802-df82-5412-9bd9-6d1d7121cce5",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "update": {
+          "privilegeName": "VinSHC appointment update",
+          "privilegeUuid": "3bd1c9a9-e09b-598b-84c0-3bbb07e7e214",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "void": null,
+        "cancel": {
+          "privilegeName": "VinSHC appointment cancel",
+          "privilegeUuid": "b3af6463-8f8a-532a-9c90-2bbaa9d8a486",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "print": {
+          "privilegeName": "VinSHC appointment print",
+          "privilegeUuid": "446d4a57-17e3-5df1-8208-e5eb2ce384f7",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "queue",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC queue read",
+          "privilegeUuid": "2618a5fc-cdb0-548e-8695-042df82fd1da",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "create": {
+          "privilegeName": "VinSHC queue create",
+          "privilegeUuid": "1a73bdb2-e15e-5695-9c10-b46cbdba4e7e",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "update": {
+          "privilegeName": "VinSHC queue update",
+          "privilegeUuid": "ba91cefe-3b04-5784-9d43-fc0afbcb04ed",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "void": null,
+        "cancel": {
+          "privilegeName": "VinSHC queue cancel",
+          "privilegeUuid": "ae12b03c-9e8a-5991-b781-270bcbea7358",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "administrative"
+        },
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "reception",
+      "resource": "reports",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "patient_identity",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC patient_identity read",
+          "privilegeUuid": "a71386f4-6983-503a-a230-42bfeb599027",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "minimal_identity"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "visit",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC visit read",
+          "privilegeUuid": "e1596920-f1e1-597f-8dbc-fa5eb85374e7",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "vitals",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "diagnosis",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "allergy",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "prescription",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "billing",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC billing read",
+          "privilegeUuid": "8fa718a8-2bc9-510d-9bfe-a3e6e6434d93",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "create": {
+          "privilegeName": "VinSHC billing create",
+          "privilegeUuid": "b0e90ded-a487-5a4a-8efa-0f755b7f44a9",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "update": null,
+        "void": null,
+        "cancel": {
+          "privilegeName": "VinSHC billing cancel",
+          "privilegeUuid": "c5450ec3-c072-5072-81e2-742ec7c7e7ad",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "print": {
+          "privilegeName": "VinSHC billing print",
+          "privilegeUuid": "95563ca6-f8cd-5f11-a317-88f67b4c8c41",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "download": {
+          "privilegeName": "VinSHC billing download",
+          "privilegeUuid": "83157668-7756-513b-83fb-0b8b3251fabf",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        }
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "payment",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC payment read",
+          "privilegeUuid": "0cd61baa-837a-5fe5-b7c1-55056214cac2",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "create": {
+          "privilegeName": "VinSHC payment create",
+          "privilegeUuid": "143f048b-a3d2-5c41-b7e1-c6801b87b94c",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": {
+          "privilegeName": "VinSHC payment print",
+          "privilegeUuid": "b6eb3c07-acaa-58f0-a90c-947a1b571f39",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        },
+        "download": {
+          "privilegeName": "VinSHC payment download",
+          "privilegeUuid": "5ce716ee-6739-5091-b4fd-1049a5385e9f",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "billing"
+        }
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "dispensing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "appointment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "queue",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "cashier",
+      "resource": "reports",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "patient_identity",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC patient_identity read",
+          "privilegeUuid": "a71386f4-6983-503a-a230-42bfeb599027",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "minimal_identity"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "visit",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC visit read",
+          "privilegeUuid": "e1596920-f1e1-597f-8dbc-fa5eb85374e7",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "care"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "vitals",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC vitals read",
+          "privilegeUuid": "cbf1f745-beee-5320-8331-0c5c13260eb1",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "care"
+        },
+        "create": {
+          "privilegeName": "VinSHC vitals create",
+          "privilegeUuid": "0be5704e-f41e-59da-9a73-9b685cbe8e29",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "care"
+        },
+        "update": {
+          "privilegeName": "VinSHC vitals update",
+          "privilegeUuid": "4a8b3f43-6bfd-5080-86de-ba06dbf52519",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "care"
+        },
+        "void": {
+          "privilegeName": "VinSHC vitals void",
+          "privilegeUuid": "daed5ace-4d1d-5335-a5f8-27389fefb869",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record",
+            "assigned_encounter"
+          ],
+          "projection": "care"
+        },
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC clinical_chart read",
+          "privilegeUuid": "f16912ce-f4c0-5ec9-9d8d-85c1624020ff",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "care"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "diagnosis",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "allergy",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "prescription",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "billing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "payment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "dispensing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "appointment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "queue",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC queue read",
+          "privilegeUuid": "2618a5fc-cdb0-548e-8695-042df82fd1da",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "care"
+        },
+        "create": null,
+        "update": {
+          "privilegeName": "VinSHC queue update",
+          "privilegeUuid": "ba91cefe-3b04-5784-9d43-fc0afbcb04ed",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "care"
+        },
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "nurse",
+      "resource": "reports",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "patient_identity",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC patient_identity read",
+          "privilegeUuid": "a71386f4-6983-503a-a230-42bfeb599027",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "visit",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC visit read",
+          "privilegeUuid": "e1596920-f1e1-597f-8dbc-fa5eb85374e7",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": null,
+        "update": {
+          "privilegeName": "VinSHC visit update",
+          "privilegeUuid": "a254d235-9aa1-520b-ba86-e9090b996eea",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "vitals",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC vitals read",
+          "privilegeUuid": "cbf1f745-beee-5320-8331-0c5c13260eb1",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC clinical_chart read",
+          "privilegeUuid": "f16912ce-f4c0-5ec9-9d8d-85c1624020ff",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": {
+          "privilegeName": "VinSHC clinical_chart print",
+          "privilegeUuid": "40f09f5b-53e9-5c63-9873-d46db694aeaa",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "download": {
+          "privilegeName": "VinSHC clinical_chart download",
+          "privilegeUuid": "52f884a7-360a-5582-8be8-9f06f785059c",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        }
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "diagnosis",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC diagnosis read",
+          "privilegeUuid": "a5c23dd2-86a7-5d7d-9dac-561d69f00da8",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": {
+          "privilegeName": "VinSHC diagnosis create",
+          "privilegeUuid": "fa77b6a5-7a78-5478-aca7-d105e4f7ba30",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "update": {
+          "privilegeName": "VinSHC diagnosis update",
+          "privilegeUuid": "ea8c96ac-171f-5e0e-88de-642dc83bfd67",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "void": {
+          "privilegeName": "VinSHC diagnosis void",
+          "privilegeUuid": "35f77f54-1b07-5f49-a78d-ee8f48875d9e",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "allergy",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC allergy read",
+          "privilegeUuid": "f8115d40-af0a-52b3-8624-5631d22e01ac",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": {
+          "privilegeName": "VinSHC allergy create",
+          "privilegeUuid": "74965d76-521e-53f1-aada-3badb59a8ba7",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "update": {
+          "privilegeName": "VinSHC allergy update",
+          "privilegeUuid": "f429b459-0d31-5e82-b2bc-734fc4e9c1ab",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record"
+          ],
+          "projection": "chart"
+        },
+        "void": {
+          "privilegeName": "VinSHC allergy void",
+          "privilegeUuid": "c98f5846-b8a3-5d59-971b-b3726a0574ec",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record"
+          ],
+          "projection": "chart"
+        },
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "prescription",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC prescription read",
+          "privilegeUuid": "0b2a43ad-c0eb-5943-85ba-b2d34c106e48",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": {
+          "privilegeName": "VinSHC prescription create",
+          "privilegeUuid": "61b3c552-139d-5313-b8a1-3dbb75789a88",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "update": {
+          "privilegeName": "VinSHC prescription update",
+          "privilegeUuid": "ae12a609-2db4-52f8-a263-b08e570267db",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "void": null,
+        "cancel": {
+          "privilegeName": "VinSHC prescription cancel",
+          "privilegeUuid": "48bb24cc-3f11-5711-8c5b-f7a1259d5567",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "cancellable_prescription",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "print": {
+          "privilegeName": "VinSHC prescription print",
+          "privilegeUuid": "5c28b279-1792-568e-9e32-226991a9dee7",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "download": {
+          "privilegeName": "VinSHC prescription download",
+          "privilegeUuid": "db4b3754-996e-5d51-b87c-7eb16655183c",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        }
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC diagnostic_order read",
+          "privilegeUuid": "d3e8b213-d034-5855-8fe8-db359b61afeb",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": {
+          "privilegeName": "VinSHC diagnostic_order create",
+          "privilegeUuid": "341d48ee-c87f-567b-ad9b-702e0cee0035",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "update": {
+          "privilegeName": "VinSHC diagnostic_order update",
+          "privilegeUuid": "2dff02b5-e88c-5aff-ad95-bd194bf47e98",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record",
+            "open_visit",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "void": null,
+        "cancel": {
+          "privilegeName": "VinSHC diagnostic_order cancel",
+          "privilegeUuid": "0e548c99-87b6-557f-93ab-db2eba1c88be",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "mutable_record",
+            "assigned_encounter"
+          ],
+          "projection": "chart"
+        },
+        "print": {
+          "privilegeName": "VinSHC diagnostic_order print",
+          "privilegeUuid": "d6ebca36-85b5-59f4-8a4e-7dbde9c6d135",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "download": {
+          "privilegeName": "VinSHC diagnostic_order download",
+          "privilegeUuid": "b83b922f-7ffc-590d-a189-d9b676be29fd",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        }
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC diagnostic_result read",
+          "privilegeUuid": "702e7def-06b5-55f4-814e-d8d5e3ec5b29",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "create": null,
+        "update": {
+          "privilegeUuid": "24ca3669-ed42-5a84-bbfb-d1ed050ee276",
+          "privilegeName": "VinSHC diagnostic_result update",
+          "conditions": [
+            "same_facility",
+            "assigned_patient",
+            "result_reviewer",
+            "assigned_encounter"
+          ],
+          "projection": "clinical_assigned"
+        },
+        "void": null,
+        "cancel": null,
+        "print": {
+          "privilegeName": "VinSHC diagnostic_result print",
+          "privilegeUuid": "0599280d-5e06-53c2-98e7-9b8111866705",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        },
+        "download": {
+          "privilegeName": "VinSHC diagnostic_result download",
+          "privilegeUuid": "e52f4726-9720-5688-94f6-6c2ec6cda604",
+          "conditions": [
+            "same_facility",
+            "assigned_patient"
+          ],
+          "projection": "chart"
+        }
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "billing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "payment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "dispensing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "appointment",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC appointment read",
+          "privilegeUuid": "67d276da-afc6-5f8c-86fc-2dd4811f4903",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "chart"
+        },
+        "create": {
+          "privilegeName": "VinSHC appointment create",
+          "privilegeUuid": "59415802-df82-5412-9bd9-6d1d7121cce5",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "chart"
+        },
+        "update": {
+          "privilegeName": "VinSHC appointment update",
+          "privilegeUuid": "3bd1c9a9-e09b-598b-84c0-3bbb07e7e214",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "chart"
+        },
+        "void": null,
+        "cancel": {
+          "privilegeName": "VinSHC appointment cancel",
+          "privilegeUuid": "b3af6463-8f8a-532a-9c90-2bbaa9d8a486",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "chart"
+        },
+        "print": {
+          "privilegeName": "VinSHC appointment print",
+          "privilegeUuid": "446d4a57-17e3-5df1-8208-e5eb2ce384f7",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "chart"
+        },
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "queue",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC queue read",
+          "privilegeUuid": "2618a5fc-cdb0-548e-8695-042df82fd1da",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "chart"
+        },
+        "create": null,
+        "update": {
+          "privilegeName": "VinSHC queue update",
+          "privilegeUuid": "ba91cefe-3b04-5784-9d43-fc0afbcb04ed",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "chart"
+        },
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "doctor",
+      "resource": "reports",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "patient_identity",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC patient_identity read",
+          "privilegeUuid": "a71386f4-6983-503a-a230-42bfeb599027",
+          "conditions": [
+            "same_facility",
+            "assigned_order"
+          ],
+          "projection": "minimal_identity"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "visit",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "vitals",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "diagnosis",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "allergy",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "prescription",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC diagnostic_order read",
+          "privilegeUuid": "d3e8b213-d034-5855-8fe8-db359b61afeb",
+          "conditions": [
+            "same_facility",
+            "assigned_order"
+          ],
+          "projection": "assigned_order"
+        },
+        "create": null,
+        "update": {
+          "privilegeName": "VinSHC diagnostic_order update",
+          "privilegeUuid": "2dff02b5-e88c-5aff-ad95-bd194bf47e98",
+          "conditions": [
+            "same_facility",
+            "assigned_order",
+            "mutable_record",
+            "open_visit"
+          ],
+          "projection": "assigned_order"
+        },
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC diagnostic_result read",
+          "privilegeUuid": "702e7def-06b5-55f4-814e-d8d5e3ec5b29",
+          "conditions": [
+            "same_facility",
+            "assigned_order"
+          ],
+          "projection": "assigned_order"
+        },
+        "create": {
+          "privilegeName": "VinSHC diagnostic_result create",
+          "privilegeUuid": "203b4744-9b75-52f7-b50a-b69b6b0fec2c",
+          "conditions": [
+            "same_facility",
+            "assigned_order",
+            "open_visit"
+          ],
+          "projection": "assigned_order"
+        },
+        "update": {
+          "privilegeName": "VinSHC diagnostic_result update",
+          "privilegeUuid": "24ca3669-ed42-5a84-bbfb-d1ed050ee276",
+          "conditions": [
+            "same_facility",
+            "assigned_order",
+            "mutable_record",
+            "open_visit"
+          ],
+          "projection": "assigned_order"
+        },
+        "void": {
+          "privilegeName": "VinSHC diagnostic_result void",
+          "privilegeUuid": "95dade3e-f440-5b68-8029-d89abaeca35a",
+          "conditions": [
+            "same_facility",
+            "assigned_order",
+            "mutable_record"
+          ],
+          "projection": "assigned_order"
+        },
+        "cancel": null,
+        "print": {
+          "privilegeName": "VinSHC diagnostic_result print",
+          "privilegeUuid": "0599280d-5e06-53c2-98e7-9b8111866705",
+          "conditions": [
+            "same_facility",
+            "assigned_order"
+          ],
+          "projection": "assigned_order"
+        },
+        "download": {
+          "privilegeName": "VinSHC diagnostic_result download",
+          "privilegeUuid": "e52f4726-9720-5688-94f6-6c2ec6cda604",
+          "conditions": [
+            "same_facility",
+            "assigned_order"
+          ],
+          "projection": "assigned_order"
+        }
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "billing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "payment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "dispensing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "appointment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "queue",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "lab",
+      "resource": "reports",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "patient_identity",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC patient_identity read",
+          "privilegeUuid": "a71386f4-6983-503a-a230-42bfeb599027",
+          "conditions": [
+            "same_facility",
+            "confirmed_prescription"
+          ],
+          "projection": "minimal_identity"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "visit",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "vitals",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "diagnosis",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "allergy",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "prescription",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC prescription read",
+          "privilegeUuid": "0b2a43ad-c0eb-5943-85ba-b2d34c106e48",
+          "conditions": [
+            "same_facility",
+            "confirmed_prescription"
+          ],
+          "projection": "confirmed_prescription"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": {
+          "privilegeName": "VinSHC prescription print",
+          "privilegeUuid": "5c28b279-1792-568e-9e32-226991a9dee7",
+          "conditions": [
+            "same_facility",
+            "confirmed_prescription"
+          ],
+          "projection": "confirmed_prescription"
+        },
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "billing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "payment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "dispensing",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC dispensing read",
+          "privilegeUuid": "a6ac1fc0-9981-57bd-ab00-bd903009bf1d",
+          "conditions": [
+            "same_facility",
+            "confirmed_prescription"
+          ],
+          "projection": "confirmed_prescription"
+        },
+        "create": {
+          "privilegeName": "VinSHC dispensing create",
+          "privilegeUuid": "36d9a7dc-1c40-5714-9bf0-72fde1779c50",
+          "conditions": [
+            "same_facility",
+            "confirmed_prescription"
+          ],
+          "projection": "confirmed_prescription"
+        },
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": {
+          "privilegeName": "VinSHC dispensing print",
+          "privilegeUuid": "5522cafc-a3ea-597c-a6a8-ce6e2da6e9dc",
+          "conditions": [
+            "same_facility",
+            "confirmed_prescription"
+          ],
+          "projection": "confirmed_prescription"
+        },
+        "download": {
+          "privilegeName": "VinSHC dispensing download",
+          "privilegeUuid": "9edf3bae-40bf-55d1-86dc-ae1414c20ddc",
+          "conditions": [
+            "same_facility",
+            "confirmed_prescription"
+          ],
+          "projection": "confirmed_prescription"
+        }
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "appointment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "queue",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "pharmacy",
+      "resource": "reports",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "patient_identity",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "visit",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "vitals",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "diagnosis",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "allergy",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "prescription",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "billing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "payment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "dispensing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "appointment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "queue",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "manager",
+      "resource": "reports",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC reports read",
+          "privilegeUuid": "433aabbe-325a-535f-9b93-554b872d43ec",
+          "conditions": [
+            "same_facility",
+            "aggregate_only"
+          ],
+          "projection": "aggregate"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": {
+          "privilegeName": "VinSHC reports print",
+          "privilegeUuid": "f6be7f01-b163-550b-bbac-c7580bfd3f3e",
+          "conditions": [
+            "same_facility",
+            "aggregate_only"
+          ],
+          "projection": "aggregate"
+        },
+        "download": {
+          "privilegeName": "VinSHC reports download",
+          "privilegeUuid": "7bbcdc7d-9e29-53ed-a32b-063d69169e3d",
+          "conditions": [
+            "same_facility",
+            "aggregate_only"
+          ],
+          "projection": "aggregate"
+        }
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "patient_identity",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "visit",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "vitals",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "clinical_chart",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "diagnosis",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "allergy",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "prescription",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "diagnostic_order",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "diagnostic_result",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "billing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "payment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "dispensing",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "appointment",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "queue",
+      "actions": {
+        "read": null,
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "metadata_admin",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC metadata_admin read",
+          "privilegeUuid": "3a94b6bb-6efb-5ded-aed9-6f5ae3243842",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "metadata"
+        },
+        "create": {
+          "privilegeName": "VinSHC metadata_admin create",
+          "privilegeUuid": "eb1aaec3-68e9-5376-af16-af93eb880956",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "metadata"
+        },
+        "update": {
+          "privilegeName": "VinSHC metadata_admin update",
+          "privilegeUuid": "5a431849-a272-5be6-b4e0-b70bd1948be9",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "metadata"
+        },
+        "void": {
+          "privilegeName": "VinSHC metadata_admin void",
+          "privilegeUuid": "25dc216b-b7d0-59a7-82e2-8bd09f3d2045",
+          "conditions": [
+            "same_facility"
+          ],
+          "projection": "metadata"
+        },
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    },
+    {
+      "role": "admin",
+      "resource": "reports",
+      "actions": {
+        "read": {
+          "privilegeName": "VinSHC reports read",
+          "privilegeUuid": "433aabbe-325a-535f-9b93-554b872d43ec",
+          "conditions": [
+            "same_facility",
+            "aggregate_only"
+          ],
+          "projection": "aggregate"
+        },
+        "create": null,
+        "update": null,
+        "void": null,
+        "cancel": null,
+        "print": null,
+        "download": null
+      }
+    }
+  ],
+  "appAdminReadsChart": false,
+  "activeWorkspaceRequired": true,
+  "nativeAccess": {
+    "directCoreRestFHIR": "deny_for_application_accounts_until_scoped_gateway",
+    "broadCorePrivilegesGranted": [],
+    "serviceAccount": "Backend-only credential, authenticated audit actor and object checks before privileged native access; no client exposure"
+  },
+  "fieldGroupCompatibility": "Original business grants retained for reference; execution matrix is authoritative in 0.3.0",
+  "reviewPolicy": "Only a doctor with server-verified result-reviewer assignment may finalize/correct a result; technologist edits are limited to assigned mutable draft/preliminary results. Confirmed prescription cancel means explicit discontinue, never in-place mutation.",
+  "contextTrust": "All context predicates and object state must be derived on server from authenticated assignment/facility/audit data; ignore client-supplied claims. This file specifies policy, not deployed enforcement."
 }
