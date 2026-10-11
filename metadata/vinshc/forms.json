@@ -1,5 +1,5 @@
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "format": "handoff_spec_not_o3forms_schema",
   "owner": "DATA-07 + FE-04",
   "forms": [
@@ -25,6 +25,37 @@
       "notes": [
         "Ngày sinh hiển thị theo precision, không ép ngày đủ khi chỉ biết năm.",
         "Mã/CCCD/điện thoại là text; không tự merge."
+      ],
+      "repeatableSections": [
+        {
+          "code": "contacts",
+          "label": "Người liên hệ",
+          "cardinality": "0..n",
+          "fields": [
+            "contact.ho_ten",
+            "contact.quan_he",
+            "contact.dien_thoai",
+            "contact.dia_chi",
+            "contact.row_key",
+            "contact.dien_thoai_chuan_hoa",
+            "contact.trang_thai_chuan_hoa_dien_thoai",
+            "contact.uu_tien",
+            "contact.lien_he_chinh",
+            "contact.lien_he_khan_cap",
+            "contact.trang_thai",
+            "contact.person_lien_ket_uuid",
+            "contact.nguon",
+            "contact.thoi_diem_ghi_nhan",
+            "contact.ly_do_void",
+            "contact.quan_he_phien_ban",
+            "contact.quan_he_nhan"
+          ],
+          "contract": "metadata/vinshc/contracts/b2.json",
+          "notes": [
+            "0..1 contact chính active; nhiều contact khẩn cấp được phép.",
+            "Không tự tạo Patient/Person người nhà; liên kết Person chỉ qua lựa chọn được xác minh."
+          ]
+        }
       ]
     },
     {
@@ -46,7 +77,8 @@
         "Mỗi giá trị có state/value/unit; trạng thái obs dùng concept *_trang_thai.",
         "Một lần đo = một obsGroup, các lần đo là các nhóm khác nhau.",
         "Không cấu hình ngưỡng cảnh báo mặc định."
-      ]
+      ],
+      "contract": "metadata/vinshc/contracts/b3.json"
     },
     {
       "code": "vinshc-consultation",

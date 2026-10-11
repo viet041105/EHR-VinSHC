@@ -1,6 +1,6 @@
 {
-  "version": "0.1.0",
-  "packSha256": "948317464e1c3913eee8d5574be1621e2a02fa6ebf65fd03eb9756e140847584",
+  "version": "0.2.0",
+  "packSha256": "0c7e42483c176ef9b47529fb3ea41bad812d6d4efc41bd03f8883ff3c86aab72",
   "concepts": {
     "vitals.mach": "263e4d0b-61d2-5517-bcb1-992cfb60675b",
     "vitals.ha_tam_thu": "f8da18ad-2e26-55cd-954b-51d6e0738815",
@@ -90,6 +90,36 @@
     "answer.visit_close_reason.left_early": "cf8f5dc1-e869-5990-ab3d-e704fccf0707",
     "answer.visit_close_reason.cancelled": "8ad6ff22-bfca-5a8d-aa90-06a2bbd7de4e",
     "answer.visit_close_reason.referred": "5af6b517-7dae-526e-92f2-afff2ed64a5c"
+  },
+  "identifierSystems": {
+    "identifier.internal": {
+      "system": "urn:uuid:ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "identifierTypeUuid": "ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.cccd": {
+      "system": "urn:uuid:4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+      "identifierTypeUuid": "4e5406dc-8ff9-5486-98fa-5d95c6fe8233",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.bhxh": {
+      "system": "urn:uuid:d7902062-a695-5bf3-8764-acf7f43e3238",
+      "identifierTypeUuid": "d7902062-a695-5bf3-8764-acf7f43e3238",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    },
+    "identifier.bhyt": {
+      "system": "urn:uuid:e2b901c3-d442-565b-bff5-841aff260d2d",
+      "identifierTypeUuid": "e2b901c3-d442-565b-bff5-841aff260d2d",
+      "namespaceOwner": "VinSHC project",
+      "scope": "Project-assigned stable namespace; not a government-published national canonical URI",
+      "environmentInvariant": true
+    }
   },
   "status": "Expected identities. Backend must verify imported metadata before exposing this map to FE."
 }

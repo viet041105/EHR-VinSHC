@@ -1,0 +1,1136 @@
+{
+  "version": "0.2.0",
+  "syntheticOnly": true,
+  "status": "structural_cases_not_native_requests",
+  "cases": [
+    {
+      "kind": "contacts",
+      "id": "contact-complete",
+      "valid": true,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "two-emergency-one-primary",
+      "valid": true,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "781b4bc8-1ff5-5423-8c5f-d17662158fe2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 2,
+          "isPrimary": false,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "no-contact",
+      "valid": true,
+      "input": []
+    },
+    {
+      "kind": "contacts",
+      "id": "duplicate-row",
+      "valid": false,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 2,
+          "isPrimary": false,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "two-primary",
+      "valid": false,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "781b4bc8-1ff5-5423-8c5f-d17662158fe2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 2,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "duplicate-priority",
+      "valid": false,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "781b4bc8-1ff5-5423-8c5f-d17662158fe2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": false,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "unknown-relationship",
+      "valid": false,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "781b4bc8-1ff5-5423-8c5f-d17662158fe2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "wife",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 2,
+          "isPrimary": false,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "invalid-manual-phone",
+      "valid": false,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "781b4bc8-1ff5-5423-8c5f-d17662158fe2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "901234567",
+          "phoneNormalized": null,
+          "phoneNormalizationStatus": "needs_review",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 2,
+          "isPrimary": false,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "void-no-reason",
+      "valid": false,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "781b4bc8-1ff5-5423-8c5f-d17662158fe2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 2,
+          "isPrimary": false,
+          "emergencyContact": true,
+          "status": "void",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "bad-source",
+      "valid": false,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        },
+        {
+          "rowKey": "781b4bc8-1ff5-5423-8c5f-d17662158fe2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "090 123 4567",
+          "phoneNormalized": "+84901234567",
+          "phoneNormalizationStatus": "normalized",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 2,
+          "isPrimary": false,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "paper",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "contact-phone-refused",
+      "valid": true,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": null,
+          "phoneNormalized": null,
+          "phoneNormalizationStatus": "missing",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "manual",
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [
+            {
+              "fieldCode": "contact.dien_thoai",
+              "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+              "context": "contact",
+              "dataStatus": "refused",
+              "source": {
+                "kind": "manual",
+                "recordedAt": "2026-10-11T13:00:00+07:00"
+              },
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            }
+          ],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "contacts",
+      "id": "legacy-phone-preserved",
+      "valid": true,
+      "input": [
+        {
+          "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+          "fullName": "Người liên hệ giả",
+          "relationshipCode": "SPOUSE",
+          "phone": "901234567",
+          "phoneNormalized": null,
+          "phoneNormalizationStatus": "needs_review",
+          "addressText": "Địa chỉ giả phục vụ kiểm thử",
+          "priority": 1,
+          "isPrimary": true,
+          "emergencyContact": true,
+          "status": "active",
+          "linkedPersonUuid": null,
+          "source": {
+            "kind": "legacy_import",
+            "recordedAt": "2026-10-11T13:00:00+07:00",
+            "sourceReference": "synthetic-import-001"
+          },
+          "recordedAt": "2026-10-11T13:00:00+07:00",
+          "voidReason": null,
+          "fieldStates": [],
+          "relationshipVersion": "1.0.0",
+          "relationshipName": "Vợ/chồng"
+        }
+      ]
+    },
+    {
+      "kind": "phone",
+      "id": "phone-12",
+      "valid": true,
+      "input": "090 123 4567",
+      "expected": {
+        "raw": "090 123 4567",
+        "normalized": "+84901234567",
+        "status": "normalized"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-13",
+      "valid": true,
+      "input": "+84 (90) 123-4567",
+      "expected": {
+        "raw": "+84 (90) 123-4567",
+        "normalized": "+84901234567",
+        "status": "normalized"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-14",
+      "valid": true,
+      "input": "0084901234567",
+      "expected": {
+        "raw": "0084901234567",
+        "normalized": "+84901234567",
+        "status": "normalized"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-15",
+      "valid": true,
+      "input": "024 1234 5678",
+      "expected": {
+        "raw": "024 1234 5678",
+        "normalized": "+842412345678",
+        "status": "normalized"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-16",
+      "valid": true,
+      "input": "+1 202 555 0123",
+      "expected": {
+        "raw": "+1 202 555 0123",
+        "normalized": "+12025550123",
+        "status": "normalized"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-17",
+      "valid": true,
+      "input": "901234567",
+      "expected": {
+        "raw": "901234567",
+        "normalized": null,
+        "status": "needs_review"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-18",
+      "valid": true,
+      "input": "0901234567 ext 2",
+      "expected": {
+        "raw": "0901234567 ext 2",
+        "normalized": null,
+        "status": "needs_review"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-19",
+      "valid": true,
+      "input": "+840901234567",
+      "expected": {
+        "raw": "+840901234567",
+        "normalized": null,
+        "status": "needs_review"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-20",
+      "valid": true,
+      "input": "",
+      "expected": {
+        "raw": "",
+        "normalized": null,
+        "status": "needs_review"
+      }
+    },
+    {
+      "kind": "phone",
+      "id": "phone-21",
+      "valid": true,
+      "input": null,
+      "expected": {
+        "raw": null,
+        "normalized": null,
+        "status": "missing"
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "refused-phone",
+      "valid": true,
+      "input": {
+        "values": {
+          "patient.dien_thoai": null
+        },
+        "states": [
+          {
+            "fieldCode": "patient.dien_thoai",
+            "rowKey": null,
+            "context": "patient",
+            "dataStatus": "refused",
+            "source": {
+              "kind": "manual",
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            },
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "missing-no-reason",
+      "valid": false,
+      "input": {
+        "values": {
+          "patient.dien_thoai": null
+        },
+        "states": []
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "value-and-reason",
+      "valid": false,
+      "input": {
+        "values": {
+          "patient.dien_thoai": "0901234567"
+        },
+        "states": [
+          {
+            "fieldCode": "patient.dien_thoai",
+            "rowKey": null,
+            "context": "patient",
+            "dataStatus": "unknown",
+            "source": {
+              "kind": "manual",
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            },
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "wrong-context",
+      "valid": false,
+      "input": {
+        "values": {
+          "patient.dien_thoai": null
+        },
+        "states": [
+          {
+            "fieldCode": "patient.dien_thoai",
+            "rowKey": "b72e7428-a98b-53ce-bf64-cf165fbb43d2",
+            "context": "contact",
+            "dataStatus": "unknown",
+            "source": {
+              "kind": "manual",
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            },
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "derived-null-only",
+      "valid": true,
+      "input": {
+        "values": {
+          "patient.dien_thoai_chuan_hoa": null
+        },
+        "states": []
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "derived-reason-forbidden",
+      "valid": false,
+      "input": {
+        "values": {
+          "patient.dien_thoai_chuan_hoa": null
+        },
+        "states": [
+          {
+            "fieldCode": "patient.dien_thoai_chuan_hoa",
+            "rowKey": null,
+            "context": "patient",
+            "dataStatus": "unknown",
+            "source": {
+              "kind": "manual",
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            },
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "required-name-null",
+      "valid": false,
+      "input": {
+        "values": {
+          "patient.ho_ten": null
+        },
+        "states": []
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "patch-omitted",
+      "valid": true,
+      "input": {
+        "values": {},
+        "states": []
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "duplicate-state",
+      "valid": false,
+      "input": {
+        "values": {
+          "patient.dien_thoai": null
+        },
+        "states": [
+          {
+            "fieldCode": "patient.dien_thoai",
+            "rowKey": null,
+            "context": "patient",
+            "dataStatus": "unknown",
+            "source": {
+              "kind": "manual",
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            },
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          },
+          {
+            "fieldCode": "patient.dien_thoai",
+            "rowKey": null,
+            "context": "patient",
+            "dataStatus": "unknown",
+            "source": {
+              "kind": "manual",
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            },
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "field_states",
+      "id": "masked-manual-rejected",
+      "valid": false,
+      "input": {
+        "values": {
+          "patient.dien_thoai": null
+        },
+        "states": [
+          {
+            "fieldCode": "patient.dien_thoai",
+            "rowKey": null,
+            "context": "patient",
+            "dataStatus": "masked",
+            "source": {
+              "kind": "manual",
+              "recordedAt": "2026-10-11T13:00:00+07:00"
+            },
+            "recordedAt": "2026-10-11T13:00:00+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "address",
+      "id": "hanoi-bachmai-leading-zero",
+      "valid": true,
+      "input": {
+        "provinceCode": "01",
+        "communeCode": "00292",
+        "catalogueVersion": "VN-19-2025-2025-07-01",
+        "addressAsOfDate": "2025-07-01"
+      }
+    },
+    {
+      "kind": "address",
+      "id": "wrong-province",
+      "valid": false,
+      "input": {
+        "provinceCode": "79",
+        "communeCode": "00292",
+        "catalogueVersion": "VN-19-2025-2025-07-01",
+        "addressAsOfDate": "2025-07-01"
+      }
+    },
+    {
+      "kind": "address",
+      "id": "numeric-code",
+      "valid": false,
+      "input": {
+        "provinceCode": 1,
+        "communeCode": "00292",
+        "catalogueVersion": "VN-19-2025-2025-07-01",
+        "addressAsOfDate": "2025-07-01"
+      }
+    },
+    {
+      "kind": "address",
+      "id": "old-effective-date",
+      "valid": false,
+      "input": {
+        "provinceCode": "01",
+        "communeCode": "00292",
+        "catalogueVersion": "VN-19-2025-2025-07-01",
+        "addressAsOfDate": "2025-06-30"
+      }
+    },
+    {
+      "kind": "address",
+      "id": "wrong-version",
+      "valid": false,
+      "input": {
+        "provinceCode": "01",
+        "communeCode": "00292",
+        "catalogueVersion": "unversioned",
+        "addressAsOfDate": "2025-07-01"
+      }
+    },
+    {
+      "kind": "address",
+      "id": "unknown-commune",
+      "valid": false,
+      "input": {
+        "provinceCode": "01",
+        "communeCode": "99999",
+        "catalogueVersion": "VN-19-2025-2025-07-01",
+        "addressAsOfDate": "2025-07-01"
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "bp-complete",
+      "valid": true,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "recorded",
+            "value": 75,
+            "unit": "mm[Hg]"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "bp-one-component-with-reason",
+      "valid": true,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "unknown"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "mixed-time",
+      "valid": false,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "recorded",
+            "value": 75,
+            "unit": "mm[Hg]",
+            "measuredAt": "2026-10-11T14:00:00+07:00"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "mixed-patient",
+      "valid": false,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "recorded",
+            "value": 75,
+            "unit": "mm[Hg]",
+            "patientUuid": "fdc31db3-c05b-5ca1-883a-12b2faebe992"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "wrong-unit",
+      "valid": false,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "recorded",
+            "value": 75,
+            "unit": "kPa"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "zero-pressure",
+      "valid": false,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "recorded",
+            "value": 0,
+            "unit": "mm[Hg]"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "missing-with-value",
+      "valid": false,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "unknown",
+            "value": 75,
+            "unit": "mm[Hg]"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "absent-partner-state-required",
+      "valid": false,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 120,
+            "unit": "mm[Hg]"
+          }
+        ]
+      }
+    },
+    {
+      "kind": "bp",
+      "id": "comparison-is-warning-not-rejection",
+      "valid": true,
+      "input": {
+        "patientUuid": "ceae5c05-bfaa-5890-95ed-b03ee590c440",
+        "visitUuid": "c23e5f05-cfc9-5b1f-a423-136e298acd30",
+        "encounterUuid": "d894aa5f-01ac-53a5-b0ff-82f92ba81437",
+        "groupUuid": "b770f93a-0a1e-53df-a521-8614a7ee4060",
+        "measuredAt": "2026-10-11T13:00:00+07:00",
+        "components": [
+          {
+            "fieldCode": "vitals.ha_tam_thu",
+            "state": "recorded",
+            "value": 70,
+            "unit": "mm[Hg]"
+          },
+          {
+            "fieldCode": "vitals.ha_tam_truong",
+            "state": "recorded",
+            "value": 75,
+            "unit": "mm[Hg]"
+          }
+        ]
+      },
+      "warning": true
+    }
+  ]
+}

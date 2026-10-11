@@ -1,10 +1,12 @@
 # Bộ metadata VinSHC cho BE và FE
 
-**Phiên bản:** `0.1.0` · **Ngày:** 10/10/2026 · **Nhánh làm việc:** `role-3-metadata`.
+**Phiên bản:** `0.2.0` · **Ngày:** 11/10/2026 · **Nhánh làm việc:** `role-3-metadata`.
 
 Người 3 và BE đã chốt chuyển sang bước metadata. Bộ này cụ thể hóa phạm vi ngoại trú trong `BACKEND.md`: MVP-1 lõi khám và hợp đồng dữ liệu MVP-2 vận hành. Các ngưỡng lâm sàng, nguồn/phiên bản danh mục và quyền kỹ thuật được nghiệm thu riêng theo các mốc bên dưới.
 
-Đây là bộ bàn giao để triển khai, gồm **165 trường**, **78 đối tượng metadata** có UUID ổn định, 18 danh mục trạng thái, mẫu biểu, ma trận quyền và dữ liệu giả. Nó bổ sung cho khảo sát 983 dòng của PDF 195 trang; không yêu cầu BE tạo 983 cột hoặc triển khai toàn bộ nội trú.
+Đây là bộ bàn giao để triển khai, gồm **180 trường**, **78 đối tượng metadata** có UUID ổn định, danh mục trạng thái/quan hệ, mẫu biểu, ma trận quyền và dữ liệu giả. Nó bổ sung cho khảo sát 983 dòng của PDF 195 trang; không yêu cầu BE tạo 983 cột hoặc triển khai toàn bộ nội trú.
+
+Bản 0.2.0 bổ sung contacts, fieldStates theo từng trường B2, phone raw/normalized, identifier.system, catalogue tỉnh/xã bản gốc, mapping sinh hiệu chờ chuyên môn, BP panel, provider giả và overlay đổi nhãn. Đọc [bàn giao B2/B3](METADATA_B2_B3.md) để xem đủ từng yêu cầu và điều kiện còn mở. Đã đối chiếu code/tài liệu `clinic-backend@9a16734`; không chạy thay kiểm thử backend của nhánh đó.
 
 ## 1. Đọc file nào và dùng vào việc gì
 
@@ -18,6 +20,9 @@ Người 3 và BE đã chốt chuyển sang bước metadata. Bộ này cụ th�
 | [permissions.json](../metadata/vinshc/permissions.json) | Ma trận nghiệp vụ cho 8 role; **chưa tự cấp privilege hoặc thực thi bảo mật trên Core** |
 | [cases.json](../metadata/vinshc/fixtures/cases.json) | 28 ca giả cho validator cấu trúc; không phải request REST trực tiếp |
 | [workflows.json](../metadata/vinshc/fixtures/workflows.json) | Kịch bản tích hợp cho BE/người 4: hai bệnh nhân trùng tên, nhiều lượt, quyền, hủy/hoàn/cấp trùng |
+| [B2_FIELD_STATES.md](data/B2_FIELD_STATES.md) | Policy thiếu/null/rowKey/context cho 37 trường bệnh nhân/contact |
+| [B3_TERMINOLOGY.md](data/B3_TERMINOLOGY.md) | 8 mapping có UUID/code/release/nguồn và trạng thái duyệt |
+| [b2.json](../metadata/vinshc/contracts/b2.json), [b3.json](../metadata/vinshc/contracts/b3.json) | Contract contacts/phone/address/FHIR/provider và yêu cầu BE triển khai |
 | [configuration](../infra/backend/configuration/) | CSV thực sự để Initializer nạp khi build/khởi động backend |
 
 Không đổi các mã trường `patient.ma_noi_bo`, `patient.ma_bhxh`, `vitals.mach`… để đổi nhãn. `patient.ma_bhxh` chỉ là mã BHXH; số thẻ BHYT được tách thành `patient.ma_bhyt`.
@@ -34,7 +39,8 @@ Không đổi các mã trường `patient.ma_noi_bo`, `patient.ma_bhxh`, `vitals
 | Person attribute type | Điện thoại, ngày sinh nguyên văn/độ chính xác/năm/tháng, nghề nghiệp, địa chỉ nguyên văn/cũ |
 | Concept | Numeric, Text, Date, Coded, answer và ba nhóm Obs; các answer phải nạp trước question, group nạp sau member |
 | Form, role/privilege | Đặc tả phối hợp FE/BE. Không copy `forms.json` vào một domain không hỗ trợ hoặc coi ma trận nghiệp vụ là quyền đã chạy |
-| ICD-10, thuốc, dịch vụ, tỉnh/xã | Contract danh mục trong `externalCatalogues`; nguồn/phiên bản và dữ liệu cơ sở cần được cung cấp trước nghiệm thu chức năng tương ứng |
+| ICD-10, thuốc, dịch vụ | Contract danh mục trong `externalCatalogues`; nguồn/phiên bản và dữ liệu cơ sở cần được cung cấp trước nghiệm thu chức năng tương ứng |
+| Tỉnh/xã | Đủ bản gốc 34 tỉnh/thành và 3.321 đơn vị cấp xã theo 19/2025/QĐ-TTg, pin version/hiệu lực; conversion cũ-mới và thay đổi sau bản gốc cần nguồn/xác nhận riêng |
 | Lịch hẹn/queue, billing/dispensing | DTO cần B8/BE-08/BE-12 ánh xạ; cấu hình appointments/queue thuộc người 4, không có thay đổi ở vùng đó |
 
 Trong bảng trường, `native` là path thuộc mô hình OpenMRS; `person_attribute`/`identifier` tham chiếu type đã cấp UUID; `obs` tham chiếu concept và group; `adapter_contract` cần adapter/module được kiểm chứng. Path DTO không phải lời khẳng định REST nhận đúng tên/path đó.
@@ -76,7 +82,7 @@ Không biết giá trị:
 
 Chỉ `recorded` có `value`. Không gửi `value:null` với `recorded`, không dùng `0`, chuỗi rỗng hoặc `false` để thay thiếu. Ô bỏ trống không chứng minh đã hỏi và trả lời “không”. `masked`/`unreadable` phục vụ đối chiếu nguồn, không phải câu trả lời khám thường ngày.
 
-`storage.missingState` chỉ rõ cách lưu trạng thái: sinh hiệu và tiền sử có companion coded Obs đã cấp UUID; các trường native còn lại cần `fieldStates[].dataStatus` trong adapter/provenance contract. **Native null/không có identifier không lưu đủ các lý do thiếu**. BE phải bổ sung persistence trạng thái cho các trường đó nếu đưa nhập liệu từ nguồn vào phạm vi; chưa được coi extension này đã có trên Core.
+`storage.missingState` chỉ rõ cách lưu trạng thái: sinh hiệu và tiền sử có companion coded Obs đã cấp UUID; B2 có policy `b2Missing` riêng từng trường: cấm thiếu / chỉ null / null có fieldStates. Các trường còn lại cần adapter/provenance contract. **Native null/không có identifier không lưu đủ các lý do thiếu**. BE phải bổ sung persistence theo contract; chưa được coi extension này đã có trên Core. Bảng state chung không có nghĩa mọi field nhận mọi state.
 
 Các field lặp thuộc từng bản ghi cha (`contacts[]`, diagnoses, orders, results…), không ghép nhiều thuốc/chẩn đoán vào chuỗi chung. Cell fixture chỉ kiểm tra một giá trị nguyên tử; adapter phải giữ cấu trúc lặp và khóa dòng.
 
@@ -125,7 +131,7 @@ Numeric hữu hạn; tỷ lệ 0..100, cân nặng/chiều cao/tần số/huyế
 
 UUID numeric trong map khớp `VITAL_FIELD_MAP` hiện có. Adapter hiện tại cần bổ sung encode/decode obsGroup và trạng thái thiếu; chưa được coi là đã hỗ trợ chỉ vì nhận được map này.
 
-LOINC/UCUM trong pack là mapping đích tham khảo FHIR R4. Chưa nạp `SAME-AS` hoặc xác nhận round-trip bằng riêng bảng mapping. `59408-5` chỉ phù hợp SpO2 đo pulse oximetry; phải xác nhận phương pháp. Nhóm BP native chưa tự thành FHIR BP panel/components. Người 4 kiểm tra trên đúng FHIR2 4.2.0.
+LOINC/UCUM trong pack/B3 là mapping đích tham khảo FHIR R4, release đích 2.83. Chưa nạp `SAME-AS` hoặc xác nhận round-trip bằng riêng bảng mapping. Người dùng xác nhận SpO2 đo pulse oximetry ngày 11/10/2026; 59408-5 là candidate riêng, vẫn chờ người duyệt. Nhóm BP native chưa tự thành FHIR BP panel/components; quyết định projection panel đã ghi trong B3. Người 4 kiểm tra trên đúng FHIR2 4.2.0.
 
 ## 5. Khám, dị ứng, chẩn đoán và thuốc
 
@@ -154,7 +160,7 @@ python tools/metadata.py
 python -m unittest discover -s metadata/tests -v
 ```
 
-Kiểm tra UUID/key, answer/member, mã trường/đơn vị với FE, nguồn khảo sát, file sinh và 28 ca dữ liệu giả. Đây là kiểm tra cấu trúc, không thay kiểm chứng native API hoặc quyền.
+Kiểm tra UUID/key, answer/member, mã trường/đơn vị với FE, nguồn khảo sát, catalogue/contract/file sinh, 28 ca gốc và 47 ca B2/B3. Đây là kiểm tra cấu trúc, không thay kiểm chứng native API hoặc quyền.
 
 Khi chỉnh nguồn:
 
@@ -188,7 +194,7 @@ Lệnh verify chỉ GET metadata trên HTTP loopback, đọc credential từ `.e
 
 ## 8. BE cần nhận và còn cần cung cấp
 
-BE có thể bắt đầu B2/B3 bằng identifier/attribute/type/concept CSV và map. B4/B8 dùng từ điển, form/role/DTO contract để chốt adapter. Các nguồn cần điền trong `externalCatalogues` là: ICD-10 có phiên bản, danh mục thuốc cơ sở, dịch vụ/giá và danh mục tỉnh/xã. Tên thuốc/giá trong một PDF không thay các nguồn này.
+BE có thể tiếp tục B2/B3 bằng identifier/attribute/type/concept CSV, map và [bàn giao bổ sung](METADATA_B2_B3.md). B4/B8 dùng từ điển, form/role/DTO contract để chốt adapter. Các nguồn cần điền tiếp là ICD-10 có phiên bản, danh mục thuốc cơ sở, dịch vụ/giá; địa giới đã có snapshot chính thức và còn cần kiểm tra thay đổi/conversion cũ-mới. Tên thuốc/giá trong một PDF không thay các nguồn này.
 
 Người 3 chủ trì ý nghĩa/danh mục/UUID; người 1 nạp và xử lý module; người 4 xác nhận API/FHIR, role, round-trip và mock; người 2 đưa vào form. Bộ này không sửa CI, schema PostgreSQL, adapter FE hay cấu hình appointments/queue của người khác.
 
