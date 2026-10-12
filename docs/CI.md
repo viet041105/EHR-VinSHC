@@ -49,7 +49,7 @@ Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định
 
 Workflow hiện cấu hình stack PostgreSQL 16.15 theo [ADR-0002](decisions/0002-postgresql.md), gồm kiểm tra database và persistence. Cấu hình workflow không thay thế kết quả run thực tế; xem GitHub Actions và [VALIDATION.md](VALIDATION.md) để biết bằng chứng đã có.
 
-CI kiểm chứng backend B1–B9 bằng dữ liệu synthetic, gồm metadata, ma trận quyền, mapping lâm sàng, MVP-2, restart và restore. CI vẫn chưa nghiệm thu E2E trên trình duyệt/FE, tải production, thông tin pháp lý thật hoặc triển khai production. Hosted run chỉ có sau khi commit chứa workflow được push; local pass không được ghi thành GitHub Actions pass.
+CI kiểm chứng backend B1–B9 bằng dữ liệu synthetic, gồm metadata, ma trận quyền, mapping lâm sàng, MVP-2, restart và restore. CI vẫn chưa nghiệm thu E2E trên trình duyệt/FE, tải production, thông tin pháp lý thật hoặc triển khai production. Workflow chỉ tự chạy cho pull request hoặc push `main`; push riêng lên `clinic-backend` không tạo check nếu chưa có PR. Commit hiện tại cần được chạy bằng PR hoặc `workflow_dispatch`; local pass không được ghi thành GitHub Actions pass.
 
 Repo build backend từ image upstream cố định, có lớp Hibernate, bản sửa migration Appointments, đồng bộ sequence sau dữ liệu nền của Core và kiểm tra khóa ngoại Stock Management theo từng bảng. Build biên dịch lớp Java và kiểm tra hash artifact gốc; smoke kiểm chứng qua API thật. Khi thêm chức năng Java/frontend của nhóm, bổ sung test phù hợp vào pipeline.
 
