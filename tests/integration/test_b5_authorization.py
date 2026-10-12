@@ -84,8 +84,12 @@ class B5AuthorizationTests(unittest.TestCase):
             self.assertEqual(role, workspace["role"])
             self.assertEqual(self.facility, workspace["facilityUuid"])
         doctor = self.clients["doctor"]
-        wrong, _, _ = doctor.request("/openmrs/ws/rest/v1/session", password=doctor.password + "-wrong")
+        wrong, _, wrong_body = doctor.request("/openmrs/ws/rest/v1/session", password=doctor.password + "-wrong")
         self.assertIn(wrong, (200, 401, 403))
+        if wrong == 200:
+            # OpenMRS answers the session resource with 200 for anonymous callers; a bad password
+            # must still leave the session unauthenticated.
+            self.assertFalse(json.loads(wrong_body)["authenticated"])
         no_workspace = Client(self.base, doctor.username, doctor.password)
         status, _, _ = no_workspace.request("/openmrs/ws/rest/v1/vinshc/authorization/workspace")
         self.assertEqual(403, status)

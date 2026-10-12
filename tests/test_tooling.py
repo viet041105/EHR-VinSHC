@@ -12,7 +12,7 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from bootstrap import bootstrap
-from check_config import validate_config
+from check_config import same_path, validate_config
 from check_database import REQUIRED_TABLES, verify_snapshot
 from collect_diagnostics import redact
 from common import ROOT, read_settings
@@ -242,6 +242,15 @@ class ConfigurationRegressionTests(unittest.TestCase):
             mount for mount in config["services"]["db"]["volumes"] if mount["type"] == "volume"]
         with self.assertRaises(ValueError):
             validate_config(config, self.baseline, self.settings)
+
+    def test_reviewed_configuration_passes(self):
+        validate_config(copy.deepcopy(self.config), self.baseline, self.settings)
+
+    def test_host_path_separator_style_does_not_matter(self):
+        self.assertTrue(same_path("D:\\repo\\infra\\postgres\\initdb", "D:/repo/infra/postgres/initdb"))
+        self.assertTrue(same_path("/repo/infra/", "/repo/infra"))
+        self.assertFalse(same_path("D:/repo/other", "D:/repo/infra"))
+        self.assertFalse(same_path(None, "/repo"))
 
     def test_initializer_person_attribute_patch_is_built_into_backend(self):
         source = (ROOT / "infra/backend/postgresql/initializer/PersonAttributeTypesCsvParser.java").read_text(

@@ -1,11 +1,19 @@
 """Validate the resolved Compose contract without printing credentials."""
 
 import json
+import os
 import re
 import subprocess
 import sys
 
 from common import ROOT, read_settings
+
+
+def same_path(left, right):
+    """Compose prints native host paths (D:\\x on Windows) while some Python builds use D:/x."""
+    def normal(value):
+        return os.path.normcase(os.path.normpath(str(value))).replace("\\", "/").rstrip("/")
+    return left is not None and normal(left) == normal(right)
 
 
 def validate_config(config, baseline, settings):
@@ -54,7 +62,7 @@ def validate_config(config, baseline, settings):
             or backend_environment.get("OMRS_CONFIG_CONNECTION_USERNAME") != settings["OMRS_DB_USER"]):
         raise ValueError("Backend and PostgreSQL must use the reviewed database, driver, port and user.")
     init_directory = str((ROOT / "infra/postgres/initdb").resolve())
-    if not any(mount.get("type") == "bind" and mount.get("source") == init_directory
+    if not any(mount.get("type") == "bind" and same_path(mount.get("source"), init_directory)
                and mount.get("target") == "/docker-entrypoint-initdb.d" and mount.get("read_only")
                for mount in services["db"].get("volumes", [])):
         raise ValueError("PostgreSQL requires the read-only OpenMRS extension initialization directory.")
@@ -62,7 +70,7 @@ def validate_config(config, baseline, settings):
         raise ValueError("Backend admin initialization differs from smoke credentials.")
     expected_build = baseline["backendBuild"]
     backend_build = services["backend"].get("build", {})
-    if (backend_build.get("context") != str((ROOT / expected_build["context"]).resolve())
+    if (not same_path(backend_build.get("context"), (ROOT / expected_build["context"]).resolve())
             or backend_build.get("dockerfile") != expected_build["dockerfile"]):
         raise ValueError("Backend must build from the reviewed Dockerfile/context.")
     dockerfile = (ROOT / expected_build["context"] / expected_build["dockerfile"]).read_text(encoding="utf-8")

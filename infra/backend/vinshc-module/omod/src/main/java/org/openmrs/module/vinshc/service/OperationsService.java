@@ -49,8 +49,11 @@ import org.openmrs.TestOrder;
 import org.openmrs.User;
 import org.openmrs.Visit;
 import org.openmrs.api.context.Context;
+import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * B8 clinic-operations adapter. Upstream appointment, queue and billing module schemas are not a
@@ -83,7 +86,21 @@ public class OperationsService {
 
 	private static final ObjectMapper JSON = new ObjectMapper();
 
+	private static final Map<String, Set<String>> APPOINTMENT_TRANSITIONS = transitions("booked",
+	    set("confirmed", "arrived", "cancelled"), "confirmed", set("arrived", "cancelled", "no_show"), "arrived",
+	    set("fulfilled", "cancelled"));
+
+	private static final Map<String, Set<String>> QUEUE_TRANSITIONS = transitions("waiting",
+	    set("called", "cancelled", "left"), "called", set("in_service", "waiting", "cancelled", "left"), "in_service",
+	    set("completed", "cancelled", "left"));
+
+	private static final Map<String, Set<String>> ORDER_TRANSITIONS = transitions("requested",
+	    set("assigned", "cancelled", "entered-in-error"), "assigned", set("in_progress", "cancelled", "entered-in-error"),
+	    "in_progress", set("completed", "cancelled", "entered-in-error"));
+
 	private final JdbcTemplate jdbc;
+
+	private final SessionFactory sessionFactory;
 
 	private volatile Metadata metadata;
 
@@ -91,11 +108,13 @@ public class OperationsService {
 		ConnectionProvider provider = ((SessionFactoryImplementor) sessionFactory).getServiceRegistry()
 		        .getService(ConnectionProvider.class);
 		this.jdbc = new JdbcTemplate(provider.unwrap(javax.sql.DataSource.class));
+		this.sessionFactory = sessionFactory;
 	}
 
 	// ---------------------------------------------------------------- configuration
 
 	public Map<String, Object> configuration() {
+		AuthorizationService.requireAuthenticated();
 		Metadata m = metadata();
 		Map<String, Object> out = new LinkedHashMap<>();
 		out.put("version", "0.3.0");
@@ -120,10 +139,12 @@ public class OperationsService {
 	public Map<String, Object> createAppointment(Map<String, Object> body) {
 		require("appointment", "create");
 		Patient patient = patient(requiredString(body, "patient"));
-		Location facility = facilityLocation(requiredString(body, "facility"));
+		String facilityUuid = canonicalUuid(requiredString(body, "facility"), "facility");
+		Location facility = facilityLocation(facilityUuid);
+		AuthorizationService.requireLocationScopeStatic(facility);
 		Provider provider = provider(requiredString(body, "provider"));
 		Map<String, Object> service = service(requiredString(body, "service"));
-		if (!requiredString(body, "facility").equals(service.get("facilityUuid")))
+		if (!facilityUuid.equals(service.get("facilityUuid")))
 			throw bad("service is not active for this facility");
 		String type = requiredString(body, "appointmentType");
 		if (!metadata().appointmentTypes.contains(type))
@@ -142,13 +163,16 @@ public class OperationsService {
 				throw conflict("idempotency key was already used with another appointment payload");
 			return appointmentView(existing);
 		}
-		lock("appointment:" + facility.getUuid() + ":" + provider.getUuid());
+		// A slot is exclusive per provider and per patient; other providers of the same facility stay
+		// bookable. Locks are always taken provider-first so two bookings cannot deadlock.
+		lock("appointment:provider:" + provider.getProviderId());
+		lock("appointment:patient:" + patient.getPatientId());
 		Number overlaps = jdbc.queryForObject(
 		    "SELECT count(*) FROM vinshc_appointment WHERE status NOT IN ('cancelled','no_show')"
-		            + " AND start_at<? AND end_at>? AND (provider_id=? OR facility_location_id=?)",
-		    Number.class, Timestamp.from(end), Timestamp.from(start), provider.getProviderId(), facility.getLocationId());
+		            + " AND start_at<? AND end_at>? AND (provider_id=? OR patient_id=?)",
+		    Number.class, Timestamp.from(end), Timestamp.from(start), provider.getProviderId(), patient.getPatientId());
 		if (overlaps.longValue() != 0)
-			throw conflict("provider or location has an overlapping appointment");
+			throw conflict("provider or patient has an overlapping appointment");
 		String uuid = UUID.randomUUID().toString();
 		jdbc.update(
 		    "INSERT INTO vinshc_appointment(appointment_uuid,patient_id,facility_location_id,provider_id,service_uuid,appointment_type,start_at,end_at,status,note,idempotency_key,creator,date_created)"
@@ -160,17 +184,15 @@ public class OperationsService {
 	}
 
 	public Map<String, Object> transitionAppointment(String uuid, Map<String, Object> body) {
-		Map<String, Object> row = required("vinshc_appointment", "appointment_uuid", uuid, "appointment");
 		String target = requiredString(body, "status");
 		require("appointment", "cancelled".equals(target) ? "cancel" : "update");
 		if (!APPOINTMENT_STATES.contains(target))
 			throw bad("invalid appointment status");
+		Map<String, Object> row = appointmentRow(uuid);
+		lock("appointment:" + row.get("appointment_id"));
+		row = appointmentRow(uuid);
 		String current = string(row.get("status"));
-		Map<String, Set<String>> transitions = new LinkedHashMap<>();
-		transitions.put("booked", set("confirmed", "arrived", "cancelled"));
-		transitions.put("confirmed", set("arrived", "cancelled", "no_show"));
-		transitions.put("arrived", set("fulfilled", "cancelled"));
-		if (!transitions.getOrDefault(current, Collections.<String> emptySet()).contains(target))
+		if (!APPOINTMENT_TRANSITIONS.getOrDefault(current, Collections.<String> emptySet()).contains(target))
 			throw conflict("invalid appointment transition " + current + " -> " + target);
 		if ("no_show".equals(target) && Instant.now().isBefore(timestamp(row.get("start_at")).toInstant()))
 			throw conflict("no_show cannot be recorded before the slot starts");
@@ -181,7 +203,15 @@ public class OperationsService {
 
 	public Map<String, Object> appointment(String uuid) {
 		require("appointment", "read");
-		return appointmentView(required("vinshc_appointment", "appointment_uuid", uuid, "appointment"));
+		return appointmentView(appointmentRow(uuid));
+	}
+
+	/** Loads an appointment and enforces that it belongs to the caller's facility workspace. */
+	private Map<String, Object> appointmentRow(String uuid) {
+		Map<String, Object> row = required("vinshc_appointment", "appointment_uuid", canonicalUuid(uuid, "appointment"),
+		    "appointment");
+		requireLocationIdScope(row.get("facility_location_id"));
+		return row;
 	}
 
 	private Map<String, Object> appointmentView(Map<String, Object> row) {
@@ -207,22 +237,21 @@ public class OperationsService {
 		Visit visit = visit(requiredString(body, "visit"));
 		if (!visit.getPatient().getPatientId().equals(patient.getPatientId()))
 			throw bad("visit belongs to another patient");
+		AuthorizationService.requireLocationScopeStatic(visit.getLocation());
 		return createQueueInternal(patient, visit, requiredString(body, "config"), requiredString(body, "point"),
 		    optionalString(body, "provider"), idempotency(body));
 	}
 
 	public Map<String, Object> transitionQueue(String uuid, Map<String, Object> body) {
-		Map<String, Object> row = required("vinshc_queue_item", "queue_item_uuid", uuid, "queue item");
 		String target = requiredString(body, "state");
 		require("queue", "cancelled".equals(target) || "left".equals(target) ? "cancel" : "update");
 		if (!QUEUE_STATES.contains(target))
 			throw bad("invalid queue state");
+		Map<String, Object> row = queueRow(uuid);
+		lock("queue-item:" + row.get("queue_item_id"));
+		row = queueRow(uuid);
 		String current = string(row.get("state"));
-		Map<String, Set<String>> transitions = new LinkedHashMap<>();
-		transitions.put("waiting", set("called", "cancelled", "left"));
-		transitions.put("called", set("in_service", "waiting", "cancelled", "left"));
-		transitions.put("in_service", set("completed", "cancelled", "left"));
-		if (!transitions.getOrDefault(current, Collections.<String> emptySet()).contains(target))
+		if (!QUEUE_TRANSITIONS.getOrDefault(current, Collections.<String> emptySet()).contains(target))
 			throw conflict("invalid queue transition " + current + " -> " + target);
 		String reason = optionalString(body, "exitReason");
 		if (("cancelled".equals(target) || "left".equals(target)) && !EXIT_REASONS.contains(reason))
@@ -236,10 +265,16 @@ public class OperationsService {
 
 	public Map<String, Object> advanceQueue(String uuid, Map<String, Object> body) {
 		require("queue", "update");
-		Map<String, Object> row = required("vinshc_queue_item", "queue_item_uuid", uuid, "queue item");
+		Map<String, Object> row = queueRow(uuid);
+		lock("queue-item:" + row.get("queue_item_id"));
+		row = queueRow(uuid);
+		String target = requiredString(body, "nextPoint");
+		Map<String, Object> replay = one("SELECT * FROM vinshc_queue_item WHERE idempotency_key=?", idempotency(body));
+		if (replay != null && number(replay.get("visit_id")).equals(number(row.get("visit_id")))
+		        && target.equals(replay.get("point_code")))
+			return queueView(replay);
 		if (!"in_service".equals(row.get("state")))
 			throw conflict("only an in_service queue item can advance");
-		String target = requiredString(body, "nextPoint");
 		assertLaterPoint(string(row.get("config_code")), string(row.get("point_code")), target);
 		jdbc.update("UPDATE vinshc_queue_item SET state='completed',changed_by=?,date_changed=? WHERE queue_item_id=?",
 		    actorId(), now(), row.get("queue_item_id"));
@@ -252,7 +287,14 @@ public class OperationsService {
 
 	public Map<String, Object> queue(String uuid) {
 		require("queue", "read");
-		return queueView(required("vinshc_queue_item", "queue_item_uuid", uuid, "queue item"));
+		return queueView(queueRow(uuid));
+	}
+
+	private Map<String, Object> queueRow(String uuid) {
+		Map<String, Object> row = required("vinshc_queue_item", "queue_item_uuid", canonicalUuid(uuid, "queue item"),
+		    "queue item");
+		requireLocationIdScope(row.get("facility_location_id"));
+		return row;
 	}
 
 	private Map<String, Object> createQueueInternal(Patient patient, Visit visit, String config, String point,
@@ -271,7 +313,8 @@ public class OperationsService {
 		Provider provider = providerUuid == null ? null : provider(providerUuid);
 		Location location = Context.getLocationService().getLocationByUuid(string(pointRecord.get("locationUuid")));
 		if (location == null || location.getRetired())
-			throw new IllegalStateException("queue point location is not provisioned: " + point);
+			throw new VinshcExceptions.Configuration("queue point location is not provisioned: " + point);
+		AuthorizationService.requireLocationScopeStatic(location);
 		lock("queue:" + location.getUuid() + ":" + point + ":" + LocalDate.now(CLINIC_ZONE));
 		Number iteration = jdbc.queryForObject(
 		    "SELECT COALESCE(max(iteration),0)+1 FROM vinshc_queue_item WHERE visit_id=? AND point_code=?", Number.class,
@@ -313,8 +356,11 @@ public class OperationsService {
 		Visit visit = visit(requiredString(body, "visit"));
 		if (!visit.getPatient().getPatientId().equals(patient.getPatientId()))
 			throw bad("visit belongs to another patient");
-		String facility = requiredString(body, "facility");
-		facilityLocation(facility);
+		String facility = canonicalUuid(requiredString(body, "facility"), "facility");
+		Location facilityLocation = facilityLocation(facility);
+		AuthorizationService.requireLocationScopeStatic(facilityLocation);
+		if (!sameOrBelow(visit.getLocation(), facilityLocation))
+			throw bad("visit does not belong to this facility");
 		String timing = requiredString(body, "paymentTiming");
 		if (!"prepay".equals(timing) && !"postpay".equals(timing))
 			throw bad("paymentTiming must be prepay or postpay");
@@ -370,18 +416,25 @@ public class OperationsService {
 
 	public Map<String, Object> bill(String uuid) {
 		require("billing", "read");
-		return billView(required("vinshc_bill", "bill_uuid", uuid, "bill"));
+		return billView(billRow(uuid));
 	}
 
+	/**
+	 * Pending receipts of a cancelled bill are cancelled too, so they can never be settled later and
+	 * flip the bill back to paid.
+	 */
 	public Map<String, Object> cancelBill(String uuid, Map<String, Object> body) {
 		require("billing", "cancel");
-		Map<String, Object> bill = billRow(uuid);
-		lock("bill:" + uuid);
-		if (settledReceipts(bill) > 0)
-			throw conflict("paid bill requires explicit refund and cannot be cancelled");
+		String reason = bounded(requiredString(body, "reason"), 1000, "reason");
+		Map<String, Object> bill = lockedBill(billRow(uuid).get("bill_id"));
 		if ("cancelled".equals(bill.get("status")))
 			throw conflict("bill is already cancelled");
-		String reason = bounded(requiredString(body, "reason"), 1000, "reason");
+		if (settledReceipts(bill) > 0)
+			throw conflict("paid bill requires explicit refund and cannot be cancelled");
+		jdbc.update(
+		    "UPDATE vinshc_payment SET status='cancelled',reason='bill cancelled'"
+		            + " WHERE bill_id=? AND kind='receipt' AND status='pending'",
+		    bill.get("bill_id"));
 		jdbc.update("UPDATE vinshc_bill SET status='cancelled',cancel_reason=?,changed_by=?,date_changed=? WHERE bill_id=?",
 		    reason, actorId(), now(), bill.get("bill_id"));
 		return bill(uuid);
@@ -389,10 +442,6 @@ public class OperationsService {
 
 	public Map<String, Object> receipt(String billUuid, Map<String, Object> body) {
 		require("payment", "create");
-		Map<String, Object> bill = billRow(billUuid);
-		lock("bill:" + billUuid);
-		if ("cancelled".equals(bill.get("status")))
-			throw conflict("cancelled bill cannot receive payment");
 		long amount = money(body.get("amountVnd"), "amountVnd", false);
 		String method = requiredString(body, "method");
 		if (!"cash".equals(method) && !"bank_transfer".equals(method))
@@ -402,16 +451,20 @@ public class OperationsService {
 			status = "cash".equals(method) ? "settled" : "pending";
 		if (!"settled".equals(status) && !("bank_transfer".equals(method) && "pending".equals(status)))
 			throw bad("cash must settle immediately; bank_transfer may be pending or settled");
-		if (settledReceipts(bill) + amount > number(bill.get("total_vnd")).longValue())
-			throw conflict("payment exceeds outstanding bill balance");
 		String key = idempotency(body);
+		Map<String, Object> bill = lockedBill(billRow(billUuid).get("bill_id"));
+		// A retried request must get its original receipt back even when that receipt filled the bill.
 		Map<String, Object> replay = one("SELECT * FROM vinshc_payment WHERE idempotency_key=?", key);
 		if (replay != null) {
-			if (number(replay.get("bill_id")).longValue() != number(bill.get("bill_id")).longValue()
+			if (!"receipt".equals(replay.get("kind")) || !sameId(replay.get("bill_id"), bill.get("bill_id"))
 			        || number(replay.get("amount_vnd")).longValue() != amount)
 				throw conflict("idempotency key was already used with another payment payload");
 			return paymentView(replay);
 		}
+		if ("cancelled".equals(bill.get("status")))
+			throw conflict("cancelled bill cannot receive payment");
+		if (settledReceipts(bill) + amount > number(bill.get("total_vnd")).longValue())
+			throw conflict("payment exceeds outstanding bill balance");
 		String uuid = UUID.randomUUID().toString();
 		Timestamp settled = "settled".equals(status) ? now() : null;
 		jdbc.update(
@@ -426,10 +479,12 @@ public class OperationsService {
 	public Map<String, Object> settlePayment(String uuid) {
 		require("payment", "create");
 		Map<String, Object> payment = paymentRow(uuid);
-		lock("bill:" + payment.get("bill_id"));
+		Map<String, Object> bill = lockedBill(payment.get("bill_id"));
+		payment = required("vinshc_payment", "payment_id", payment.get("payment_id"), "payment");
 		if (!"receipt".equals(payment.get("kind")) || !"pending".equals(payment.get("status")))
 			throw conflict("only a pending receipt can be settled");
-		Map<String, Object> bill = required("vinshc_bill", "bill_id", payment.get("bill_id"), "bill");
+		if ("cancelled".equals(bill.get("status")))
+			throw conflict("cancelled bill cannot be settled");
 		if (settledReceipts(bill) + number(payment.get("amount_vnd")).longValue() > number(bill.get("total_vnd"))
 		        .longValue())
 			throw conflict("settlement exceeds outstanding bill balance");
@@ -441,28 +496,29 @@ public class OperationsService {
 
 	public Map<String, Object> refund(String receiptUuid, Map<String, Object> body) {
 		require("payment", "create");
+		long amount = money(body.get("amountVnd"), "amountVnd", false);
+		String key = idempotency(body);
 		Map<String, Object> receipt = paymentRow(receiptUuid);
+		lockedBill(receipt.get("bill_id"));
+		receipt = required("vinshc_payment", "payment_id", receipt.get("payment_id"), "payment");
+		Map<String, Object> replay = one("SELECT * FROM vinshc_payment WHERE idempotency_key=?", key);
+		if (replay != null) {
+			if (!"refund".equals(replay.get("kind")) || !sameId(replay.get("original_payment_id"), receipt.get("payment_id"))
+			        || number(replay.get("amount_vnd")).longValue() != amount)
+				throw conflict("idempotency key was already used with another refund payload");
+			return paymentView(replay);
+		}
 		if (!"receipt".equals(receipt.get("kind")) || !"settled".equals(receipt.get("status")))
 			throw conflict("refund requires a settled receipt");
-		lock("bill:" + receipt.get("bill_id"));
-		long amount = money(body.get("amountVnd"), "amountVnd", false);
+		String reason = bounded(requiredString(body, "reason"), 1000, "reason");
+		String method = requiredString(body, "method");
+		if (!"cash".equals(method) && !"bank_transfer".equals(method))
+			throw bad("method must be cash or bank_transfer");
 		Number prior = jdbc.queryForObject(
 		    "SELECT COALESCE(sum(amount_vnd),0) FROM vinshc_payment WHERE original_payment_id=? AND kind='refund' AND status='settled'",
 		    Number.class, receipt.get("payment_id"));
 		if (prior.longValue() + amount > number(receipt.get("amount_vnd")).longValue())
 			throw conflict("refund exceeds remaining refundable amount");
-		String key = idempotency(body);
-		Map<String, Object> replay = one("SELECT * FROM vinshc_payment WHERE idempotency_key=?", key);
-		if (replay != null) {
-			if (number(replay.get("original_payment_id")).longValue() != number(receipt.get("payment_id")).longValue()
-			        || number(replay.get("amount_vnd")).longValue() != amount)
-				throw conflict("idempotency key was already used with another refund payload");
-			return paymentView(replay);
-		}
-		String reason = bounded(requiredString(body, "reason"), 1000, "reason");
-		String method = requiredString(body, "method");
-		if (!"cash".equals(method) && !"bank_transfer".equals(method))
-			throw bad("method must be cash or bank_transfer");
 		String uuid = UUID.randomUUID().toString();
 		jdbc.update(
 		    "INSERT INTO vinshc_payment(payment_uuid,bill_id,kind,original_payment_id,amount_vnd,method,status,reason,idempotency_key,creator,date_created,settled_by,settled_at)"
@@ -517,7 +573,11 @@ public class OperationsService {
 		return out;
 	}
 
-	private void recalculateBill(Map<String, Object> bill) {
+	/** Derives the payment status; a cancelled bill keeps its terminal status. */
+	private void recalculateBill(Map<String, Object> snapshot) {
+		Map<String, Object> bill = required("vinshc_bill", "bill_id", snapshot.get("bill_id"), "bill");
+		if ("cancelled".equals(bill.get("status")))
+			return;
 		long received = settledReceipts(bill), refunded = settledRefunds(bill),
 		        total = number(bill.get("total_vnd")).longValue();
 		String state = received == 0 ? "unpaid"
@@ -557,8 +617,8 @@ public class OperationsService {
 				recorded = true;
 		if (!recorded)
 			throw bad("orderer must be recorded on the encounter");
-		String facility = requiredString(body, "facility");
-		facilityLocation(facility);
+		String facility = canonicalUuid(requiredString(body, "facility"), "facility");
+		AuthorizationService.requireLocationScopeStatic(facilityLocation(facility));
 		Map<String, Object> service = service(requiredString(body, "service"));
 		if (!facility.equals(service.get("facilityUuid")))
 			throw bad("service is not active for this facility");
@@ -566,8 +626,11 @@ public class OperationsService {
 		Map<String, Object> workflow = workflowConfig(config);
 		Map<String, Object> bill = null;
 		String billUuid = optionalString(body, "bill");
-		if (billUuid != null)
+		if (billUuid != null) {
 			bill = billRow(billUuid);
+			if (!number(bill.get("patient_id")).equals(patient.getPatientId()))
+				throw bad("bill belongs to another patient");
+		}
 		if ("prepay".equals(workflow.get("paymentTiming"))) {
 			if (bill == null || !billContainsPaidService(bill, string(service.get("uuid"))))
 				throw conflict("prepay workflow requires a settled matching service bill");
@@ -582,7 +645,7 @@ public class OperationsService {
 		}
 		Concept concept = Context.getConceptService().getConceptByUuid(string(service.get("orderConceptUuid")));
 		if (concept == null || concept.getRetired())
-			throw new IllegalStateException("service order concept is not provisioned");
+			throw new VinshcExceptions.Configuration("service order concept is not provisioned");
 		TestOrder order = new TestOrder();
 		order.setPatient(patient);
 		order.setEncounter(encounter);
@@ -602,24 +665,36 @@ public class OperationsService {
 		return serviceOrder(saved.getUuid());
 	}
 
+	/**
+	 * A cancelled/entered-in-error service order keeps its reason and discontinues the native
+	 * TestOrder, so REST/FHIR consumers no longer see it as active.
+	 */
 	public Map<String, Object> transitionServiceOrder(String uuid, Map<String, Object> body) {
 		require("diagnostic_order", "update");
-		Map<String, Object> row = serviceOrderRow(uuid);
 		String target = requiredString(body, "state");
 		if (!ORDER_STATES.contains(target))
 			throw bad("invalid service order state");
+		Map<String, Object> row = serviceOrderRow(uuid);
+		lock("service-order:" + row.get("service_order_id"));
+		row = serviceOrderRow(uuid);
 		String current = string(row.get("state"));
-		Map<String, Set<String>> transitions = new LinkedHashMap<>();
-		transitions.put("requested", set("assigned", "cancelled", "entered-in-error"));
-		transitions.put("assigned", set("in_progress", "cancelled", "entered-in-error"));
-		transitions.put("in_progress", set("completed", "cancelled", "entered-in-error"));
-		if (!transitions.getOrDefault(current, Collections.<String> emptySet()).contains(target))
+		if (!ORDER_TRANSITIONS.getOrDefault(current, Collections.<String> emptySet()).contains(target))
 			throw conflict("invalid service order transition " + current + " -> " + target);
 		Provider assigned = null;
 		if ("assigned".equals(target))
 			assigned = provider(requiredString(body, "assignedProvider"));
-		if (("cancelled".equals(target) || "entered-in-error".equals(target)) && optionalString(body, "reason") == null)
+		boolean stopping = "cancelled".equals(target) || "entered-in-error".equals(target);
+		String reason = optionalString(body, "reason");
+		if (reason != null && reason.trim().isEmpty())
+			reason = null;
+		if (stopping && reason == null)
 			throw bad("cancellation/error requires reason");
+		if (!stopping && reason != null)
+			throw bad("reason is only accepted for cancelled/entered-in-error");
+		if (reason != null)
+			reason = bounded(reason.trim(), 1000, "reason");
+		if (stopping)
+			discontinueNative(nativeOrder(row), reason);
 		if ("completed".equals(target)) {
 			Number finals = jdbc.queryForObject(
 			    "SELECT count(*) FROM vinshc_result_revision WHERE service_order_id=? AND state IN ('final','corrected')",
@@ -628,14 +703,37 @@ public class OperationsService {
 				throw conflict("service order cannot complete without a final result");
 		}
 		jdbc.update(
-		    "UPDATE vinshc_service_order SET state=?,assigned_provider_id=COALESCE(?,assigned_provider_id),changed_by=?,date_changed=? WHERE service_order_id=?",
-		    target, assigned == null ? null : assigned.getProviderId(), actorId(), now(), row.get("service_order_id"));
+		    "UPDATE vinshc_service_order SET state=?,state_reason=COALESCE(?,state_reason),assigned_provider_id=COALESCE(?,assigned_provider_id),changed_by=?,date_changed=? WHERE service_order_id=?",
+		    target, reason, assigned == null ? null : assigned.getProviderId(), actorId(), now(),
+		    row.get("service_order_id"));
 		return serviceOrder(uuid);
+	}
+
+	private void discontinueNative(Order order, String reason) {
+		if (order == null || order.getVoided() || !order.isActive())
+			return;
+		try {
+			Context.getOrderService().discontinueOrder(order, reason, null, order.getOrderer(), order.getEncounter());
+		}
+		catch (org.openmrs.api.APIAuthenticationException ex) {
+			throw ex;
+		}
+		catch (org.openmrs.api.APIException ex) {
+			throw conflict("native order cannot be discontinued: " + ex.getMessage());
+		}
+		catch (RuntimeException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("cannot discontinue native order", ex);
+		}
 	}
 
 	public Map<String, Object> createResult(String orderUuid, Map<String, Object> body) {
 		require("diagnostic_result", "create");
 		Map<String, Object> order = serviceOrderRow(orderUuid);
+		lock("service-order:" + order.get("service_order_id"));
+		order = serviceOrderRow(orderUuid);
 		if (!"in_progress".equals(order.get("state")) && !"assigned".equals(order.get("state")))
 			throw conflict("result requires assigned/in_progress service order");
 		if (jdbc.queryForObject("SELECT count(*) FROM vinshc_result_revision WHERE service_order_id=?", Number.class,
@@ -646,11 +744,18 @@ public class OperationsService {
 
 	public Map<String, Object> correctResult(String resultUuid, Map<String, Object> body) {
 		require("diagnostic_result", "update");
-		Map<String, Object> old = resultRow(resultUuid);
-		if (!"final".equals(old.get("state")) && !"corrected".equals(old.get("state")))
-			throw conflict("only final/corrected result can be corrected");
 		if (optionalString(body, "reason") == null)
 			throw bad("result correction requires reason");
+		Map<String, Object> old = resultRow(resultUuid);
+		lock("service-order:" + old.get("service_order_id"));
+		old = resultRow(resultUuid);
+		if (!"final".equals(old.get("state")) && !"corrected".equals(old.get("state")))
+			throw conflict("only final/corrected result can be corrected");
+		Number latest = jdbc.queryForObject(
+		    "SELECT max(version_number) FROM vinshc_result_revision WHERE service_order_id=?", Number.class,
+		    old.get("service_order_id"));
+		if (latest.intValue() != number(old.get("version_number")).intValue())
+			throw conflict("result has a newer revision; correct the latest revision instead");
 		Map<String, Object> order = required("vinshc_service_order", "service_order_id", old.get("service_order_id"),
 		    "service order");
 		return insertResult(order, body, old, number(old.get("version_number")).intValue() + 1, true);
@@ -713,6 +818,7 @@ public class OperationsService {
 		out.put("serviceCode", row.get("service_code"));
 		out.put("serviceName", row.get("service_name"));
 		out.put("state", row.get("state"));
+		out.put("stateReason", row.get("state_reason"));
 		out.put("assignedProviderUuid", uuidNullable("provider", "provider_id", row.get("assigned_provider_id")));
 		out.put("billUuid", uuidNullable("vinshc_bill", "bill_id", row.get("bill_id"), "bill_uuid"));
 		out.put("createdAt", iso(row.get("date_created")));
@@ -780,6 +886,7 @@ public class OperationsService {
 		catch (Exception ex) {
 			throw new IllegalStateException("cannot persist attachment", ex);
 		}
+		deleteFileIfRolledBack(target);
 		String hash = sha256(bytes);
 		jdbc.update(
 		    "INSERT INTO vinshc_attachment(attachment_uuid,service_order_id,result_id,storage_key,original_name,mime_type,size_bytes,sha256,creator,date_created) VALUES (?,?,?,?,?,?,?,?,?,?)",
@@ -790,10 +897,12 @@ public class OperationsService {
 
 	public Map<String, Object> attachment(String uuid, boolean includeBytes) {
 		require("diagnostic_result", includeBytes ? "download" : "read");
-		Map<String, Object> row = required("vinshc_attachment", "attachment_uuid", uuid, "attachment");
+		Map<String, Object> row = required("vinshc_attachment", "attachment_uuid", canonicalUuid(uuid, "attachment"),
+		    "attachment");
 		Map<String, Object> out = baseView(row, "attachment_uuid");
 		Map<String, Object> order = required("vinshc_service_order", "service_order_id", row.get("service_order_id"),
 		    "service order");
+		requireFacilityScope(string(order.get("facility_uuid")));
 		out.put("orderUuid", uuid("orders", "order_id", order.get("order_id")));
 		out.put("resultUuid", uuidNullable("vinshc_result_revision", "result_id", row.get("result_id"), "result_uuid"));
 		out.put("filename", row.get("original_name"));
@@ -827,12 +936,15 @@ public class OperationsService {
 		String privilege = "receipt".equals(template) || "refund".equals(template) ? "billing"
 		        : "appointment".equals(template) ? "appointment" : "diagnostic_order";
 		require(privilege, "print");
+		String source = canonicalUuid(sourceUuid, "sourceUuid");
+		// Building first validates the source and the caller's facility scope, also for reprints.
+		Map<String, Object> payload = buildDocument(template, source);
+		lock("document-source:" + template + ":" + source);
 		Map<String, Object> prior = one(
 		    "SELECT * FROM vinshc_document WHERE template_code=? AND source_uuid=? ORDER BY document_version DESC LIMIT 1",
-		    template, canonicalUuid(sourceUuid));
+		    template, source);
 		if (prior != null)
 			return map((String) prior.get("payload_json"));
-		Map<String, Object> payload = buildDocument(template, sourceUuid);
 		String facility = string(((Map<?, ?>) payload.get("facility")).get("uuid"));
 		lock("document:" + facility + ":" + template + ":" + LocalDate.now(CLINIC_ZONE).getYear());
 		Number sequence = jdbc.queryForObject(
@@ -849,7 +961,7 @@ public class OperationsService {
 		String documentUuid = UUID.randomUUID().toString();
 		jdbc.update(
 		    "INSERT INTO vinshc_document(document_uuid,facility_uuid,template_code,source_uuid,document_number,document_version,payload_json,creator,date_created) VALUES (?,?,?,?,?,1,?,?,?)",
-		    documentUuid, facility, template, sourceUuid, number, json(payload), actorId(), now());
+		    documentUuid, facility, template, source, number, json(payload), actorId(), now());
 		return payload;
 	}
 
@@ -862,7 +974,9 @@ public class OperationsService {
 		catch (Exception ex) {
 			throw bad("date must be YYYY-MM-DD");
 		}
+		facilityUuid = canonicalUuid(facilityUuid, "facility");
 		Location location = facilityLocation(facilityUuid);
+		AuthorizationService.requireLocationScopeStatic(location);
 		Instant start = dayStart(day), end = dayStart(day.plusDays(1));
 		String locationCte = "WITH RECURSIVE locations AS (SELECT location_id FROM location WHERE location_id=? UNION ALL SELECT l.location_id FROM location l JOIN locations p ON l.parent_location=p.location_id) ";
 		Number opened = jdbc.queryForObject(locationCte
@@ -895,7 +1009,7 @@ public class OperationsService {
 		Map<String, Object> facility;
 		Patient patient;
 		if ("appointment".equals(template)) {
-			Map<String, Object> a = required("vinshc_appointment", "appointment_uuid", sourceUuid, "appointment");
+			Map<String, Object> a = appointmentRow(sourceUuid);
 			patient = Context.getPatientService().getPatient(number(a.get("patient_id")).intValue());
 			facility = facilityByLocation(number(a.get("facility_location_id")).intValue());
 			payload.put("status", a.get("status"));
@@ -937,11 +1051,17 @@ public class OperationsService {
 			            .intValue())));
 		} else if ("prescription".equals(template)) {
 			Order order = Context.getOrderService().getOrderByUuid(sourceUuid);
-			if (!(order instanceof DrugOrder))
+			if (!(order instanceof DrugOrder) || order.getVoided())
 				throw bad("prescription source is not a drug order");
 			DrugOrder drug = (DrugOrder) order;
+			AuthorizationService.requireEncounterScopeStatic(drug.getEncounter());
 			patient = drug.getPatient();
-			facility = facilityByLocation(drug.getEncounter().getLocation().getLocationId());
+			Location location = drug.getEncounter().getLocation();
+			if (location == null && drug.getEncounter().getVisit() != null)
+				location = drug.getEncounter().getVisit().getLocation();
+			if (location == null)
+				throw new VinshcExceptions.Configuration("prescription encounter is not bound to a facility location");
+			facility = facilityByLocation(location.getLocationId());
 			payload.put("status", drug.isActive() ? "confirmed" : "discontinued");
 			payload.put("practitioner", providerIdentity(drug.getOrderer()));
 			Map<String, Object> line = new LinkedHashMap<>();
@@ -981,7 +1101,7 @@ public class OperationsService {
 				        || Boolean.TRUE.equals(facilities.get("productionEnabled"))
 				        || !Boolean.FALSE.equals(contract.get("productionUploadEnabled"))
 				                && contract.get("productionUploadEnabled") != null)
-					throw new IllegalStateException("B8 runtime only accepts the test metadata pack");
+					throw new VinshcExceptions.Configuration("B8 runtime only accepts the test metadata pack");
 				Metadata loaded = new Metadata();
 				loaded.facilities = index((List<Map<String, Object>>) facilities.get("records"), "uuid");
 				loaded.services = index((List<Map<String, Object>>) services.get("records"), "uuid");
@@ -999,7 +1119,7 @@ public class OperationsService {
 				throw ex;
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("cannot load B8 metadata", ex);
+				throw new VinshcExceptions.Configuration("cannot load B8 metadata", ex);
 			}
 		}
 	}
@@ -1036,7 +1156,7 @@ public class OperationsService {
 			if (service.equals(p.get("serviceUuid")) && facility.equals(p.get("facilityUuid"))
 			        && Boolean.TRUE.equals(p.get("active")))
 				return p;
-		throw new IllegalStateException("active price is not configured for service/facility");
+		throw new VinshcExceptions.Configuration("active price is not configured for service/facility");
 	}
 
 	private Map<String, Object> workflowConfig(String code) {
@@ -1107,7 +1227,7 @@ public class OperationsService {
 			throw bad("facility does not exist");
 		Location value = Context.getLocationService().getLocationByUuid(string(record.get("locationUuid")));
 		if (value == null || value.getRetired())
-			throw new IllegalStateException("facility location is not provisioned");
+			throw new VinshcExceptions.Configuration("facility location is not provisioned");
 		return value;
 	}
 
@@ -1119,20 +1239,20 @@ public class OperationsService {
 					return f;
 			value = value.getParentLocation();
 		}
-		throw new IllegalStateException("location is not bound to a facility");
+		throw new VinshcExceptions.Configuration("location is not bound to a facility");
 	}
 
 	private static CareSetting outpatient() {
 		CareSetting value = Context.getOrderService().getCareSettingByUuid(OUTPATIENT_CARE_SETTING);
 		if (value == null)
-			throw new IllegalStateException("outpatient care setting missing");
+			throw new VinshcExceptions.Configuration("outpatient care setting missing");
 		return value;
 	}
 
 	private static OrderType testOrderType() {
 		OrderType value = Context.getOrderService().getOrderTypeByUuid(OrderType.TEST_ORDER_TYPE_UUID);
 		if (value == null)
-			throw new IllegalStateException("test order type missing");
+			throw new VinshcExceptions.Configuration("test order type missing");
 		return value;
 	}
 
@@ -1140,27 +1260,70 @@ public class OperationsService {
 		return Context.getOrderService().getOrder(number(adapter.get("order_id")).intValue());
 	}
 
+	// Every *Row loader enforces the caller's facility workspace before the record is used.
+
 	private Map<String, Object> billRow(String uuid) {
-		return required("vinshc_bill", "bill_uuid", canonicalUuid(uuid), "bill");
+		Map<String, Object> row = required("vinshc_bill", "bill_uuid", canonicalUuid(uuid, "bill"), "bill");
+		requireFacilityScope(string(row.get("facility_uuid")));
+		return row;
 	}
 
 	private Map<String, Object> paymentRow(String uuid) {
-		return required("vinshc_payment", "payment_uuid", canonicalUuid(uuid), "payment");
+		Map<String, Object> row = required("vinshc_payment", "payment_uuid", canonicalUuid(uuid, "payment"), "payment");
+		Map<String, Object> bill = required("vinshc_bill", "bill_id", row.get("bill_id"), "bill");
+		requireFacilityScope(string(bill.get("facility_uuid")));
+		return row;
 	}
 
 	private Map<String, Object> serviceOrderRow(String nativeUuid) {
-		Order nativeOrder = Context.getOrderService().getOrderByUuid(canonicalUuid(nativeUuid));
+		Order nativeOrder = Context.getOrderService().getOrderByUuid(canonicalUuid(nativeUuid, "service order"));
 		if (nativeOrder == null || nativeOrder.getVoided())
 			throw bad("service order does not exist");
-		return required("vinshc_service_order", "order_id", nativeOrder.getOrderId(), "service order");
+		Map<String, Object> row = required("vinshc_service_order", "order_id", nativeOrder.getOrderId(), "service order");
+		requireFacilityScope(string(row.get("facility_uuid")));
+		return row;
 	}
 
 	private Map<String, Object> resultRow(String uuid) {
-		return required("vinshc_result_revision", "result_uuid", canonicalUuid(uuid), "result");
+		Map<String, Object> row = required("vinshc_result_revision", "result_uuid", canonicalUuid(uuid, "result"),
+		    "result");
+		Map<String, Object> order = required("vinshc_service_order", "service_order_id", row.get("service_order_id"),
+		    "service order");
+		requireFacilityScope(string(order.get("facility_uuid")));
+		return row;
+	}
+
+	/**
+	 * Single lock key for every money operation on a bill (receipt, settle, refund, cancel), then a
+	 * fresh read so decisions never use a snapshot taken before the lock.
+	 */
+	private Map<String, Object> lockedBill(Object billId) {
+		lock("bill:" + number(billId).longValue());
+		return required("vinshc_bill", "bill_id", billId, "bill");
+	}
+
+	private void requireFacilityScope(String facilityUuid) {
+		AuthorizationService.requireLocationScopeStatic(facilityLocation(facilityUuid));
+	}
+
+	private void requireLocationIdScope(Object locationId) {
+		AuthorizationService
+		        .requireLocationScopeStatic(Context.getLocationService().getLocation(number(locationId).intValue()));
+	}
+
+	private static boolean sameOrBelow(Location candidate, Location ancestor) {
+		for (Location value = candidate; value != null; value = value.getParentLocation())
+			if (value.getLocationId().equals(ancestor.getLocationId()))
+				return true;
+		return false;
+	}
+
+	private static boolean sameId(Object left, Object right) {
+		return left != null && right != null && number(left).longValue() == number(right).longValue();
 	}
 
 	private boolean billContainsPaidService(Map<String, Object> bill, String service) {
-		if (settledReceipts(bill) < number(bill.get("total_vnd")).longValue())
+		if (!"paid".equals(bill.get("status")) || settledReceipts(bill) < number(bill.get("total_vnd")).longValue())
 			return false;
 		for (Map<String, Object> line : list(bill.get("lines_json")))
 			if (service.equals(line.get("serviceUuid")))
@@ -1181,7 +1344,36 @@ public class OperationsService {
 	}
 
 	private void lock(String value) {
-		jdbc.queryForList("SELECT pg_advisory_xact_lock(hashtext(?))", value);
+		TransactionLocks.lock(sessionFactory, value);
+	}
+
+	/** Removes a just-written attachment file when the surrounding transaction does not commit. */
+	private static void deleteFileIfRolledBack(Path file) {
+		if (!TransactionSynchronizationManager.isSynchronizationActive())
+			return;
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+
+			@Override
+			public void afterCompletion(int status) {
+				if (status != STATUS_COMMITTED)
+					try {
+						Files.deleteIfExists(file);
+					}
+					catch (Exception ex) {
+						LoggerFactory.getLogger(OperationsService.class).warn("Cannot remove orphan attachment {}", file, ex);
+					}
+			}
+		});
+	}
+
+	private static Map<String, Set<String>> transitions(Object... values) {
+		Map<String, Set<String>> map = new LinkedHashMap<>();
+		for (int i = 0; i < values.length; i += 2) {
+			@SuppressWarnings("unchecked")
+			Set<String> targets = (Set<String>) values[i + 1];
+			map.put((String) values[i], targets);
+		}
+		return Collections.unmodifiableMap(map);
 	}
 
 	private static Timestamp now() {
@@ -1220,19 +1412,16 @@ public class OperationsService {
 	}
 
 	private static int integer(Object value, String field) {
-		if (!(value instanceof Number) || value instanceof Double || value instanceof Float
-		        || ((Number) value).doubleValue() != ((Number) value).longValue())
-			throw bad(field + " must be an integer");
-		long n = ((Number) value).longValue();
-		if (n < Integer.MIN_VALUE || n > Integer.MAX_VALUE)
-			throw bad(field + " is out of range");
-		return (int) n;
+		return VinshcService.strictInt(value, field);
 	}
 
-	private static long money(Object value, String field, boolean zeroAllowed) {
+	/** Integer VND within the JSON-safe range; a BigInteger beyond long must not wrap into range. */
+	static long money(Object value, String field, boolean zeroAllowed) {
 		if (!(value instanceof Byte || value instanceof Short || value instanceof Integer || value instanceof Long
 		        || value instanceof java.math.BigInteger))
 			throw bad(field + " must be an integer VND amount");
+		if (value instanceof java.math.BigInteger && ((java.math.BigInteger) value).bitLength() > 63)
+			throw bad(field + " is out of range");
 		long n = ((Number) value).longValue();
 		if (n < 0 || (!zeroAllowed && n == 0) || n > MAX_MONEY)
 			throw bad(field + " is out of range");
@@ -1286,7 +1475,7 @@ public class OperationsService {
 	private static int actorId() {
 		User user = Context.getAuthenticatedUser();
 		if (user == null)
-			throw new IllegalStateException("authenticated user missing");
+			throw new VinshcExceptions.NotAuthenticated();
 		return user.getUserId();
 	}
 
@@ -1335,8 +1524,8 @@ public class OperationsService {
 	private String uuid(String table, String id, Object value, String uuidColumn) {
 		if ("patient".equals(table) && "patient_id".equals(id) && "uuid".equals(uuidColumn))
 			return string(jdbc.queryForObject(
-			    "SELECT p.uuid FROM patient x JOIN person p ON p.person_id=x.patient_id WHERE x.patient_id=?",
-			    Object.class, value));
+			    "SELECT p.uuid FROM patient x JOIN person p ON p.person_id=x.patient_id WHERE x.patient_id=?", Object.class,
+			    value));
 		return string(
 		    jdbc.queryForObject("SELECT " + uuidColumn + " FROM " + table + " WHERE " + id + "=?", Object.class, value));
 	}
@@ -1349,7 +1538,7 @@ public class OperationsService {
 		return value == null ? null : uuid(table, id, value, uuidColumn);
 	}
 
-	private static String sniff(byte[] bytes) {
+	static String sniff(byte[] bytes) {
 		if (bytes.length >= 5 && bytes[0] == '%' && bytes[1] == 'P' && bytes[2] == 'D' && bytes[3] == 'F' && bytes[4] == '-')
 			return "application/pdf";
 		if (bytes.length >= 8 && (bytes[0] & 255) == 137 && bytes[1] == 80 && bytes[2] == 78 && bytes[3] == 71
@@ -1402,11 +1591,20 @@ public class OperationsService {
 		return out;
 	}
 
-	private static Map<String, Object> userIdentity(int id) {
-		User u = Context.getUserService().getUser(id);
+	/**
+	 * Issuer identity for printed receipts. Read directly so a cashier does not need the Core
+	 * "Get Users" privilege; the name parts follow PersonName.getFullName() order.
+	 */
+	private Map<String, Object> userIdentity(int id) {
+		Map<String, Object> row = one("SELECT u.uuid, u.username, (SELECT NULLIF(trim(concat_ws(' ', n.prefix, n.given_name,"
+		        + " n.middle_name, n.family_name_prefix, n.family_name, n.family_name2, n.family_name_suffix, n.degree)), '')"
+		        + " FROM person_name n WHERE n.person_id=u.person_id AND n.voided=false"
+		        + " ORDER BY n.preferred DESC, n.person_name_id LIMIT 1) AS full_name FROM users u WHERE u.user_id=?", id);
+		if (row == null)
+			throw new IllegalStateException("payment creator does not exist: " + id);
 		Map<String, Object> out = new LinkedHashMap<>();
-		out.put("uuid", u.getUuid());
-		out.put("fullName", u.getPerson() == null ? u.getUsername() : u.getPerson().getPersonName().getFullName());
+		out.put("uuid", row.get("uuid"));
+		out.put("fullName", row.get("full_name") == null ? row.get("username") : row.get("full_name"));
 		out.put("title", "Thu ngân");
 		out.put("licenceNumber", null);
 		return out;

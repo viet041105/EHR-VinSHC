@@ -28,13 +28,15 @@ Missing, forged or inactive workspace values return HTTP 403. This prevents a mu
 | `DELETE /vinshc/authorization/assignment` | Revoke an assignment; protected by system administration or `metadata_admin void` |
 | `GET /vinshc/authorization/workspace` | Validate and return the active workspace selected by the two headers |
 | `GET /vinshc/authorization/evaluate?resource=...&action=...` | Evaluate one cell of the role matrix; allowed returns 200, denied returns 403 |
-| `GET /vinshc/authorization/audit?patient=...&encounter=...` | Read append-only VinSHC access-audit rows |
+| `GET /vinshc/authorization/audit?patient=...&encounter=...&limit=200&offset=0` | Read append-only VinSHC access-audit rows, newest first; `limit` 1–1000 (default 200); an unknown patient/encounter UUID returns 400 instead of an unfiltered log |
 
 Accounts and passwords are provisioned outside Git. Integration tests generate random local credentials in memory and void the accounts afterward.
 
 ## Core REST and FHIR boundary
 
-Application roles do not receive broad Core privileges such as `Get Patients` or `Get Observations`. The VinSHC adapter temporarily proxies only the Core service privileges required after its own role/facility checks; this proxy applies only under `/vinshc/**`. Direct Core REST calls remain HTTP 403. FHIR2 4.2.0 may return HTTP 500 `OperationOutcome` instead of 403 for a missing privilege; this is the recorded upstream defect, not an authorization success.
+Application roles do not receive broad Core privileges such as `Get Patients` or `Get Observations`. The VinSHC adapter temporarily proxies only the Core service privileges required after its own role/facility checks; this proxy applies only under `/vinshc/**`. OpenMRS shares one `UserContext` between all concurrent requests of an HTTP session, so the proxy privileges live on a request-private context and never on that shared object; a parallel Core request with the same session cookie still gets 403 (`test_b10_review_regressions.py::test_10`). Direct Core REST calls remain HTTP 403.
+
+Every B8 operation record (appointment, queue item, bill, payment, service order, result, attachment, printed document, daily report) is checked against the active facility workspace in the same way as patient and encounter data. FHIR2 4.2.0 may return HTTP 500 `OperationOutcome` instead of 403 for a missing privilege; this is the recorded upstream defect, not an authorization success.
 
 ## Audit coverage and limits
 

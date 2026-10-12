@@ -132,6 +132,9 @@ jobs:
             --metadata-report .runtime/reports/metadata-ci-after-restart.json \
             --metadata-report .runtime/reports/metadata-ci-after-restore.json \
             --recovery-report ".runtime/reports/b6-${B9_RESTORE_PROJECT}-recovery.json"
+      - name: Verify backend review regressions on the source stack
+        # Runs last: it adds synthetic transactions, and B9 asserts that nothing changed since B8.
+        run: python -m unittest -v tests.integration.test_b10_review_regressions
       - name: Collect redacted diagnostics
         if: always()
         run: python scripts/collect_diagnostics.py

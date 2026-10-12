@@ -15,6 +15,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -48,6 +49,8 @@ import org.openmrs.OrderType;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.SimpleDosingInstructions;
+import org.openmrs.api.APIAuthenticationException;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -105,6 +108,12 @@ public class ClinicalService {
 	
 	private static final ZoneId CLINIC_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 	
+	/**
+	 * Date-only values (follow-up date) are stored as midnight UTC, independent of the JVM zone, so a
+	 * restore on a host with another default zone cannot shift the calendar date.
+	 */
+	private static final ZoneId DATE_VALUE_ZONE = ZoneOffset.UTC;
+	
 	private static final int TEXT_LIMIT = 4000;
 	
 	private static final Map<String, String> TEXT_FIELDS = map("visit.ly_do_kham", "ce6ac27d-a555-5ddd-bd82-6dd575066adc",
@@ -149,6 +158,7 @@ public class ClinicalService {
 		Patient patient = patient(requiredString(body, "patient"));
 		Encounter encounter = consultationEncounter(requiredString(body, "encounter"), patient);
 		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lockEncounter(encounter);
 		if (consultationGroup(encounter) != null)
 			throw bad("encounter already has a consultation; correct the existing group instead");
 		Map<String, Object> values = new LinkedHashMap<>();
@@ -174,6 +184,7 @@ public class ClinicalService {
 			throw bad("consultation group does not exist");
 		Encounter encounter = group.getEncounter();
 		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lockEncounter(encounter);
 		Patient patient = patient(encounter.getPatient().getUuid());
 		boolean finalized = finalization(encounter) != null;
 		String reason = reason(body, finalized, "finalized consultation corrections require reason");
@@ -226,6 +237,7 @@ public class ClinicalService {
 		requireDirectPrivilege(FINALIZE_PRIVILEGE);
 		Encounter encounter = encounter(encounterUuid);
 		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lockEncounter(encounter);
 		Patient patient = patient(encounter.getPatient().getUuid());
 		consultationEncounter(encounterUuid, patient);
 		if (finalization(encounter) != null)
@@ -283,7 +295,7 @@ public class ClinicalService {
 		if ("no_known_allergy".equals(values.get("allergy.trang_thai")) && !activeAllergies(patient).isEmpty())
 			throw bad("allergy.trang_thai=no_known_allergy contradicts active allergies; void them first");
 		Object followup = values.get(FOLLOWUP_DATE);
-		if (followup != null && ((LocalDate) followup).isBefore(localDate(encounter.getEncounterDatetime())))
+		if (followup != null && ((LocalDate) followup).isBefore(clinicDate(encounter.getEncounterDatetime())))
 			throw bad(FOLLOWUP_DATE + " cannot be before the encounter date");
 	}
 	
@@ -347,7 +359,7 @@ public class ClinicalService {
 		else if (STATUS_FIELDS.containsKey(key))
 			obs.setValueCoded(concept(answers(key).get(value)));
 		else
-			obs.setValueDatetime(java.util.Date.from(((LocalDate) value).atStartOfDay(ZoneId.systemDefault()).toInstant()));
+			obs.setValueDatetime(java.util.Date.from(((LocalDate) value).atStartOfDay(DATE_VALUE_ZONE).toInstant()));
 	}
 	
 	private static Object decode(String key, Obs obs) {
@@ -360,7 +372,8 @@ public class ClinicalService {
 					return answer.getKey();
 			return null;
 		}
-		return obs.getValueDatetime() == null ? null : localDate(obs.getValueDatetime());
+		return obs.getValueDatetime() == null ? null
+		        : Instant.ofEpochMilli(obs.getValueDatetime().getTime()).atZone(DATE_VALUE_ZONE).toLocalDate();
 	}
 	
 	private static Map<String, Obs> members(Obs group) {
@@ -430,6 +443,7 @@ public class ClinicalService {
 		Patient patient = patient(requiredString(body, "patient"));
 		Encounter encounter = consultationEncounter(requiredString(body, "encounter"), patient);
 		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lockEncounter(encounter);
 		String reason = reason(body, finalization(encounter) != null, "diagnosis changes after finalization require reason");
 		Diagnosis diagnosis = buildDiagnosis(patient, encounter, body, null);
 		Diagnosis saved = Context.getDiagnosisService().save(diagnosis);
@@ -442,14 +456,22 @@ public class ClinicalService {
 		requireDirectPrivilege(DIAGNOSIS_PRIVILEGE);
 		Diagnosis old = activeDiagnosis(uuid);
 		String reason = reason(body, true, "diagnosis replacement requires reason");
-		Map<String, Object> merged = new LinkedHashMap<>();
-		merged.put("concept", old.getDiagnosis().getCoded().getUuid());
-		merged.put("rank", Integer.valueOf(1).equals(old.getRank()) ? "primary" : "secondary");
-		merged.put("certainty", old.getCertainty().name().toLowerCase(Locale.ROOT));
-		merged.putAll(body);
 		Patient patient = old.getPatient();
 		Encounter encounter = old.getEncounter();
 		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lockEncounter(encounter);
+		Context.refreshEntity(old);
+		if (old.getVoided())
+			throw bad("diagnosis does not exist");
+		// Diagnoses written outside VinSHC may be free text or lack a certainty; they cannot be merged.
+		if (old.getDiagnosis() == null || old.getDiagnosis().getCoded() == null)
+			throw bad("only catalogue-coded diagnoses can be replaced; void it and record a coded diagnosis");
+		Map<String, Object> merged = new LinkedHashMap<>();
+		merged.put("concept", old.getDiagnosis().getCoded().getUuid());
+		merged.put("rank", Integer.valueOf(1).equals(old.getRank()) ? "primary" : "secondary");
+		if (old.getCertainty() != null)
+		merged.put("certainty", old.getCertainty().name().toLowerCase(Locale.ROOT));
+		merged.putAll(body);
 		Diagnosis replacement = buildDiagnosis(patient, encounter, merged, old);
 		Context.getDiagnosisService().voidDiagnosis(old, reason);
 		Diagnosis saved = Context.getDiagnosisService().save(replacement);
@@ -462,6 +484,10 @@ public class ClinicalService {
 		requireDirectPrivilege(DIAGNOSIS_PRIVILEGE);
 		Diagnosis old = activeDiagnosis(uuid);
 		AuthorizationService.requireEncounterScopeStatic(old.getEncounter());
+		lockEncounter(old.getEncounter());
+		Context.refreshEntity(old);
+		if (old.getVoided())
+			throw bad("diagnosis does not exist");
 		String why = requiredReason(reason);
 		if (Integer.valueOf(1).equals(old.getRank()) && finalization(old.getEncounter()) != null)
 			throw bad("a finalized consultation must keep its primary diagnosis; replace it instead");
@@ -519,11 +545,11 @@ public class ClinicalService {
 	private static ConceptSource icd10Source() {
 		String uuid = globalProperty(GP_ICD10_SOURCE);
 		if (uuid == null || globalProperty(GP_ICD10_VERSION) == null)
-			throw new IllegalStateException(
+			throw new VinshcExceptions.Configuration(
 			        "ICD-10 catalogue not configured: set " + GP_ICD10_SOURCE + " and " + GP_ICD10_VERSION);
 		ConceptSource source = Context.getConceptService().getConceptSourceByUuid(uuid);
 		if (source == null || source.getRetired())
-			throw new IllegalStateException("configured ICD-10 concept source does not exist: " + uuid);
+			throw new VinshcExceptions.Configuration("configured ICD-10 concept source does not exist: " + uuid);
 		return source;
 	}
 	
@@ -576,12 +602,14 @@ public class ClinicalService {
 		requireDirectPrivilege(ALLERGY_PRIVILEGE);
 		Patient patient = patient(requiredString(body, "patient"));
 		AuthorizationService.requirePatientScopeStatic(patient);
+		lock("vinshc-allergy:" + patient.getPatientId());
 		Encounter encounter = null;
 		String encounterUuid = optionalString(body, "encounter");
 		if (encounterUuid != null) {
 			encounter = encounter(encounterUuid);
 			if (!patient.getPatientId().equals(encounter.getPatient().getPatientId()))
 				throw bad("encounter belongs to another patient");
+			AuthorizationService.requireEncounterScopeStatic(encounter);
 		}
 		AllergenType type;
 		try {
@@ -654,6 +682,10 @@ public class ClinicalService {
 		if (allergy == null || allergy.getVoided())
 			throw bad("allergy does not exist");
 		AuthorizationService.requirePatientScopeStatic(allergy.getPatient());
+		lock("vinshc-allergy:" + allergy.getPatient().getPatientId());
+		Context.refreshEntity(allergy);
+		if (allergy.getVoided())
+			throw bad("allergy does not exist");
 		String why = requiredReason(reason);
 		Context.getPatientService().voidAllergy(allergy, why);
 		event("allergy_voided", allergy.getPatient(), allergy.getEncounter(), allergy.getUuid(), why, null);
@@ -689,7 +721,7 @@ public class ClinicalService {
 	private static Concept otherNonCodedConcept() {
 		Concept concept = Context.getConceptService().getConceptByUuid(Allergen.getOtherNonCodedConceptUuid());
 		if (concept == null)
-			throw new IllegalStateException("allergy.concept.otherNonCoded concept is missing");
+			throw new VinshcExceptions.Configuration("allergy.concept.otherNonCoded concept is missing");
 		return concept;
 	}
 	
@@ -730,6 +762,8 @@ public class ClinicalService {
 		Patient patient = patient(requiredString(body, "patient"));
 		Encounter encounter = consultationEncounter(requiredString(body, "encounter"), patient);
 		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lock("vinshc-drug-orders:" + patient.getPatientId());
+		String reason = reason(body, finalization(encounter) != null, "prescribing after finalization requires reason");
 		Provider orderer = clinician(encounter, requiredString(body, "orderer"));
 		Drug drug = Context.getConceptService().getDrugByUuid(requiredString(body, "drug"));
 		if (drug == null || drug.getRetired() || drug.getConcept() == null)
@@ -794,7 +828,7 @@ public class ClinicalService {
 			throw bad("allergyOverrideReason is only accepted when the drug matches an active allergy");
 		
 		DrugOrder saved = (DrugOrder) Context.getOrderService().saveOrder(order, null);
-		event("drug_order_created", patient, encounter, saved.getUuid(), null, drug.getUuid());
+		event("drug_order_created", patient, encounter, saved.getUuid(), reason, drug.getUuid());
 		if (conflict != null)
 			event("drug_order_allergy_override", patient, encounter, saved.getUuid(),
 			    boundedText(override, 1000, "allergyOverrideReason"), "allergy " + conflict.getUuid());
@@ -808,6 +842,8 @@ public class ClinicalService {
 		if (!(order instanceof DrugOrder) || order.getVoided())
 			throw bad("drug order does not exist");
 		AuthorizationService.requireEncounterScopeStatic(order.getEncounter());
+		lock("vinshc-drug-orders:" + order.getPatient().getPatientId());
+		Context.refreshEntity(order);
 		if (!order.isActive())
 			throw bad("drug order is not active");
 		String reason = requiredReason(optionalString(body, "reason"));
@@ -816,8 +852,17 @@ public class ClinicalService {
 		try {
 			stop = Context.getOrderService().discontinueOrder(order, reason, null, orderer, order.getEncounter());
 		}
-		catch (Exception ex) {
+		catch (APIAuthenticationException ex) {
+			throw ex;
+		}
+		catch (APIException ex) {
 			throw bad("cannot discontinue order: " + ex.getMessage());
+		}
+		catch (RuntimeException ex) {
+			throw ex;
+		}
+		catch (Exception ex) {
+			throw new IllegalStateException("cannot discontinue order", ex);
 		}
 		event("drug_order_discontinued", order.getPatient(), order.getEncounter(), order.getUuid(), reason,
 		    "discontinuation " + stop.getUuid());
@@ -832,7 +877,7 @@ public class ClinicalService {
 			throw bad("orderer provider does not exist");
 		EncounterRole role = Context.getEncounterService().getEncounterRoleByUuid(CLINICIAN_ROLE);
 		if (role == null)
-			throw new IllegalStateException("clinician encounter role metadata missing");
+			throw new VinshcExceptions.Configuration("clinician encounter role metadata missing");
 		if (!encounter.getProvidersByRole(role).contains(provider))
 			throw bad("orderer must be the clinician recorded on the consultation encounter");
 		return provider;
@@ -841,14 +886,14 @@ public class ClinicalService {
 	private static CareSetting outpatient() {
 		CareSetting setting = Context.getOrderService().getCareSettingByUuid(OUTPATIENT_CARE_SETTING);
 		if (setting == null)
-			throw new IllegalStateException("outpatient care setting missing");
+			throw new VinshcExceptions.Configuration("outpatient care setting missing");
 		return setting;
 	}
 	
 	private static OrderType drugOrderType() {
 		OrderType type = Context.getOrderService().getOrderTypeByUuid(OrderType.DRUG_ORDER_TYPE_UUID);
 		if (type == null)
-			throw new IllegalStateException("drug order type missing");
+			throw new VinshcExceptions.Configuration("drug order type missing");
 		return type;
 	}
 	
@@ -1044,17 +1089,18 @@ public class ClinicalService {
 	private static Concept concept(String uuid) {
 		Concept concept = Context.getConceptService().getConceptByUuid(uuid);
 		if (concept == null)
-			throw new IllegalStateException("required metadata concept missing: " + uuid);
+			throw new VinshcExceptions.Configuration("required metadata concept missing: " + uuid);
 		return concept;
 	}
 	
 	private static Concept conceptSet(String globalPropertyName) {
 		String uuid = globalProperty(globalPropertyName);
 		if (uuid == null)
-			throw new IllegalStateException("catalogue not configured: " + globalPropertyName);
+			throw new VinshcExceptions.Configuration("catalogue not configured: " + globalPropertyName);
 		Concept set = Context.getConceptService().getConceptByUuid(uuid);
 		if (set == null || !Boolean.TRUE.equals(set.getSet()))
-			throw new IllegalStateException("catalogue concept set missing for " + globalPropertyName + ": " + uuid);
+			throw new VinshcExceptions.Configuration(
+			        "catalogue concept set missing for " + globalPropertyName + ": " + uuid);
 		return set;
 	}
 	
@@ -1108,9 +1154,7 @@ public class ClinicalService {
 	}
 	
 	private static int integer(Object raw, String field) {
-		if (!(raw instanceof Number) || raw instanceof Boolean || ((Number) raw).doubleValue() % 1 != 0)
-			throw bad(field + " must be a JSON integer");
-		return ((Number) raw).intValue();
+		return VinshcService.strictInt(raw, field);
 	}
 	
 	private static Map<String, Object> ref(Concept concept) {
@@ -1126,7 +1170,16 @@ public class ClinicalService {
 		return date == null ? null : Instant.ofEpochMilli(date.getTime()).atZone(CLINIC_ZONE).toOffsetDateTime().toString();
 	}
 	
-	private static LocalDate localDate(java.util.Date date) {
-		return Instant.ofEpochMilli(date.getTime()).atZone(ZoneId.systemDefault()).toLocalDate();
+	/** Calendar date of an instant at the clinic, e.g. the encounter date seen by staff. */
+	static LocalDate clinicDate(java.util.Date date) {
+		return Instant.ofEpochMilli(date.getTime()).atZone(CLINIC_ZONE).toLocalDate();
+	}
+	
+	private void lock(String key) {
+		TransactionLocks.lock(sessionFactory, key);
+	}
+	
+	private void lockEncounter(Encounter encounter) {
+		lock("vinshc-encounter:" + encounter.getEncounterId());
 	}
 }

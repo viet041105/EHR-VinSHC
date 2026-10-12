@@ -70,6 +70,13 @@
     </createTable>
     <sql>CREATE UNIQUE INDEX ux_vinshc_address_current ON vinshc_address_snapshot(row_key) WHERE is_current</sql>
     <createIndex tableName="vinshc_address_snapshot" indexName="ix_vinshc_address_patient"><column name="patient_id"/><column name="is_current"/></createIndex>
+    <!-- Raw <sql> has no automatic rollback; dropping the tables also drops their partial indexes.
+         Rollback blocks are not part of the changeset checksum. -->
+    <rollback>
+      <dropTable tableName="vinshc_address_snapshot"/>
+      <dropTable tableName="vinshc_field_state"/>
+      <dropTable tableName="vinshc_contact"/>
+    </rollback>
   </changeSet>
   <changeSet id="vinshc-0.2.1-complete-source-provenance" author="vinshc" dbms="postgresql">
     <addColumn tableName="vinshc_contact">
@@ -103,6 +110,9 @@
     <sql>CREATE UNIQUE INDEX ux_vinshc_consultation_finalized ON vinshc_clinical_event(encounter_id) WHERE event_type='consultation_finalized'</sql>
     <createIndex tableName="vinshc_clinical_event" indexName="ix_vinshc_event_encounter"><column name="encounter_id"/></createIndex>
     <createIndex tableName="vinshc_clinical_event" indexName="ix_vinshc_event_patient"><column name="patient_id"/></createIndex>
+    <rollback>
+      <dropTable tableName="vinshc_clinical_event"/>
+    </rollback>
   </changeSet>
   <changeSet id="vinshc-0.3.0-workspace-authorization" author="vinshc" dbms="postgresql">
     <createTable tableName="vinshc_workspace_assignment">
@@ -130,6 +140,10 @@
     </createTable>
     <createIndex tableName="vinshc_access_event" indexName="ix_vinshc_access_patient"><column name="patient_id"/><column name="date_created"/></createIndex>
     <createIndex tableName="vinshc_access_event" indexName="ix_vinshc_access_encounter"><column name="encounter_id"/><column name="date_created"/></createIndex>
+    <rollback>
+      <dropTable tableName="vinshc_access_event"/>
+      <dropTable tableName="vinshc_workspace_assignment"/>
+    </rollback>
   </changeSet>
   <changeSet id="vinshc-0.3.0-clinic-operations" author="vinshc" dbms="postgresql">
     <comment>B8 transactional clinic operations owned by the VinSHC adapter.</comment>
@@ -271,5 +285,32 @@
       <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
     </createTable>
     <addUniqueConstraint tableName="vinshc_document" columnNames="template_code,source_uuid,document_version" constraintName="ux_vinshc_document_source_version"/>
+  </changeSet>
+  <changeSet id="vinshc-0.3.1-review-fixes" author="vinshc" dbms="postgresql">
+    <comment>Service-order stop reason and indexes for foreign keys and hot B8 lookups (all auto-rollbackable).</comment>
+    <addColumn tableName="vinshc_service_order">
+      <column name="state_reason" type="VARCHAR(1000)"/>
+    </addColumn>
+    <createIndex tableName="vinshc_payment" indexName="ix_vinshc_payment_bill"><column name="bill_id"/><column name="kind"/><column name="status"/></createIndex>
+    <createIndex tableName="vinshc_payment" indexName="ix_vinshc_payment_original"><column name="original_payment_id"/></createIndex>
+    <createIndex tableName="vinshc_payment" indexName="ix_vinshc_payment_settled"><column name="settled_at"/></createIndex>
+    <createIndex tableName="vinshc_attachment" indexName="ix_vinshc_attachment_order"><column name="service_order_id"/></createIndex>
+    <createIndex tableName="vinshc_attachment" indexName="ix_vinshc_attachment_result"><column name="result_id"/></createIndex>
+    <createIndex tableName="vinshc_service_order" indexName="ix_vinshc_service_order_patient"><column name="patient_id"/></createIndex>
+    <createIndex tableName="vinshc_service_order" indexName="ix_vinshc_service_order_encounter"><column name="encounter_id"/></createIndex>
+    <createIndex tableName="vinshc_appointment" indexName="ix_vinshc_appointment_provider_time"><column name="provider_id"/><column name="start_at"/></createIndex>
+    <createIndex tableName="vinshc_appointment" indexName="ix_vinshc_appointment_patient_time"><column name="patient_id"/><column name="start_at"/></createIndex>
+  </changeSet>
+  <changeSet id="vinshc-0.3.1-timestamptz" author="vinshc" dbms="postgresql">
+    <comment>Align the B2 date_created columns with the other TIMESTAMPTZ audit columns. Existing values are JVM wall
+      time; the pinned backend image runs in UTC (/etc/localtime -> UTC, TZ unset), so they are interpreted as UTC.</comment>
+    <sql>ALTER TABLE vinshc_contact ALTER COLUMN date_created TYPE TIMESTAMP WITH TIME ZONE USING date_created AT TIME ZONE 'UTC'</sql>
+    <sql>ALTER TABLE vinshc_field_state ALTER COLUMN date_created TYPE TIMESTAMP WITH TIME ZONE USING date_created AT TIME ZONE 'UTC'</sql>
+    <sql>ALTER TABLE vinshc_address_snapshot ALTER COLUMN date_created TYPE TIMESTAMP WITH TIME ZONE USING date_created AT TIME ZONE 'UTC'</sql>
+    <rollback>
+      <sql>ALTER TABLE vinshc_contact ALTER COLUMN date_created TYPE TIMESTAMP USING date_created AT TIME ZONE 'UTC'</sql>
+      <sql>ALTER TABLE vinshc_field_state ALTER COLUMN date_created TYPE TIMESTAMP USING date_created AT TIME ZONE 'UTC'</sql>
+      <sql>ALTER TABLE vinshc_address_snapshot ALTER COLUMN date_created TYPE TIMESTAMP USING date_created AT TIME ZONE 'UTC'</sql>
+    </rollback>
   </changeSet>
 </databaseChangeLog>

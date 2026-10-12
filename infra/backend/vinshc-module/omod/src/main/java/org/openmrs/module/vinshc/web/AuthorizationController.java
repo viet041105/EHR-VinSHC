@@ -50,7 +50,8 @@ public class AuthorizationController extends BaseVinshcController {
 
 	@GetMapping("/audit")
 	public List<Map<String, Object>> audit(@RequestParam(required = false) String patient,
-	        @RequestParam(required = false) String encounter) {
-		return service.audit(patient, encounter);
+	        @RequestParam(required = false) String encounter, @RequestParam(required = false) Integer limit,
+	        @RequestParam(required = false) Integer offset) {
+		return service.audit(patient, encounter, limit, offset);
 	}
 }
