@@ -6,6 +6,11 @@ Docker xuất trong `.runtime/backend` và nguồn metadata FE. Không merge ho�
 
 ## Kết luận
 
+FE đã bổ sung tổng quan, chọn context, bảng bản ghi trong phiên và bố cục chuẩn bị
+cho các chức năng thiếu API sau đợt kiểm tra này; xem [UI_BACKEND_MAP.md](UI_BACKEND_MAP.md).
+Các khoảng trống bên dưới mô tả phần chưa hoạt động trọn vẹn, không có nghĩa mọi
+màn hình đều chưa được dựng. BE giữ nguyên; FE chưa thể bật chức năng đang chờ API.
+
 **BE và FE chưa hoàn thành toàn bộ ứng dụng phòng khám.** BE đã có nhiều API được
 kiểm thử; FE đã có caller cho 56/56 mapping VinSHC hiện tại. Đây là độ phủ route,
 không chứng minh mọi thao tác ghi thành công hoặc đủ nghiệp vụ MVP.

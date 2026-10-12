@@ -4,16 +4,19 @@ import {BackendClient,BackendError,isSystemAdministrator,uuid,vitalsPayload,VITA
 import {metadata as m,assignedRoles,permitted,active,facilityForLocation} from './metadata.js';
 import {actions,sections,consultationFields,F,choice,id,options,LABELS,stateText} from './connected-actions.js';
 import {VITAL_FIELD_MAP} from './backend-mapping.js';
+import {WorkspaceMemory,recordTypes,actionRecordTypes} from './workspace-model.js';
+import {extraSections,contextPanel,workspaceScreen,resultHighlights} from './workspace-screens.js';
 const client=new BackendClient();
+const memory=new WorkspaceMemory();
 const state={roles:[],role:null,facility:null,section:null,action:null,result:null,context:{},error:'',message:'',busy:false,workspace:false};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const localTime=()=>{const now=new Date();return new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);};
 const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 const allowed=a=>(!a.systemOnly||isSystemAdministrator(client.user))&&(a.resource==='clinical_chart'&&a.permission!=='read'?state.role==='doctor':permitted(state.role,a.resource,a.permission));
-const visibleSections=()=>sections.filter(s=>s.actions.some(k=>allowed(actions[k]))||permitted(state.role,s.resource,'read')||s.id==='pharmacy'&&state.role==='pharmacy');
+const visibleSections=()=>[...extraSections(state.role),...sections.filter(s=>s.actions.some(k=>allowed(actions[k]))||permitted(state.role,s.resource,'read')||s.id==='pharmacy'&&state.role==='pharmacy')];
 const note=text=>`<p class="connection-note">${esc(text)}</p>`;
 function field(f,values={}){
- const value=values[f.name]??f.value??(f.type==='datetime-local'&&f.required?localTime():f.type==='date'&&f.required?today():state.context[f.name]||'');
+ const value=values[f.name]??f.value??(f.type==='datetime-local'&&f.required?localTime():f.type==='date'&&f.required?today():memory.defaults(state.action)[f.name]??state.context[f.name]??'');
  const common=`name="${esc(f.name)}" ${f.required?'required':''} ${f.max?'maxlength="'+f.max+'"':''}`;
  let control;
  if(f.type==='select')control=`<select ${common}><option value="">${f.required?'Chọn…':'Chưa ghi nhận'}</option>${f.options.map(([v,l])=>`<option value="${esc(v)}" ${String(value)===String(v)?'selected':''}>${esc(l)}</option>`).join('')}</select>`;
@@ -24,7 +27,7 @@ function field(f,values={}){
 function shell(content){
  document.querySelector('#app').innerHTML=`<a class="skip-link" href="#main-content">Đến nội dung chính</a><header class="site-header clinic-header"><a class="site-brand" href="/"><span class="logo-plus">✚</span><span><strong>VinSHC</strong><small>KHÔNG GIAN OPENMRS</small></span></a><div class="header-controls">${state.workspace?`<span class="account-badge"><strong>${esc(client.user?.display)}</strong><small>${esc(m.permissions.roles[state.role].label)} · Đã kết nối</small></span><button id="switchWorkspace" ${state.busy?'disabled':''}>Đổi vai trò/cơ sở</button><button id="logout" ${state.busy?'disabled':''}>Đăng xuất</button>`:'<a href="/">Về trang chủ</a>'}</div></header>${content}`;
  document.querySelector('#logout')?.addEventListener('click',logout);
- document.querySelector('#switchWorkspace')?.addEventListener('click',()=>{state.workspace=false;state.result=null;state.context={};retries.clear();state.error='';state.message='';state.busy=false;client.generation++;client.workspace=null;render();});
+ document.querySelector('#switchWorkspace')?.addEventListener('click',()=>{memory.clear();state.workspace=false;state.result=null;state.context={};retries.clear();state.error='';state.message='';state.busy=false;client.generation++;client.workspace=null;render();});
 }
 function render(){
  if(!client.user){shell(`<main id="main-content" class="connection-login"><section class="panel form-card"><span class="eyebrow">VINSHC / OPENMRS LOCAL</span><h1>Đăng nhập phòng khám</h1><p>Dùng tài khoản OpenMRS đã được phân công vai trò và cơ sở.</p>${note('Môi trường kiểm thử · danh mục hiện chưa được duyệt cho sử dụng lâm sàng. Hồ sơ và thao tác chỉ được đọc/ghi qua backend.')}<form id="loginForm">${field(F('username','Tên đăng nhập'))}<label>Mật khẩu *<input name="password" type="password" autocomplete="current-password" required></label><p class="error" role="alert">${esc(state.error)}</p><button class="primary" ${state.busy?'disabled':''}>${state.busy?'Đang kết nối…':'Đăng nhập OpenMRS'}</button></form></section></main>`);document.querySelector('#loginForm').onsubmit=login;return;}
@@ -34,8 +37,9 @@ function render(){
  }
  const available=visibleSections();if(!available.some(s=>s.id===state.section))state.section=available[0]?.id;
  const current=available.find(s=>s.id===state.section);
- shell(`<main class="clinic-main"><aside class="clinic-sidebar"><div class="sidebar-label">${esc(m.permissions.roles[state.role].label)}</div>${available.map(s=>`<button data-section="${s.id}" class="${state.section===s.id?'active':''}" ${state.busy?'disabled':''}>${esc(s.title)}</button>`).join('')}<div class="sidebar-note"><span class="dot"></span> OpenMRS local<small>${esc(facilityForLocation(state.facility)?.name)}<br>Metadata ${esc(m.map.version)} · Dữ liệu kiểm thử</small></div></aside><div id="main-content" class="content connected-content"><div class="page-heading"><span class="eyebrow">VINSHC / KHÔNG GIAN KẾT NỐI</span><h1>${esc(current?.title||'Không có chức năng được cấp')}</h1></div>${note('Môi trường kiểm thử. Thao tác ghi sẽ lưu lên OpenMRS và được kiểm tra theo vai trò, cơ sở hiện tại.')}${current?.note?note(current.note):''}<p id="connectionError" class="error" role="alert">${esc(state.error)}</p><p id="connectionMessage" class="connection-success" role="status">${esc(state.message)}</p>${current?sectionContent(current):''}<section id="backendResult" class="panel result-panel" aria-live="polite">${state.result?`<h2>Kết quả từ OpenMRS</h2>${actions[state.action]?.document?'<button id="printDocument">In chứng từ</button>':''}${displayResult(state.result)}`:'<p class="readonly">Chọn thao tác để đọc hoặc ghi dữ liệu backend.</p>'}</section></div></main>`);
+ shell(`<main class="clinic-main"><aside class="clinic-sidebar"><div class="sidebar-label">${esc(m.permissions.roles[state.role].label)}</div>${available.map(s=>`<button data-section="${s.id}" class="${state.section===s.id?'active':''}" ${state.busy?'disabled':''}>${esc(s.title)}</button>`).join('')}<div class="sidebar-note"><span class="dot"></span> OpenMRS local<small>${esc(facilityForLocation(state.facility)?.name)}<br>Metadata ${esc(m.map.version)} · Dữ liệu kiểm thử</small></div></aside><div id="main-content" class="content connected-content"><div class="page-heading"><span class="eyebrow">VINSHC / KHÔNG GIAN KẾT NỐI</span><h1>${esc(current?.title||'Không có chức năng được cấp')}</h1></div>${note('Môi trường kiểm thử. Thao tác ghi sẽ lưu lên OpenMRS và được kiểm tra theo vai trò, cơ sở hiện tại.')}${current?.note?note(current.note):''}<p id="connectionError" class="error" role="alert">${esc(state.error)}</p><p id="connectionMessage" class="connection-success" role="status">${esc(state.message)}</p>${current?.id!=='overview'?contextPanel({role:state.role,memory,field}):''}${current?sectionContent(current):''}<section id="backendResult" class="panel result-panel" aria-live="polite">${state.result?`<h2>Kết quả từ OpenMRS</h2>${actions[state.action]?.document?'<button id="printDocument">In chứng từ</button>':''}${resultHighlights(state.result)}${displayResult(state.result)}`:'<p class="readonly">Chọn thao tác để đọc hoặc ghi dữ liệu backend.</p>'}</section></div></main>`);
  document.querySelectorAll('[data-section]').forEach(b=>b.onclick=()=>{state.section=b.dataset.section;state.action=null;state.result=null;state.error='';state.message='';render();});
+ bindWorkspaceScreens();
  document.querySelector('#actionPicker')?.addEventListener('change',e=>{state.action=e.target.value;state.error='';state.message='';state.result=null;render();});
  document.querySelector('#actionForm')?.addEventListener('submit',submitAction);
  document.querySelector('#vitalsForm')?.addEventListener('submit',submitVitals);
@@ -49,11 +53,71 @@ function render(){
  }
 }
 function sectionContent(section){
- if(section.id==='vitals')return vitalsForm();
- const choices=section.actions.filter(k=>allowed(actions[k]));if(!choices.length)return '';
+ const screen=workspaceScreen(section.id,{role:state.role,memory,field,stateText,sections:visibleSections(),canAction:key=>Boolean(actions[key]&&allowed(actions[key]))});
+ if(section.id==='vitals')return vitalsForm()+screen;
+ const choices=section.actions.filter(k=>allowed(actions[k]));if(!choices.length)return screen;
  if(!choices.includes(state.action))state.action=choices[0];
  const a=actions[state.action];
- return `<section class="panel form-card">${field(choice('actionPicker','Thao tác',choices.map(k=>[k,actions[k].title])),{actionPicker:state.action}).replace('name="actionPicker"','id="actionPicker"')}<h2>${esc(a.title)}</h2>${a.notice?note(a.notice):''}<form id="actionForm"><div class="form-grid">${a.fields.map(f=>field(f,formValues())).join('')}</div>${state.action==='correction'?note('Các trường đang hiển thị được lấy từ phiếu đã đọc. Để trống trường đã có nghĩa là xóa trường đó. Nhập lý do cho bản đính chính.'):''}<div class="form-actions"><button class="primary" ${state.busy?'disabled':''}>${state.busy?'Đang xử lý…':a.method==='GET'?'Đọc từ OpenMRS':'Xác nhận gửi OpenMRS'}</button></div></form></section>`;
+ return `<section class="panel form-card"><div class="workspace-heading"><h2>Thao tác ${esc(section.title.toLowerCase())}</h2><span class="capability-badge connected">Đã nối API</span></div><div class="action-shortcuts">${choices.slice(0,6).map(k=>`<button type="button" data-go-section="${section.id}" data-go-action="${k}" ${state.action===k?'aria-current="true"':''}>${esc(actions[k].title)}</button>`).join('')}</div>${field(choice('actionPicker','Thao tác',choices.map(k=>[k,actions[k].title])),{actionPicker:state.action}).replace('name="actionPicker"','id="actionPicker"')}<h2>${esc(a.title)}</h2>${a.notice?note(a.notice):''}${knownRecordPicker(a)}<form id="actionForm"><div class="form-grid">${a.fields.map(f=>field(f,formValues())).join('')}</div>${state.action==='correction'?note('Các trường đang hiển thị được lấy từ phiếu đã đọc. Để trống trường đã có nghĩa là xóa trường đó. Nhập lý do cho bản đính chính.'):''}<div class="form-actions"><button class="primary" ${state.busy?'disabled':''}>${state.busy?'Đang xử lý…':a.method==='GET'?'Đọc từ OpenMRS':'Xác nhận gửi OpenMRS'}</button></div></form></section>${screen}`;
+}
+function knownRecordPicker(action){
+ if(!action.fields.some(f=>f.name==='record'))return '';
+ const type=actionRecordTypes[state.action],rows=type?memory.list([type]):[];
+ if(!rows.length)return '';
+ return `<label class="known-record-picker">Chọn ${esc(recordTypes[type].label.toLowerCase())} đã mở<select id="knownRecordPicker"><option value="">Hoặc nhập mã bên dưới…</option>${rows.map(row=>`<option value="${row.id}" ${memory.selected[type]===row.id?'selected':''}>${esc(row.data.serviceName||stateText(row.data.status||row.data.state||recordTypes[type].label))} · ${row.id}</option>`).join('')}</select></label>`;
+}
+function navigate(section,action){
+ if(state.busy||!visibleSections().some(s=>s.id===section))return;
+ if(action&&(!actions[action]||!allowed(actions[action])))return;
+ state.section=section;state.action=action||null;state.result=null;state.error='';state.message='';render();
+ document.querySelector('#main-content')?.scrollIntoView({block:'start'});
+}
+function resetCareContext(){
+ state.context={catalogueVersion:state.context.catalogueVersion};state.result=null;retries.clear();
+}
+function bindWorkspaceScreens(){
+ document.querySelectorAll('[data-go-section]').forEach(button=>button.onclick=()=>navigate(button.dataset.goSection,button.dataset.goAction));
+ document.querySelectorAll('[data-pending-form]').forEach(form=>form.onsubmit=event=>event.preventDefault());
+ document.querySelector('#careContextForm')?.addEventListener('submit',event=>{
+  event.preventDefault();if(state.busy)return;
+  try{
+   const form=new FormData(event.target),context=Object.fromEntries(['patient','visit','encounter'].map(k=>[k,String(form.get('care_'+k)||'').trim()]));
+   if((context.visit||context.encounter)&&!context.patient)throw new BackendError('Chọn bệnh nhân trước khi áp dụng mã lượt hoặc encounter.');
+   memory.setContext(context);memory.selected={};resetCareContext();state.message='Đã áp dụng mã hồ sơ cho các biểu mẫu. Backend sẽ kiểm tra khi gửi.';state.error='';render();
+  }catch(error){showError(error);}
+ });
+ document.querySelector('#clearCareContext')?.addEventListener('click',()=>{if(state.busy)return;memory.context={};memory.selected={};resetCareContext();state.message='Đã bỏ chọn hồ sơ.';state.error='';render();});
+ document.querySelector('#knownRecordPicker')?.addEventListener('change',event=>{
+  const record=event.target.value;if(!record)return;
+  memory.select(actionRecordTypes[state.action],record);resetCareContext();render();
+ });
+ document.querySelectorAll('[data-select-type],[data-read-type]').forEach(button=>button.onclick=async()=>{
+  if(state.busy)return;const type=button.dataset.selectType||button.dataset.readType,id=button.dataset.selectId||button.dataset.readId;
+  const row=memory.select(type,id);if(!row)return;resetCareContext();state.error='';
+  if(button.dataset.readType){
+   const key=recordTypes[type].read,a=actions[key];if(!a||!allowed(a))return;
+   const data=type==='patient'?{patient:id}:type==='encounter'?{encounter:id}:{record:id};
+   state.action=key;state.section=type==='patient'?'identity':recordTypes[type].section;
+   await perform(()=>client.request('vinshc/'+a.path(data)),'Đã đọc lại bản ghi từ OpenMRS.',result=>captureWorkspaceResponse(key,result,data));
+  }else{state.message='Đã chọn '+recordTypes[type].label.toLowerCase()+'. Chọn thao tác để tiếp tục.';render();}
+ });
+ document.querySelector('#sessionRecordFilter')?.addEventListener('input',event=>{
+  const query=event.target.value.trim().toLowerCase();let count=0;
+  document.querySelectorAll('[data-session-record]').forEach(row=>{row.hidden=!row.dataset.filter.includes(query);if(!row.hidden)count++;});
+  document.querySelector('#sessionFilterEmpty').hidden=Boolean(count);
+ });
+}
+function captureClinicalContext(result){
+ if(!result)return;
+ if(Object.hasOwn(result,'consultation')&&!result.consultation){delete state.context.group;delete state.context.consultationValues;}
+ if(result.consultation){state.context.group=result.consultation.groupUuid;state.context.consultationValues=result.consultation.values;}
+ if(result.groupUuid){state.context.group=result.groupUuid;state.context.consultationValues=result.values;}
+}
+function captureWorkspaceResponse(action,result,input){
+ const previousPatient=memory.context.patient,previousEncounter=memory.context.encounter;
+ memory.capture(action,result,input);
+ if(previousPatient!==memory.context.patient||previousEncounter!==memory.context.encounter)state.context={catalogueVersion:state.context.catalogueVersion};
+ captureClinicalContext(result);
 }
 function formValues(){return state.action==='correction'?state.context.consultationValues||{}:{};}
 function vitalsForm(){
@@ -74,10 +138,10 @@ async function login(e){
 }
 async function openWorkspace(e){
  e.preventDefault();const f=new FormData(e.target);state.busy=true;state.error='';render();
- try{const role=f.get('role'),facility=uuid(f.get('facility'));if(!state.roles.includes(role))throw new BackendError('Vai trò không thuộc tài khoản.');await client.selectWorkspace(role,facility);state.role=role;state.facility=facility;state.workspace=true;state.section=null;state.action=null;state.result=null;state.context={};}
+ try{const role=f.get('role'),facility=uuid(f.get('facility'));if(!state.roles.includes(role))throw new BackendError('Vai trò không thuộc tài khoản.');await client.selectWorkspace(role,facility);memory.clear();state.role=role;state.facility=facility;state.workspace=true;state.section=null;state.action=null;state.result=null;state.context={};}
  catch(error){state.error=error.message;}finally{state.busy=false;render();}
 }
-function logout(){client.clear();retries.clear();Object.assign(state,{roles:[],role:null,facility:null,section:null,action:null,result:null,context:{},workspace:false,error:'',message:'',busy:false});render();}
+function logout(){client.clear();memory.clear();retries.clear();Object.assign(state,{roles:[],role:null,facility:null,section:null,action:null,result:null,context:{},workspace:false,error:'',message:'',busy:false});render();}
 // Keep an uncertain transaction's key for an identical manual retry; never auto-retry a write.
 const retries=new Map();
 async function submitAction(e){
@@ -105,30 +169,27 @@ async function submitAction(e){
    if(a.idempotent)retries.delete(fingerprint);
    if(a.binary){const href=URL.createObjectURL(result),link=document.createElement('a');link.href=href;link.download='vinshc-report-'+data.record;link.click();setTimeout(()=>URL.revokeObjectURL(href),1000);state.result={message:'Đã tải tệp từ OpenMRS.'};}
    if(a.document)state.message='Đã lấy chứng từ từ OpenMRS. Dùng nút In chứng từ để in nội dung đã nhận.';
-   for(const k of ['patient','encounter','visit','orderer'])if(data[k])state.context[k]=data[k];
-   if(result.patientUuid)state.context.patient=result.patientUuid;
-   if(result.encounterUuid)state.context.encounter=result.encounterUuid;
-   if(result.visitUuid)state.context.visit=result.visitUuid;
-   if(Object.hasOwn(result,'consultation')&&!result.consultation){delete state.context.group;delete state.context.consultationValues;}
-   if(result.consultation){state.context.group=result.consultation.groupUuid;state.context.consultationValues=result.consultation.values;}
-   if(result.groupUuid){state.context.group=result.groupUuid;state.context.consultationValues=result.values;}
+   captureWorkspaceResponse(state.action,result,data);
+   if(data.orderer)state.context.orderer=data.orderer;
   });
  }catch(error){showError(error);}
 }
 async function submitVitals(e){
  e.preventDefault();if(state.busy||!permitted(state.role,'vitals','create'))return;
- try{const data=Object.fromEntries(new FormData(e.target)),payload=vitalsPayload(data.patient,data.encounter,data,VITAL_FIELD_MAP);await perform(()=>client.request('vinshc/vitals',{method:'POST',body:payload}),'OpenMRS đã lưu lần đo sinh hiệu.',result=>{if(result.needsVerification)state.message='Đã lưu sinh hiệu. Backend đánh dấu cần đối chiếu huyết áp; kiểm tra lại số đo.';});}catch(error){showError(error);}
+ try{const data=Object.fromEntries(new FormData(e.target)),payload=vitalsPayload(data.patient,data.encounter,data,VITAL_FIELD_MAP);await perform(()=>client.request('vinshc/vitals',{method:'POST',body:payload}),'OpenMRS đã lưu lần đo sinh hiệu.',result=>{captureWorkspaceResponse('vitals',result,data);if(result.needsVerification)state.message='Đã lưu sinh hiệu. Backend đánh dấu cần đối chiếu huyết áp; kiểm tra lại số đo.';});}catch(error){showError(error);}
 }
 async function perform(task,message,onSuccess){
  state.busy=true;state.error='';state.message='';
+ const messageElement=document.querySelector('#connectionMessage');if(messageElement)messageElement.textContent='';
  // Disable controls without replacing the form: failed requests preserve the user's input.
- document.querySelectorAll('button,select').forEach(el=>el.disabled=true);
+ const locked=[...document.querySelectorAll('button,select')].map(el=>({el,disabled:el.disabled}));
+ locked.forEach(({el})=>el.disabled=true);
  try{const result=await task();state.result=result;state.message=message;onSuccess?.(result);state.busy=false;render();}
- catch(error){state.busy=false;showError(error);}finally{document.querySelectorAll('button,select').forEach(el=>el.disabled=false);}
+ catch(error){state.busy=false;showError(error);}finally{locked.forEach(({el,disabled})=>{if(el.isConnected)el.disabled=disabled;});}
 }
 function showError(error){
  state.error=error.message;
- if(!client.user){state.workspace=false;state.result=null;state.context={};state.roles=[];retries.clear();render();return;}
+ if(!client.user){memory.clear();state.workspace=false;state.result=null;state.context={};state.roles=[];retries.clear();render();return;}
  const target=document.querySelector('#connectionError');if(target)target.textContent=state.error;else render();
 }
 async function loadProvinces(){
@@ -148,8 +209,8 @@ function displayResult(value,depth=0){
  if(value===null||value===undefined)return '<span class="readonly">Chưa ghi nhận</span>';
  if(typeof value!=='object')return esc(typeof value==='boolean'?(value?'Có':'Không'):stateText(value));
  if(Array.isArray(value))return value.length?`<div class="result-list">${value.map(v=>`<article>${displayResult(v,depth+1)}</article>`).join('')}</div>`:'<p class="readonly">Chưa có bản ghi.</p>';
- return `<dl class="result-fields">${Object.entries(value).filter(([k])=>!['memberUuids','packSha256','upstreamBoundaries','adapterStrategy'].includes(k)).map(([k,v])=>`<div><dt>${esc(LABELS[k]||resultLabels[k]||k)}</dt><dd>${typeof v==='number'&&/Vnd$/.test(k)?esc(new Intl.NumberFormat('vi-VN').format(v)):displayResult(v,depth+1)}</dd></div>`).join('')}</dl>`;
+ return `<dl class="result-fields">${Object.entries(value).filter(([k])=>!['memberUuids','packSha256','upstreamBoundaries','adapterStrategy'].includes(k)).map(([k,v])=>`<div><dt>${esc(resultLabels[k]||LABELS[k]||k)}</dt><dd>${typeof v==='number'&&/(Vnd|_vnd)$/.test(k)?esc(new Intl.NumberFormat('vi-VN').format(v)):displayResult(v,depth+1)}</dd></div>`).join('')}</dl>`;
 }
 window.addEventListener('pageshow',event=>{if(event.persisted)logout();});
-window.addEventListener('pagehide',()=>{client.clear();retries.clear();state.context={};state.result=null;});
+window.addEventListener('pagehide',()=>{client.clear();memory.clear();retries.clear();state.context={};state.result=null;});
 render();

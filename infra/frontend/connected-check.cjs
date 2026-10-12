@@ -49,8 +49,8 @@ const location='feae71be-957c-4f94-b100-d84bc6915574',facility='06ba3ea8-cbb2-51
    assert.equal(writes.at(-1).body.facility,facility);assert.ok(writes.at(-1).body.idempotencyKey);assert.equal(writes.at(-1).body.lines[0].unitPriceVnd,undefined);
    await page.locator('#actionPicker').selectOption('receipt');await page.locator('[name=record]').fill(patient);await page.locator('[name=amountVnd]').fill('10000');await page.locator('[name=method]').selectOption('cash');failReceipt=true;
    await page.locator('#actionForm button').click();await page.locator('#connectionError').filter({hasText:/Dữ liệu đã thay đổi/}).waitFor();assert.equal(await page.locator('[name=amountVnd]').inputValue(),'10000');const key=writes.at(-1).body.idempotencyKey;failReceipt=false;
-   await page.locator('#actionForm button').click();await page.getByText('Đã thanh toán',{exact:true}).waitFor();assert.equal(writes.at(-1).body.idempotencyKey,key);
-   await page.locator('#switchWorkspace').click();await workspace('manager');assert.equal(await page.locator('[data-section=identity]').count(),0);await page.locator('#actionForm button').click();await page.getByText('Thu ròng (VND)',{exact:true}).waitFor();
+   await page.locator('#actionForm button').click();await page.locator('#backendResult').getByText('Đã thanh toán',{exact:true}).waitFor();assert.equal(writes.at(-1).body.idempotencyKey,key);
+   await page.locator('#switchWorkspace').click();await workspace('manager');assert.equal(await page.locator('[data-section=identity]').count(),0);await page.locator('[data-section=reports]').click();await page.locator('#actionForm button').click();await page.getByText('Thu ròng (VND)',{exact:true}).waitFor();
    const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>window.innerWidth);assert.equal(overflow,false);
    await page.screenshot({path:path.join('/private/tmp',`vinshc-connected-${viewport.width}.png`),fullPage:true});
    for(const next of ['reception','lab','pharmacy','admin']){

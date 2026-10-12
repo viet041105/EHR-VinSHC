@@ -18,6 +18,10 @@
     {
       "file": "field-policies.json",
       "source": "pack.json fields[].b2Missing where mode=field_states"
+    },
+    {
+      "file": "ui-options.json",
+      "source": "pack.json codeLists.gender, codeLists.birth_precision, codeLists.visit_close_reason"
     }
   ]
 }

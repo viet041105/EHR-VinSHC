@@ -1,0 +1,64 @@
+{
+  "sourceCommit": "d9d5b957223f6bc73db173dbbc1d413910689526",
+  "version": "0.3.0",
+  "codeLists": {
+    "gender": [
+      {
+        "code": "M",
+        "label": "Nam"
+      },
+      {
+        "code": "F",
+        "label": "Nữ"
+      },
+      {
+        "code": "O",
+        "label": "Khác"
+      },
+      {
+        "code": "U",
+        "label": "Không rõ"
+      }
+    ],
+    "birth_precision": [
+      {
+        "code": "day",
+        "label": "Đủ ngày tháng năm"
+      },
+      {
+        "code": "month",
+        "label": "Chỉ tháng/năm"
+      },
+      {
+        "code": "year",
+        "label": "Chỉ năm"
+      },
+      {
+        "code": "unknown",
+        "label": "Không rõ"
+      }
+    ],
+    "visit_close_reason": [
+      {
+        "code": "completed",
+        "label": "Kết thúc khám",
+        "conceptRef": "answer.visit_close_reason.completed"
+      },
+      {
+        "code": "left_early",
+        "label": "Bỏ về trước khi khám xong",
+        "conceptRef": "answer.visit_close_reason.left_early"
+      },
+      {
+        "code": "cancelled",
+        "label": "Hủy tiếp nhận",
+        "conceptRef": "answer.visit_close_reason.cancelled"
+      },
+      {
+        "code": "referred",
+        "label": "Chuyển khám cơ sở khác",
+        "conceptRef": "answer.visit_close_reason.referred"
+      }
+    ]
+  }
+}

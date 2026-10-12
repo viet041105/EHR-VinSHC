@@ -82,6 +82,25 @@ reference mapping và global properties; không tạo user, patient hoặc giao 
 kiểm thử và `productionEnabled=false`; khởi động DB thật không biến danh mục này
 thành danh mục lâm sàng đã được duyệt.
 
+## Giao diện công việc
+
+Sau khi mở workspace, trang **Tổng quan công việc** hiển thị các chức năng đúng vai trò.
+Chọn **Bệnh nhân** hoặc **Lượt khám** để mở màn hình mới (nếu role được phép).
+Trong **Hồ sơ đang làm việc**, áp dụng mã patient/visit/encounter có sẵn để dùng chung
+giữa các biểu mẫu; backend kiểm tra quyền và liên kết khi gửi.
+
+Các phần nghiệp vụ có nút thao tác nhanh, bảng **Bản ghi đã mở trong phiên**,
+bộ lọc trong phiên và chọn/đọc lại theo loại phiếu. Dữ liệu chỉ đến từ phản hồi BE
+thành công, không phải danh sách toàn server; đổi workspace/đăng xuất sẽ xóa bộ nhớ này.
+
+Màn hình tiếp nhận/mở lượt/tìm kiếm/cấp thuốc/thiết lập cơ sở đã có bố cục chuẩn bị.
+Nút **Chờ backend** chưa gửi dữ liệu; không tạo thành công giả hoặc gọi API chưa tồn tại.
+Admin vẫn chỉ thấy quản trị/báo cáo và tổng quan; màn hình bệnh nhân/lượt thuộc role
+nghiệp vụ, không tự hiện cho admin chỉ vì có quyền System Developer.
+
+Xem [UI_BACKEND_MAP.md](UI_BACKEND_MAP.md) để đối chiếu từng màn hình với API,
+metadata và các phần cần BE bổ sung.
+
 ## Các API đã nối
 
 - Session và B5: xác nhận vai trò/cơ sở, gửi workspace headers trong từng request.
@@ -143,8 +162,8 @@ kiểm tra đăng nhập trên trình duyệt, cấu hình/metadata và xóa sto
 browser test riêng. Không chạy integration fixtures tạo patient để chứng minh kết nối.
 Ảnh QA nằm trong `/private/tmp`, không phải dữ liệu production.
 
-Đã xác minh ngày 2026-10-12: 11 unit tests đạt; Playwright desktop/mobile
-(route mock) đạt; kiểm thử đăng nhập và đọc API qua Vite → gateway → OpenMRS
+Đã xác minh ngày 2026-10-13: 16 unit tests đạt; ba bộ Playwright desktop/mobile
+(route mock, gồm màn hình công việc mới) đạt; kiểm thử đăng nhập và đọc API qua Vite → gateway → OpenMRS
 trên PostgreSQL thật đạt, gồm mở workspace admin, tìm user, đọc audit và báo cáo ngày.
 Bốn container healthy; API coverage 56/56; cấu hình admin chạy lại không tạo trùng. Sau kiểm thử, DB có 0 patient,
 0 visit, 0 encounter và 0 obs; không tạo fixture lâm sàng. Kiểm thử thật chỉ xác
@@ -157,6 +176,8 @@ minh kết nối/cấu hình, chưa chứng minh toàn bộ luồng nghiệp v�
 - `backend-client.js`: HTTP client, lỗi, generation guard, validation payload.
 - `metadata.js`, `metadata/`, `backend-mapping.js`: danh mục và hợp đồng backend.
 - `additional-actions.js`: bổ sung CRUD phần mở rộng, policy thông tin thiếu và quản trị workspace.
+- `workspace-screens.js`, `workspace-model.js`: tổng quan, màn hình chuẩn bị và bộ nhớ bản ghi/context của workspace.
+- `metadata/ui-options.json`: code list giới tính, độ đầy đủ ngày sinh và lý do kết thúc từ pack main.
 - `metadata/field-policies.json`: trích nguyên policy field-state từ pack của main đã khóa.
 - `configure-admin.py`: cấu hình role/assignment cho admin hiện có qua API.
 - `clear-demo.js`: xóa đúng hai khóa demo cũ.
