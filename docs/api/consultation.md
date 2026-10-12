@@ -109,6 +109,6 @@ OpenMRS Core lưu coded Obs nhưng không tự thực thi các quy tắc trên. 
 
 `POST /obs/{uuid}` tạo UUID thay thế và void Obs cũ. B4A xác nhận child thay thế vẫn thuộc đúng consultation group, bản cũ còn đọc được với `voided=true`. Hai lượt khám của cùng patient dùng visit, encounter và group riêng nên dữ liệu lượt hai không ghi đè lượt đầu.
 
-FHIR2 đọc parent group thành Observation có đúng `subject`, `encounter` và `hasMember`. Visit OpenMRS không được ánh xạ thành FHIR Encounter. Mapping ICD-10/Condition, AllergyIntolerance và MedicationRequest chờ B4 đầy đủ.
+FHIR2 đọc parent group thành Observation có đúng `subject`, `encounter` và `hasMember`. B7 xác nhận FHIR2 chiếu cả OpenMRS Visit và Encounter thành FHIR `Encounter`, phân biệt bằng `meta.tag`; encounter lâm sàng có `partOf` trỏ tới visit. Condition, AllergyIntolerance và MedicationRequest đã được kiểm tra ở B7; coding ICD-10 chuẩn vẫn là khoảng trống đã ghi nhận.
 
 Bằng chứng: `tests/integration/test_b4a_consultation.py` (`.runtime/reports/b4a-integration.json`) cho lưu trữ native; `tests/integration/test_b4b_clinical.py` (`.runtime/reports/b4b-clinical.json`) cho API có kiểm tra, chốt phiếu, chẩn đoán, dị ứng, đơn thuốc và quyền.

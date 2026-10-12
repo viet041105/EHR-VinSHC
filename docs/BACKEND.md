@@ -196,12 +196,12 @@ Chỉ định CLS, lịch hẹn, hàng đợi, thu tiền và mẫu in thuộc m
 
 **Đầu vào:** B2–B5; quyết định định danh và thuật ngữ từ nhóm metadata. **Đầu ra:** bảng mapping có bằng chứng, không triển khai chia sẻ hồ sơ thật trong mốc này.
 
-- [ ] Lập bảng cho Patient, Encounter, Observation, Condition, AllergyIntolerance, MedicationRequest, ServiceRequest, Location, Practitioner: nguồn OpenMRS, trường FHIR, identifier/mã, đơn vị, thời gian, trạng thái, người/cơ sở tạo, thao tác runtime hỗ trợ và giới hạn. Đối chiếu với cột FHIR trong [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
-- [ ] Tạo fixture nhiều lần khám; đối chiếu REST với FHIR trên **cùng UUID** hoặc mapping đã định nghĩa. Kiểm tra thông tin sửa/void, timezone (Asia/Ho_Chi_Minh, trao đổi theo ISO 8601 có offset) và dữ liệu không có. Nếu một resource chưa map đúng, ghi issue và test fail/skip có lý do rõ ràng.
-- [ ] Dùng identifier bệnh nhân theo từng cơ sở, facility ID ổn định, mã thuật ngữ có nguồn/phiên bản và provenance phù hợp. Ghi rõ cơ chế MPI/record locator, đồng ý chia sẻ và quyền xem hồ sơ liên cơ sở là quyết định thiết kế của giai đoạn sau (M7).
-- [ ] Theo [ADR-0001](decisions/0001-openmrs-openehr.md): OpenMRS là nơi lưu hồ sơ gốc; cột archetype openEHR trong từ điển dữ liệu được giữ khớp với cấu trúc lưu thật (DATA-10); EHRbase chỉ thêm ở tầng sau qua adapter một chiều. FHIR API hiện tại không phải bằng chứng đã đáp ứng openEHR. Nếu mentor đổi quyết định trong ADR, cập nhật mốc này trước khi làm tiếp.
+- [x] Bảng [FHIR mapping](api/fhir-mapping.md) ghi đủ Patient, Encounter, Observation, Condition, AllergyIntolerance, MedicationRequest, ServiceRequest, Location và Practitioner: nguồn/ID, trường/link, code/unit/time/status, người/cơ sở, capability thực và giới hạn; đã đối chiếu contract metadata và cột FHIR trong [DATA_DICTIONARY.md](DATA_DICTIONARY.md).
+- [x] Fixture hai lượt khám đối chiếu REST–FHIR cùng UUID/mapping; test instant ISO 8601 có offset, quy ước hiển thị `Asia/Ho_Chi_Minh`, sửa/void và missing-state. Sáu gap runtime có mã/assertion rõ; ServiceRequest được ghi blocked đến B8 thay vì giả là đã round-trip.
+- [x] Patient identifier giữ namespace theo loại/cơ sở; facility UUID ổn định và provider mapping đã xác minh. Catalogue/code/version/provenance chưa đạt production được ghi rõ. MPI/record locator, consent và cross-facility policy vẫn là quyết định M7, không auto-merge.
+- [x] Giữ [ADR-0001](decisions/0001-openmrs-openehr.md): OpenMRS là nguồn gốc; openEHR là mapping thiết kế/adapter một chiều ở tầng sau. B7 không tuyên bố FHIR2 hiện tại đáp ứng openEHR hoặc đã triển khai EHRbase.
 
-**Đạt khi:** bảng mapping được kiểm tra bằng fixture; nguồn gốc cơ sở và bệnh nhân rõ ràng; giới hạn FHIR được ghi cho FE/nhóm tích hợp.
+**Đạt khi:** bảng mapping được kiểm tra bằng fixture; nguồn gốc cơ sở và bệnh nhân rõ ràng; giới hạn FHIR được ghi cho FE/nhóm tích hợp. **Đã đạt local ngày 12/10/2026:** B7 6/6 trên Docker cô lập; báo cáo `.runtime/reports/b7-fhir.json`. Các gap nêu trên là giới hạn được kiểm thử, không phải cam kết interoperability production.
 
 ### Mốc B8 — Vận hành phòng khám (MVP-2)
 

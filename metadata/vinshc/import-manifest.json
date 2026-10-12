@@ -817,7 +817,7 @@
     {
       "domain": "provider-person-practitioner-binding",
       "source": "metadata/vinshc/catalogues/facilities.json",
-      "method": "Upsert synthetic Person by personUuid, bind Provider.person; Practitioner id=verified personUuid; keep providerUuid independent"
+      "method": "Upsert synthetic Person by personUuid and bind Provider.person; provision Provider by providerUuid. FHIR2 4.2.0 exposes Provider.uuid as Practitioner.id; keep personUuid independent"
     },
     {
       "domain": "drug-ingredients",

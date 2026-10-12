@@ -34,6 +34,6 @@ OpenMRS Visit là lượt khám nghiệp vụ gom nhiều encounter; nó không 
 
 B3 xác nhận visit đã kết thúc chỉ xuất hiện trong lịch sử đúng patient, cùng encounter và hai nhóm đo sinh hiệu vẫn đọc lại được. UUID không tồn tại trả 404; payload thiếu trường bắt buộc trả 400. Phân trang nhiều lượt, nhiều visit đồng thời và quyền theo 8 role vẫn cần kiểm tra ở B5/B9.
 
-FHIR `Encounter/{uuid}` trong tài liệu B3 là mapping của OpenMRS Encounter sinh hiệu nằm bên trong visit. Không dùng visit UUID để gọi FHIR Encounter và không gộp hai lifecycle này chỉ vì cùng hiển thị là “lượt khám”.
+FHIR2 4.2.0 chiếu cả OpenMRS Visit và OpenMRS Encounter thành tài nguyên FHIR `Encounter`, nhưng vẫn giữ hai lifecycle riêng: Visit có `meta.tag.code=visit`; encounter lâm sàng có `meta.tag.code=encounter` và `partOf` trỏ tới Visit. B7 đã đọc lại thành công bằng cả hai UUID; ứng dụng phải kiểm tra tag/quan hệ thay vì coi hai loại là một bản ghi.
 
 Bộ kiểm thử và bằng chứng: `tests/integration/test_b3_vitals.py`, `.runtime/reports/b3-integration.json`.
