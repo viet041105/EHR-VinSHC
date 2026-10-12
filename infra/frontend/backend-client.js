@@ -3,11 +3,16 @@ export class BackendError extends Error {
 }
 const ROOT='/openmrs/ws/rest/v1/';
 const messages={400:'Thông tin chưa hợp lệ. Kiểm tra các trường đã nhập.',401:'Phiên đăng nhập không hợp lệ hoặc đã hết hạn.',403:'Tài khoản không có quyền trong vai trò/cơ sở đã chọn.',404:'Không tìm thấy bản ghi hoặc API chưa được cài đặt.',409:'Dữ liệu đã thay đổi hoặc thao tác không phù hợp trạng thái hiện tại.',503:'Backend chưa có đủ cấu hình hoặc metadata cho chức năng này.'};
+export const isSystemAdministrator=user=>(user?.roles||[]).some(r=>(typeof r==='string'?r:r.name||r.display)==='System Developer');
 export class BackendClient {
  #token=null;
  constructor(fetcher=(...args)=>globalThis.fetch(...args)){this.fetcher=fetcher;this.workspace=null;this.user=null;this.generation=0;}
- async request(path,{method='GET',body,scoped=true,binary=false}={}){
-  if(!/^(session(?:\?|$)|vinshc\/)/.test(path)||path.includes('..'))throw new BackendError('Đường dẫn API không được hỗ trợ.');
+ async request(path,{method='GET',body,scoped=true,binary=false,adminCore=false}={}){
+  if(adminCore){
+   if(!isSystemAdministrator(this.user)||!/^user(?:\/[0-9a-f-]{36})?(?:\?|$)/i.test(path)||!['GET','POST'].includes(method))throw new BackendError('Chỉ quản trị hệ thống được dùng API tài khoản Core.',403);
+   if(method==='POST'&&(!/^user\/[0-9a-f-]{36}$/i.test(path)||!body||Object.keys(body).some(k=>k!=='roles')||!Array.isArray(body.roles)||body.roles.some(r=>!UUID_PATTERN.test(r))))throw new BackendError('Chỉ hỗ trợ cập nhật danh sách role của user hiện có.');
+   scoped=false;
+  }else if(!/^(session(?:\?|$)|vinshc\/)/.test(path)||path.includes('..'))throw new BackendError('Đường dẫn API không được hỗ trợ.');
   const generation=this.generation,headers={Accept:binary?'*/*':'application/json'};
   if(this.#token)headers.Authorization='Basic '+this.#token;
   if(scoped&&this.workspace){headers['X-VinSHC-Workspace-Role']=this.workspace.role;headers['X-VinSHC-Workspace-Facility']=this.workspace.facility;}
@@ -21,7 +26,7 @@ export class BackendClient {
   if(response.status===204&&response.ok)return null;
   if(!response.headers.get('content-type')?.includes('json'))throw new BackendError(messages[response.status]||'Backend không trả JSON. Kiểm tra gateway/module VinSHC.',response.status);
   let data;try{data=await response.json();}catch{throw new BackendError('Không đọc được phản hồi backend.',response.status);}
-  if(!response.ok)throw new BackendError(messages[response.status]||'Backend trả lỗi HTTP '+response.status+'.',response.status,data);
+  if(!response.ok){const detail=typeof data.detail==='string'&&data.detail.length<500&&!/[\r\n]/.test(data.detail)?' '+data.detail:'';throw new BackendError((messages[response.status]||'Backend trả lỗi HTTP '+response.status+'.')+detail,response.status,data);}
   return data;
  }
  async login(username,password){
@@ -36,6 +41,7 @@ export class BackendClient {
  }
  clear(){this.#token=null;this.workspace=null;this.user=null;this.generation++;}
 }
+const UUID_PATTERN=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export const uuid=value=>{
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value||''))throw new BackendError('Cần mã UUID hợp lệ từ backend.');
  return value.toLowerCase();

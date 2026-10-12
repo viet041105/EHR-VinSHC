@@ -37,6 +37,7 @@ npm run backend:prepare
 npm run backend:build
 npm run backend:up
 npm run backend:metadata
+npm run backend:admin
 npm run backend:status
 ```
 
@@ -52,10 +53,18 @@ Lần build/khởi tạo schema đầu cần nhiều thời gian; `up` đợi he
 
 Đăng nhập bằng `EHR_ADMIN_USERNAME` / `EHR_ADMIN_PASSWORD` trong
 `.runtime/backend/.env` (đọc bằng editor trên máy, không chia sẻ file này).
-Tài khoản quản trị gốc có thể đăng nhập và đọc cấu hình thật bằng nút
-**Kiểm tra kết nối và cấu hình backend**. Các workspace nghiệp vụ cần role
-`VinSHC App: <role>` và assignment user/role/location phía server; FE không tự tạo
-tài khoản, gán role hoặc cấp quyền.
+`backend:admin` cấu hình tài khoản quản trị hiện có: thêm `VinSHC App: admin`,
+giữ nguyên các role Core và gán cơ sở phát triển bằng API sẵn có. Lệnh chạy lại không
+thêm assignment trùng, không tạo tài khoản/bệnh nhân demo. Không tự chạy lệnh này khi login.
+
+Sau khi cấu hình, đăng xuất/đăng nhập lại, chọn **Quản trị** và **VinSHC Development Clinic**,
+bấm **Mở không gian làm việc**. Mật khẩu hiện có được giữ nguyên.
+Trong mục Quản trị có đọc cấu hình, audit phân trang, kiểm tra quyền, gán/thu hồi workspace.
+System Developer có thêm tìm user Core và thêm role ứng dụng (giữ các role cũ).
+Sau khi thêm role, dùng Gán vai trò và cơ sở; tài khoản đích cần đăng nhập lại.
+API Core chỉ mở cho System Developer và chỉ cho đọc user/cập nhật role, không dùng
+để né giới hạn dữ liệu bệnh nhân. Tài khoản app-admin không được mở các thao tác Core.
+FE không tự tạo tài khoản hay cấp quyền khi người dùng đăng nhập.
 
 Dừng stack, giữ dữ liệu:
 
@@ -73,7 +82,8 @@ thành danh mục lâm sàng đã được duyệt.
 ## Các API đã nối
 
 - Session và B5: xác nhận vai trò/cơ sở, gửi workspace headers trong từng request.
-- B2: identity aggregate, người liên hệ, địa chỉ DATA-08; danh mục tỉnh/xã và version
+- B2: identity aggregate/lịch sử; thêm/sửa/hủy người liên hệ và địa chỉ; ghi/xóa
+  field-state theo policy metadata; danh mục tỉnh/xã và version
   đọc từ backend. Identity aggregate hiện không chứa đầy đủ thông tin Person Core.
 - B3: ghi lần đo sinh hiệu đã validation bằng field code chính thức; trạng thái
   thiếu tường minh, giới hạn nhập theo backend, cờ needsVerification cho huyết áp đảo.
@@ -100,7 +110,9 @@ VinSHC scoped thay thế tìm/tạo/sửa patient Core, mở/kết thúc visit, 
 list/search. Vì vậy form hiện nhận UUID thật từ backend; chưa thể chạy toàn bộ
 quy trình tiếp nhận → khám → kết thúc chỉ bằng giao diện.
 
-Cấp thuốc, CRUD tài khoản/form/cấu hình cơ sở cũng chưa có API ứng dụng.
+Cấp thuốc, CRUD tài khoản/form/cấu hình cơ sở cũng chưa có API ứng dụng scoped.
+FE đã nối tìm tài khoản và thêm role qua Core cho System Developer; chưa có form tạo
+tài khoản mới hay đổi mật khẩu.
 Backend dùng diagnostic_order print cho cả mẫu đơn thuốc/kết quả, nên pharmacy/lab
 chưa mở được các mẫu đó dù metadata có một số quyền print. FE không gọi Core/FHIR
 để né giới hạn này hoặc ghi thành công giả.
@@ -112,18 +124,23 @@ Bổ sung những API này cần sửa ngoài FE và phải được chủ dự 
 ```sh
 npm test
 npm run test:browser
+npm run test:api
 npm run test:live
 ```
 
 `test:browser` dùng Playwright route mock, context độc lập, desktop/mobile và các
-vai trò, không ghi DB. `test:live` cần backend và FE đang chạy; chỉ đọc API thật,
+vai trò, không ghi DB. Có kiểm tra giữ role cũ khi cấp role mới, ngăn app-admin gọi
+Core, assign/revoke, PATCH null/omission và DELETE 204. `test:api` cần
+`backend:prepare`; đối chiếu caller FE với đủ 56 mapping VinSHC trong source BE đã khóa.
+Độ phủ route không chứng minh mọi thao tác ghi đều qua runtime. `test:live` cần backend và FE đang chạy; chỉ đọc API thật,
 kiểm tra đăng nhập trên trình duyệt, cấu hình/metadata và xóa storage demo cũ trong
 browser test riêng. Không chạy integration fixtures tạo patient để chứng minh kết nối.
 Ảnh QA nằm trong `/private/tmp`, không phải dữ liệu production.
 
-Đã xác minh ngày 2026-10-12: 8 unit tests đạt; Playwright desktop/mobile
+Đã xác minh ngày 2026-10-12: 11 unit tests đạt; Playwright desktop/mobile
 (route mock) đạt; kiểm thử đăng nhập và đọc API qua Vite → gateway → OpenMRS
-trên PostgreSQL thật đạt. Bốn container healthy. Sau kiểm thử, DB có 0 patient,
+trên PostgreSQL thật đạt, gồm mở workspace admin, tìm user, đọc audit và báo cáo ngày.
+Bốn container healthy; API coverage 56/56; cấu hình admin chạy lại không tạo trùng. Sau kiểm thử, DB có 0 patient,
 0 visit, 0 encounter và 0 obs; không tạo fixture lâm sàng. Kiểm thử thật chỉ xác
 minh kết nối/cấu hình, chưa chứng minh toàn bộ luồng nghiệp vụ ghi dữ liệu.
 
@@ -133,6 +150,9 @@ minh kết nối/cấu hình, chưa chứng minh toàn bộ luồng nghiệp v�
 - `connected.js`, `connected-actions.js`, `connected.css`: không gian kết nối.
 - `backend-client.js`: HTTP client, lỗi, generation guard, validation payload.
 - `metadata.js`, `metadata/`, `backend-mapping.js`: danh mục và hợp đồng backend.
+- `additional-actions.js`: bổ sung CRUD phần mở rộng, policy thông tin thiếu và quản trị workspace.
+- `metadata/field-policies.json`: trích nguyên policy field-state từ pack của main đã khóa.
+- `configure-admin.py`: cấu hình role/assignment cho admin hiện có qua API.
 - `clear-demo.js`: xóa đúng hai khóa demo cũ.
 - `docker-local.mjs`, `compose.local.yaml`: chạy backend main nguyên bản, không sửa ngoài FE.
 

@@ -1,0 +1,287 @@
+{
+  "version": "0.3.0",
+  "sourceCommit": "d9d5b957223f6bc73db173dbbc1d413910689526",
+  "fields": [
+    {
+      "code": "patient.cccd",
+      "label": "Số CCCD",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.ma_bhxh",
+      "label": "Mã BHXH",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.ma_bhyt",
+      "label": "Số thẻ BHYT",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "identifier",
+      "rowKeyRequired": true,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.ngay_sinh",
+      "label": "Ngày sinh đủ ngày",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "if_birth_precision_day"
+    },
+    {
+      "code": "patient.ngay_sinh_nguon",
+      "label": "Ngày sinh nguyên văn",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.nam_sinh",
+      "label": "Năm sinh",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "if_birth_precision_year_or_month"
+    },
+    {
+      "code": "patient.thang_sinh",
+      "label": "Tháng sinh",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "if_birth_precision_month"
+    },
+    {
+      "code": "patient.dien_thoai",
+      "label": "Điện thoại người bệnh",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.nghe_nghiep",
+      "label": "Nghề nghiệp nguyên văn",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.dia_chi",
+      "label": "Địa chỉ có cấu trúc",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "address",
+      "rowKeyRequired": true,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.dia_chi_nguon",
+      "label": "Địa chỉ nguyên văn",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "patient.dia_chi_cu",
+      "label": "Địa chỉ theo giấy tờ cũ",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "patient",
+      "rowKeyRequired": false,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "contact.quan_he",
+      "label": "Quan hệ với bệnh nhân",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "contact",
+      "rowKeyRequired": true,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "contact.dien_thoai",
+      "label": "Điện thoại người liên hệ",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "contact",
+      "rowKeyRequired": true,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    },
+    {
+      "code": "contact.dia_chi",
+      "label": "Địa chỉ người liên hệ",
+      "mode": "field_states",
+      "allowedStates": [
+        "not_recorded",
+        "not_asked",
+        "unknown",
+        "refused",
+        "not_applicable",
+        "masked",
+        "unreadable"
+      ],
+      "nullable": true,
+      "context": "contact",
+      "rowKeyRequired": true,
+      "sourceRequired": true,
+      "conditionalRequired": "optional"
+    }
+  ]
+}

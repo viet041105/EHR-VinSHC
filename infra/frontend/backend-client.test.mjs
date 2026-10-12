@@ -48,3 +48,30 @@ import {clearLegacyDemo} from './clear-demo.js';
 test('legacy demo cleanup removes only its own stores',()=>{
  const values=new Map([['vinshc-demo-v1','old'],['vinshc-demo-v2','old'],['other-project','keep']]);clearLegacyDemo({removeItem:key=>values.delete(key)});assert.deepEqual([...values],[['other-project','keep']]);assert.doesNotThrow(()=>clearLegacyDemo({removeItem(){throw Error('denied');}}));
 });
+
+import {contactPatch,missingContext} from './additional-actions.js';
+import policies from './metadata/field-policies.json' with {type:'json'};
+test('Core account access requires system admin and cannot mutate passwords or arbitrary Core resources',async()=>{
+ const calls=[],client=new BackendClient(async(path,init)=>{calls.push({path,init});return response({results:[]});});
+ client.user={roles:[{name:'VinSHC App: admin'}]};await assert.rejects(client.request('user',{adminCore:true}),e=>e.status===403);assert.equal(calls.length,0);
+ client.user={roles:[{name:'System Developer'}]};client.workspace={role:'admin',facility:encounter};
+ await client.request('user?q=admin',{adminCore:true});assert.equal(calls[0].init.headers['X-VinSHC-Workspace-Role'],undefined);
+ await assert.rejects(client.request('patient',{adminCore:true}));await assert.rejects(client.request('user/'+patient,{method:'POST',body:{password:'unexpected'},adminCore:true}));
+ await client.request('user/'+patient,{method:'POST',body:{roles:[encounter]},adminCore:true});assert.deepEqual(JSON.parse(calls.at(-1).init.body),{roles:[encounter]});
+ await assert.rejects(client.request('user',{method:'POST',body:{roles:[]},adminCore:true}));
+});
+test('PATCH keeps omitted contact fields, explicit clearing is null, field-state validates context and 204 clears successfully',async()=>{
+ assert.deepEqual(contactPatch({record:patient,phone:'0901234567',isPrimary:'false'}),{phone:'0901234567',isPrimary:false});
+ assert.deepEqual(contactPatch({record:patient,clearPhone:'true'}),{phone:null});assert.throws(()=>contactPatch({record:patient,clearPhone:'true',phone:'123'}));assert.throws(()=>contactPatch({record:patient}));
+ const field=policies.fields.find(f=>f.rowKeyRequired),data={patient,fieldCode:field.code,rowKey:encounter,dataStatus:field.allowedStates[0]};
+ assert.equal(missingContext(data).context,field.context);assert.throws(()=>missingContext({...data,rowKey:''}));
+ const payload=actions.fieldState.build(data);assert.equal(payload.context,field.context);assert.throws(()=>actions.fieldState.build({...data,dataStatus:'invalid'}));
+ assert.match(actions.clearFieldState.path(data),/context=/);assert.equal(actions.clearFieldState.method,'DELETE');
+ const client=new BackendClient(async()=>new Response(null,{status:204}));assert.equal(await client.request('vinshc/'+actions.clearFieldState.path(data),{method:'DELETE'}),null);
+});
+test('workspace assignment uses chosen location and does not confuse it with business facility UUID',()=>{
+ const facility=metadata.facilities.records[0],data={user:patient,role:'nurse',facility:facility.locationUuid};
+ assert.deepEqual(actions.assignWorkspace.build(data),data);assert.equal(actions.revokeWorkspace.method,'DELETE');assert.equal(actions.assignWorkspace.facility,undefined);
+ assert.equal(actions.replaceDiagnosis.build({record:patient,concept:encounter,reason:'Correction'}).record,undefined);
+ assert.match(actions.identity.path({patient,includeHistory:'true'}),/includeHistory=true/);
+});

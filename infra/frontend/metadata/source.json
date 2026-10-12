@@ -13,5 +13,11 @@
     "catalogues/facilities.json",
     "catalogues/contact-relationships.json",
     "contracts/workflow.json"
+  ],
+  "derivedFiles": [
+    {
+      "file": "field-policies.json",
+      "source": "pack.json fields[].b2Missing where mode=field_states"
+    }
   ]
 }

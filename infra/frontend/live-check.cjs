@@ -26,7 +26,12 @@ const settings=Object.fromEntries(fs.readFileSync(path.join(__dirname,'.runtime/
   await page.getByRole('link',{name:/Đăng nhập phòng khám/}).click();await page.locator('#loginForm').waitFor();
   await page.locator('[name=username]').fill(settings.EHR_ADMIN_USERNAME);await page.locator('[name=password]').fill(settings.EHR_ADMIN_PASSWORD);await page.locator('#loginForm button').click();await page.locator('#systemSetup').waitFor();
   await page.locator('#systemSetup').click();await page.locator('#setupResult').filter({hasText:'VND'}).waitFor();
+  await page.locator('[name=role]').selectOption('admin');await page.locator('#workspaceForm button').click();await page.locator('[data-section=admin]').click();
+  await page.locator('#actionPicker').selectOption('workspace');await page.locator('#actionForm button').click();await page.locator('#backendResult').filter({hasText:'VinSHC App: admin'}).waitFor();
+  await page.locator('#actionPicker').selectOption('systemUsers');await page.locator('[name=query]').fill(settings.EHR_ADMIN_USERNAME);await page.locator('#actionForm button').click();await page.locator('#backendResult').filter({hasText:'System Developer'}).waitFor();
+  await page.locator('#actionPicker').selectOption('audit');await page.locator('#actionForm button').click();await page.locator('#connectionMessage').filter({hasText:'Đã đọc'}).waitFor();
+  await page.locator('[data-section=reports]').click();await page.locator('#actionForm button').click();await page.locator('#backendResult').filter({hasText:'Thu ròng'}).waitFor();
   await page.locator('#logout').click();await page.locator('#loginForm').waitFor();assert.deepEqual(errors,[]);await context.close();
  }finally{await browser.close();}
- console.log('PASS: real Vite → OpenMRS → PostgreSQL configuration, authenticated browser login, runtime metadata, 34 provinces, no demo stores, blocked runtime files. Read-only: no patient/user/transaction fixtures created.');
+ console.log('PASS: real Vite → OpenMRS → PostgreSQL configuration, authenticated admin workspace + account lookup + audit + report in browser, runtime metadata, 34 provinces, no demo stores, blocked runtime files. Read-only: no patient/user/transaction fixtures created.');
 })().catch(error=>{console.error(error.message);process.exit(1);});

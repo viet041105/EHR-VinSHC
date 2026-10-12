@@ -8,7 +8,7 @@
   "scripts": {
     "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
     "test": "node --test backend-client.test.mjs",
-    "test:browser": "node connected-check.cjs",
+    "test:browser": "node connected-check.cjs && node additional-check.cjs",
     "test:connected": "node connected-check.cjs",
     "backend:prepare": "node docker-local.mjs prepare",
     "backend:build": "node docker-local.mjs build",
@@ -16,7 +16,9 @@
     "backend:status": "node docker-local.mjs status",
     "backend:down": "node docker-local.mjs down",
     "test:live": "node live-check.cjs",
-    "backend:metadata": "python3 configure-metadata.py"
+    "backend:metadata": "python3 configure-metadata.py",
+    "backend:admin": "python3 configure-admin.py",
+    "test:api": "node check-api-coverage.mjs"
   },
   "devDependencies": {
     "playwright": "1.64.0",

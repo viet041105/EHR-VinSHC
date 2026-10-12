@@ -4,7 +4,19 @@ Kiểm tra ngày 12/10/2026, Asia/Ho_Chi_Minh. Backend được đối chiếu v
 `main`/`origin/main` sau fetch: `d9d5b957223f6bc73db173dbbc1d413910689526`.
 Đây là kiểm tra khả năng tích hợp và cấu hình, không phải audit bảo mật toàn bộ OpenMRS.
 
-## Kết luận về đăng nhập admin
+## Cập nhật sau khi được yêu cầu cấu hình
+
+Tài khoản `admin` đã được thêm role `VinSHC App: admin` và một assignment active tại
+VinSHC Development Clinic bằng API BE sẵn có; role Core và mật khẩu cũ được giữ nguyên.
+FE đã có form tìm user/thêm role cho System Developer và assign/revoke/evaluate/audit.
+Kiểm thử trình duyệt thật đã mở workspace admin, tìm user, đọc audit và báo cáo ngày.
+Mọi 56 mapping VinSHC đã có caller FE, gồm các endpoint trước đó chưa nối.
+Các giới hạn patient/visit/vitals/list-search/dispensing vẫn còn như bảng bên dưới.
+
+Các số liệu 0 assignment và mô tả FE chưa có form ở phần kiểm tra dưới đây là
+snapshot trước cấu hình, được giữ để giải thích nguyên nhân ban đầu.
+
+## Kết luận về đăng nhập admin (trước cấu hình)
 
 BE đã có session, phân quyền, assignment user–role–facility và kiểm tra workspace.
 Không thiếu package npm, schema hoặc module phân quyền trên stack đang chạy.

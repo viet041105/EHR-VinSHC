@@ -1,5 +1,6 @@
 import './clear-demo.js';
-import {BackendClient,BackendError,uuid,vitalsPayload,VITAL_LIMITS} from './backend-client.js';
+import {fieldPolicies} from './additional-actions.js';
+import {BackendClient,BackendError,isSystemAdministrator,uuid,vitalsPayload,VITAL_LIMITS} from './backend-client.js';
 import {metadata as m,assignedRoles,permitted,active,facilityForLocation} from './metadata.js';
 import {actions,sections,consultationFields,F,choice,id,options,LABELS,stateText} from './connected-actions.js';
 import {VITAL_FIELD_MAP} from './backend-mapping.js';
@@ -8,11 +9,11 @@ const state={roles:[],role:null,facility:null,section:null,action:null,result:nu
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const localTime=()=>{const now=new Date();return new Date(now.getTime()-now.getTimezoneOffset()*60000).toISOString().slice(0,16);};
 const today=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Ho_Chi_Minh',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
-const allowed=a=>a.resource==='clinical_chart'&&a.permission!=='read'?state.role==='doctor':permitted(state.role,a.resource,a.permission);
+const allowed=a=>(!a.systemOnly||isSystemAdministrator(client.user))&&(a.resource==='clinical_chart'&&a.permission!=='read'?state.role==='doctor':permitted(state.role,a.resource,a.permission));
 const visibleSections=()=>sections.filter(s=>s.actions.some(k=>allowed(actions[k]))||permitted(state.role,s.resource,'read')||s.id==='pharmacy'&&state.role==='pharmacy');
 const note=text=>`<p class="connection-note">${esc(text)}</p>`;
 function field(f,values={}){
- const value=values[f.name]??f.value??(f.type==='datetime-local'?localTime():f.type==='date'?today():state.context[f.name]||'');
+ const value=values[f.name]??f.value??(f.type==='datetime-local'&&f.required?localTime():f.type==='date'&&f.required?today():state.context[f.name]||'');
  const common=`name="${esc(f.name)}" ${f.required?'required':''} ${f.max?'maxlength="'+f.max+'"':''}`;
  let control;
  if(f.type==='select')control=`<select ${common}><option value="">${f.required?'Chọn…':'Chưa ghi nhận'}</option>${f.options.map(([v,l])=>`<option value="${esc(v)}" ${String(value)===String(v)?'selected':''}>${esc(l)}</option>`).join('')}</select>`;
@@ -40,6 +41,12 @@ function render(){
  document.querySelector('#vitalsForm')?.addEventListener('submit',submitVitals);
  document.querySelector('#printDocument')?.addEventListener('click',()=>window.print());
  if(actions[state.action]?.address)loadProvinces();
+ if(['fieldState','clearFieldState'].includes(state.action)){
+  const form=document.querySelector('#actionForm'),code=form.elements.fieldCode;
+  const sync=()=>{const policy=fieldPolicies.find(f=>f.code===code.value),row=form.elements.rowKey;row.required=Boolean(policy?.rowKeyRequired);row.disabled=!policy?.rowKeyRequired;if(row.disabled)row.value='';
+   const status=form.elements.dataStatus;if(status){const old=status.value;status.innerHTML='<option value="">Chọn…</option>'+(policy?.allowedStates||[]).map(v=>`<option value="${esc(v)}">${esc(stateText(v))}</option>`).join('');if(policy?.allowedStates.includes(old))status.value=old;}
+  };code.onchange=sync;sync();
+ }
 }
 function sectionContent(section){
  if(section.id==='vitals')return vitalsForm();
@@ -79,17 +86,22 @@ async function submitAction(e){
  try{
   for(const f of a.fields){if(data[f.name]===undefined)continue;if(f.type==='file')continue;data[f.name]=data[f.name].trim();if(f.type==='uuid'&&data[f.name])data[f.name]=uuid(data[f.name]);if(data[f.name]===''&&!f.required)delete data[f.name];}
   if(a.facility){const facility=facilityForLocation(state.facility);if(!facility)throw new BackendError('Cơ sở chưa có trong metadata.');data.facility=facility.uuid;}
-  if(a.address){if(!state.context.catalogueVersion)throw new BackendError('Chưa đọc được phiên bản danh mục địa chỉ từ backend.');data.catalogueVersion=state.context.catalogueVersion;}
+  if(a.address&&(data.provinceCode||data.communeCode)){if(!state.context.catalogueVersion)throw new BackendError('Chưa đọc được phiên bản danh mục địa chỉ từ backend.');data.catalogueVersion=state.context.catalogueVersion;}
+  if(state.action==='revokeWorkspace'&&data.user===client.user.uuid&&data.role===state.role&&data.facility===state.facility)throw new BackendError('Đổi workspace trước khi thu hồi phân công đang sử dụng.');
   let payload=a.build?a.build(data):undefined;
   if(a.upload){const file=data.file;if(!file?.size||file.size>20*1024*1024||!['application/pdf','image/jpeg','image/png'].includes(file.type))throw new BackendError('Chọn PDF/JPEG/PNG có dung lượng tối đa 20 MiB.');payload=new FormData();payload.set('file',file);}
   if(state.action==='correction'){
    if(!state.context.group||data.group!==state.context.group)throw new BackendError('Đọc hồ sơ lần khám trước, rồi đính chính đúng mã phiếu đã đọc.');
    for(const f of consultationFields)if(state.context.consultationValues?.[f.name]&&!payload.values[f.name])payload.values[f.name]=null;
   }
-  const path='vinshc/'+a.path(data);
+  const path=(a.adminCore?'':'vinshc/')+a.path(data);
   const fingerprint=JSON.stringify([client.workspace,state.action,path,payload]);
   if(a.idempotent){if(!retries.has(fingerprint))retries.set(fingerprint,crypto.randomUUID());payload.idempotencyKey=retries.get(fingerprint);}
-  await perform(()=>client.request(path,{method:a.method||'POST',body:payload,binary:a.binary}),a.method==='GET'?'Đã đọc dữ liệu từ OpenMRS.':'OpenMRS đã xác nhận thao tác.',result=>{
+  await perform(async()=>{
+   if(a.grantRole){const user=await client.request(path+'?v=custom:(uuid,retired,roles:(uuid,name))',{adminCore:true});if(user.retired)throw new BackendError('Tài khoản đã ngừng hoạt động.');payload={roles:[...new Set([...user.roles.map(r=>r.uuid),m.permissions.roles[data.role].openmrs.uuid])]};}
+   return client.request(path,{method:a.method||'POST',body:payload,binary:a.binary,adminCore:a.adminCore});
+  },a.method==='GET'?'Đã đọc dữ liệu từ OpenMRS.':'OpenMRS đã xác nhận thao tác.',result=>{
+   result=result||{};
    if(a.idempotent)retries.delete(fingerprint);
    if(a.binary){const href=URL.createObjectURL(result),link=document.createElement('a');link.href=href;link.download='vinshc-report-'+data.record;link.click();setTimeout(()=>URL.revokeObjectURL(href),1000);state.result={message:'Đã tải tệp từ OpenMRS.'};}
    if(a.document)state.message='Đã lấy chứng từ từ OpenMRS. Dùng nút In chứng từ để in nội dung đã nhận.';
@@ -131,7 +143,7 @@ async function loadProvinces(){
  }catch(error){showError(error);}
 }
 function setCatalogue(select,rows){select.innerHTML='<option value="">Chọn…</option>'+rows.map(r=>`<option value="${esc(r.code)}">${esc(r.name||r.label||r.code)}</option>`).join('');}
-const resultLabels={uuid:'Mã bản ghi',patientUuid:'Mã bệnh nhân',encounterUuid:'Mã lần khám',visitUuid:'Mã lượt khám',groupUuid:'Mã phiếu khám',status:'Trạng thái',state:'Trạng thái',contacts:'Người liên hệ',addresses:'Địa chỉ',fieldStates:'Trạng thái thông tin',consultation:'Phiếu khám',values:'Nội dung',diagnoses:'Chẩn đoán',drugOrders:'Đơn thuốc',allergies:'Dị ứng',events:'Lịch sử thay đổi',needsVerification:'Cần đối chiếu',totalVnd:'Tổng phí (VND)',settledVnd:'Đã thu (VND)',refundedVnd:'Đã hoàn (VND)',outstandingVnd:'Còn phải thu (VND)',netCollectedVnd:'Thu ròng (VND)',amountVnd:'Số tiền (VND)',grossVnd:'Tổng thu (VND)',refundVnd:'Hoàn tiền (VND)',netVnd:'Thu ròng (VND)',openedVisits:'Lượt mở',completedVisits:'Lượt hoàn tất',aggregateOnly:'Chỉ số tổng hợp',serviceName:'Dịch vụ',serviceCode:'Mã dịch vụ',lines:'Chi tiết phí',payments:'Giao dịch',queueNumber:'Số thứ tự',point:'Điểm phục vụ',config:'Quy trình',results:'Kết quả',numericValue:'Kết quả số',textValue:'Kết quả văn bản',unit:'Đơn vị',version:'Phiên bản',recordedAt:'Thời điểm ghi',reviewedAt:'Thời điểm duyệt',full_name:'Họ tên',phone_raw:'Điện thoại nguyên văn',phone_e164:'Điện thoại chuẩn hóa',address_text:'Địa chỉ nguyên văn',province_name:'Tỉnh/thành',commune_name:'Xã/phường',legacy_address_text:'Địa chỉ cũ',relationship_name:'Quan hệ',source_kind:'Nguồn',version_number:'Phiên bản',row_key:'Mã bản ghi',recorded_at:'Thời điểm ghi',method:'Phương thức',reason:'Lý do',testOnly:'Chỉ dùng kiểm thử',productionUploadEnabled:'Upload production',workflowConfigs:'Quy trình',date:'Ngày',timezone:'Múi giờ',currency:'Tiền tệ',display:'Tên hiển thị',name:'Tên',code:'Mã',concept:'Danh mục',rank:'Loại chẩn đoán',certainty:'Mức chắc chắn',icd10Code:'Mã ICD-10',icd10Name:'Tên chẩn đoán',stateReason:'Lý do trạng thái',assignedProviderUuid:'Người được phân công',is_current:'Phiên bản hiện hành',data_status:'Trạng thái thông tin',field_code:'Trường thông tin',createdAt:'Thời điểm tạo',at:'Thời điểm',action:'Thao tác',byUserUuid:'Người thao tác',members:'Các chỉ số đã lưu',billUuid:'Mã phiếu phí',orderUuid:'Mã chỉ định',orderer:'Người kê',drug:'Thuốc',dose:'Liều mỗi lần',quantity:'Số lượng',facilityUuid:'Cơ sở nghiệp vụ',facilityLocationUuid:'Location cơ sở'};
+const resultLabels={userUuid:'Mã tài khoản',roleName:'Tên role',roles:'Các role',username:'Tên đăng nhập',systemId:'Mã hệ thống',retired:'Ngừng hoạt động',role:'Vai trò',privilege:'Quyền',resource:'Nghiệp vụ',allowed:'Được phép',uuid:'Mã bản ghi',patientUuid:'Mã bệnh nhân',encounterUuid:'Mã lần khám',visitUuid:'Mã lượt khám',groupUuid:'Mã phiếu khám',status:'Trạng thái',state:'Trạng thái',contacts:'Người liên hệ',addresses:'Địa chỉ',fieldStates:'Trạng thái thông tin',consultation:'Phiếu khám',values:'Nội dung',diagnoses:'Chẩn đoán',drugOrders:'Đơn thuốc',allergies:'Dị ứng',events:'Lịch sử thay đổi',needsVerification:'Cần đối chiếu',totalVnd:'Tổng phí (VND)',settledVnd:'Đã thu (VND)',refundedVnd:'Đã hoàn (VND)',outstandingVnd:'Còn phải thu (VND)',netCollectedVnd:'Thu ròng (VND)',amountVnd:'Số tiền (VND)',grossVnd:'Tổng thu (VND)',refundVnd:'Hoàn tiền (VND)',netVnd:'Thu ròng (VND)',openedVisits:'Lượt mở',completedVisits:'Lượt hoàn tất',aggregateOnly:'Chỉ số tổng hợp',serviceName:'Dịch vụ',serviceCode:'Mã dịch vụ',lines:'Chi tiết phí',payments:'Giao dịch',queueNumber:'Số thứ tự',point:'Điểm phục vụ',config:'Quy trình',results:'Kết quả',numericValue:'Kết quả số',textValue:'Kết quả văn bản',unit:'Đơn vị',version:'Phiên bản',recordedAt:'Thời điểm ghi',reviewedAt:'Thời điểm duyệt',full_name:'Họ tên',phone_raw:'Điện thoại nguyên văn',phone_e164:'Điện thoại chuẩn hóa',address_text:'Địa chỉ nguyên văn',province_name:'Tỉnh/thành',commune_name:'Xã/phường',legacy_address_text:'Địa chỉ cũ',relationship_name:'Quan hệ',source_kind:'Nguồn',version_number:'Phiên bản',row_key:'Mã bản ghi',recorded_at:'Thời điểm ghi',method:'Phương thức',reason:'Lý do',testOnly:'Chỉ dùng kiểm thử',productionUploadEnabled:'Upload production',workflowConfigs:'Quy trình',date:'Ngày',timezone:'Múi giờ',currency:'Tiền tệ',display:'Tên hiển thị',name:'Tên',code:'Mã',concept:'Danh mục',rank:'Loại chẩn đoán',certainty:'Mức chắc chắn',icd10Code:'Mã ICD-10',icd10Name:'Tên chẩn đoán',stateReason:'Lý do trạng thái',assignedProviderUuid:'Người được phân công',is_current:'Phiên bản hiện hành',data_status:'Trạng thái thông tin',field_code:'Trường thông tin',createdAt:'Thời điểm tạo',at:'Thời điểm',action:'Thao tác',byUserUuid:'Người thao tác',members:'Các chỉ số đã lưu',billUuid:'Mã phiếu phí',orderUuid:'Mã chỉ định',orderer:'Người kê',drug:'Thuốc',dose:'Liều mỗi lần',quantity:'Số lượng',facilityUuid:'Cơ sở nghiệp vụ',facilityLocationUuid:'Location cơ sở'};
 function displayResult(value,depth=0){
  if(value===null||value===undefined)return '<span class="readonly">Chưa ghi nhận</span>';
  if(typeof value!=='object')return esc(typeof value==='boolean'?(value?'Có':'Không'):stateText(value));
