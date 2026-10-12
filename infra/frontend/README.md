@@ -85,3 +85,100 @@ Metadata Việt Nam/UUID/địa chỉ hierarchy, O3 form schema, drug/order type
 Chỉ nhập dữ liệu giả. localStorage/tài liệu/journal/thu tiền/cấp thuốc/khóa tài khoản/role demo không phải lưu trữ bệnh án hoặc phân quyền production. Không có chữ ký điện tử, cấp phát thuốc, LIS/PACS, liên thông hay patient portal. Không tuyên bố tuân thủ đầy đủ quy định Việt Nam. Các mục cần xác minh nằm trong [VIETNAM_COMPLIANCE.md](../../docs/VIETNAM_COMPLIANCE.md).
 
 Font Be Vietnam Pro tải từ Google Fonts, fallback Arial/sans-serif khi offline. Ảnh mới là ảnh chụp trên Pexels, tải và lưu local theo yêu cầu không dùng ảnh gen AI; ảnh không đại diện nhân viên của VinSHC. Tác giả, trang nguồn, URL tải và giấy phép được ghi tại [ASSET_SOURCES.md](assets/ASSET_SOURCES.md).
+
+## Chế độ kết nối backend (nhánh fe)
+
+Trang chủ có nút **Đăng nhập OpenMRS**. Mở trực tiếp
+http://127.0.0.1:5173/connected.html. Bản demo vẫn ở trang chủ → Dùng bản demo;
+hai chế độ có nguồn dữ liệu riêng. Chế độ kết nối không đọc dữ liệu demo,
+không lưu mật khẩu/hồ sơ backend vào localStorage hoặc sessionStorage và không tự
+chuyển sang demo khi API lỗi. Reload cần đăng nhập lại.
+
+Vite proxy `/openmrs` tới `http://127.0.0.1:8080` để trình duyệt gọi cùng origin.
+Nếu gateway dùng cổng khác, chạy trong thư mục FE:
+
+```sh
+VINSHC_BACKEND_ORIGIN=http://127.0.0.1:8081 npm run dev
+```
+
+Chỉ hỗ trợ HTTP loopback cho môi trường kiểm thử hiện tại. Không cần cấu hình CORS
+hoặc sửa Compose để chạy FE. Chạy `npm run dev` từ thư mục `infra/frontend` như trước.
+Khi sửa cấu hình proxy, khởi động lại Vite.
+
+Backend cần chạy bản `main` có module VinSHC 0.3.1 (commit `d9d5b95` hoặc mới hơn).
+Nhánh `fe` chưa chứa các thay đổi backend trên main; không chạy stack backend cũ
+của nhánh fe rồi coi đó là bản đã tích hợp. Dùng backend main được triển khai riêng.
+Không merge main vào fe trong lần thay đổi này vì sẽ sửa ngoài thư mục frontend.
+
+Tài khoản phải có `VinSHC App: <role>` và assignment role/location phía server.
+Tài khoản quản trị OpenMRS mặc định không tự biến thành tài khoản ứng dụng.
+FE đọc role từ session, kiểm tra workspace với server, gửi
+`X-VinSHC-Workspace-Role` và `X-VinSHC-Workspace-Facility` trong từng request nghiệp vụ.
+Backend vẫn là nơi kiểm tra quyền, phạm vi và trạng thái bản ghi.
+
+### Những gì đã nối
+
+- B2: đọc identity aggregate, tạo người liên hệ, địa chỉ DATA-08 với catalogue
+  tỉnh/xã đọc từ backend và provenance API. Identity hiện không trả tên/giới/ngày sinh.
+- B3: ghi sinh hiệu qua `/vinshc/vitals`, dùng field code chính thức, trạng thái
+  thiếu tường minh. Huyết áp đảo được backend đánh dấu needsVerification.
+- B4: đọc clinical-summary, tạo/đính chính/chốt phiếu, chẩn đoán ICD selectable,
+  dị ứng coded, kê từng dòng thuốc đã xác nhận, ngừng thuốc, void diagnosis/allergy
+  có lý do, đọc tình trạng cấu hình danh mục. Trường đã có bị để trống khi đính
+  chính phiếu được gửi `null` để xóa theo contract; cần đọc phiếu trước.
+- B8: đọc/tạo/cập nhật lịch hẹn, hàng đợi/chuyển điểm, phiếu phí/thu/chuyển khoản/hoàn,
+  chỉ định/phân công/kết quả/đính chính, upload/download tệp, DTO chứng từ và mẫu in,
+  báo cáo ngày không có định danh bệnh nhân.
+- B5: workspace và nhật ký truy cập. UI ẩn thao tác không có trong ma trận role;
+  các endpoint clinical legacy được backend cho phép riêng cho doctor.
+
+Danh mục FE nằm trong `metadata/`, sao chép nguyên bản từ `metadata/vinshc` ở commit
+được ghi trong `metadata/source.json`. Không sửa nguồn ngoài FE. UUID cơ sở nghiệp
+vụ (`facility.uuid`) khác UUID OpenMRS location (`facility.locationUuid`): workspace
+headers dùng location, các payload B8/báo cáo dùng UUID cơ sở nghiệp vụ.
+Danh mục hiện giữ `productionEnabled=false`, dùng dữ liệu giả để kiểm thử.
+UUID thuốc/đơn vị/ICD chỉ có tác dụng khi metadata tương ứng đã được nạp trên backend;
+FE không tự sinh UUID, tự nhập Initializer hoặc coi snapshot là cấu hình runtime.
+
+### Giới hạn backend còn lại
+
+Không gọi Core `/patient`, `/visit`, `/encounter`, `/obs` hoặc FHIR để né quyền.
+B5 chặn những endpoint đó với app roles; code hiện chưa có API VinSHC scoped thay
+thế cho tìm/tạo/cập nhật patient Core, mở/kết thúc visit và tạo encounter. Do đó các
+form kết nối nhận UUID thật do backend/người phụ trách fixture bàn giao. Đây là
+bản nối các endpoint hiện có, chưa phải quy trình tiếp nhận → kết thúc lượt liền mạch.
+
+B8 chỉ có GET theo UUID, chưa có API danh sách/tìm kiếm, nên FE chưa thể tự tạo
+worklist toàn phòng khám. Cấp thuốc, CRUD tài khoản, form và cấu hình cơ sở chưa có
+endpoint ứng dụng; chế độ kết nối không giả lập ghi thành công. Chức năng in tuân
+đúng quyền thực tế trong OperationsService: backend hiện dùng diagnostic_order
+print cho cả mẫu đơn thuốc/kết quả, nên pharmacy/lab chưa mở được các mẫu này dù
+một số privilege trong metadata cho phép in.
+
+Chưa có endpoint đọc các lần đo hoặc sửa/void sinh hiệu scoped. Form sinh hiệu tạo
+lần đo mới, không cho sửa số đo cũ. Đơn thuốc được gửi từng dòng, không có transaction
+nhiều dòng. Lập phiếu phí hiện mỗi phiếu một dịch vụ. Backend kiểm tra chuyển trạng
+thái và quan hệ; FE không tự tạo provider/encounter hay nhập giá thay backend.
+
+Key giao dịch chỉ giữ trong bộ nhớ cho lần gửi lại cùng payload sau lỗi; không tự
+retry lệnh ghi, không sinh key mới cho retry đó. Reload/đổi workspace làm mất key;
+nếu request đã tới server mà mất phản hồi, cần đối soát bằng UUID/nhật ký trước khi
+thực hiện lại ở phiên mới. Chốt phiếu không đồng nghĩa đóng Visit.
+
+### Kiểm thử phần nối API
+
+```sh
+npm test
+npm run test:connected
+```
+
+Lệnh thứ hai cần Vite đang chạy và Chromium của Playwright đã cài. Bài test dùng
+route mock theo contract, kiểm tra desktop/mobile, role/facility, payload sinh hiệu,
+metadata, phiếu phí, retry idempotency, lỗi quyền và không lưu credential/hồ sơ.
+Ảnh lưu `/private/tmp/vinshc-connected-1440.png` và `vinshc-connected-390.png`.
+Mock test không chứng minh backend runtime đã hoạt động. Lần triển khai này chưa
+chạy integration thật vì OpenMRS cổng 8080 không phản hồi và Docker daemon chưa chạy.
+
+Để hoàn thiện luồng toàn bộ, backend cần bổ sung scoped CRUD/search patient,
+visit/encounter lifecycle, list/search B8 và dispensing. Những thay đổi này nằm ngoài
+FE và cần chủ dự án xác nhận riêng; chưa thực hiện trong nhánh này.

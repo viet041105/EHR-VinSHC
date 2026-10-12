@@ -1,0 +1,225 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0",
+  "effectiveFrom": "2026-10-11",
+  "testOnly": true,
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "production": "pending_facility_and_clinical_review"
+  },
+  "records": [
+    {
+      "uuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "code": "VSHC-DEV",
+      "name": "VinSHC Development Clinic",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "legalName": "Cơ sở kiểm thử VinSHC (synthetic; không phải pháp nhân thật)",
+      "facilityIdentifier": {
+        "system": "urn:uuid:05f96a5c-c4bf-571e-bf36-39cb4150c5de",
+        "value": "VSHC-DEV"
+      },
+      "internalPatientIdentifierSystem": "urn:uuid:ca12ea64-d279-5cce-a2a9-e2c46446ac34",
+      "addressText": "Địa chỉ kiểm thử, Hà Nội",
+      "phone": "+84900000000",
+      "licenceNumber": "TEST-FACILITY-001",
+      "logoAsset": null,
+      "legalIdentityVerified": false,
+      "timezone": "Asia/Ho_Chi_Minh"
+    }
+  ],
+  "locations": [
+    {
+      "uuid": "bce6f525-9ec2-5edb-ad86-10af87b9ce88",
+      "code": "consultation",
+      "name": "Phòng khám kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "parentUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "671edb90-11b0-5d0f-b095-c77e1b1f7d78",
+      "code": "laboratory",
+      "name": "Phòng CLS kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "parentUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "1dd053ea-06f9-5b1f-9172-b103df9157fc",
+      "code": "pharmacy",
+      "name": "Quầy thuốc kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "parentUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    }
+  ],
+  "providers": [
+    {
+      "uuid": "8eecce4b-a8e4-5b99-accb-4eb458feb386",
+      "code": "VSHC-TEST-DOCTOR-001",
+      "name": "Bác sĩ giả 01",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "fullName": "Bác sĩ giả 01",
+      "practitionerUuid": "9ffc97ef-0d94-57d1-a175-e9bf2ab70883",
+      "practitionerRoleUuid": "265a39f0-c0cc-514b-ab84-e6f5b5ad1d8c",
+      "roleCode": "doctor",
+      "title": "Bác sĩ",
+      "specialty": "Chuyên khoa kiểm thử",
+      "licenceNumber": "TEST-CCHN-DOCTOR",
+      "licenceFrom": "2026-10-11",
+      "licenceTo": null,
+      "licenceVerified": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "encounterRoleUuid": "21dc99b5-a544-5c12-9dcc-3d12fe1d164b",
+      "synthetic": true,
+      "installed": false,
+      "practitionerUuidStatus": "candidate_person_uuid_for_synthetic_provisioning; bind Provider.person.uuid explicitly, do not use Provider.uuid implicitly",
+      "personUuid": "9ffc97ef-0d94-57d1-a175-e9bf2ab70883"
+    },
+    {
+      "uuid": "35df9441-ace8-54b0-9fbc-088280b303b6",
+      "code": "VSHC-TEST-NURSE-001",
+      "name": "Điều dưỡng giả 01",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "fullName": "Điều dưỡng giả 01",
+      "practitionerUuid": "5658e124-e801-53ce-bacc-06361ebab0b5",
+      "practitionerRoleUuid": "b80f61a8-9ec9-597c-973e-1bff7f02af74",
+      "roleCode": "nurse",
+      "title": "Điều dưỡng",
+      "specialty": null,
+      "licenceNumber": "TEST-CCHN-NURSE",
+      "licenceFrom": "2026-10-11",
+      "licenceTo": null,
+      "licenceVerified": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "encounterRoleUuid": "3d09e225-5185-5db6-a9cc-89a6962dc014",
+      "synthetic": true,
+      "installed": false,
+      "practitionerUuidStatus": "candidate_person_uuid_for_synthetic_provisioning; bind Provider.person.uuid explicitly, do not use Provider.uuid implicitly",
+      "personUuid": "5658e124-e801-53ce-bacc-06361ebab0b5"
+    },
+    {
+      "uuid": "4f0a63a2-e254-5f42-af95-9df8660e6a62",
+      "code": "VSHC-TEST-LAB-001",
+      "name": "KTV giả 01",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "fullName": "KTV giả 01",
+      "practitionerUuid": "17790c77-ad51-5b80-b9e8-f1d6097e08f2",
+      "practitionerRoleUuid": "6be62aed-94ff-5853-8ea1-3836ba5e0de5",
+      "roleCode": "lab",
+      "title": "Kỹ thuật viên",
+      "specialty": "CLS kiểm thử",
+      "licenceNumber": "TEST-CCHN-LAB",
+      "licenceFrom": "2026-10-11",
+      "licenceTo": null,
+      "licenceVerified": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "encounterRoleUuid": "2dc83c7f-83bf-5c36-a769-433274c63809",
+      "synthetic": true,
+      "installed": false,
+      "practitionerUuidStatus": "candidate_person_uuid_for_synthetic_provisioning; bind Provider.person.uuid explicitly, do not use Provider.uuid implicitly",
+      "personUuid": "17790c77-ad51-5b80-b9e8-f1d6097e08f2"
+    },
+    {
+      "uuid": "eff950a6-8247-565a-a302-37f8bc7c133a",
+      "code": "VSHC-TEST-REVIEWER-001",
+      "name": "Người duyệt giả 01",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "fullName": "Người duyệt giả 01",
+      "practitionerUuid": "d3fe77cf-bb09-503f-b6f1-fa721b7620a6",
+      "practitionerRoleUuid": "68fa26ee-720a-5c91-8a24-0ced6d7ca731",
+      "roleCode": "result_reviewer",
+      "title": "Bác sĩ duyệt kết quả",
+      "specialty": "CLS kiểm thử",
+      "licenceNumber": "TEST-CCHN-RESULT_REVIEWER",
+      "licenceFrom": "2026-10-11",
+      "licenceTo": null,
+      "licenceVerified": false,
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "encounterRoleUuid": "ca39bcfc-eeef-5f69-aa79-decf5d78c529",
+      "synthetic": true,
+      "installed": false,
+      "practitionerUuidStatus": "candidate_person_uuid_for_synthetic_provisioning; bind Provider.person.uuid explicitly, do not use Provider.uuid implicitly",
+      "personUuid": "d3fe77cf-bb09-503f-b6f1-fa721b7620a6"
+    }
+  ],
+  "realPersonnelPolicy": "Provision real personnel through protected admin configuration; no credentials or unapproved personal data in Git"
+}

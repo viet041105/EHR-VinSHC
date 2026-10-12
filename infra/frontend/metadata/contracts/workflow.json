@@ -1,0 +1,295 @@
+{
+  "version": "0.3.0",
+  "testOnly": true,
+  "appointmentServices": [
+    {
+      "uuid": "4132be79-31d9-5fe6-a20e-fe5bd72138a1",
+      "code": "OPD",
+      "name": "Khám ngoại trú",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "durationMinutes": 20,
+      "locationUuid": "bce6f525-9ec2-5edb-ad86-10af87b9ce88",
+      "providerRoles": [
+        "doctor"
+      ],
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    }
+  ],
+  "appointmentTypes": [
+    {
+      "uuid": "e76d32f9-7ebd-513d-b88d-d8cb15fca629",
+      "code": "FIRST",
+      "name": "Khám lần đầu",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      }
+    },
+    {
+      "uuid": "df066f81-4c0c-544c-820d-336aa9e5255e",
+      "code": "FOLLOWUP",
+      "name": "Tái khám",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      }
+    }
+  ],
+  "appointmentStates": [
+    "booked",
+    "confirmed",
+    "arrived",
+    "fulfilled",
+    "cancelled",
+    "no_show"
+  ],
+  "appointmentTransitions": {
+    "booked": [
+      "confirmed",
+      "arrived",
+      "cancelled"
+    ],
+    "confirmed": [
+      "arrived",
+      "cancelled",
+      "no_show"
+    ],
+    "arrived": [
+      "fulfilled",
+      "cancelled"
+    ],
+    "fulfilled": [],
+    "cancelled": [],
+    "no_show": []
+  },
+  "appointmentRule": "Explicit timezone offset, start<end, default 20min; prevent overlapping provider/location slots atomically; no_show only after slot start; follow-up note does not create slot automatically",
+  "queuePoints": [
+    {
+      "uuid": "acf326e7-edee-5b86-b903-46fef5106e32",
+      "code": "RECEPTION",
+      "name": "Tiếp đón",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "bafb1d09-1fcb-523b-a09b-cb1c8da8c43c",
+      "code": "NURSE",
+      "name": "Điều dưỡng",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "locationUuid": "bce6f525-9ec2-5edb-ad86-10af87b9ce88",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "6643b586-097b-5fee-8df6-761fe0b49871",
+      "code": "DOCTOR",
+      "name": "Bác sĩ",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "locationUuid": "bce6f525-9ec2-5edb-ad86-10af87b9ce88",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "49744954-e712-5025-942b-e98a6f5dfaa5",
+      "code": "LAB",
+      "name": "CLS",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "locationUuid": "671edb90-11b0-5d0f-b095-c77e1b1f7d78",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "35f696a6-bf2f-5028-aa91-66ea0f6754c4",
+      "code": "CASHIER",
+      "name": "Thu ngân",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "locationUuid": "feae71be-957c-4f94-b100-d84bc6915574",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    },
+    {
+      "uuid": "539146b1-2968-579d-a497-a470b3a45f30",
+      "code": "PHARMACY",
+      "name": "Quầy thuốc",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "internal",
+        "reference": "VinSHC metadata convention",
+        "recordedOn": "2026-10-11"
+      },
+      "locationUuid": "1dd053ea-06f9-5b1f-9172-b103df9157fc",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab"
+    }
+  ],
+  "queueStates": [
+    "waiting",
+    "called",
+    "in_service",
+    "completed",
+    "cancelled",
+    "left"
+  ],
+  "queueTransitions": {
+    "waiting": [
+      "called",
+      "cancelled",
+      "left"
+    ],
+    "called": [
+      "in_service",
+      "waiting",
+      "cancelled",
+      "left"
+    ],
+    "in_service": [
+      "completed",
+      "cancelled",
+      "left"
+    ],
+    "completed": [],
+    "cancelled": [],
+    "left": []
+  },
+  "exitReasons": [
+    "patient_requested",
+    "duplicate_registration",
+    "service_unavailable",
+    "referred_elsewhere",
+    "other"
+  ],
+  "configs": [
+    {
+      "code": "STANDARD_POSTPAY",
+      "hasNurse": true,
+      "hasPharmacy": true,
+      "paymentTiming": "postpay",
+      "flow": [
+        "RECEPTION",
+        "NURSE",
+        "DOCTOR",
+        "LAB_IF_ORDERED",
+        "CASHIER",
+        "PHARMACY_IF_PRESCRIBED"
+      ]
+    },
+    {
+      "code": "COMPACT_PREPAY",
+      "hasNurse": false,
+      "hasPharmacy": false,
+      "paymentTiming": "prepay",
+      "flow": [
+        "RECEPTION",
+        "CASHIER_BEFORE_EXECUTION",
+        "DOCTOR",
+        "LAB_IF_ORDERED"
+      ],
+      "doctorVitalsGrant": "Explicit nurse-level vitals privilege with doctor assignment; flag alone does not grant"
+    }
+  ],
+  "events": [
+    {
+      "event": "registration_committed",
+      "effect": "Create first queue waiting item",
+      "automatic": true
+    },
+    {
+      "event": "vitals_finalized",
+      "effect": "Complete nurse queue and create doctor waiting item",
+      "automatic": true
+    },
+    {
+      "event": "order_created",
+      "effect": "Create lab waiting item after assignment/payment gates",
+      "automatic": true
+    },
+    {
+      "event": "result_finalized",
+      "effect": "Notify assigned doctor worklist; do not close consultation/visit",
+      "automatic": true
+    },
+    {
+      "event": "consultation_finalized",
+      "effect": "User confirms next step to lab/cashier; outstanding order remains",
+      "automatic": false
+    },
+    {
+      "event": "visit_cancel_or_left",
+      "effect": "User confirms reason; retain records/payments; stop new execution",
+      "automatic": false
+    },
+    {
+      "event": "payment_settled",
+      "effect": "Release matching prepay service gate only; never mark clinical result final",
+      "automatic": true
+    }
+  ],
+  "concurrency": "Idempotent event key + unique queue item per visit/servicepoint/iteration; transaction locks; explicit re-queue is new iteration",
+  "moduleMapping": "Appointment/queue module schemas and transition APIs must be verified on pinned modules by BE; do not copy JSON as unsupported Initializer schema"
+}

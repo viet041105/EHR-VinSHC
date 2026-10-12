@@ -1,15 +1,15 @@
-/** Handoff definitions, not verified REST request schemas. See docs/FRONTEND.md. */
+/** Capability summary of origin/main d9d5b95. Live adapter: backend-client.js / connected-actions.js. */
 export const BACKEND_SERVICES = [
- {id:'access',name:'Phiên & quyền',module:'Core / REST / auth',milestone:'B1 · B5',scope:'User, provider, location, privileges',status:'Chờ hợp đồng quyền'},
- {id:'patient',name:'Hành chính & định danh',module:'Core / REST / idgen / addresshierarchy',milestone:'B2',scope:'Patient, Person, Identifier',status:'Chờ hợp đồng API'},
- {id:'visit',name:'Lượt khám & sinh hiệu',module:'Core / REST / forms',milestone:'B3',scope:'Visit → Encounter → Obs',status:'Chờ metadata & API'},
- {id:'exam',name:'Khám & đơn thuốc',module:'Core / REST / emrapi',milestone:'B4',scope:'Diagnosis, Allergy, Drug Order',status:'Chờ danh mục & API'},
- {id:'appointment',name:'Lịch hẹn & hàng đợi',module:'Appointments / Queue',milestone:'B8',scope:'Provider, service, slot, queue entry',status:'Chờ kiểm chứng module'},
- {id:'result',name:'Chỉ định & kết quả CLS',module:'Test Order / Obs / Attachments',milestone:'B8',scope:'Order, assignee, result, provenance',status:'Chờ kiểm chứng luồng'},
- {id:'billing',name:'Phí & giao dịch',module:'Billing / API mở rộng nếu cần',milestone:'B8',scope:'Price snapshot, bill, VND transaction',status:'Chờ kiểm chứng module'},
- {id:'dispense',name:'Cấp thuốc',module:'Dispensing / Stock Management',milestone:'B0 · B8',scope:'Đơn đã xác nhận, bản ghi cấp',status:'Chờ hợp đồng API'},
- {id:'report',name:'Báo cáo tổng hợp',module:'Reporting / aggregate API',milestone:'B8',scope:'Chỉ số theo ngày, không bệnh án',status:'Chờ hợp đồng báo cáo'},
- {id:'audit',name:'Audit & vận hành',module:'Core / cấu hình / API vận hành',milestone:'B5 · B6',scope:'Account, config, audit, backup status',status:'Chờ hợp đồng vận hành'},
+ {id:'access',name:'Phiên & quyền',module:'Core / REST / auth',milestone:'B1 · B5',scope:'User, provider, location, privileges',status:'B5: workspace server, role/facility headers'},
+ {id:'patient',name:'Hành chính & định danh',module:'Core / REST / idgen / addresshierarchy',milestone:'B2',scope:'Patient, Person, Identifier',status:'B2: identity/contact/address; Core CRUD chưa có scoped API'},
+ {id:'visit',name:'Lượt khám & sinh hiệu',module:'Core / REST / forms',milestone:'B3',scope:'Visit → Encounter → Obs',status:'B3: validated vitals; tạo visit/encounter còn thiếu scoped API'},
+ {id:'exam',name:'Khám & đơn thuốc',module:'Core / REST / emrapi',milestone:'B4',scope:'Diagnosis, Allergy, Drug Order',status:'B4: consultation, diagnosis, allergy, drug-order; metadata 0.3.0'},
+ {id:'appointment',name:'Lịch hẹn & hàng đợi',module:'Appointments / Queue',milestone:'B8',scope:'Provider, service, slot, queue entry',status:'B8: VinSHC adapter, chưa có list API'},
+ {id:'result',name:'Chỉ định & kết quả CLS',module:'Test Order / Obs / Attachments',milestone:'B8',scope:'Order, assignee, result, provenance',status:'B8: service-orders/results/revisions/attachments'},
+ {id:'billing',name:'Phí & giao dịch',module:'Billing / API mở rộng nếu cần',milestone:'B8',scope:'Price snapshot, bill, VND transaction',status:'B8: VinSHC adapter, chưa có list API'},
+ {id:'dispense',name:'Cấp thuốc',module:'Dispensing / Stock Management',milestone:'B0 · B8',scope:'Đơn đã xác nhận, bản ghi cấp',status:'Chưa có API cấp thuốc'},
+ {id:'report',name:'Báo cáo tổng hợp',module:'Reporting / aggregate API',milestone:'B8',scope:'Chỉ số theo ngày, không bệnh án',status:'B8: báo cáo ngày theo cơ sở, dữ liệu tổng hợp'},
+ {id:'audit',name:'Audit & vận hành',module:'Core / cấu hình / API vận hành',milestone:'B5 · B6',scope:'Account, config, audit, backup status',status:'B5/B8: audit/configuration; chưa có CRUD tài khoản/form'},
 ];
 
 export const VITAL_FIELD_MAP = Object.freeze([
