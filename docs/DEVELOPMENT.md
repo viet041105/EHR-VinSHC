@@ -109,6 +109,8 @@ python scripts/collect_diagnostics.py
 
 Log và báo cáo nằm trong `.runtime/reports/`, được Git bỏ qua. Nếu chia sẻ log từ nguồn khác, kiểm tra nội dung trước khi gửi.
 
+Backup/restore không tương đương restart volume. Dùng công cụ và quy trình project cô lập trong [RECOVERY_RUNBOOK.md](RECOVERY_RUNBOOK.md); không restore đè project đang dùng.
+
 **Phân biệt dừng và xóa dữ liệu:** thêm `--volumes`/`-v` vào lệnh `down` sẽ xóa named volume của Compose project. Hướng dẫn local không tự thực hiện thao tác đó; CI chỉ xóa volume của project tạm thuộc chính lần chạy CI.
 
 ## 6. Các cấu hình thành viên có thể thay đổi

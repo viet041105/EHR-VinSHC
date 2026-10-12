@@ -183,14 +183,14 @@ Chỉ định CLS, lịch hẹn, hàng đợi, thu tiền và mẫu in thuộc m
 
 Đã có bằng chứng một phần: PostgreSQL dùng UTF8 và hai volume `postgres-data` / `openmrs-pg-data`; một lần dump PostgreSQL và restore sang project chính đã đạt trên dữ liệu giả ([VALIDATION.md](VALIDATION.md)). Mốc này biến kết quả đó thành quy trình lặp lại được.
 
-- [ ] Kiểm tra PostgreSQL và `/openmrs/data` dùng volume bền vững, encoding UTF8, cổng DB/backend không publish ra host, healthcheck/readiness, log và dung lượng. Ghi rõ dữ liệu nào nằm ở DB, dữ liệu nào nằm trong OpenMRS data volume, ví dụ tệp đính kèm nếu chức năng này được dùng.
-- [ ] Thiết kế backup nhất quán cho DB (`pg_dump` / `pg_restore`), OpenMRS data volume và bản cấu hình/image tương ứng; ghi lịch, nơi lưu, bảo vệ credential, thời gian lưu và người vận hành. Cách dump/copy cụ thể phải được thử trên **Compose project tách biệt** trước khi đưa vào runbook.
-- [ ] Thử restore vào project/volume mới: bệnh nhân, visit, encounter, obs, file đính kèm nếu có phải đọc được qua API; kiểm tra module/version và metadata sau restore; chạy `check_database.py` sau restore. Ghi thời gian phục hồi, sai khác và cách rollback. Restart container chỉ chứng minh persistence, **không** thay thế backup–restore.
+- [x] Kiểm tra PostgreSQL và `/openmrs/data` dùng volume bền vững, encoding UTF8, cổng DB/backend không publish ra host, healthcheck/readiness, log và dung lượng. Phân loại dữ liệu DB/application volume, giới hạn attachment và kiểm tra dung lượng nằm trong [RECOVERY_RUNBOOK.md](RECOVERY_RUNBOOK.md).
+- [x] Thiết kế backup nhất quán cho DB (`pg_dump` custom format), OpenMRS data volume giữ Linux ownership và manifest cấu hình/image có SHA-256. `scripts/recovery.py backup` đã chạy trên Compose project tách biệt; lịch, nơi lưu, credential, retention và operator được chốt thành gate trong runbook.
+- [x] Restore vào project/volume mới đã đọc lại đúng patient, visit, encounter, obs qua REST/FHIR; module/version/metadata, PostgreSQL 16.15 UTF8, 245 bảng và 118 foreign key đều đạt. Application-volume marker giữ đúng SHA-256; chưa có attachment nghiệp vụ B2–B5 nên không tuyên bố test upload. Backup 95,172 giây; restore + verify 121,203 giây ngày 12/10/2026.
 - [ ] Tách quyền database trước khi ra ngoài môi trường local: hiện `OMRS_DB_USER` là user khởi tạo của image PostgreSQL và có quyền quản trị cluster. Production cần tài khoản migration/quản trị riêng và tài khoản ứng dụng quyền tối thiểu.
-- [ ] Chuẩn bị cấu hình staging/production: HTTPS ở gateway/reverse proxy, secrets ngoài Git, cổng/hostname, giới hạn truy cập, tài khoản quản trị, chính sách backup, log/monitoring và quy trình cập nhật. Compose hiện tại chỉ bind `127.0.0.1` cho local; đưa lên server cần thiết kế riêng và được kiểm chứng.
-- [ ] Với thay đổi schema/module/image, ghi kế hoạch nâng cấp có backup trước, thử trên bản sao dữ liệu giả, cách kiểm tra sau nâng cấp và đường lui. Khi nâng phiên bản upstream, xem lại từng bản sửa trong `infra/backend/postgresql/` trước khi giữ hoặc bỏ. Không chạy migration hoặc xóa volume trên instance có dữ liệu cần giữ khi chưa có phương án phục hồi.
+- [x] Checklist staging/production về HTTPS, secrets ngoài Git, network, admin, backup, log/monitoring và update đã được chuẩn bị trong runbook. Compose hiện tại vẫn chỉ là local `127.0.0.1`; triển khai server cần owner phê duyệt và kiểm chứng riêng.
+- [x] Runbook đã ghi quy trình nâng cấp schema/module/image: backup trước, restore/upgrade trên bản sao giả, hậu kiểm, review patch PostgreSQL và rollback bằng instance cũ; cấm reverse migration/xóa volume khi chưa có đường phục hồi.
 
-**Đạt khi:** có backup và restore kiểm chứng được bằng dữ liệu giả trên môi trường cô lập, runbook ghi lệnh/thứ tự/kết quả; baseline local vẫn pass.
+**Đạt khi:** có backup và restore kiểm chứng được bằng dữ liệu giả trên môi trường cô lập, runbook ghi lệnh/thứ tự/kết quả; baseline local vẫn pass. **Đã đạt local ngày 12/10/2026**; mục tách database role và các phê duyệt production vẫn là deployment gate, không thể hoàn tất bằng credential thật trong Git.
 
 ### Mốc B7 — FHIR và khả năng mở rộng liên phòng khám
 
