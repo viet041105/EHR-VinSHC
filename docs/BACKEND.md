@@ -223,12 +223,14 @@ Chỉ định CLS, lịch hẹn, hàng đợi, thu tiền và mẫu in thuộc m
 
 **Đầu vào:** B2–B8 và UI/form đủ cho kịch bản. **Đầu ra:** backend của một phòng khám có thể bàn giao để nghiệm thu.
 
-- [ ] Đưa test API nghiệp vụ, quyền, Initializer idempotency, FHIR mapping, MVP-2 và persistence vào CI trên project riêng. CI phải dựng từ image/config trong PR, không dựa vào container có sẵn trên máy lập trình viên. Test có lỗi phải chỉ ra thao tác và dữ liệu synthetic liên quan, không lộ mật khẩu.
-- [ ] Chạy kịch bản end to end với FE và metadata cho MVP-1 rồi MVP-2: đăng ký/tìm bệnh nhân, lấy số, thu phí, sinh hiệu, khám, chỉ định CLS, chẩn đoán, kê đơn, in đơn, thu tiền thuốc, kết thúc, xem lại lịch sử. Thử bệnh nhân quay lại, hai người trùng tên, dữ liệu thiếu/sai, người dùng sai quyền, hủy lượt và lỗi API.
-- [ ] Chạy lại trên instance sạch, sau restart và sau restore. Bàn giao file cấu hình, phiên bản image/module, cách dựng, API contract, kết quả test, runbook và danh sách giới hạn được chấp nhận.
-- [ ] Đánh giá riêng trước khi dùng dữ liệu thật theo [checklist trước pilot](VIETNAM_COMPLIANCE.md#3-trước-khi-pilot-với-dữ-liệu-thật): quyền, audit truy cập, sao lưu, bảo mật triển khai, quy trình vận hành và yêu cầu chuyên môn/pháp lý áp dụng. MVP với dữ liệu giả không tự động trở thành hệ thống production.
+- [x] CI dựng image/config từ commit trên project riêng, kiểm tra metadata/Initializer, chạy có thứ tự 53 test B1–B8, rồi verifier B9 sau restart và restore. Report/diagnostics được giới hạn trong `.runtime/reports/`; backup và credential không upload. Workflow đã được actionlint/local-equivalent kiểm tra; GitHub-hosted run chỉ có bằng chứng sau khi commit được push.
+- [ ] Kịch bản backend synthetic đã bao phủ đăng ký/tìm, hàng đợi, thu phí, sinh hiệu, khám, CLS, chẩn đoán, kê đơn, 5 DTO in, lịch sử/tái khám, trùng tên, dữ liệu sai/thiếu, sai quyền, hủy và lỗi API. **Còn thiếu:** E2E trên trình duyệt với FE và người dùng nghiệp vụ; không tick hoàn thành thay cho nhóm FE.
+- [x] Đã chạy database sạch, restart giữ volume và backup–restore sang project/volume mới. Verifier read-only đối chiếu patient/encounter/diagnosis/đơn thuốc, tiền, native TestOrder/FHIR, attachment đúng byte/hash, số chứng từ và báo cáo. Gói bàn giao nằm ở [BACKEND_HANDOFF.md](BACKEND_HANDOFF.md); giới hạn cần owner chấp nhận vẫn mở.
+- [x] Đã đánh giá riêng theo [PILOT_READINESS.md](PILOT_READINESS.md), kết luận `NOT APPROVED FOR REAL DATA`: các gate HTTPS/secrets/DB least privilege, catalogue và danh tính pháp lý, file scanning/storage, vận hành, dữ liệu cá nhân, FE UAT và chữ ký owner chưa đạt.
 
 **Đạt khi:** một người khác dựng lại và thực hiện trọn kịch bản bằng dữ liệu giả, test CI pass, dữ liệu đọc lại đúng sau restart/restore, các giới hạn còn lại được người phụ trách chấp nhận bằng văn bản.
+
+**Bằng chứng backend local ngày 12/10/2026:** clean stack đạt 53/53 B1–B8; restart 4/4 và restore project mới 4/4; metadata 78 identity giữ nguyên, PostgreSQL 16.15/253 bảng/118 FK đạt. Backup mất 97,969 giây, restore 130,516 giây. B9 tổng thể chưa đạt điều kiện cuối vì chưa có hosted CI run, FE/browser UAT, người kiểm chứng độc lập và văn bản chấp nhận giới hạn.
 
 ## 4. Khi nào viết module Java hoặc sửa source upstream?
 

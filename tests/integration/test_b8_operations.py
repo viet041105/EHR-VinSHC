@@ -199,7 +199,8 @@ class B8OperationsTests(unittest.TestCase):
         type(self).state.update(postpay=paid, receipt=first, refund=refund,
                                 prepay=prepay, prepay_receipt=receipt)
         self.record("integer VND snapshots, partial/pending settlement, refund, cancel and actor trace",
-                    postpayBill=postpay["uuid"], prepayBill=prepay["uuid"])
+                    postpayBill=postpay["uuid"], prepayBill=prepay["uuid"],
+                    receiptUuid=first["uuid"], refundUuid=refund["uuid"])
 
     def test_05_diagnostic_order_result_attachment_and_fhir(self):
         service = self.services["LAB-GLU"]
@@ -248,7 +249,8 @@ class B8OperationsTests(unittest.TestCase):
         self.assertEqual(fhir["encounter"]["reference"], "Encounter/" + self.ctx["encounterUuid"])
         type(self).state.update(service_order=order, result=corrected, attachment=attachment)
         self.record("native TestOrder/FHIR ServiceRequest, assignment, numeric result revision and PDF round-trip",
-                    orderUuid=order["uuid"], resultUuid=corrected["uuid"])
+                    orderUuid=order["uuid"], resultUuid=corrected["uuid"],
+                    attachmentUuid=attachment["uuid"], attachmentSha256=attachment["sha256"])
 
     def test_06_print_dtos_use_configured_identity_and_stable_numbers(self):
         summary = self.client.json(
@@ -272,7 +274,7 @@ class B8OperationsTests(unittest.TestCase):
             self.assertEqual(document["patient"]["uuid"], self.ctx["patientUuid"])
             numbers[template] = document["documentNumber"]
         self.record("prescription/receipt/order/result/appointment DTOs use configured identities and immutable numbers",
-                    documentNumbers=numbers)
+                    documentNumbers=numbers, sources=sources)
 
     def test_07_daily_report_is_aggregate_and_manager_only_needs_report_privilege(self):
         role = json.loads((ROOT / "metadata/vinshc/permissions.json").read_text(encoding="utf-8"))["roles"]["manager"]

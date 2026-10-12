@@ -21,7 +21,7 @@ Kết quả kiểm chứng local hiện có trong [VALIDATION.md](VALIDATION.md)
 3. Chạy regression test cho bootstrap, cấu hình, che credential và smoke failure handling.
 4. Validate cú pháp/hành vi workflow bằng actionlint có phiên bản và checksum cố định.
 
-### Job `PostgreSQL, OpenMRS REST, FHIR and persistence`
+### Job `B1-B9 PostgreSQL, API, FHIR, restart and restore`
 
 1. Pull image đã khóa và build backend từ image release cố định, bỏ demo lớn và áp dụng bản sửa PostgreSQL đã lưu trong repo.
 2. Dựng stack PostgreSQL trên runner mới và chờ các service khỏe; xác nhận version, UTF8, extension, schema OpenMRS, đủ 118 khóa ngoại Stock Management và hai cột nhị phân của module dùng BYTEA. Lệnh khởi tạo có giới hạn tổng 2.400 giây; dựng lại dùng 600 giây, để khi lỗi vẫn còn thời gian lấy diagnostics và dọn project.
@@ -29,9 +29,10 @@ Kết quả kiểm chứng local hiện có trong [VALIDATION.md](VALIDATION.md)
 4. Xác thực REST; xác nhận phiên bản Core và đủ 29 module của baseline; kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
 5. Kiểm tra REST patient search, FHIR R4 CapabilityStatement và FHIR Patient search. Báo cáo smoke ghi toàn bộ resource/interaction được server công bố và trạng thái `started`/version của từng module baseline để làm bằng chứng B0; việc được công bố không đồng nghĩa luồng nghiệp vụ đã được nghiệm thu.
 6. Tạo bệnh nhân giả, visit, encounter, observation số và văn bản tiếng Việt dài; đối chiếu mã bệnh nhân, quan hệ, giá trị, đơn vị, thời gian và văn bản qua REST/FHIR.
-7. Chạy integration contract B1 cho session, tạo/tìm/đọc patient, mở/kết thúc/đọc lịch sử visit và lỗi 400/401/403/404.
-8. Dừng và dựng lại container, giữ volume; đọc chính hồ sơ trước đó để kiểm chứng persistence.
-9. Lưu báo cáo/log đã che mật khẩu cấu hình, gồm log OpenMRS trong application volume khi khởi tạo chưa xong, rồi xóa container/volume của chính project CI đó.
+7. Chạy có thứ tự toàn bộ contract B1–B8: hành chính, sinh hiệu, khám/đơn thuốc, quyền, FHIR và MVP-2.
+8. Dừng và dựng lại container, giữ volume; xác minh metadata Initializer không đổi UUID/số lượng và đọc lại clinical/financial/order/file/document state bằng verifier B9 read-only.
+9. Backup database và `/openmrs/data`, restore sang project/volume/cổng khác; kiểm tra database, smoke, metadata và cùng verifier B9, gồm byte/hash attachment.
+10. Sinh report bàn giao đã che thông tin nhạy cảm, chỉ upload `.runtime/reports/`, rồi xóa volume của cả source và restore project.
 
 Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định danh hoặc mất hồ sơ sau restart, job phải thất bại.
 
@@ -48,7 +49,7 @@ Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định
 
 Workflow hiện cấu hình stack PostgreSQL 16.15 theo [ADR-0002](decisions/0002-postgresql.md), gồm kiểm tra database và persistence. Cấu hình workflow không thay thế kết quả run thực tế; xem GitHub Actions và [VALIDATION.md](VALIDATION.md) để biết bằng chứng đã có.
 
-CI kiểm chứng baseline chạy được và các API chính; chưa nghiệm thu biểu mẫu Việt Nam, ma trận quyền lễ tân/điều dưỡng/bác sĩ, toàn bộ mapping lâm sàng, E2E trên trình duyệt hoặc triển khai production.
+CI kiểm chứng backend B1–B9 bằng dữ liệu synthetic, gồm metadata, ma trận quyền, mapping lâm sàng, MVP-2, restart và restore. CI vẫn chưa nghiệm thu E2E trên trình duyệt/FE, tải production, thông tin pháp lý thật hoặc triển khai production. Hosted run chỉ có sau khi commit chứa workflow được push; local pass không được ghi thành GitHub Actions pass.
 
 Repo build backend từ image upstream cố định, có lớp Hibernate, bản sửa migration Appointments, đồng bộ sequence sau dữ liệu nền của Core và kiểm tra khóa ngoại Stock Management theo từng bảng. Build biên dịch lớp Java và kiểm tra hash artifact gốc; smoke kiểm chứng qua API thật. Khi thêm chức năng Java/frontend của nhóm, bổ sung test phù hợp vào pipeline.
 
@@ -60,12 +61,14 @@ python -m unittest discover -s tests -v
 docker compose up -d --wait --wait-timeout 2400
 python scripts/check_database.py
 python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
-python -m unittest discover -s tests/integration -v
+python -m unittest -v tests.integration.test_b1_contract tests.integration.test_b2_patient tests.integration.test_b3_vitals tests.integration.test_b23_extensions tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical tests.integration.test_b5_authorization tests.integration.test_b7_fhir tests.integration.test_b8_operations
 docker compose down
 docker compose up -d --wait --wait-timeout 600
 python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
+$env:VINSHC_ACCEPTANCE_PHASE='restart'
+python -m unittest -v tests.integration.test_b9_persistence
 ```
 
-Giữ fixture và volume của cùng một instance. Cách dựng môi trường, xem log và xử lý lỗi nằm trong [DEVELOPMENT.md](DEVELOPMENT.md).
+Để chạy B4–B9 bằng catalogue test, thêm `tests/integration/compose.b4-metadata.yaml` vào Compose và đặt `VINSHC_B4_CATALOGUE=metadata`. Backup/restore project thứ hai làm đúng các lệnh đã khóa trong workflow; không dùng `discover` vì thứ tự fixture có phụ thuộc được ghi rõ. Giữ fixture và volume của cùng một instance. Cách dựng môi trường, xem log và xử lý lỗi nằm trong [DEVELOPMENT.md](DEVELOPMENT.md).
 
 Sau khi có run GitHub thành công, nhóm có thể cấu hình branch rules để yêu cầu hai check trên trước khi merge. Thiết lập branch rules là cấu hình repository riêng; file workflow không tự bật quy tắc đó.

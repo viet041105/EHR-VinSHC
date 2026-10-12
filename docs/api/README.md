@@ -16,6 +16,7 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | [Xử lý lỗi](error-handling.md) | Runtime: 400/401/403/404/503; quy tắc FHIR 500 khi thiếu quyền |
 | [FHIR mapping](fhir-mapping.md) | B7 runtime: 9 resource, multi-visit/timezone/void/missing-state và 6 gap có assertion |
 | [Vận hành phòng khám](clinic-operations.md) | B8 runtime: lịch hẹn, hàng đợi, VND billing, CLS/file, mẫu in, báo cáo và hai cấu hình |
+| [Bàn giao backend](../BACKEND_HANDOFF.md) | B9: CI B1–B8, verifier restart/restore, report bàn giao và giới hạn pilot |
 | [Ma trận capability](capabilities.md) | B0: module/API/metadata/mức thử/khoảng trống |
 
 ## Quy ước chung
