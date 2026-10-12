@@ -15,6 +15,7 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | [Authorization và audit](authorization-audit.md) | B5 runtime: 8 role, active role/facility workspace, 896 matrix cells, Core/FHIR boundary và access audit |
 | [Xử lý lỗi](error-handling.md) | Runtime: 400/401/403/404/503; quy tắc FHIR 500 khi thiếu quyền |
 | [FHIR mapping](fhir-mapping.md) | B7 runtime: 9 resource, multi-visit/timezone/void/missing-state và 6 gap có assertion |
+| [Vận hành phòng khám](clinic-operations.md) | B8 runtime: lịch hẹn, hàng đợi, VND billing, CLS/file, mẫu in, báo cáo và hai cấu hình |
 | [Ma trận capability](capabilities.md) | B0: module/API/metadata/mức thử/khoảng trống |
 
 ## Quy ước chung
@@ -36,16 +37,16 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | Patient/visit/encounter/obs | Response của request tạo, sau đó lưu dưới `.runtime/` để đọc lại |
 | Metadata Việt Nam 0.3.0 | 78 identity nền và catalogue test B4 đã nạp trên Docker cô lập; catalogue test giữ `productionEnabled=false` |
 
-## Chạy kiểm chứng B1–B4
+## Chạy kiểm chứng B1–B8
 
 `test_b23_extensions.py` cần fixture của B2 và B3, nhưng `discover` chạy theo thứ tự tên file (`test_b23` đứng trước `test_b2_`). Trên database mới, chạy theo thứ tự:
 
 ```powershell
-python -m unittest -v tests.integration.test_b1_contract tests.integration.test_b2_patient tests.integration.test_b3_vitals tests.integration.test_b23_extensions tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical tests.integration.test_b5_authorization tests.integration.test_b7_fhir
+python -m unittest -v tests.integration.test_b1_contract tests.integration.test_b2_patient tests.integration.test_b3_vitals tests.integration.test_b23_extensions tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical tests.integration.test_b5_authorization tests.integration.test_b7_fhir tests.integration.test_b8_operations
 ```
 
 Để dùng catalogue metadata 0.3.0 thay cho fallback synthetic, chạy Compose với `tests/integration/compose.b4-metadata.yaml` và đặt `$env:VINSHC_B4_CATALOGUE='metadata'`. Adapter sẽ từ chối catalogue nếu `productionEnabled=true`, tránh dùng nhầm dữ liệu production trong test.
 
 Khi đã có fixture, `python -m unittest discover -s tests/integration -v` chạy lại được.
 
-Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b23-extension-integration.json`, `b3-integration.json`, `b4a-integration.json`, `b4b-clinical.json`, `b5-authorization.json` và `b7-fhir.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2; B4B tạo patient synthetic mới mỗi lần chạy và đọc lại encounter của lần trước. B5 tạo credential ngẫu nhiên trong bộ nhớ, kiểm tra rồi void tài khoản test. B7 chỉ đọc lại fixture B2–B4 và kiểm tra gap FHIR, không tạo dữ liệu lâm sàng thay thế. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.
+Test chỉ chấp nhận HTTP loopback, không theo redirect và từ chối HTML thay cho JSON. Báo cáo nằm tại `.runtime/reports/b1-integration.json`, `b2-integration.json`, `b23-extension-integration.json`, `b3-integration.json`, `b4a-integration.json`, `b4b-clinical.json`, `b5-authorization.json`, `b7-fhir.json` và `b8-operations.json`; fixture tương ứng nằm trong `.runtime/fixtures/`. B3/B4A dùng hai patient synthetic của B2; B4B tạo patient synthetic mới mỗi lần chạy và đọc lại encounter của lần trước. B5 tạo credential ngẫu nhiên trong bộ nhớ, kiểm tra rồi void tài khoản test. B7 đọc lại fixture B2–B4; B8 tạo giao dịch MVP-2 và native TestOrder trên fixture đó, vì vậy phải chạy sau B7 trên database sạch. Nếu file fixture có nhưng dữ liệu tương ứng mất, test fail thay vì tạo lại để che mất lỗi persistence.

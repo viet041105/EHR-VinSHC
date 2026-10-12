@@ -75,6 +75,19 @@ public class AuthorizationService {
 		instance.auditRead(resource, patient, encounter, entityUuid, detail);
 	}
 
+	public static void requireOperation(String resource, String action) {
+		AuthorizationService service = instance;
+		if (service == null)
+			throw new IllegalStateException("authorization service is not initialized");
+		User user = authenticatedUser();
+		if (isSystemAdministrator(user))
+			return;
+		String privilege = "VinSHC " + resource + " " + action;
+		if (service.workspaceRole(false) == null && !service.hasAppRole(user) && user.hasPrivilege(privilege))
+			return;
+		service.evaluate(resource, action);
+	}
+
 	private void require(String privilege) {
 		User user = authenticatedUser();
 		if (isSystemAdministrator(user) || (workspaceRole(false) == null && user.hasPrivilege(privilege)))

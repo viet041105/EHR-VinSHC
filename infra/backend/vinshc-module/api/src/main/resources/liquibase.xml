@@ -131,4 +131,145 @@
     <createIndex tableName="vinshc_access_event" indexName="ix_vinshc_access_patient"><column name="patient_id"/><column name="date_created"/></createIndex>
     <createIndex tableName="vinshc_access_event" indexName="ix_vinshc_access_encounter"><column name="encounter_id"/><column name="date_created"/></createIndex>
   </changeSet>
+  <changeSet id="vinshc-0.3.0-clinic-operations" author="vinshc" dbms="postgresql">
+    <comment>B8 transactional clinic operations owned by the VinSHC adapter.</comment>
+    <createTable tableName="vinshc_appointment">
+      <column name="appointment_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="appointment_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_appointment_uuid"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_appointment_patient"/></column>
+      <column name="visit_id" type="INT"><constraints references="visit(visit_id)" foreignKeyName="fk_vinshc_appointment_visit"/></column>
+      <column name="facility_location_id" type="INT"><constraints nullable="false" references="location(location_id)" foreignKeyName="fk_vinshc_appointment_location"/></column>
+      <column name="provider_id" type="INT"><constraints references="provider(provider_id)" foreignKeyName="fk_vinshc_appointment_provider"/></column>
+      <column name="service_uuid" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="appointment_type" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="start_at" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="end_at" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="status" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="note" type="VARCHAR(1000)"/>
+      <column name="idempotency_key" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_appointment_key"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_appointment_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="changed_by" type="INT"/><column name="date_changed" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+    <createIndex tableName="vinshc_appointment" indexName="ix_vinshc_appointment_slot"><column name="facility_location_id"/><column name="provider_id"/><column name="start_at"/><column name="end_at"/></createIndex>
+
+    <createTable tableName="vinshc_queue_item">
+      <column name="queue_item_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="queue_item_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_queue_uuid"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_queue_patient"/></column>
+      <column name="visit_id" type="INT"><constraints nullable="false" references="visit(visit_id)" foreignKeyName="fk_vinshc_queue_visit"/></column>
+      <column name="facility_location_id" type="INT"><constraints nullable="false" references="location(location_id)" foreignKeyName="fk_vinshc_queue_location"/></column>
+      <column name="provider_id" type="INT"><constraints references="provider(provider_id)" foreignKeyName="fk_vinshc_queue_provider"/></column>
+      <column name="config_code" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="point_code" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="iteration" type="INT"><constraints nullable="false"/></column>
+      <column name="queue_number" type="INT"><constraints nullable="false"/></column>
+      <column name="state" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="exit_reason" type="VARCHAR(64)"/>
+      <column name="idempotency_key" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_queue_key"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_queue_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="changed_by" type="INT"/><column name="date_changed" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+    <addUniqueConstraint tableName="vinshc_queue_item" columnNames="visit_id,point_code,iteration" constraintName="ux_vinshc_queue_iteration"/>
+    <createIndex tableName="vinshc_queue_item" indexName="ix_vinshc_queue_order"><column name="facility_location_id"/><column name="point_code"/><column name="date_created"/><column name="queue_number"/></createIndex>
+
+    <createTable tableName="vinshc_bill">
+      <column name="bill_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="bill_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_bill_uuid"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_bill_patient"/></column>
+      <column name="visit_id" type="INT"><constraints nullable="false" references="visit(visit_id)" foreignKeyName="fk_vinshc_bill_visit"/></column>
+      <column name="facility_uuid" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="currency" type="VARCHAR(3)"><constraints nullable="false"/></column>
+      <column name="payment_timing" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="lines_json" type="TEXT"><constraints nullable="false"/></column>
+      <column name="total_vnd" type="BIGINT"><constraints nullable="false"/></column>
+      <column name="status" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="cancel_reason" type="VARCHAR(1000)"/>
+      <column name="idempotency_key" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_bill_key"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_bill_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="changed_by" type="INT"/><column name="date_changed" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+    <createTable tableName="vinshc_payment">
+      <column name="payment_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="payment_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_payment_uuid"/></column>
+      <column name="bill_id" type="BIGINT"><constraints nullable="false" references="vinshc_bill(bill_id)" foreignKeyName="fk_vinshc_payment_bill"/></column>
+      <column name="kind" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="original_payment_id" type="BIGINT"><constraints references="vinshc_payment(payment_id)" foreignKeyName="fk_vinshc_payment_original"/></column>
+      <column name="amount_vnd" type="BIGINT"><constraints nullable="false"/></column>
+      <column name="method" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="status" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="reason" type="VARCHAR(1000)"/>
+      <column name="idempotency_key" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_payment_key"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_payment_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="settled_by" type="INT"/><column name="settled_at" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+
+    <createTable tableName="vinshc_service_order">
+      <column name="service_order_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="order_id" type="INT"><constraints nullable="false" references="orders(order_id)" foreignKeyName="fk_vinshc_service_order_native"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_service_order_patient"/></column>
+      <column name="encounter_id" type="INT"><constraints nullable="false" references="encounter(encounter_id)" foreignKeyName="fk_vinshc_service_order_encounter"/></column>
+      <column name="visit_id" type="INT"><constraints nullable="false" references="visit(visit_id)" foreignKeyName="fk_vinshc_service_order_visit"/></column>
+      <column name="facility_uuid" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="service_uuid" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="service_code" type="VARCHAR(64)"><constraints nullable="false"/></column>
+      <column name="service_name" type="VARCHAR(255)"><constraints nullable="false"/></column>
+      <column name="state" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="assigned_provider_id" type="INT"><constraints references="provider(provider_id)" foreignKeyName="fk_vinshc_service_order_assignee"/></column>
+      <column name="bill_id" type="BIGINT"><constraints references="vinshc_bill(bill_id)" foreignKeyName="fk_vinshc_service_order_bill"/></column>
+      <column name="idempotency_key" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_service_order_key"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_service_order_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="changed_by" type="INT"/><column name="date_changed" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+    <addUniqueConstraint tableName="vinshc_service_order" columnNames="order_id" constraintName="ux_vinshc_service_order_native"/>
+    <createTable tableName="vinshc_result_revision">
+      <column name="result_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="result_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_result_uuid"/></column>
+      <column name="service_order_id" type="BIGINT"><constraints nullable="false" references="vinshc_service_order(service_order_id)" foreignKeyName="fk_vinshc_result_order"/></column>
+      <column name="version_number" type="INT"><constraints nullable="false"/></column>
+      <column name="state" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="numeric_value" type="NUMERIC(30,10)"/>
+      <column name="text_value" type="TEXT"/>
+      <column name="unit" type="VARCHAR(64)"/>
+      <column name="previous_result_id" type="BIGINT"><constraints references="vinshc_result_revision(result_id)" foreignKeyName="fk_vinshc_result_previous"/></column>
+      <column name="correction_reason" type="VARCHAR(1000)"/>
+      <column name="author_provider_id" type="INT"><constraints nullable="false" references="provider(provider_id)" foreignKeyName="fk_vinshc_result_author"/></column>
+      <column name="reviewer_provider_id" type="INT"><constraints references="provider(provider_id)" foreignKeyName="fk_vinshc_result_reviewer"/></column>
+      <column name="recorded_at" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="reviewed_at" type="TIMESTAMP WITH TIME ZONE"/>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_result_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+    </createTable>
+    <addUniqueConstraint tableName="vinshc_result_revision" columnNames="service_order_id,version_number" constraintName="ux_vinshc_result_version"/>
+    <createTable tableName="vinshc_attachment">
+      <column name="attachment_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="attachment_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_attachment_uuid"/></column>
+      <column name="service_order_id" type="BIGINT"><constraints nullable="false" references="vinshc_service_order(service_order_id)" foreignKeyName="fk_vinshc_attachment_order"/></column>
+      <column name="result_id" type="BIGINT"><constraints references="vinshc_result_revision(result_id)" foreignKeyName="fk_vinshc_attachment_result"/></column>
+      <column name="storage_key" type="VARCHAR(255)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_attachment_key"/></column>
+      <column name="original_name" type="VARCHAR(255)"><constraints nullable="false"/></column>
+      <column name="mime_type" type="VARCHAR(64)"><constraints nullable="false"/></column>
+      <column name="size_bytes" type="BIGINT"><constraints nullable="false"/></column>
+      <column name="sha256" type="VARCHAR(64)"><constraints nullable="false"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_attachment_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+    </createTable>
+    <createTable tableName="vinshc_document">
+      <column name="document_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="document_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_document_uuid"/></column>
+      <column name="facility_uuid" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="template_code" type="VARCHAR(32)"><constraints nullable="false"/></column>
+      <column name="source_uuid" type="VARCHAR(38)"><constraints nullable="false"/></column>
+      <column name="document_number" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_document_number"/></column>
+      <column name="document_version" type="INT"><constraints nullable="false"/></column>
+      <column name="payload_json" type="TEXT"><constraints nullable="false"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_document_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+    </createTable>
+    <addUniqueConstraint tableName="vinshc_document" columnNames="template_code,source_uuid,document_version" constraintName="ux_vinshc_document_source_version"/>
+  </changeSet>
 </databaseChangeLog>

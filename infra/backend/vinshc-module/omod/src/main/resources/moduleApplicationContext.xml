@@ -12,4 +12,7 @@
   <bean id="vinshcClinicalService" class="org.openmrs.module.vinshc.service.ClinicalService">
     <constructor-arg ref="sessionFactory"/>
   </bean>
+  <bean id="vinshcOperationsService" class="org.openmrs.module.vinshc.service.OperationsService">
+    <constructor-arg ref="sessionFactory"/>
+  </bean>
 </beans>

@@ -10,7 +10,7 @@ Runbook này áp dụng cho baseline Docker Compose local/staging của VinSHC. 
 | `/openmrs/data` (`openmrs-pg-data`) | runtime properties, module runtime/cache và file do module lưu local; attachment/patient document có thể nằm tại đây tùy cấu hình module | archive `tar.gz` trực tiếp giữa Linux volume, giữ UID/GID/quyền, SHA-256 |
 | Git/config/image | Compose, baseline, Dockerfile, overlay và image ID thực chạy | manifest bắt buộc khớp trước restore |
 
-Baseline B2–B5 hiện chưa có luồng upload attachment được nghiệm thu. B6 vẫn sao lưu toàn bộ `/openmrs/data` và đã kiểm tra một file marker qua SHA-256; khi bật attachment phải bổ sung ca upload/download thật trước và sau restore.
+B8 đã nghiệm thu upload/download PDF thật và SHA-256 trong `/openmrs/data/vinshc-attachments`. Lần restore B6 trước đó chỉ xác minh file marker; B9 vẫn phải backup/restore lại với attachment nghiệp vụ rồi đối chiếu byte/hash trước và sau restore.
 
 Database/backend không publish cổng ra host; gateway local chỉ bind `127.0.0.1`. `check_config.py` kiểm tra volume, healthcheck, image và ranh giới cổng. `check_database.py` kiểm tra PostgreSQL 16.15, UTF8, extension, schema và migration nhị phân. Kiểm tra dung lượng trước backup bằng `docker system df -v`; không xóa/prune tài nguyên Docker để giải phóng dung lượng khi chưa xác định đúng owner.
 

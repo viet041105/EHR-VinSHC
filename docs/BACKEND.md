@@ -207,15 +207,17 @@ Chỉ định CLS, lịch hẹn, hàng đợi, thu tiền và mẫu in thuộc m
 
 **Đầu vào:** B3–B5; danh mục dịch vụ và bảng giá mẫu (DATA-09); mẫu giấy tờ từ khảo sát M0; ma trận khả năng của B0. **Đầu ra:** quy trình phòng khám tư chạy trọn trên backend với dữ liệu giả.
 
-- [ ] **Lịch hẹn và hàng đợi:** kiểm thử appointments và queue: đặt lịch, cấp số, hàng đợi theo phòng/bác sĩ, chuyển bước giữa tiếp đón → điều dưỡng → bác sĩ → CLS → thu ngân. Kiểm tra đúng thứ tự và trạng thái khi bệnh nhân bỏ về giữa chừng.
-- [ ] **Bảng giá và thu tiền:** đánh giá module billing có đáp ứng danh mục dịch vụ, bảng giá theo cơ sở, thu/hoàn/hủy, trả trước và trả sau hay không. Tiền tệ là VND. Kiểm tra tổng tiền, trạng thái thanh toán và dấu vết người thu. Nếu thiếu, ghi khoảng trống và phương án theo mục 4.
-- [ ] **Chỉ định CLS:** kiểm thử tạo chỉ định, gán cho KTV, nhập kết quả số/văn bản hoặc đính kèm file, bác sĩ đọc kết quả. Kết quả phải gắn đúng chỉ định, lượt khám và bệnh nhân. Luồng file đính kèm phải được nghiệm thu riêng, vì [VALIDATION.md](VALIDATION.md#giới-hạn) ghi chưa thử upload/complex obs trên PostgreSQL.
-- [ ] **Dữ liệu cho mẫu in:** cung cấp API/dữ liệu đủ cho đơn thuốc, phiếu thu, phiếu chỉ định, phiếu kết quả, giấy hẹn. Thông tin cơ sở và người hành nghề lấy từ cấu hình, không viết cứng. Phối hợp FE-08.
-- [ ] **Báo cáo ngày:** số lượt khám và doanh thu theo ngày, khớp dữ liệu giả; role quản lý đọc được báo cáo mà không cần quyền đọc bệnh án.
-- [ ] **Biến thể cấu hình:** trả trước/trả sau; có/không có điều dưỡng; có/không có quầy thuốc ([CLINIC_WORKFLOW.md](CLINIC_WORKFLOW.md#các-biến-thể-cần-hỗ-trợ-bằng-cấu-hình)). Mỗi biến thể bật bằng cấu hình, không rẽ nhánh bằng code riêng cho từng phòng khám.
-- [ ] **Khung adapter (BE-09):** đề xuất cấu trúc `integrations/` và cách bật/tắt cho BHYT, hóa đơn điện tử, đơn thuốc quốc gia, LIS, PACS. Chỉ làm khung và hợp đồng (INT-10); adapter thật thuộc M6.
+- [x] **Lịch hẹn và hàng đợi:** transaction adapter đã kiểm thử đặt/tái phát idempotent, khóa slot trùng, lifecycle lịch hẹn; cấp số và chuyển `RECEPTION → NURSE → DOCTOR → LAB → CASHIER → PHARMACY`; trạng thái `left` giữ lý do. Module upstream vẫn started nhưng schema/transition API không được dùng làm contract ứng dụng khi chưa ổn định.
+- [x] **Bảng giá và thu tiền:** snapshot danh mục/giá theo cơ sở, số nguyên VND, trả trước/trả sau, thu một phần, chuyển khoản pending/settled, hoàn tiền và hủy bill chưa thu đã được kiểm thử. Mọi payment lưu người ghi, thời điểm, idempotency key và liên kết bill/receipt gốc.
+- [x] **Chỉ định CLS:** API tạo native `TestOrder`, gán KTV, chuyển trạng thái, ghi/sửa kết quả append-only và đọc lại cùng UUID qua FHIR `ServiceRequest`. Multipart PDF đã upload/download đúng byte và SHA-256, gắn đúng patient/encounter/order/result; JPEG/PNG cùng allowlist/sniff. Production upload vẫn khóa cho đến khi có scanner/object storage.
+- [x] **Dữ liệu cho mẫu in:** DTO có số chứng từ ổn định cho đơn thuốc, phiếu thu, phiếu chỉ định, phiếu kết quả và giấy hẹn; danh tính cơ sở/người hành nghề lấy từ metadata/native record. B8 không render PDF hay tuyên bố chữ ký điện tử hợp lệ pháp lý; FE-08 dùng contract này.
+- [x] **Báo cáo ngày:** đối chiếu số lượt và gross/refund/net VND theo ngày `Asia/Ho_Chi_Minh`; output chỉ aggregate. User role quản lý đọc được báo cáo nhưng nhận 403 khi đọc clinical summary.
+- [x] **Biến thể cấu hình:** `STANDARD_POSTPAY` có điều dưỡng/quầy thuốc và `COMPACT_PREPAY` không có hai điểm đó được đọc từ `workflow.json`; prepay gate được kiểm thử, không có nhánh code riêng theo phòng khám.
+- [x] **Khung adapter (BE-09):** [`integrations/`](../integrations/) có manifest disabled-by-default và JSON Schema envelope chung cho BHYT, hóa đơn điện tử, đơn thuốc quốc gia, LIS, PACS; adapter thật, credential và kết nối ngoài vẫn thuộc M6.
 
 **Đạt khi:** quy trình mục 2.3 của `PROJECT_PLAN.md` chạy trọn trên backend với dữ liệu giả, gồm hàng đợi, thu tiền, CLS và tái khám; ít nhất hai biến thể cấu hình chạy được; tiền và trạng thái thanh toán truy vết được.
+
+**Đã đạt local ngày 12/10/2026:** B8 đạt 7/7 trên Docker PostgreSQL cô lập sau chuỗi fixture B1–B4; hợp đồng ở [clinic-operations.md](api/clinic-operations.md), report `.runtime/reports/b8-operations.json`. Catalogue và danh tính là synthetic; production upload và mọi tích hợp ngoài đều giữ disabled.
 
 ### Mốc B9 — Tích hợp, CI và nghiệm thu một phòng khám
 

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:vinshc:integration:adapter-envelope:1",
+  "title": "VinSHC integration adapter envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["contractVersion", "eventId", "eventType", "occurredAt", "facilityUuid", "payload", "payloadSha256"],
+  "properties": {
+    "contractVersion": { "const": "1.0.0" },
+    "eventId": { "type": "string", "format": "uuid" },
+    "eventType": { "type": "string", "minLength": 1, "maxLength": 100 },
+    "occurredAt": { "type": "string", "format": "date-time" },
+    "facilityUuid": { "type": "string", "format": "uuid" },
+    "patientUuid": { "type": ["string", "null"], "format": "uuid" },
+    "correlationId": { "type": ["string", "null"], "maxLength": 100 },
+    "payload": { "type": "object" },
+    "payloadSha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}
