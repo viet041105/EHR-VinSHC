@@ -6,7 +6,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
+    "dev": "node dev.mjs --host 127.0.0.1 --port 5173 --strictPort",
     "test": "node --test backend-client.test.mjs",
     "test:browser": "node connected-check.cjs && node additional-check.cjs",
     "test:connected": "node connected-check.cjs",

@@ -15,7 +15,10 @@ npm run dev
 
 Mở http://127.0.0.1:5173 → Đăng nhập phòng khám. Trang đăng nhập trực tiếp:
 http://127.0.0.1:5173/connected.html. Vite tự cập nhật khi lưu source; Ctrl+C để dừng.
-Chỉ một server dùng cổng 5173. Không mở bằng file://.
+Trên macOS/Linux, chạy lại `npm run dev` tự dừng Vite cũ của chính thư mục FE này
+đang giữ cổng 5173 và khởi động server mới trong terminal hiện tại. Nếu ứng dụng
+khác giữ cổng, lệnh báo rõ và không dừng ứng dụng đó; có thể dùng
+`npm run dev -- --port 5174`. Không mở bằng file://.
 
 Proxy `/openmrs` mặc định tới http://127.0.0.1:8080. Đổi gateway local nếu cần:
 
