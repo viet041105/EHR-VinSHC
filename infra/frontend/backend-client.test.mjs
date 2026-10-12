@@ -43,3 +43,8 @@ test('money, result revisions, price snapshots and state payloads follow backend
  assert.throws(()=>actions.saveResult.build({state:'final',textValue:'Test',recordedAt:'2026-10-12T09:00:00+07:00'}),/người duyệt/);assert.throws(()=>actions.saveResult.build({state:'draft',textValue:'Test',numericValue:1,recordedAt:'2026-10-12T09:00:00+07:00'}),/đúng một/);
  assert.throws(()=>actions.orderTransition.build({state:'cancelled'}),/lý do/);assert.throws(()=>actions.orderTransition.build({state:'assigned'}),/phân công/);assert.deepEqual(actions.queueTransition.build({state:'called',exitReason:'other'}),{state:'called'});
 });
+
+import {clearLegacyDemo} from './clear-demo.js';
+test('legacy demo cleanup removes only its own stores',()=>{
+ const values=new Map([['vinshc-demo-v1','old'],['vinshc-demo-v2','old'],['other-project','keep']]);clearLegacyDemo({removeItem:key=>values.delete(key)});assert.deepEqual([...values],[['other-project','keep']]);assert.doesNotThrow(()=>clearLegacyDemo({removeItem(){throw Error('denied');}}));
+});

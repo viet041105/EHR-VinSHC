@@ -21,7 +21,7 @@ const stateLabels={booked:'Đã đặt',confirmed:'Đã xác nhận',arrived:'Đ
 export const stateText=v=>stateLabels[v]||v;
 const states=values=>values.map(v=>[v,stateText(v)]);
 const units=kind=>options(m.units.catalogues[kind],kind==='frequencies'?'uuid':'conceptUuid');
-const frequencies=active(m.units.catalogues.frequencies).map(r=>[m.map.entities['frequency.'+r.code.toLowerCase()],r.name]);
+const frequencies=active(m.units.catalogues.frequencies).filter(r=>r.frequencyPerDay!==null).map(r=>[m.map.entities['frequency.'+r.code.toLowerCase()],r.name]);
 export const consultationFields=[
  F('visit.ly_do_kham','Lý do khám','textarea',{max:4000}),optional('history.benh_su','Bệnh sử','textarea',{max:4000}),
  choice('history.tien_su_ban_than_trang_thai','Tiền sử bản thân',states(['not_asked','none_reported','present','unknown'])),optional('history.tien_su_ban_than','Nội dung tiền sử bản thân','textarea',{max:4000}),
@@ -87,14 +87,14 @@ actions.saveResult=action('Ghi kết quả CLS','diagnostic_result','create',res
 actions.correctResult=action('Đính chính kết quả CLS','diagnostic_result','update',[...resultFields.filter(f=>f.name!=='state'),reason],d=>'operations/results/'+uuid(d.record)+'/corrections',resultBody);
 for(const [key,title,resource,path] of [['voidDiagnosis','Hủy chẩn đoán','diagnosis','diagnosis/'],['voidAllergy','Hủy ghi nhận dị ứng','allergy','allergy/']])actions[key]=action(title,resource,'void',[fieldId,reason],d=>path+uuid(d.record)+'?'+new URLSearchParams({reason:d.reason}),null,{method:'DELETE'});
 export const sections=[
- {id:'identity',title:'Hành chính',resource:'patient_identity',actions:['identity','contact','address'],note:'Tìm/tạo bệnh nhân, sửa thông tin Core và mở lượt đang chờ API VinSHC có phân quyền. Không dùng mã demo để ghi backend.'},
+ {id:'identity',title:'Hành chính',resource:'patient_identity',actions:['identity','contact','address'],note:'Tìm/tạo bệnh nhân, sửa thông tin Core và mở lượt đang chờ API VinSHC có phân quyền. Các form nhận UUID do backend cấp.'},
  {id:'vitals',title:'Sinh hiệu',resource:'vitals',actions:[]},
  {id:'clinical',title:'Khám & điều trị',resource:'clinical_chart',actions:['summary','clinicalConfiguration','consultation','correction','diagnosis','allergy','prescription','finalize','discontinue','voidDiagnosis','voidAllergy']},
  {id:'appointments',title:'Lịch hẹn',resource:'appointment',actions:['appointments','book','appointmentTransition'],note:'Backend hiện hỗ trợ đọc từng lịch hẹn theo mã; chưa có API danh sách hoặc tìm kiếm lịch hẹn.'},
  {id:'queue',title:'Hàng đợi',resource:'queue',actions:['queue','enqueue','queueTransition','advance'],note:'Backend chưa cung cấp danh sách hàng đợi; đọc phiếu theo mã từ lần tạo hoặc bàn giao.'},
  {id:'billing',title:'Thu ngân',resource:'billing',actions:['bills','bill','receipt','payment','settle','refund','cancelBill']},
  {id:'orders',title:'Chỉ định & kết quả',resource:'diagnostic_order',actions:['order','createOrder','orderTransition','result','saveResult','correctResult']},
- {id:'pharmacy',title:'Quầy thuốc',resource:'dispensing',actions:[],note:'Backend hiện chưa cung cấp API danh sách đơn đã xác nhận hoặc ghi cấp thuốc. Chức năng cấp thuốc chỉ có trong bản demo, chưa được bật ở chế độ kết nối.'},
+ {id:'pharmacy',title:'Quầy thuốc',resource:'dispensing',actions:[],note:'Backend hiện chưa cung cấp API danh sách đơn đã xác nhận hoặc ghi cấp thuốc. Chức năng cấp thuốc chờ backend bổ sung API.'},
  {id:'reports',title:'Báo cáo',resource:'reports',actions:['report']},
  {id:'admin',title:'Quản trị',resource:'metadata_admin',actions:['configuration','audit'],note:'Quản lý tài khoản, cấu hình cơ sở và form chưa có API ứng dụng tương ứng. Phân công vai trò cần người quản trị backend thiết lập.'}
 ];

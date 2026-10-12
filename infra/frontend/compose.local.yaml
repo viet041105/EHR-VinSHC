@@ -1,0 +1,6 @@
+# Overlay for the unmodified main backend exported into .runtime/backend.
+# The pinned Maven builder currently targets amd64; Docker Desktop emulates it on Apple Silicon.
+services:
+  backend:
+    platform: linux/amd64
+    image: vinshc-fe-local-backend:main-d9d5b95

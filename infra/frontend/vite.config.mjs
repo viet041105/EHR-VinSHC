@@ -5,4 +5,4 @@ const url = new URL(target);
 if (url.protocol !== 'http:' || !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname) || url.username || url.password || url.pathname !== '/' || url.search || url.hash) {
  throw new Error('VINSHC_BACKEND_ORIGIN phải là HTTP origin loopback, không kèm đường dẫn.');
 }
-export default defineConfig({server:{proxy:{'/openmrs':{target:url.origin,changeOrigin:true,timeout:15000,proxyTimeout:15000}}}});
+export default defineConfig({server:{fs:{deny:['.env','.env.*','*.{crt,pem}','**/.git/**','**/.runtime/**']},proxy:{'/openmrs':{target:url.origin,changeOrigin:true,timeout:15000,proxyTimeout:15000}}}});

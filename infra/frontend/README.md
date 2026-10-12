@@ -1,184 +1,141 @@
-# VinSHC — frontend khám ngoại trú
+# VinSHC frontend — kết nối OpenMRS
 
-Frontend độc lập bằng HTML/CSS/JavaScript modules, giữ backend OpenMRS hiện có. Trang chủ dùng ảnh chụp thật và bố cục xanh dương/xanh ngọc theo ảnh tham chiếu; khu nhân viên dùng menu bên trái và trang theo 8 role.
+HTML/CSS/JavaScript modules, Vite, Node.js ≥22.12. Không còn bệnh nhân, tài khoản,
+lượt khám, sinh hiệu hoặc giao dịch demo trên ứng dụng. Không có fallback lưu hồ sơ
+trên trình duyệt; mọi thao tác nghiệp vụ dùng backend. Mock fixtures chỉ nằm trong
+test tự động, không được nạp vào ứng dụng hay database.
 
-Đọc [thiết kế FE và hợp đồng bàn giao FE–BE](../../docs/FRONTEND.md) để đối chiếu màn hình, quyền, DTO và các mốc B1–B9. [Phạm vi/mapping 13 thành phần ban đầu](../../docs/FRONTEND_SCOPE.md) giữ bối cảnh báo cáo; không phải hợp đồng API đã được kiểm chứng.
-
-## Chạy
-
-FE dùng Vite chạy trên Node.js. Cần Node.js **22.12 trở lên** và npm; nên dùng Node.js 24 LTS cho các máy trong nhóm. Trong thư mục `infra/frontend`, cài dependency lần đầu rồi khởi động:
+## Chạy FE
 
 ```sh
+cd infra/frontend
 npm install
 npm run dev
 ```
 
-Tại gốc repo, lệnh tương đương là:
+Mở http://127.0.0.1:5173 → Đăng nhập phòng khám. Trang đăng nhập trực tiếp:
+http://127.0.0.1:5173/connected.html. Vite tự cập nhật khi lưu source; Ctrl+C để dừng.
+Chỉ một server dùng cổng 5173. Không mở bằng file://.
 
-```sh
-npm --prefix infra/frontend install
-npm run dev
-```
-
-Mở http://127.0.0.1:5173. Server chạy bằng Node.js, không cần Python, Docker hoặc backend để mở bản demo. Sửa source rồi lưu, Vite tự cập nhật trang. `Ctrl+C` để dừng server. Cổng được giữ cố định 5173; nếu đã có server chạy ở cổng này, dừng server đó trước. Không mở bằng file://.
-
-## Các màn hình và vai trò
-
-Trang chủ chỉ giới thiệu VinSHC; các nội dung xuất hiện theo viewport với độ trễ lần lượt 80ms trong mỗi nhóm, hỗ trợ reduced motion và focus bàn phím. “Vào phòng khám” mở bộ chọn tài khoản, không mặc định bác sĩ. Khu nhân viên có menu riêng theo role; điện thoại mở menu bằng nút cạnh tài khoản. Xem [thiết kế theo kế hoạch 8 role](../../docs/ROLE_WORKFLOWS.md).
-
-- Tiếp đón: tiếp nhận, sửa hành chính, mở lượt, lịch hẹn, hàng đợi theo phòng/bác sĩ; lịch sử hành chính; hủy/bỏ về có lý do.
-- Điều dưỡng: danh sách đo sinh hiệu, ghi chú/bàn giao, tài liệu, biểu mẫu điều dưỡng; ngữ cảnh lâm sàng chỉ đọc.
-- Bác sĩ: khám/dị ứng/chẩn đoán và mức chắc chắn; thuốc có liều/đơn vị/đường dùng/tần suất/số ngày; chỉ định và phân KTV, đơn mẫu xác nhận, tái khám, kết thúc lượt; tóm tắt lượt và giấy hẹn mẫu.
-- Thu ngân: bảng giá, phiếu phí, thu từng phần/đủ, hoàn/hủy có lý do, phiếu thu.
-- KTV CLS: chỉ định chờ xử lý được giao cho đúng tài khoản, kết quả sơ bộ và trang kết quả đã hoàn tất riêng; báo cáo đính kèm.
-- Dược/quầy thuốc: đơn chờ cấp và lịch sử cấp riêng; ghi cấp sau đối chiếu, không sửa đơn, chặn cấp đối với lượt hủy. Kho/lô/hạn dùng còn ở module mở rộng.
-- Quản lý: báo cáo lượt, thu/hoàn/ròng theo ngày; không hiển thị bệnh án hoặc tên người bệnh.
-- Quản trị: tài khoản nhiều role, khóa/mở khóa, form nháp theo người điền, bảng giá mẫu, cấu hình cơ sở/biến thể, nhật ký, trang bàn giao FE–BE và kiểm tra REST session local.
-
-Tài khoản có thể kiêm nhiệm; chuyển không gian qua menu cạnh tài khoản, giữ nguyên ID. Tài khoản khóa không xuất hiện trong bộ chọn. Mọi thao tác workspace hiện lưu localStorage; đây chưa phải đăng nhập/ủy quyền OpenMRS.
-
-## Luồng thử nghiệm
-
-1. Vào phòng khám → Tiếp đón. Tìm/tạo người bệnh, đối chiếu thông tin và mở lượt. Đặt hẹn hoặc điều phối theo phòng/bác sĩ.
-2. Đổi tài khoản → Điều dưỡng. Ghi sinh hiệu, thời điểm đo và ghi chú bàn giao.
-3. Bác sĩ ghi phiếu khám/dị ứng/chẩn đoán/thuốc; tại tab Thuốc xác nhận đơn mẫu; tại Chỉ định chọn KTV được giao.
-4. KTV chỉ nhìn thấy chỉ định giao cho mình, ghi báo cáo và xác nhận hoàn tất sau khi đối chiếu. Bác sĩ/điều dưỡng xem kết quả trong chart.
-5. Thu ngân lập phí, thu một phần/đủ, xem/in phiếu; thử hoàn có lý do hoặc hủy phiếu chưa thu. Tổng tiền VND không có phần thập phân.
-6. Dược đối chiếu đơn xác nhận và ghi cấp thuốc mẫu. Quản lý xem thu/hoàn/ròng và lượt khám trong báo cáo ngày.
-7. Quản trị thử tài khoản kiêm nhiệm, form bác sĩ/điều dưỡng, cấu hình có/không điều dưỡng/quầy thuốc, tên/địa chỉ/giấy phép cơ sở. Form chỉ được điền theo role được giao, lượt đóng chỉ đọc.
-8. Bác sĩ kết thúc lượt sau khi có phiếu. Tiếp đón mở lượt tiếp theo; lượt trước giữ nguyên lịch sử. Reload cần chọn lại tài khoản, dữ liệu giả vẫn còn.
-
-Bản in đơn/chỉ định/kết quả/phiếu thu/báo cáo/tóm tắt lượt/giấy hẹn có nhãn dữ liệu giả và lấy cơ sở từ cấu hình; chưa phải mẫu nghiệp vụ đã được nghiệm thu. Ngày hẹn trên phiếu không tự tạo slot lịch khám. Hủy/bỏ về giữ phiếu khám, chỉ định và giao dịch; thu ngân xử lý phí riêng. Báo cáo tách lượt hoàn tất với lượt hủy. Thu trước/sau là hướng dẫn cấu hình; chưa chặn luồng theo trạng thái trả tiền. Đính chính kết quả, địa chỉ hierarchy, danh mục chẩn đoán/thuốc và mẫu chuẩn đầy đủ còn cần phát triển theo FE-04/08/09.
-
-## Kiến trúc và kiểm tra
-
-- `app.js`: shell/trang chủ, luồng tiếp nhận và phiếu khám.
-- `landing.js`: trang chủ dùng ảnh chụp thật, nội dung giới thiệu và footer.
-- `modules.js`: lịch hẹn, queue, active visits, chart sections, tài liệu, form drafts, quản trị và session UI.
-- `operations.js`: màn hình có phạm vi riêng cho thu ngân, KTV, dược và quản lý; bản in mẫu.
-- `workflow.js`: 8 role, privilege ghép và giới hạn thao tác trong từng không gian; guard màn hình/tab/form, hủy lượt, trường thuốc, thanh toán/hoàn, chỉ định/kết quả, validation hẹn và form definitions.
-- `backend-mapping.js`: bản đồ dịch vụ chờ bàn giao và command trung gian sinh hiệu theo concept UUID/version metadata; không tự gửi REST request hoặc sinh UUID tạm.
-- `repository.js`: adapter dữ liệu giả, localStorage `vinshc-demo-v2` gồm patients/workspace; đọc dữ liệu `vinshc-demo-v1` cũ khi chưa có v2.
-- `api.js`: kiểm tra session localhost, không phải clinical API repository.
-- `styles.css`: layout responsive và hiệu ứng; `assets/`: ảnh thật tải local, xem [nguồn ảnh](assets/ASSET_SOURCES.md).
-
-```sh
-node infra/frontend/verify.mjs
-node --check infra/frontend/app.js
-node --check infra/frontend/modules.js
-```
-
-Browser QA dùng Playwright; `browser-check.cjs` và `design-check.cjs` dùng browser context riêng, dữ liệu giả không tác động browser người dùng. Bài thứ hai kiểm tra mọi trang của 8 role trên desktop/mobile, hiệu ứng tuần tự/reduced motion/focus, ảnh local, giấy hẹn/tóm tắt lượt và hủy/bỏ về. Chạy từ infra/frontend sau `npm install` / `npx playwright install chromium`, cùng server đang chạy:
-
-```sh
-npm run test:browser
-```
-
-Ảnh QA lưu dưới `/private/tmp` (có thể đổi `QA_OUTPUT_DIR`), không phải artifact production.
-
-## Việt Nam, API và giới hạn
-
-UI tiếng Việt, ngày vi-VN và thời gian hiển thị Asia/Ho_Chi_Minh. Các datetime-local nhập theo timezone trình duyệt, nên đặt thiết bị Asia/Ho_Chi_Minh khi demo; adapter thật phải chốt timezone. Có định danh cá nhân/BHYT tùy chọn, địa chỉ văn bản hiện tại, mã riêng, trạng thái dị ứng rõ ràng và đơn vị sinh hiệu. Ngưỡng nhập số chỉ kiểm tra lỗi, không phân loại bệnh; ICD/thuốc chưa đối chiếu danh mục lâm sàng.
-
-Metadata Việt Nam/UUID/địa chỉ hierarchy, O3 form schema, drug/order type/care setting, provider/location, pagination, role/privilege cần xác nhận với người 1/3/4 khi nối backend. Không suy ra quyền ghi FHIR từ read capabilities.
-
-Chỉ nhập dữ liệu giả. localStorage/tài liệu/journal/thu tiền/cấp thuốc/khóa tài khoản/role demo không phải lưu trữ bệnh án hoặc phân quyền production. Không có chữ ký điện tử, cấp phát thuốc, LIS/PACS, liên thông hay patient portal. Không tuyên bố tuân thủ đầy đủ quy định Việt Nam. Các mục cần xác minh nằm trong [VIETNAM_COMPLIANCE.md](../../docs/VIETNAM_COMPLIANCE.md).
-
-Font Be Vietnam Pro tải từ Google Fonts, fallback Arial/sans-serif khi offline. Ảnh mới là ảnh chụp trên Pexels, tải và lưu local theo yêu cầu không dùng ảnh gen AI; ảnh không đại diện nhân viên của VinSHC. Tác giả, trang nguồn, URL tải và giấy phép được ghi tại [ASSET_SOURCES.md](assets/ASSET_SOURCES.md).
-
-## Chế độ kết nối backend (nhánh fe)
-
-Trang chủ có nút **Đăng nhập OpenMRS**. Mở trực tiếp
-http://127.0.0.1:5173/connected.html. Bản demo vẫn ở trang chủ → Dùng bản demo;
-hai chế độ có nguồn dữ liệu riêng. Chế độ kết nối không đọc dữ liệu demo,
-không lưu mật khẩu/hồ sơ backend vào localStorage hoặc sessionStorage và không tự
-chuyển sang demo khi API lỗi. Reload cần đăng nhập lại.
-
-Vite proxy `/openmrs` tới `http://127.0.0.1:8080` để trình duyệt gọi cùng origin.
-Nếu gateway dùng cổng khác, chạy trong thư mục FE:
+Proxy `/openmrs` mặc định tới http://127.0.0.1:8080. Đổi gateway local nếu cần:
 
 ```sh
 VINSHC_BACKEND_ORIGIN=http://127.0.0.1:8081 npm run dev
 ```
 
-Chỉ hỗ trợ HTTP loopback cho môi trường kiểm thử hiện tại. Không cần cấu hình CORS
-hoặc sửa Compose để chạy FE. Chạy `npm run dev` từ thư mục `infra/frontend` như trước.
-Khi sửa cấu hình proxy, khởi động lại Vite.
+Chỉ nhận HTTP loopback. Credentials và dữ liệu backend giữ trong bộ nhớ phiên,
+không ghi localStorage/sessionStorage; reload cần đăng nhập lại. Hai khóa demo cũ
+`vinshc-demo-v1`/`vinshc-demo-v2` được xóa khi mở trang, không xóa dữ liệu ứng dụng khác.
 
-Backend cần chạy bản `main` có module VinSHC 0.3.1 (commit `d9d5b95` hoặc mới hơn).
-Nhánh `fe` chưa chứa các thay đổi backend trên main; không chạy stack backend cũ
-của nhánh fe rồi coi đó là bản đã tích hợp. Dùng backend main được triển khai riêng.
-Không merge main vào fe trong lần thay đổi này vì sẽ sửa ngoài thư mục frontend.
+## Chạy backend main và PostgreSQL từ nhánh fe
 
-Tài khoản phải có `VinSHC App: <role>` và assignment role/location phía server.
-Tài khoản quản trị OpenMRS mặc định không tự biến thành tài khoản ứng dụng.
-FE đọc role từ session, kiểm tra workspace với server, gửi
-`X-VinSHC-Workspace-Role` và `X-VinSHC-Workspace-Facility` trong từng request nghiệp vụ.
-Backend vẫn là nơi kiểm tra quyền, phạm vi và trạng thái bản ghi.
+Cần Docker Desktop đang chạy. Các lệnh sau chỉ tạo file runtime bên trong thư mục
+FE; không checkout/merge main hoặc sửa file backend trong working tree.
 
-### Những gì đã nối
+```sh
+npm run backend:prepare
+npm run backend:build
+npm run backend:up
+npm run backend:metadata
+npm run backend:status
+```
 
-- B2: đọc identity aggregate, tạo người liên hệ, địa chỉ DATA-08 với catalogue
-  tỉnh/xã đọc từ backend và provenance API. Identity hiện không trả tên/giới/ngày sinh.
-- B3: ghi sinh hiệu qua `/vinshc/vitals`, dùng field code chính thức, trạng thái
-  thiếu tường minh. Huyết áp đảo được backend đánh dấu needsVerification.
-- B4: đọc clinical-summary, tạo/đính chính/chốt phiếu, chẩn đoán ICD selectable,
-  dị ứng coded, kê từng dòng thuốc đã xác nhận, ngừng thuốc, void diagnosis/allergy
-  có lý do, đọc tình trạng cấu hình danh mục. Trường đã có bị để trống khi đính
-  chính phiếu được gửi `null` để xóa theo contract; cần đọc phiếu trước.
-- B8: đọc/tạo/cập nhật lịch hẹn, hàng đợi/chuyển điểm, phiếu phí/thu/chuyển khoản/hoàn,
-  chỉ định/phân công/kết quả/đính chính, upload/download tệp, DTO chứng từ và mẫu in,
-  báo cáo ngày không có định danh bệnh nhân.
-- B5: workspace và nhật ký truy cập. UI ẩn thao tác không có trong ma trận role;
-  các endpoint clinical legacy được backend cho phép riêng cho doctor.
+`prepare` xuất nguyên bản commit trong `metadata/source.json` vào `.runtime/backend`,
+chạy bootstrap có sẵn để tạo `.env` với mật khẩu ngẫu nhiên. Runtime và secret không
+được commit, không được Vite phục vụ. `build` dùng Dockerfile main nguyên bản;
+`compose.local.yaml` chỉ chọn amd64 cho backend do Maven image đã khóa không có ARM,
+và dùng image riêng `vinshc-fe-local-backend:main-d9d5b95`.
 
-Danh mục FE nằm trong `metadata/`, sao chép nguyên bản từ `metadata/vinshc` ở commit
-được ghi trong `metadata/source.json`. Không sửa nguồn ngoài FE. UUID cơ sở nghiệp
-vụ (`facility.uuid`) khác UUID OpenMRS location (`facility.locationUuid`): workspace
-headers dùng location, các payload B8/báo cáo dùng UUID cơ sở nghiệp vụ.
-Danh mục hiện giữ `productionEnabled=false`, dùng dữ liệu giả để kiểm thử.
-UUID thuốc/đơn vị/ICD chỉ có tác dụng khi metadata tương ứng đã được nạp trên backend;
-FE không tự sinh UUID, tự nhập Initializer hoặc coi snapshot là cấu hình runtime.
+Project Docker riêng: `vinshc-fe-local`. PostgreSQL và dữ liệu OpenMRS dùng named
+volume riêng, không ghi đè volume có sẵn của project khác. Gateway ở cổng 8080.
+Lần build/khởi tạo schema đầu cần nhiều thời gian; `up` đợi healthcheck tối đa 40 phút.
 
-### Giới hạn backend còn lại
+Đăng nhập bằng `EHR_ADMIN_USERNAME` / `EHR_ADMIN_PASSWORD` trong
+`.runtime/backend/.env` (đọc bằng editor trên máy, không chia sẻ file này).
+Tài khoản quản trị gốc có thể đăng nhập và đọc cấu hình thật bằng nút
+**Kiểm tra kết nối và cấu hình backend**. Các workspace nghiệp vụ cần role
+`VinSHC App: <role>` và assignment user/role/location phía server; FE không tự tạo
+tài khoản, gán role hoặc cấp quyền.
 
-Không gọi Core `/patient`, `/visit`, `/encounter`, `/obs` hoặc FHIR để né quyền.
-B5 chặn những endpoint đó với app roles; code hiện chưa có API VinSHC scoped thay
-thế cho tìm/tạo/cập nhật patient Core, mở/kết thúc visit và tạo encounter. Do đó các
-form kết nối nhận UUID thật do backend/người phụ trách fixture bàn giao. Đây là
-bản nối các endpoint hiện có, chưa phải quy trình tiếp nhận → kết thúc lượt liền mạch.
+Dừng stack, giữ dữ liệu:
 
-B8 chỉ có GET theo UUID, chưa có API danh sách/tìm kiếm, nên FE chưa thể tự tạo
-worklist toàn phòng khám. Cấp thuốc, CRUD tài khoản, form và cấu hình cơ sở chưa có
-endpoint ứng dụng; chế độ kết nối không giả lập ghi thành công. Chức năng in tuân
-đúng quyền thực tế trong OperationsService: backend hiện dùng diagnostic_order
-print cho cả mẫu đơn thuốc/kết quả, nên pharmacy/lab chưa mở được các mẫu này dù
-một số privilege trong metadata cho phép in.
+```sh
+npm run backend:down
+```
 
-Chưa có endpoint đọc các lần đo hoặc sửa/void sinh hiệu scoped. Form sinh hiệu tạo
-lần đo mới, không cho sửa số đo cũ. Đơn thuốc được gửi từng dòng, không có transaction
-nhiều dòng. Lập phiếu phí hiện mỗi phiếu một dịch vụ. Backend kiểm tra chuyển trạng
-thái và quan hệ; FE không tự tạo provider/encounter hay nhập giá thay backend.
+Không dùng `down -v`. Không tự nạp fixture bệnh nhân/giao dịch. Overlay metadata
+`tests/integration/compose.b4-metadata.yaml` là gói danh mục của repo (concept, thuốc,
+đơn vị, room, role), không tạo bệnh nhân. `backend:metadata` gọi helper có sẵn của main để nối concept set,
+reference mapping và global properties; không tạo user, patient hoặc giao dịch. Danh mục dự án hiện vẫn là môi trường
+kiểm thử và `productionEnabled=false`; khởi động DB thật không biến danh mục này
+thành danh mục lâm sàng đã được duyệt.
 
-Key giao dịch chỉ giữ trong bộ nhớ cho lần gửi lại cùng payload sau lỗi; không tự
-retry lệnh ghi, không sinh key mới cho retry đó. Reload/đổi workspace làm mất key;
-nếu request đã tới server mà mất phản hồi, cần đối soát bằng UUID/nhật ký trước khi
-thực hiện lại ở phiên mới. Chốt phiếu không đồng nghĩa đóng Visit.
+## Các API đã nối
 
-### Kiểm thử phần nối API
+- Session và B5: xác nhận vai trò/cơ sở, gửi workspace headers trong từng request.
+- B2: identity aggregate, người liên hệ, địa chỉ DATA-08; danh mục tỉnh/xã và version
+  đọc từ backend. Identity aggregate hiện không chứa đầy đủ thông tin Person Core.
+- B3: ghi lần đo sinh hiệu đã validation bằng field code chính thức; trạng thái
+  thiếu tường minh, giới hạn nhập theo backend, cờ needsVerification cho huyết áp đảo.
+- B4: clinical-summary, phiếu khám/tạo/đính chính/chốt, chẩn đoán selectable,
+  dị ứng coded, kê từng dòng thuốc đã xác nhận, ngừng/void có lý do, cấu hình danh mục.
+- B8: lịch hẹn, hàng đợi/chuyển điểm, bill/payment/settle/refund/cancel, chỉ định,
+  phân công, kết quả/revision, file PDF/JPEG/PNG, chứng từ và báo cáo ngày tổng hợp.
+
+Danh mục trong `metadata/` sao chép nguyên bản từ commit đã ghi ở `source.json`.
+Business facility UUID khác OpenMRS location UUID: headers dùng location, payload B8
+và báo cáo dùng business facility. Danh mục FE không thay thế metadata runtime;
+backend kiểm tra mọi UUID, quyền, phạm vi, quan hệ và state transition.
+
+Đính chính phiếu cần đọc phiếu trước; xóa trường đang có gửi `null` cùng lý do.
+Kê thuốc tạo order đã xác nhận, không có nháp server. Chốt phiếu không đóng Visit.
+Key giao dịch chỉ giữ trong bộ nhớ cho retry cùng payload sau lỗi; không tự retry ghi.
+Reload/đổi workspace làm mất key: cần đối soát giao dịch nếu mất phản hồi từ server.
+
+## Những phần cần backend bổ sung
+
+B5 chặn Core `/patient`, `/visit`, `/encounter`, `/obs` với app roles. Chưa có API
+VinSHC scoped thay thế tìm/tạo/sửa patient Core, mở/kết thúc visit, tạo encounter,
+đọc các lần đo sinh hiệu hoặc sửa/void sinh hiệu. B8 chỉ có GET theo UUID, chưa có
+list/search. Vì vậy form hiện nhận UUID thật từ backend; chưa thể chạy toàn bộ
+quy trình tiếp nhận → khám → kết thúc chỉ bằng giao diện.
+
+Cấp thuốc, CRUD tài khoản/form/cấu hình cơ sở cũng chưa có API ứng dụng.
+Backend dùng diagnostic_order print cho cả mẫu đơn thuốc/kết quả, nên pharmacy/lab
+chưa mở được các mẫu đó dù metadata có một số quyền print. FE không gọi Core/FHIR
+để né giới hạn này hoặc ghi thành công giả.
+
+Bổ sung những API này cần sửa ngoài FE và phải được chủ dự án xác nhận riêng.
+
+## Kiểm thử
 
 ```sh
 npm test
-npm run test:connected
+npm run test:browser
+npm run test:live
 ```
 
-Lệnh thứ hai cần Vite đang chạy và Chromium của Playwright đã cài. Bài test dùng
-route mock theo contract, kiểm tra desktop/mobile, role/facility, payload sinh hiệu,
-metadata, phiếu phí, retry idempotency, lỗi quyền và không lưu credential/hồ sơ.
-Ảnh lưu `/private/tmp/vinshc-connected-1440.png` và `vinshc-connected-390.png`.
-Mock test không chứng minh backend runtime đã hoạt động. Lần triển khai này chưa
-chạy integration thật vì OpenMRS cổng 8080 không phản hồi và Docker daemon chưa chạy.
+`test:browser` dùng Playwright route mock, context độc lập, desktop/mobile và các
+vai trò, không ghi DB. `test:live` cần backend và FE đang chạy; chỉ đọc API thật,
+kiểm tra đăng nhập trên trình duyệt, cấu hình/metadata và xóa storage demo cũ trong
+browser test riêng. Không chạy integration fixtures tạo patient để chứng minh kết nối.
+Ảnh QA nằm trong `/private/tmp`, không phải dữ liệu production.
 
-Để hoàn thiện luồng toàn bộ, backend cần bổ sung scoped CRUD/search patient,
-visit/encounter lifecycle, list/search B8 và dispensing. Những thay đổi này nằm ngoài
-FE và cần chủ dự án xác nhận riêng; chưa thực hiện trong nhánh này.
+Đã xác minh ngày 2026-10-12: 8 unit tests đạt; Playwright desktop/mobile
+(route mock) đạt; kiểm thử đăng nhập và đọc API qua Vite → gateway → OpenMRS
+trên PostgreSQL thật đạt. Bốn container healthy. Sau kiểm thử, DB có 0 patient,
+0 visit, 0 encounter và 0 obs; không tạo fixture lâm sàng. Kiểm thử thật chỉ xác
+minh kết nối/cấu hình, chưa chứng minh toàn bộ luồng nghiệp vụ ghi dữ liệu.
+
+## Source
+
+- `app.js`, `landing.js`: trang giới thiệu và đường vào phòng khám.
+- `connected.js`, `connected-actions.js`, `connected.css`: không gian kết nối.
+- `backend-client.js`: HTTP client, lỗi, generation guard, validation payload.
+- `metadata.js`, `metadata/`, `backend-mapping.js`: danh mục và hợp đồng backend.
+- `clear-demo.js`: xóa đúng hai khóa demo cũ.
+- `docker-local.mjs`, `compose.local.yaml`: chạy backend main nguyên bản, không sửa ngoài FE.
+
+Ảnh Pexels được lưu local; xem `assets/ASSET_SOURCES.md`. Font Be Vietnam Pro dùng
+fallback khi offline. Ngày/giờ hiển thị theo Asia/Ho_Chi_Minh; nhập datetime theo
+múi giờ thiết bị, nên đặt thiết bị đúng múi giờ khi sử dụng.
