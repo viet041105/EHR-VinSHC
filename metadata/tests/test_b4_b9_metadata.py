@@ -46,6 +46,11 @@ class B4B9MetadataTests(unittest.TestCase):
         for row in csv.DictReader(io.StringIO(outputs[prefix + "drugs/vinshc/medications.csv"])):
             self.assertIn(row["Concept Drug"], concepts)
             self.assertIn(row["Concept Dosage Form"], concepts)
+        by_uuid = {row["Uuid"]: row for row in concept_rows}
+        for frequency in self.bundle["medicationUnits"]["catalogues"]["frequencies"]:
+            self.assertEqual("Frequency", by_uuid[frequency["conceptUuid"]]["Data class"])
+        for indicator in self.bundle["diagnostics"]["records"]:
+            self.assertEqual("Test", by_uuid[indicator["conceptUuid"]]["Data class"])
         privileges = {r["Privilege name"] for r in csv.DictReader(io.StringIO(outputs[prefix + "privileges/vinshc/metadata.csv"]))}
         roles = list(csv.DictReader(io.StringIO(outputs[prefix + "roles/vinshc/metadata.csv"])))
         self.assertEqual(8, len(roles))

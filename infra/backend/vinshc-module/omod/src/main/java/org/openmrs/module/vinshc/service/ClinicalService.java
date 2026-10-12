@@ -76,6 +76,8 @@ public class ClinicalService {
 	public static final String GP_ICD10_SOURCE = "vinshc.diagnosis.icd10ConceptSourceUuid";
 	
 	public static final String GP_ICD10_VERSION = "vinshc.diagnosis.icd10CatalogueVersion";
+
+	public static final String GP_ICD10_SELECTABLE_SET = "vinshc.diagnosis.icd10SelectableConceptSetUuid";
 	
 	public static final String GP_ALLERGEN_SET_PREFIX = "vinshc.allergy.allergenConceptSetUuid.";
 	
@@ -146,6 +148,7 @@ public class ClinicalService {
 		requireDirectPrivilege(CONSULTATION_PRIVILEGE);
 		Patient patient = patient(requiredString(body, "patient"));
 		Encounter encounter = consultationEncounter(requiredString(body, "encounter"), patient);
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		if (consultationGroup(encounter) != null)
 			throw bad("encounter already has a consultation; correct the existing group instead");
 		Map<String, Object> values = new LinkedHashMap<>();
@@ -170,6 +173,7 @@ public class ClinicalService {
 		if (group == null || group.getVoided() || !CONSULTATION_GROUP.equals(group.getConcept().getUuid()))
 			throw bad("consultation group does not exist");
 		Encounter encounter = group.getEncounter();
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		Patient patient = patient(encounter.getPatient().getUuid());
 		boolean finalized = finalization(encounter) != null;
 		String reason = reason(body, finalized, "finalized consultation corrections require reason");
@@ -221,6 +225,7 @@ public class ClinicalService {
 	public Map<String, Object> finalizeConsultation(String encounterUuid) {
 		requireDirectPrivilege(FINALIZE_PRIVILEGE);
 		Encounter encounter = encounter(encounterUuid);
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		Patient patient = patient(encounter.getPatient().getUuid());
 		consultationEncounter(encounterUuid, patient);
 		if (finalization(encounter) != null)
@@ -238,10 +243,11 @@ public class ClinicalService {
 		return summary(encounterUuid);
 	}
 	
-	@Transactional(readOnly = true)
+	@Transactional
 	public Map<String, Object> summary(String encounterUuid) {
 		requireDirectPrivilege(READ_PRIVILEGE);
 		Encounter encounter = encounter(encounterUuid);
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		Patient patient = encounter.getPatient();
 		Map<String, Object> result = new LinkedHashMap<>();
 		result.put("encounterUuid", encounter.getUuid());
@@ -261,6 +267,7 @@ public class ClinicalService {
 		result.put("drugOrders", orders);
 		result.put("allergies", allergies(patient.getUuid()));
 		result.put("events", events(encounter));
+		AuthorizationService.auditReadStatic("clinical_chart", patient, encounter, encounter.getUuid(), "clinical-summary");
 		return result;
 	}
 	
@@ -422,6 +429,7 @@ public class ClinicalService {
 		requireDirectPrivilege(DIAGNOSIS_PRIVILEGE);
 		Patient patient = patient(requiredString(body, "patient"));
 		Encounter encounter = consultationEncounter(requiredString(body, "encounter"), patient);
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		String reason = reason(body, finalization(encounter) != null, "diagnosis changes after finalization require reason");
 		Diagnosis diagnosis = buildDiagnosis(patient, encounter, body, null);
 		Diagnosis saved = Context.getDiagnosisService().save(diagnosis);
@@ -441,6 +449,7 @@ public class ClinicalService {
 		merged.putAll(body);
 		Patient patient = old.getPatient();
 		Encounter encounter = old.getEncounter();
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		Diagnosis replacement = buildDiagnosis(patient, encounter, merged, old);
 		Context.getDiagnosisService().voidDiagnosis(old, reason);
 		Diagnosis saved = Context.getDiagnosisService().save(replacement);
@@ -452,6 +461,7 @@ public class ClinicalService {
 	public Map<String, Object> voidDiagnosis(String uuid, String reason) {
 		requireDirectPrivilege(DIAGNOSIS_PRIVILEGE);
 		Diagnosis old = activeDiagnosis(uuid);
+		AuthorizationService.requireEncounterScopeStatic(old.getEncounter());
 		String why = requiredReason(reason);
 		if (Integer.valueOf(1).equals(old.getRank()) && finalization(old.getEncounter()) != null)
 			throw bad("a finalized consultation must keep its primary diagnosis; replace it instead");
@@ -467,6 +477,7 @@ public class ClinicalService {
 		if (concept == null || concept.getRetired())
 			throw bad("diagnosis concept does not exist or is retired");
 		icd10Code(concept);
+		setMember(conceptSet(GP_ICD10_SELECTABLE_SET), concept.getUuid(), "concept");
 		String rankCode = requiredString(body, "rank");
 		if (!"primary".equals(rankCode) && !"secondary".equals(rankCode))
 			throw bad("rank must be primary or secondary");
@@ -564,6 +575,7 @@ public class ClinicalService {
 	public Map<String, Object> recordAllergy(Map<String, Object> body) {
 		requireDirectPrivilege(ALLERGY_PRIVILEGE);
 		Patient patient = patient(requiredString(body, "patient"));
+		AuthorizationService.requirePatientScopeStatic(patient);
 		Encounter encounter = null;
 		String encounterUuid = optionalString(body, "encounter");
 		if (encounterUuid != null) {
@@ -641,19 +653,22 @@ public class ClinicalService {
 		Allergy allergy = Context.getPatientService().getAllergyByUuid(uuid);
 		if (allergy == null || allergy.getVoided())
 			throw bad("allergy does not exist");
+		AuthorizationService.requirePatientScopeStatic(allergy.getPatient());
 		String why = requiredReason(reason);
 		Context.getPatientService().voidAllergy(allergy, why);
 		event("allergy_voided", allergy.getPatient(), allergy.getEncounter(), allergy.getUuid(), why, null);
 		return allergyView(allergy);
 	}
 	
-	@Transactional(readOnly = true)
+	@Transactional
 	public Map<String, Object> allergies(String patientUuid) {
 		requireDirectPrivilege(READ_PRIVILEGE);
 		Patient patient = patient(patientUuid);
+		AuthorizationService.requirePatientScopeStatic(patient);
 		Map<String, Object> result = new LinkedHashMap<>();
 		result.put("patientUuid", patient.getUuid());
 		result.put("allergies", activeAllergies(patient).stream().map(this::allergyView).collect(Collectors.toList()));
+		AuthorizationService.auditReadStatic("allergy", patient, null, patient.getUuid(), "active-list");
 		return result;
 	}
 	
@@ -714,6 +729,7 @@ public class ClinicalService {
 		requireDirectPrivilege(PRESCRIBE_PRIVILEGE);
 		Patient patient = patient(requiredString(body, "patient"));
 		Encounter encounter = consultationEncounter(requiredString(body, "encounter"), patient);
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		Provider orderer = clinician(encounter, requiredString(body, "orderer"));
 		Drug drug = Context.getConceptService().getDrugByUuid(requiredString(body, "drug"));
 		if (drug == null || drug.getRetired() || drug.getConcept() == null)
@@ -791,6 +807,7 @@ public class ClinicalService {
 		Order order = Context.getOrderService().getOrderByUuid(uuid);
 		if (!(order instanceof DrugOrder) || order.getVoided())
 			throw bad("drug order does not exist");
+		AuthorizationService.requireEncounterScopeStatic(order.getEncounter());
 		if (!order.isActive())
 			throw bad("drug order is not active");
 		String reason = requiredReason(optionalString(body, "reason"));
@@ -889,7 +906,11 @@ public class ClinicalService {
 		Map<String, Object> diagnosis = new LinkedHashMap<>();
 		diagnosis.put(GP_ICD10_SOURCE, globalProperty(GP_ICD10_SOURCE));
 		diagnosis.put(GP_ICD10_VERSION, globalProperty(GP_ICD10_VERSION));
-		diagnosis.put("ready", ready(() -> icd10Source()));
+		diagnosis.put(GP_ICD10_SELECTABLE_SET, setStatus(GP_ICD10_SELECTABLE_SET));
+		diagnosis.put("ready", ready(() -> {
+			icd10Source();
+			conceptSet(GP_ICD10_SELECTABLE_SET);
+		}));
 		status.put("diagnosis", diagnosis);
 		Map<String, Object> allergy = new LinkedHashMap<>();
 		for (String type : new String[] { "drug", "food", "environment" })

@@ -817,7 +817,7 @@
     {
       "domain": "provider-person-practitioner-binding",
       "source": "metadata/vinshc/catalogues/facilities.json",
-      "method": "Upsert synthetic Person by personUuid, bind Provider.person; Practitioner id=verified personUuid; keep providerUuid independent"
+      "method": "Upsert synthetic Person by personUuid and bind Provider.person; provision Provider by providerUuid. FHIR2 4.2.0 exposes Provider.uuid as Practitioner.id; keep personUuid independent"
     },
     {
       "domain": "drug-ingredients",
@@ -859,7 +859,7 @@
   "accountsOrCredentialsIncluded": false,
   "idempotency": "Upsert by UUID/stable name for role/privilege; never match mutable labels. Second import no extra rows; update version/label preserves UUID. Runtime proof required from BE",
   "fileSha256": {
-    "metadata/vinshc/initializer-test/concepts/vinshc/040-test-catalogues.csv": "d99d3fd7b96b8fac462b1c2e40064da5767a0aac163f0fa56442f7c0d144d6a7",
+    "metadata/vinshc/initializer-test/concepts/vinshc/040-test-catalogues.csv": "4b94988c6a43d8310206c9b8c4e11b0e2ae34ec47f301d599da2c6c780685aad",
     "metadata/vinshc/initializer-test/privileges/vinshc/metadata.csv": "515741f044f7ac56d9a5c5302812641a6b3bc038b4d1e9e99f23d8b060e572f7",
     "metadata/vinshc/initializer-test/roles/vinshc/metadata.csv": "ad24ee72141539052d365672f0728fe9f5301732cdf0ac4d9ed6d55d87cde24c",
     "metadata/vinshc/initializer-test/locations/vinshc/test-rooms.csv": "6925759422910325402aee04d56d58b59c11f57e24e01d176f2b210ebfc3a1f5",

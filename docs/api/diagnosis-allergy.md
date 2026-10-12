@@ -1,6 +1,6 @@
 # Diagnosis và allergy
 
-Module `vinshc` 0.3.0 có API ghi có kiểm tra cho chẩn đoán và dị ứng, lưu vào đối tượng native của OpenMRS (`Diagnosis`, `Allergy`). **Danh mục thật chưa được bàn giao**: khi chưa cấu hình, các endpoint trả 503 thay vì nhận text tự do. Test tích hợp dùng danh mục giả có nhãn `VinSHC synthetic` và mã `SYN-...`, không phải mã ICD-10. Danh mục cần bàn giao: xem [B4_CATALOGUE_HANDOFF.md](../data/B4_CATALOGUE_HANDOFF.md).
+Module `vinshc` 0.3.0 có API ghi có kiểm tra cho chẩn đoán và dị ứng, lưu vào đối tượng native của OpenMRS (`Diagnosis`, `Allergy`). Test tích hợp chạy được với catalogue test metadata 0.3.0; catalogue này giữ `productionEnabled=false`. Khi chưa cấu hình, endpoint trả 503 thay vì nhận dữ liệu ngoài catalogue. Điều kiện catalogue production: xem [B4_CATALOGUE_HANDOFF.md](../data/B4_CATALOGUE_HANDOFF.md).
 
 Base: `/openmrs/ws/rest/v1/vinshc`. Lỗi theo [error-handling.md](error-handling.md#endpoint-vinshc-wsrestv1vinshc).
 
@@ -23,8 +23,8 @@ Base: `/openmrs/ws/rest/v1/vinshc`. Lỗi theo [error-handling.md](error-handlin
 ```
 
 - `rank`: `primary` (lưu `rank=1`) hoặc `secondary` (`rank=2`). `certainty`: `provisional` hoặc `confirmed`.
-- `concept` phải có mapping `SAME-AS` tới concept source cấu hình ở `vinshc.diagnosis.icd10ConceptSourceUuid`, và phải cấu hình `vinshc.diagnosis.icd10CatalogueVersion`. Thiếu một trong hai thì trả 503.
-- Từ chối `nonCoded` (text tự do), concept không có mapping, concept đã retire, chẩn đoán trùng trong cùng encounter và chẩn đoán chính thứ hai.
+- `concept` phải có mapping `SAME-AS` tới source ở `vinshc.diagnosis.icd10ConceptSourceUuid`, đồng thời là member của set `vinshc.diagnosis.icd10SelectableConceptSetUuid`; catalogue phải có `vinshc.diagnosis.icd10CatalogueVersion`. Thiếu cấu hình thì trả 503.
+- Từ chối `nonCoded` (text tự do), concept ngoài allowlist selectable, concept không có mapping, concept đã retire, chẩn đoán trùng trong cùng encounter và chẩn đoán chính thứ hai. Nhờ vậy category rộng như `E11` vẫn bị từ chối dù có mapping để phục vụ hiển thị/phân cấp.
 - Thay thế là append-only: bản cũ void kèm `reason`, bản mới có UUID mới. Phiếu đã chốt thì thêm chẩn đoán cũng cần `reason`, và không void được chẩn đoán chính.
 
 Response:

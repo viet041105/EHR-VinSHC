@@ -26,7 +26,6 @@ import org.openmrs.Obs;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.PersonAddress;
-import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,9 +89,11 @@ public class VinshcService {
 		this.sessionFactory = sessionFactory;
 	}
 	
+	@Transactional
 	public Map<String, Object> identity(String patientUuid, boolean includeHistory) {
 		requireDirectPrivilege(READ_PRIVILEGE);
 		Patient patient = patient(patientUuid);
+		AuthorizationService.requirePatientScopeStatic(patient);
 		Map<String, Object> result = new LinkedHashMap<>();
 		result.put("patientUuid", patient.getUuid());
 		String current = includeHistory ? "" : " AND is_current=true";
@@ -106,6 +107,8 @@ public class VinshcService {
 		    jdbc.queryForList(
 		        "SELECT * FROM vinshc_address_snapshot WHERE patient_id=?" + current + " ORDER BY row_key, version_number",
 		        patient.getPatientId()));
+		AuthorizationService.auditReadStatic("patient_identity", patient, null, patient.getUuid(),
+		    includeHistory ? "history" : "current");
 		return result;
 	}
 	
@@ -118,6 +121,7 @@ public class VinshcService {
 		if (old == null)
 			requireNewRecordProvenance(body);
 		Patient patient = resolvePatient(body, old);
+		AuthorizationService.requirePatientScopeStatic(patient);
 		if (old != null && number(old.get("patient_id")).intValue() != patient.getPatientId()) {
 			throw bad("rowKey belongs to another patient");
 		}
@@ -169,6 +173,8 @@ public class VinshcService {
 		if (reason == null || reason.trim().isEmpty())
 			throw bad("voidReason is required");
 		Map<String, Object> old = requiredCurrent("vinshc_contact", rowKey);
+		AuthorizationService.requirePatientScopeStatic(
+		    Context.getPatientService().getPatient(number(old.get("patient_id")).intValue()));
 		close("vinshc_contact", "contact_id", old.get("contact_id"));
 		jdbc.update(
 		    "INSERT INTO vinshc_contact(row_key,version_number,patient_id,full_name,relationship_code,relationship_name,relationship_version,phone_raw,phone_normalized,phone_normalization_status,address_text,priority,is_primary,emergency_contact,linked_person_id,source_kind,source_document_uuid,source_page,source_row_code,source_reference,recorded_at,status,void_reason,is_current,creator,date_created) SELECT row_key,version_number+1,patient_id,full_name,relationship_code,relationship_name,relationship_version,phone_raw,phone_normalized,phone_normalization_status,address_text,priority,false,emergency_contact,linked_person_id,source_kind,source_document_uuid,source_page,source_row_code,source_reference,?, 'void', ?, true, ?, ? FROM vinshc_contact WHERE contact_id=?",
@@ -182,6 +188,7 @@ public class VinshcService {
 		requireDirectPrivilege(WRITE_PRIVILEGE);
 		requireNewRecordProvenance(body);
 		Patient patient = patient(requiredString(body, "patient"));
+		AuthorizationService.requirePatientScopeStatic(patient);
 		String field = requiredString(body, "fieldCode");
 		String context = requiredString(body, "context");
 		String status = requiredString(body, "dataStatus");
@@ -233,6 +240,7 @@ public class VinshcService {
 	public void clearFieldState(String patientUuid, String fieldCode, String context, String rowKey) {
 		requireDirectPrivilege(WRITE_PRIVILEGE);
 		Patient patient = patient(patientUuid);
+		AuthorizationService.requirePatientScopeStatic(patient);
 		Map<String, Object> policy = fieldPolicies().get(fieldCode);
 		if (policy == null || !"field_states".equals(policy.get("mode")) || !context.equals(policy.get("context")))
 			throw bad("fieldCode/context does not permit fieldStates");
@@ -253,6 +261,7 @@ public class VinshcService {
 		if (old == null)
 			requireNewRecordProvenance(body);
 		Patient patient = resolvePatient(body, old);
+		AuthorizationService.requirePatientScopeStatic(patient);
 		if (old != null && number(old.get("patient_id")).intValue() != patient.getPatientId())
 			throw bad("rowKey belongs to another patient");
 		Map<String, Object> merged = merge(old, body);
@@ -338,6 +347,8 @@ public class VinshcService {
 		if (reason == null || reason.trim().isEmpty())
 			throw bad("voidReason is required");
 		Map<String, Object> old = requiredCurrent("vinshc_address_snapshot", rowKey);
+		AuthorizationService.requirePatientScopeStatic(
+		    Context.getPatientService().getPatient(number(old.get("patient_id")).intValue()));
 		close("vinshc_address_snapshot", "address_id", old.get("address_id"));
 		jdbc.update(
 		    "INSERT INTO vinshc_address_snapshot(row_key,version_number,patient_id,address_text,legacy_address_text,province_code,province_name,commune_code,commune_name,catalogue_version,address_as_of_date,source_kind,source_document_uuid,source_page,source_row_code,source_reference,recorded_at,status,void_reason,is_current,creator,date_created) SELECT row_key,version_number+1,patient_id,address_text,legacy_address_text,province_code,province_name,commune_code,commune_name,catalogue_version,address_as_of_date,source_kind,source_document_uuid,source_page,source_row_code,source_reference,?, 'void', ?, true, ?, ? FROM vinshc_address_snapshot WHERE address_id=?",
@@ -410,6 +421,7 @@ public class VinshcService {
 		Encounter encounter = Context.getEncounterService().getEncounterByUuid(requiredString(body, "encounter"));
 		if (encounter == null)
 			throw bad("encounter does not exist");
+		AuthorizationService.requireEncounterScopeStatic(encounter);
 		if (!patient.getPatientId().equals(encounter.getPatient().getPatientId()))
 			throw bad("encounter belongs to another patient");
 		if (!"8368ff74-1b50-592b-8e78-2f0f2ddc1e06".equals(encounter.getEncounterType().getUuid()))
@@ -668,9 +680,7 @@ public class VinshcService {
 	}
 	
 	static void requireDirectPrivilege(String privilege) {
-		if (!Context.isAuthenticated() || Context.getAuthenticatedUser() == null
-		        || !Context.getAuthenticatedUser().hasPrivilege(privilege))
-			throw new APIAuthenticationException("Privileges required: " + privilege);
+		AuthorizationService.requireLegacy(privilege);
 	}
 	
 	private Map<String, Object> current(String table, String keyColumn, String key) {

@@ -5,6 +5,7 @@ import json
 import urllib.error
 import urllib.parse
 import urllib.request
+import uuid
 
 
 class ApiError(Exception):
@@ -20,7 +21,7 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 class Client:
     """HTTP client restricted to a loopback OpenMRS test instance."""
 
-    def __init__(self, base_url, username, password):
+    def __init__(self, base_url, username, password, *, default_headers=None):
         parsed = urllib.parse.urlsplit(base_url)
         if (parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
                 or parsed.username or parsed.password or parsed.path not in {"", "/"}
@@ -29,10 +30,11 @@ class Client:
         self.base_url = base_url.rstrip("/")
         self.username = username
         self.password = password
+        self.default_headers = dict(default_headers or {})
         self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
 
     def request(self, path, *, method="GET", payload=None, auth=True, password=None, timeout=10):
-        headers = {"Accept": "application/json, application/fhir+json"}
+        headers = {"Accept": "application/json, application/fhir+json", **self.default_headers}
         data = None
         if payload is not None:
             data = json.dumps(payload).encode("utf-8")
@@ -62,6 +64,44 @@ class Client:
         if not isinstance(result, dict):
             raise ApiError(f"{path}: expected a JSON object.")
         return result
+
+    def multipart(self, path, *, filename, content_type, content, fields=None,
+                  statuses=(200, 201), timeout=30):
+        """Upload one synthetic test file without depending on third-party HTTP packages."""
+        boundary = "vinshc-" + uuid.uuid4().hex
+        parts = []
+        for name, value in (fields or {}).items():
+            parts.extend([
+                f"--{boundary}\r\n".encode(),
+                f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode(),
+                str(value).encode("utf-8"), b"\r\n",
+            ])
+        parts.extend([
+            f"--{boundary}\r\n".encode(),
+            f'Content-Disposition: form-data; name="file"; filename="{filename}"\r\n'.encode(),
+            f"Content-Type: {content_type}\r\n\r\n".encode(), content, b"\r\n",
+            f"--{boundary}--\r\n".encode(),
+        ])
+        headers = {
+            "Accept": "application/json",
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            **self.default_headers,
+        }
+        token = base64.b64encode(f"{self.username}:{self.password}".encode()).decode()
+        headers["Authorization"] = f"Basic {token}"
+        request = urllib.request.Request(
+            self.base_url + path, data=b"".join(parts), headers=headers, method="POST"
+        )
+        try:
+            with self.opener.open(request, timeout=timeout) as response:
+                status, response_headers, body = response.status, response.headers, response.read()
+        except urllib.error.HTTPError as error:
+            status, response_headers, body = error.code, error.headers, error.read()
+        if status not in statuses:
+            raise ApiError(f"POST {path}: expected {statuses}, got HTTP {status}: {body[:300]!r}")
+        if "json" not in response_headers.get("Content-Type", "").lower():
+            raise ApiError(f"{path}: expected JSON multipart response.")
+        return json.loads(body)
 
 
 # Backwards-compatible name used by smoke.py and its existing tests.

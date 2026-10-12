@@ -990,7 +990,7 @@
       "managed": false,
       "importPolicy": "isolated_test_manifest_only",
       "dataType": "Text",
-      "class": "Misc"
+      "class": "Frequency"
     },
     {
       "key": "frequency.qd",
@@ -1008,7 +1008,7 @@
       "managed": false,
       "importPolicy": "isolated_test_manifest_only",
       "dataType": "Text",
-      "class": "Misc"
+      "class": "Frequency"
     },
     {
       "key": "frequency.bid",
@@ -1026,7 +1026,7 @@
       "managed": false,
       "importPolicy": "isolated_test_manifest_only",
       "dataType": "Text",
-      "class": "Misc"
+      "class": "Frequency"
     },
     {
       "key": "frequency.tid",
@@ -1044,7 +1044,7 @@
       "managed": false,
       "importPolicy": "isolated_test_manifest_only",
       "dataType": "Text",
-      "class": "Misc"
+      "class": "Frequency"
     },
     {
       "key": "frequency.prn",
@@ -1466,7 +1466,7 @@
       "managed": false,
       "importPolicy": "isolated_test_manifest_only",
       "dataType": "Numeric",
-      "class": "LabTest",
+      "class": "Test",
       "unit": "mmol/L",
       "allowDecimals": true
     },
@@ -1478,7 +1478,7 @@
       "managed": false,
       "importPolicy": "isolated_test_manifest_only",
       "dataType": "Numeric",
-      "class": "LabTest",
+      "class": "Test",
       "unit": "umol/L",
       "allowDecimals": true
     },

@@ -1,0 +1,36 @@
+{
+  "contractVersion": "1.0.0",
+  "defaultEnabled": false,
+  "adapters": [
+    {
+      "code": "bhyt",
+      "direction": "bidirectional",
+      "enabled": false,
+      "capabilities": ["eligibility", "claim-submit", "claim-status"]
+    },
+    {
+      "code": "electronic-invoice",
+      "direction": "outbound",
+      "enabled": false,
+      "capabilities": ["invoice-issue", "invoice-adjust", "invoice-status"]
+    },
+    {
+      "code": "national-prescription",
+      "direction": "outbound",
+      "enabled": false,
+      "capabilities": ["prescription-submit", "prescription-status"]
+    },
+    {
+      "code": "lis",
+      "direction": "bidirectional",
+      "enabled": false,
+      "capabilities": ["order-submit", "result-receive", "order-status"]
+    },
+    {
+      "code": "pacs",
+      "direction": "bidirectional",
+      "enabled": false,
+      "capabilities": ["worklist-submit", "study-link-receive", "order-status"]
+    }
+  ]
+}

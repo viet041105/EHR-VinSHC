@@ -9,4 +9,10 @@
 !infra/backend/vinshc-module/**
 !metadata/vinshc/catalogues/address-vn-19-2025.json
 !metadata/vinshc/catalogues/contact-relationships.json
+!metadata/vinshc/catalogues/facilities.json
+!metadata/vinshc/catalogues/prices.json
+!metadata/vinshc/catalogues/services.json
+!metadata/vinshc/contracts/b4-b9.json
+!metadata/vinshc/contracts/printing-reporting.json
+!metadata/vinshc/contracts/workflow.json
 !metadata/vinshc/pack.json

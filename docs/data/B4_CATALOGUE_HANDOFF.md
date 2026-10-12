@@ -1,6 +1,6 @@
 # Bàn giao danh mục cho B4
 
-Backend B4 (module `vinshc` 0.3.0) đã sẵn sàng nhận danh mục, nhưng **chưa có danh mục thật**. Tài liệu này liệt kê việc người phụ trách metadata (DATA-02, DATA-03) cần bàn giao để chẩn đoán, dị ứng và đơn thuốc chạy với dữ liệu thật. Không cần sửa code: chỉ cần nạp concept bằng Initializer và đặt global property.
+Backend B4 (module `vinshc` 0.3.0) đã được kiểm thử với catalogue test metadata 0.3.0. Catalogue này có nguồn và phiên bản nhưng giữ `productionEnabled=false`; vì vậy vẫn cần người phụ trách metadata/nghiệp vụ phê duyệt catalogue production trước khi dùng dữ liệu thật. Adapter test nạp CSV Initializer rồi provision concept set, mapping và global property còn thiếu.
 
 Kiểm tra trạng thái bất cứ lúc nào bằng `GET /openmrs/ws/rest/v1/vinshc/clinical-configuration`. Mỗi mục có `ready: true` khi đã cấu hình đúng.
 
@@ -13,6 +13,7 @@ Kiểm tra trạng thái bất cứ lúc nào bằng `GET /openmrs/ws/rest/v1/vi
 | Mapping `SAME-AS` từ concept tới reference term của source trên | Một concept chỉ map một mã ICD-10 |
 | GP `vinshc.diagnosis.icd10ConceptSourceUuid` | UUID của concept source |
 | GP `vinshc.diagnosis.icd10CatalogueVersion` | Nhãn phiên bản danh mục, trả về cùng mọi chẩn đoán |
+| GP `vinshc.diagnosis.icd10SelectableConceptSetUuid` | Concept set chỉ chứa mã được phép chọn; category có mapping nhưng bị khóa, ví dụ `E11`, không được nằm trong set này |
 
 ## 2. Dị ứng
 
@@ -36,8 +37,9 @@ Kiểm tra trạng thái bất cứ lúc nào bằng `GET /openmrs/ws/rest/v1/vi
 | Concept set đơn vị cấp → GP Core `order.drugDispensingUnitsConceptUuid` | Ví dụ viên, hộp |
 | `OrderFrequency` cho từng tần suất | Concept lớp `Frequency` và `frequencyPerDay` |
 
-## 4. Khi nạp danh mục thật
+## 4. Cách kiểm thử và nạp catalogue production
 
-1. Nạp bằng Initializer (domain `conceptsources`, `concepts`, `drugs`, `orderfrequencies`, `globalproperties`) trên database mới, rồi nạp lại để chứng minh không trùng.
-2. Danh mục giả của test (`tests/integration/b4_catalogue.py`) chỉ đặt GP khi GP đang trống hoặc trỏ tới concept không tồn tại. Khi GP đã trỏ tới danh mục thật, test B4B **tự bỏ qua** (skip) để không ghi đè. Cần thêm một bộ test dùng mã thật trước khi đóng B4.
-3. Trên database local đã chạy test, GP đang trỏ tới danh mục giả. Đặt lại GP sang danh mục thật (Initializer `globalproperties` sẽ ghi đè).
+1. Catalogue test 0.3.0 được mount bằng [`compose.b4-metadata.yaml`](../../tests/integration/compose.b4-metadata.yaml). [`b4_metadata_catalogue.py`](../../tests/integration/b4_metadata_catalogue.py) đọc trực tiếp JSON versioned, tạo mapping/concept set ổn định và cấu hình GP trên instance test cô lập.
+2. Chạy `VINSHC_B4_CATALOGUE=metadata` với `test_b4b_clinical.py`. Clean import, reimport/recreate và 9/9 test đã đạt ngày 12/10/2026; mã selectable và mã category bị khóa đều có ca kiểm tra.
+3. Khi nạp production, dùng catalogue đã được duyệt với UUID/version/source ổn định, nạp trên database mới rồi nạp lần hai để chứng minh idempotent. Không bật `productionEnabled` cho catalogue test.
+4. `tests/integration/b4_catalogue.py` chỉ là fallback synthetic. Không dùng mã `SYN-*` làm bằng chứng catalogue production.

@@ -65,6 +65,12 @@ RUN test -d /openmrs/distribution/openmrs_config \
 COPY --from=vinshc-module-build --chown=1001:0 /src/omod/target/vinshc-0.3.0.omod /openmrs/distribution/openmrs_modules/vinshc-0.3.0.omod
 COPY --chown=1001:0 metadata/vinshc/catalogues/address-vn-19-2025.json /openmrs/distribution/vinshc_metadata/address-vn-19-2025.json
 COPY --chown=1001:0 metadata/vinshc/catalogues/contact-relationships.json /openmrs/distribution/vinshc_metadata/contact-relationships.json
+COPY --chown=1001:0 metadata/vinshc/catalogues/facilities.json /openmrs/distribution/vinshc_metadata/facilities.json
+COPY --chown=1001:0 metadata/vinshc/catalogues/prices.json /openmrs/distribution/vinshc_metadata/prices.json
+COPY --chown=1001:0 metadata/vinshc/catalogues/services.json /openmrs/distribution/vinshc_metadata/services.json
+COPY --chown=1001:0 metadata/vinshc/contracts/b4-b9.json /openmrs/distribution/vinshc_metadata/b4-b9.json
+COPY --chown=1001:0 metadata/vinshc/contracts/printing-reporting.json /openmrs/distribution/vinshc_metadata/printing-reporting.json
+COPY --chown=1001:0 metadata/vinshc/contracts/workflow.json /openmrs/distribution/vinshc_metadata/workflow.json
 COPY --chown=1001:0 metadata/vinshc/pack.json /openmrs/distribution/vinshc_metadata/pack.json
 COPY --chown=1001:0 infra/backend/configuration/ /openmrs/distribution/openmrs_config/
 USER 1001

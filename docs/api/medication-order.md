@@ -2,7 +2,7 @@
 
 FHIR runtime ngày 10/10/2026 chỉ công bố `read`, `search-type`, `patch` cho `MedicationRequest` và không công bố `create`/`update`. `ServiceRequest` chỉ có `read` và `search-type`. Vì vậy **kê đơn đi qua REST của module `vinshc`**; FHIR chỉ dùng để đọc lại.
 
-Module `vinshc` 0.3.0 tạo `DrugOrder` native với kiểm tra dữ liệu. **Danh mục thuốc, đơn vị, đường dùng và tần suất của phòng khám chưa được bàn giao**: thiếu danh mục thì trả 503. Test dùng danh mục giả `VinSHC synthetic`. Danh mục cần bàn giao: xem [B4_CATALOGUE_HANDOFF.md](../data/B4_CATALOGUE_HANDOFF.md).
+Module `vinshc` 0.3.0 tạo `DrugOrder` native với kiểm tra dữ liệu. Test tích hợp đã chạy với `Drug`, đơn vị, đường dùng và tần suất từ catalogue test metadata 0.3.0; catalogue này giữ `productionEnabled=false`. Thiếu cấu hình thì endpoint trả 503. Điều kiện catalogue production: xem [B4_CATALOGUE_HANDOFF.md](../data/B4_CATALOGUE_HANDOFF.md).
 
 ## Kê một dòng thuốc
 

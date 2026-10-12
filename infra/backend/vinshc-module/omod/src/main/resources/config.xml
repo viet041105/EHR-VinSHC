@@ -47,6 +47,14 @@
     <name>VinSHC: Prescribe medication</name>
     <description>Create and discontinue validated outpatient drug orders.</description>
   </privilege>
+  <privilege>
+    <name>VinSHC: Manage authorization</name>
+    <description>Provision server-side role and facility workspace assignments.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Read audit log</name>
+    <description>Read VinSHC record-access and clinical-change audit evidence.</description>
+  </privilege>
   <globalProperty>
     <property>vinshc.diagnosis.icd10ConceptSourceUuid</property>
     <defaultValue></defaultValue>
@@ -56,6 +64,11 @@
     <property>vinshc.diagnosis.icd10CatalogueVersion</property>
     <defaultValue></defaultValue>
     <description>Version label of the approved ICD-10 catalogue, returned with every diagnosis.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.diagnosis.icd10SelectableConceptSetUuid</property>
+    <defaultValue></defaultValue>
+    <description>Concept set containing selectable ICD-10 diagnosis concepts.</description>
   </globalProperty>
   <globalProperty>
     <property>vinshc.allergy.allergenConceptSetUuid.drug</property>

@@ -129,7 +129,7 @@
         "create": "backend acceptance required",
         "read": "scoped authorized projection; implementation needs runtime round-trip",
         "update": "backend acceptance required",
-        "detail": "FHIR Encounter maps OpenMRS Encounter, not Visit; writes via tested REST/adapter"
+        "detail": "FHIR2 4.2.0 projects both OpenMRS Visit and Encounter as FHIR Encounter; distinguish meta.tag visit/encounter and Encounter.partOf; writes use tested REST/adapter"
       },
       "approval": {
         "status": "pending_backend_and_clinical_acceptance",
@@ -752,8 +752,8 @@
       "key": "practitioner",
       "openmrsSourceKey": "provider.synthetic.doctor",
       "openmrsSourceUuid": "9ffc97ef-0d94-57d1-a175-e9bf2ab70883",
-      "sourceKind": "provider-reference-pending-person-binding",
-      "instanceSource": "FHIR Practitioner id is verified Provider.person.uuid; provider UUID is identifier/source link, not automatically Practitioner.id",
+      "sourceKind": "native-provider-uuid",
+      "instanceSource": "FHIR2 4.2.0 uses the OpenMRS Provider.uuid as Practitioner.id; Provider.person.uuid remains the linked demographic person and is not the FHIR resource id",
       "fhirResource": "Practitioner",
       "path": "identifier",
       "code": "VSHC-TEST-DOCTOR-001",
@@ -779,7 +779,7 @@
         "create": "backend acceptance required",
         "read": "scoped authorized projection; implementation needs runtime round-trip",
         "update": "backend acceptance required",
-        "detail": "Provider fixture not deployed; verify Person/Provider-to-Practitioner implementation"
+        "detail": "Runtime read verified with synthetic Provider; qualification/licence/facility role are not projected"
       },
       "approval": {
         "status": "pending_backend_and_clinical_acceptance",
@@ -788,8 +788,8 @@
       "enabledForProduction": false,
       "fieldMappings": [
         {
-          "sourcePath": "Provider.person.uuid",
-          "targetPath": "id; provider-to-person binding must be verified",
+          "sourcePath": "Provider.uuid",
+          "targetPath": "id; Provider.person supplies name/gender fields",
           "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
           "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
         },
@@ -830,7 +830,7 @@
       "openmrsSourceKey": "providerrole.synthetic.doctor",
       "openmrsSourceUuid": "265a39f0-c0cc-514b-ab84-e6f5b5ad1d8c",
       "sourceKind": "adapter-derived",
-      "instanceSource": "Adapter-issued role UUID; practitioner reference must resolve verified Provider.person UUID",
+      "instanceSource": "Adapter-issued role UUID; practitioner reference must resolve the FHIR Practitioner id derived from Provider.uuid",
       "fhirResource": "PractitionerRole",
       "path": "practitioner/organization/location",
       "code": "doctor",
@@ -871,7 +871,7 @@
           "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
         },
         {
-          "sourcePath": "Provider.person.uuid",
+          "sourcePath": "Provider.uuid",
           "targetPath": "practitioner.reference",
           "codingVersionPolicy": "Pinned catalogue/terminology version; local code where no reviewed standard mapping",
           "writePolicy": "Adapter validation and scoped authorization; round-trip acceptance required"
