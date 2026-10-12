@@ -72,6 +72,17 @@ public class VinshcService {
 	private static final Set<String> POSITIVE_VITALS = set("vitals.mach", "vitals.ha_tam_thu", "vitals.ha_tam_truong",
 	    "vitals.nhip_tho", "vitals.can_nang", "vitals.chieu_cao");
 	
+	/**
+	 * Hard physiological limits (inclusive) in the concept units: /min, mm[Hg], Cel, %, kg, cm. They
+	 * reject impossible or mistyped values; plausible-but-abnormal values still pass and are flagged
+	 * clinically elsewhere.
+	 */
+	private static final Map<String, double[]> VITAL_LIMITS = limits("vitals.mach", 1, 350, "vitals.ha_tam_thu", 1, 350,
+	    "vitals.ha_tam_truong", 1, 300, "vitals.nhiet_do", 25, 46, "vitals.nhip_tho", 1, 150, "vitals.spo2", 0, 100,
+	    "vitals.can_nang", 0.2, 650, "vitals.chieu_cao", 20, 300);
+	
+	private static final String VITALS_ENCOUNTER_TYPE = "8368ff74-1b50-592b-8e78-2f0f2ddc1e06";
+	
 	private final JdbcTemplate jdbc;
 
 	private final SessionFactory sessionFactory;
@@ -125,6 +136,9 @@ public class VinshcService {
 		if (old != null && number(old.get("patient_id")).intValue() != patient.getPatientId()) {
 			throw bad("rowKey belongs to another patient");
 		}
+		lockPatient(patient);
+		if (old != null)
+			old = requiredCurrent("vinshc_contact", string(old.get("row_key")));
 		String key = old == null ? UUID.randomUUID().toString() : string(old.get("row_key"));
 		Map<String, Object> merged = merge(old, body);
 		String fullName = requiredString(merged, "fullName", "full_name");
@@ -173,8 +187,10 @@ public class VinshcService {
 		if (reason == null || reason.trim().isEmpty())
 			throw bad("voidReason is required");
 		Map<String, Object> old = requiredCurrent("vinshc_contact", rowKey);
-		AuthorizationService.requirePatientScopeStatic(
-		    Context.getPatientService().getPatient(number(old.get("patient_id")).intValue()));
+		Patient patient = Context.getPatientService().getPatient(number(old.get("patient_id")).intValue());
+		AuthorizationService.requirePatientScopeStatic(patient);
+		lockPatient(patient);
+		old = requiredCurrent("vinshc_contact", rowKey);
 		close("vinshc_contact", "contact_id", old.get("contact_id"));
 		jdbc.update(
 		    "INSERT INTO vinshc_contact(row_key,version_number,patient_id,full_name,relationship_code,relationship_name,relationship_version,phone_raw,phone_normalized,phone_normalization_status,address_text,priority,is_primary,emergency_contact,linked_person_id,source_kind,source_document_uuid,source_page,source_row_code,source_reference,recorded_at,status,void_reason,is_current,creator,date_created) SELECT row_key,version_number+1,patient_id,full_name,relationship_code,relationship_name,relationship_version,phone_raw,phone_normalized,phone_normalization_status,address_text,priority,false,emergency_contact,linked_person_id,source_kind,source_document_uuid,source_page,source_row_code,source_reference,?, 'void', ?, true, ?, ? FROM vinshc_contact WHERE contact_id=?",
@@ -189,6 +205,7 @@ public class VinshcService {
 		requireNewRecordProvenance(body);
 		Patient patient = patient(requiredString(body, "patient"));
 		AuthorizationService.requirePatientScopeStatic(patient);
+		lockPatient(patient);
 		String field = requiredString(body, "fieldCode");
 		String context = requiredString(body, "context");
 		String status = requiredString(body, "dataStatus");
@@ -241,6 +258,7 @@ public class VinshcService {
 		requireDirectPrivilege(WRITE_PRIVILEGE);
 		Patient patient = patient(patientUuid);
 		AuthorizationService.requirePatientScopeStatic(patient);
+		lockPatient(patient);
 		Map<String, Object> policy = fieldPolicies().get(fieldCode);
 		if (policy == null || !"field_states".equals(policy.get("mode")) || !context.equals(policy.get("context")))
 			throw bad("fieldCode/context does not permit fieldStates");
@@ -264,6 +282,9 @@ public class VinshcService {
 		AuthorizationService.requirePatientScopeStatic(patient);
 		if (old != null && number(old.get("patient_id")).intValue() != patient.getPatientId())
 			throw bad("rowKey belongs to another patient");
+		lockPatient(patient);
+		if (old != null)
+			old = requiredCurrent("vinshc_address_snapshot", string(old.get("row_key")));
 		Map<String, Object> merged = merge(old, body);
 		String provinceCode = optionalString(merged, "provinceCode", "province_code");
 		String communeCode = optionalString(merged, "communeCode", "commune_code");
@@ -347,8 +368,10 @@ public class VinshcService {
 		if (reason == null || reason.trim().isEmpty())
 			throw bad("voidReason is required");
 		Map<String, Object> old = requiredCurrent("vinshc_address_snapshot", rowKey);
-		AuthorizationService.requirePatientScopeStatic(
-		    Context.getPatientService().getPatient(number(old.get("patient_id")).intValue()));
+		Patient owner = Context.getPatientService().getPatient(number(old.get("patient_id")).intValue());
+		AuthorizationService.requirePatientScopeStatic(owner);
+		lockPatient(owner);
+		old = requiredCurrent("vinshc_address_snapshot", rowKey);
 		close("vinshc_address_snapshot", "address_id", old.get("address_id"));
 		jdbc.update(
 		    "INSERT INTO vinshc_address_snapshot(row_key,version_number,patient_id,address_text,legacy_address_text,province_code,province_name,commune_code,commune_name,catalogue_version,address_as_of_date,source_kind,source_document_uuid,source_page,source_row_code,source_reference,recorded_at,status,void_reason,is_current,creator,date_created) SELECT row_key,version_number+1,patient_id,address_text,legacy_address_text,province_code,province_name,commune_code,commune_name,catalogue_version,address_as_of_date,source_kind,source_document_uuid,source_page,source_row_code,source_reference,?, 'void', ?, true, ?, ? FROM vinshc_address_snapshot WHERE address_id=?",
@@ -419,12 +442,12 @@ public class VinshcService {
 		requireDirectPrivilege(VITALS_PRIVILEGE);
 		Patient patient = patient(requiredString(body, "patient"));
 		Encounter encounter = Context.getEncounterService().getEncounterByUuid(requiredString(body, "encounter"));
-		if (encounter == null)
+		if (encounter == null || encounter.getVoided())
 			throw bad("encounter does not exist");
 		AuthorizationService.requireEncounterScopeStatic(encounter);
 		if (!patient.getPatientId().equals(encounter.getPatient().getPatientId()))
 			throw bad("encounter belongs to another patient");
-		if (!"8368ff74-1b50-592b-8e78-2f0f2ddc1e06".equals(encounter.getEncounterType().getUuid()))
+		if (!VITALS_ENCOUNTER_TYPE.equals(encounter.getEncounterType().getUuid()))
 			throw bad("encounter is not a VinSHC vitals encounter");
 		Map<String, Object> values = objectMap(body.get("values"));
 		Map<String, Object> states = objectMap(body.get("states"));
@@ -453,8 +476,9 @@ public class VinshcService {
 					throw bad(field + " must be finite");
 				if (POSITIVE_VITALS.contains(field) && value <= 0)
 					throw bad(field + " must be > 0");
-				if ("vitals.spo2".equals(field) && (value < 0 || value > 100))
-					throw bad("vitals.spo2 must be between 0 and 100");
+				double[] range = VITAL_LIMITS.get(field);
+				if (value < range[0] || value > range[1])
+					throw bad(field + " must be between " + format(range[0]) + " and " + format(range[1]));
 				if (state != null && !"recorded".equals(state))
 					throw bad(field + " has a value so state must be recorded");
 				Obs numeric = baseObs(patient, encounter, measuredAt, concept(VITAL_CONCEPTS.get(field)));
@@ -507,7 +531,7 @@ public class VinshcService {
 	private Concept concept(String uuid) {
 		Concept concept = Context.getConceptService().getConceptByUuid(uuid);
 		if (concept == null)
-			throw new IllegalStateException("required metadata concept missing: " + uuid);
+			throw new VinshcExceptions.Configuration("required metadata concept missing: " + uuid);
 		return concept;
 	}
 	
@@ -598,7 +622,7 @@ public class VinshcService {
 				    new TypeReference<Map<String, Object>>() {});
 				List<Map<String, Object>> items = (List<Map<String, Object>>) root.get("items");
 				if (items == null || items.size() != 7 || !"1.0.0".equals(root.get("version")))
-					throw new IllegalStateException("unexpected contact relationship catalogue");
+					throw new VinshcExceptions.Configuration("unexpected contact relationship catalogue");
 				Map<String, Map<String, Object>> indexed = new LinkedHashMap<>();
 				for (Map<String, Object> item : items)
 					if (!Boolean.TRUE.equals(item.get("retired")) && item.get("effectiveTo") == null)
@@ -607,7 +631,7 @@ public class VinshcService {
 				return relationshipRecords;
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("cannot load contact relationship catalogue: " + path, ex);
+				throw new VinshcExceptions.Configuration("cannot load contact relationship catalogue: " + path, ex);
 			}
 		}
 	}
@@ -631,12 +655,12 @@ public class VinshcService {
 						indexed.put(string(field.get("code")), Collections.unmodifiableMap((Map<String, Object>) policy));
 				}
 				if (indexed.size() != 37)
-					throw new IllegalStateException("expected 37 B2 missing-state policies");
+					throw new VinshcExceptions.Configuration("expected 37 B2 missing-state policies");
 				fieldPolicies = Collections.unmodifiableMap(indexed);
 				return fieldPolicies;
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("cannot load B2 field policies: " + path, ex);
+				throw new VinshcExceptions.Configuration("cannot load B2 field policies: " + path, ex);
 			}
 		}
 	}
@@ -654,7 +678,7 @@ public class VinshcService {
 				    new TypeReference<Map<String, Object>>() {});
 				List<Map<String, Object>> records = (List<Map<String, Object>>) root.get("records");
 				if (records == null || records.size() != 3355 || !CATALOGUE_VERSION.equals(root.get("version")))
-					throw new IllegalStateException("unexpected address catalogue version/count");
+					throw new VinshcExceptions.Configuration("unexpected address catalogue version/count");
 				Map<String, Map<String, Object>> indexed = new LinkedHashMap<>();
 				for (Map<String, Object> record : records)
 					indexed.put(string(record.get("code")), Collections.unmodifiableMap(record));
@@ -662,7 +686,7 @@ public class VinshcService {
 				return addressRecords;
 			}
 			catch (Exception ex) {
-				throw new IllegalStateException("cannot load pinned address catalogue: " + path, ex);
+				throw new VinshcExceptions.Configuration("cannot load pinned address catalogue: " + path, ex);
 			}
 		}
 	}
@@ -681,6 +705,11 @@ public class VinshcService {
 	
 	static void requireDirectPrivilege(String privilege) {
 		AuthorizationService.requireLegacy(privilege);
+	}
+	
+	/** Serializes administrative writes of one patient so check-then-insert stays consistent. */
+	private void lockPatient(Patient patient) {
+		TransactionLocks.lock(sessionFactory, "vinshc-patient-admin:" + patient.getPatientId());
 	}
 	
 	private Map<String, Object> current(String table, String keyColumn, String key) {
@@ -798,12 +827,38 @@ public class VinshcService {
 	}
 	
 	static String canonicalUuid(String value) {
+		return canonicalUuid(value, "rowKey");
+	}
+	
+	static String canonicalUuid(String value, String field) {
 		try {
 			return UUID.fromString(value).toString();
 		}
 		catch (Exception ex) {
-			throw bad("rowKey must be a UUID");
+			throw bad(field + " must be a UUID");
 		}
+	}
+	
+	/**
+	 * A JSON integer within the Java int range. Rejects fractions, booleans and values that would
+	 * silently wrap (for example 4294967297 must not become 1).
+	 */
+	static int strictInt(Object raw, String field) {
+		if (!(raw instanceof Number) || raw instanceof Boolean)
+			throw bad(field + " must be a JSON integer");
+		java.math.BigDecimal value;
+		try {
+			value = new java.math.BigDecimal(raw.toString());
+		}
+		catch (NumberFormatException ex) {
+			throw bad(field + " must be a JSON integer");
+		}
+		if (value.signum() != 0 && value.stripTrailingZeros().scale() > 0)
+			throw bad(field + " must be a JSON integer");
+		if (value.compareTo(java.math.BigDecimal.valueOf(Integer.MIN_VALUE)) < 0
+		        || value.compareTo(java.math.BigDecimal.valueOf(Integer.MAX_VALUE)) > 0)
+			throw bad(field + " is out of range");
+		return value.intValueExact();
 	}
 	
 	static String requiredString(Map<String, Object> map, String... keys) {
@@ -824,9 +879,7 @@ public class VinshcService {
 		Object value = map.get(key);
 		if (!(value instanceof Number))
 			value = map.get(key.replaceAll("([A-Z])", "_$1").toLowerCase());
-		if (!(value instanceof Number))
-			throw bad(key + " must be an integer");
-		return ((Number) value).intValue();
+		return strictInt(value, key);
 	}
 	
 	private static boolean bool(Map<String, Object> map, String camel, String snake, boolean fallback) {
@@ -854,8 +907,24 @@ public class VinshcService {
 			throw bad(field + " exceeds " + maximum + " characters");
 	}
 	
-	static IllegalArgumentException bad(String message) {
-		return new IllegalArgumentException(message);
+	static VinshcExceptions.BadRequest bad(String message) {
+		return new VinshcExceptions.BadRequest(message);
+	}
+	
+	static VinshcExceptions.Configuration misconfigured(String message) {
+		return new VinshcExceptions.Configuration(message);
+	}
+	
+	private static Map<String, double[]> limits(Object... values) {
+		Map<String, double[]> map = new LinkedHashMap<>();
+		for (int i = 0; i < values.length; i += 3)
+			map.put((String) values[i],
+			    new double[] { ((Number) values[i + 1]).doubleValue(), ((Number) values[i + 2]).doubleValue() });
+		return Collections.unmodifiableMap(map);
+	}
+	
+	private static String format(double value) {
+		return value == Math.rint(value) ? String.valueOf((long) value) : String.valueOf(value);
 	}
 	
 	static Set<String> set(String... values) {

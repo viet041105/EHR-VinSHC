@@ -2,7 +2,7 @@ FROM maven:3.9.9-eclipse-temurin-17-alpine@sha256:c1b318f88ab1bcf7aae3e0fceff4f5
 WORKDIR /src
 COPY infra/backend/vinshc-module/ ./
 RUN --mount=type=cache,target=/root/.m2 \
-    mvn --batch-mode --no-transfer-progress -DskipTests -Dlicense.skip=true -Dspotless.check.skip=true -Dmaven.buildNumber.skip=true package \
+    mvn --batch-mode --no-transfer-progress -Dlicense.skip=true -Dspotless.check.skip=true -Dmaven.buildNumber.skip=true package \
     && test -f /src/omod/target/vinshc-0.3.0.omod
 
 # Stable upstream release with checked-in PostgreSQL compatibility resources.

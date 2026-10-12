@@ -129,6 +129,20 @@ Compose bind gateway vào `127.0.0.1`; database và backend không publish cổn
 
 Các mật khẩu sinh trong `.env` không chứa ký tự `$`, để tránh nội suy ngoài dự kiến của Compose. Khi tự thay mật khẩu, cần tuân theo cú pháp file env của Docker Compose.
 
+### Biến môi trường tùy chọn của container backend (module VinSHC)
+
+Các biến dưới đây **không** đọc từ `.env` và Compose hiện không truyền chúng; mặc định trỏ vào đường dẫn đã bake trong image. Chỉ đặt khi cần override, bằng một file Compose override khai báo `services.backend.environment`.
+
+| Biến | Mặc định trong container | Dùng cho |
+| --- | --- | --- |
+| `VINSHC_ADDRESS_CATALOGUE` | `/openmrs/distribution/vinshc_metadata/address-vn-19-2025.json` | Danh mục địa chỉ 34 tỉnh/3.321 xã (B2) |
+| `VINSHC_RELATIONSHIP_CATALOGUE` | `/openmrs/distribution/vinshc_metadata/contact-relationships.json` | Danh mục quan hệ người liên hệ (B2) |
+| `VINSHC_METADATA_PACK` | `/openmrs/distribution/vinshc_metadata/pack.json` | Chính sách missing-state của 37 trường B2 |
+| `VINSHC_B8_METADATA_ROOT` | `/openmrs/distribution/vinshc_metadata` | Thư mục chứa `facilities.json`, `services.json`, `prices.json`, `workflow.json`, `printing-reporting.json`, `b4-b9.json` |
+| `VINSHC_ATTACHMENT_ROOT` | `/openmrs/data/vinshc-attachments` | Nơi lưu file đính kèm B8; phải nằm trong volume được backup |
+
+Thiếu file hoặc sai version danh mục làm endpoint liên quan trả `503`, không âm thầm bỏ qua.
+
 ## 7. Phát triển theo vai trò
 
 | Thành viên | Cách bắt đầu |

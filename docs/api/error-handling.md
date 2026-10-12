@@ -40,8 +40,11 @@ Mọi endpoint của module VinSHC dùng chung một dạng lỗi `{"error": "<t
 
 | Status | Ý nghĩa | Hành vi client |
 | --- | --- | --- |
-| 400 | Payload sai contract hoặc vi phạm quy tắc nghiệp vụ (kể cả `ValidationException` của Core) | Hiển thị thông điệp cho người nhập; không retry. |
-| 403 | Thiếu privilege `VinSHC: ...` tương ứng | Hiển thị không đủ quyền. |
+| 400 | Payload sai contract hoặc vi phạm quy tắc nghiệp vụ (kể cả `ValidationException`/`APIException` của Core) | Hiển thị thông điệp cho người nhập; không retry. |
+| 401 | Chưa đăng nhập (`{"error":"unauthenticated"}`) | Chuyển về luồng đăng nhập. |
+| 403 | Thiếu privilege `VinSHC ...`, workspace không hợp lệ hoặc bản ghi thuộc cơ sở khác (`same_facility`) | Hiển thị không đủ quyền. |
+| 409 | Chuyển trạng thái sai, vượt số dư, slot trùng, idempotency key dùng cho payload khác, hoặc ghi đồng thời chạm ràng buộc DB (`conflicting concurrent change; reload and retry`) | Tải lại bản ghi rồi quyết định; chỉ retry khi người dùng xác nhận. |
 | 503 | Metadata hoặc danh mục bắt buộc chưa cấu hình (ví dụ ICD-10, danh mục thuốc) | Báo quản trị; không cho nhập text tự do thay thế. |
+| 500 | Lỗi không lường trước (`{"error":"internal server error"}`) | Báo lỗi hệ thống; chi tiết và stack trace chỉ nằm trong log server. |
 
-Conflict 409, rate limit 429 và lỗi optimistic locking chưa có bằng chứng runtime trong B1; không giả định hành vi cho đến khi có test.
+Chỉ các lỗi nghiệp vụ có chủ đích mới trả nguyên thông điệp; lỗi kỹ thuật không lộ message nội bộ ra client. Bằng chứng: unit test `ErrorContractTest` (resolver handler thật của Spring) và `tests/integration/test_b10_review_regressions.py`. Rate limit 429 và optimistic locking vẫn chưa có.

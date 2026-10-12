@@ -29,10 +29,11 @@ Kết quả kiểm chứng local hiện có trong [VALIDATION.md](VALIDATION.md)
 4. Xác thực REST; xác nhận phiên bản Core và đủ 29 module của baseline; kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
 5. Kiểm tra REST patient search, FHIR R4 CapabilityStatement và FHIR Patient search. Báo cáo smoke ghi toàn bộ resource/interaction được server công bố và trạng thái `started`/version của từng module baseline để làm bằng chứng B0; việc được công bố không đồng nghĩa luồng nghiệp vụ đã được nghiệm thu.
 6. Tạo bệnh nhân giả, visit, encounter, observation số và văn bản tiếng Việt dài; đối chiếu mã bệnh nhân, quan hệ, giá trị, đơn vị, thời gian và văn bản qua REST/FHIR.
-7. Chạy có thứ tự toàn bộ contract B1–B8: hành chính, sinh hiệu, khám/đơn thuốc, quyền, FHIR và MVP-2.
+7. Chạy có thứ tự toàn bộ contract B1–B8: hành chính, sinh hiệu, khám/đơn thuốc, quyền, FHIR và MVP-2. Unit test Java của module chạy trong bước build image (Dockerfile không còn `-DskipTests`).
 8. Dừng và dựng lại container, giữ volume; xác minh metadata Initializer không đổi UUID/số lượng và đọc lại clinical/financial/order/file/document state bằng verifier B9 read-only.
 9. Backup database và `/openmrs/data`, restore sang project/volume/cổng khác; kiểm tra database, smoke, metadata và cùng verifier B9, gồm byte/hash attachment.
-10. Sinh report bàn giao đã che thông tin nhạy cảm, chỉ upload `.runtime/reports/`, rồi xóa volume của cả source và restore project.
+10. Sau khi B9 restart/restore đã pass, chạy `test_b10_review_regressions` trên stack gốc cho các lỗi đã sửa từ [review backend](REVIEW_BE.md) (phạm vi cơ sở, race thanh toán, idempotency, rò proxy privilege, rollback, múi giờ, mã lỗi). Bước này phải đứng cuối vì nó tạo thêm giao dịch synthetic, còn B9 khẳng định dữ liệu không đổi kể từ B8.
+11. Sinh report bàn giao đã che thông tin nhạy cảm, chỉ upload `.runtime/reports/`, rồi xóa volume của cả source và restore project.
 
 Nếu backend không sẵn sàng, API trả HTML/redirect thay JSON, sai định danh hoặc mất hồ sơ sau restart, job phải thất bại.
 
@@ -67,6 +68,8 @@ docker compose up -d --wait --wait-timeout 600
 python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
 $env:VINSHC_ACCEPTANCE_PHASE='restart'
 python -m unittest -v tests.integration.test_b9_persistence
+# Chạy cuối cùng: test này ghi thêm dữ liệu synthetic
+python -m unittest -v tests.integration.test_b10_review_regressions
 ```
 
 Để chạy B4–B9 bằng catalogue test, thêm `tests/integration/compose.b4-metadata.yaml` vào Compose và đặt `VINSHC_B4_CATALOGUE=metadata`. Backup/restore project thứ hai làm đúng các lệnh đã khóa trong workflow; không dùng `discover` vì thứ tự fixture có phụ thuộc được ghi rõ. Giữ fixture và volume của cùng một instance. Cách dựng môi trường, xem log và xử lý lỗi nằm trong [DEVELOPMENT.md](DEVELOPMENT.md).
