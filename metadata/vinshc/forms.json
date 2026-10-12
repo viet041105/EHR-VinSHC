@@ -1,0 +1,301 @@
+{
+  "version": "0.3.0",
+  "format": "handoff_spec_not_o3forms_schema",
+  "owner": "DATA-07 + FE-04",
+  "forms": [
+    {
+      "code": "vinshc-registration",
+      "label": "Tiếp nhận người bệnh",
+      "role": "reception",
+      "fields": [
+        "patient.ma_noi_bo",
+        "patient.ho_ten",
+        "patient.gioi_tinh",
+        "patient.do_chinh_xac_ngay_sinh",
+        "patient.ngay_sinh",
+        "patient.nam_sinh",
+        "patient.thang_sinh",
+        "patient.dien_thoai",
+        "patient.cccd",
+        "patient.ma_bhxh",
+        "patient.ma_bhyt",
+        "patient.dia_chi",
+        "patient.dia_chi_cu"
+      ],
+      "notes": [
+        "Ngày sinh hiển thị theo precision, không ép ngày đủ khi chỉ biết năm.",
+        "Mã/CCCD/điện thoại là text; không tự merge."
+      ],
+      "repeatableSections": [
+        {
+          "code": "contacts",
+          "label": "Người liên hệ",
+          "cardinality": "0..n",
+          "fields": [
+            "contact.ho_ten",
+            "contact.quan_he",
+            "contact.dien_thoai",
+            "contact.dia_chi",
+            "contact.row_key",
+            "contact.dien_thoai_chuan_hoa",
+            "contact.trang_thai_chuan_hoa_dien_thoai",
+            "contact.uu_tien",
+            "contact.lien_he_chinh",
+            "contact.lien_he_khan_cap",
+            "contact.trang_thai",
+            "contact.person_lien_ket_uuid",
+            "contact.nguon",
+            "contact.thoi_diem_ghi_nhan",
+            "contact.ly_do_void",
+            "contact.quan_he_phien_ban",
+            "contact.quan_he_nhan"
+          ],
+          "contract": "metadata/vinshc/contracts/b2.json",
+          "notes": [
+            "0..1 contact chính active; nhiều contact khẩn cấp được phép.",
+            "Không tự tạo Patient/Person người nhà; liên kết Person chỉ qua lựa chọn được xác minh."
+          ]
+        }
+      ],
+      "version": "0.3.0"
+    },
+    {
+      "code": "vinshc-vitals",
+      "label": "Ghi sinh hiệu",
+      "role": "nurse_or_doctor_with_grant",
+      "fields": [
+        "vitals.thoi_diem_do",
+        "vitals.mach",
+        "vitals.ha_tam_thu",
+        "vitals.ha_tam_truong",
+        "vitals.nhiet_do",
+        "vitals.nhip_tho",
+        "vitals.spo2",
+        "vitals.can_nang",
+        "vitals.chieu_cao"
+      ],
+      "notes": [
+        "Mỗi giá trị có state/value/unit; trạng thái obs dùng concept *_trang_thai.",
+        "Một lần đo = một obsGroup, các lần đo là các nhóm khác nhau.",
+        "Không cấu hình ngưỡng cảnh báo mặc định."
+      ],
+      "contract": "metadata/vinshc/contracts/b3.json",
+      "version": "0.3.0"
+    },
+    {
+      "code": "vinshc-consultation",
+      "label": "Khám ngoại trú",
+      "role": "doctor",
+      "fields": [
+        "visit.ly_do_kham",
+        "history.benh_su",
+        "history.tien_su_ban_than_trang_thai",
+        "history.tien_su_ban_than",
+        "history.tien_su_gia_dinh_trang_thai",
+        "history.tien_su_gia_dinh",
+        "allergy.trang_thai",
+        "allergy.tac_nhan",
+        "exam.toan_than",
+        "exam.bo_phan",
+        "exam.tom_tat",
+        "dx.chinh",
+        "dx.kem_theo",
+        "dx.do_chac_chan",
+        "exam.huong_dieu_tri",
+        "exam.loi_dan",
+        "followup.ngay_tai_kham",
+        "followup.loi_dan"
+      ],
+      "notes": [
+        "Không biến thiếu câu trả lời dị ứng thành no_known_allergy.",
+        "Diagnosis/DrugOrder/Allergy native theo hợp đồng B4, không cố nhét tất cả vào Obs."
+      ],
+      "version": "0.3.0"
+    },
+    {
+      "code": "vinshc-diagnosis-allergy",
+      "version": "0.3.0",
+      "fields": [
+        "allergy.trang_thai",
+        "allergy.uuid",
+        "allergy.tac_nhan",
+        "allergy.phan_ung",
+        "allergy.muc_do",
+        "allergy.ghi_chu",
+        "dx.chinh",
+        "dx.kem_theo",
+        "dx.ma",
+        "dx.ten_nguon",
+        "dx.he_ma",
+        "dx.do_chac_chan",
+        "dx.vai_tro",
+        "allergy.clinical_status",
+        "allergy.verification_status",
+        "allergy.tac_nhan_nguyen_van",
+        "allergy.criticality",
+        "dx.uuid",
+        "dx.encounter_uuid",
+        "dx.catalogue_version",
+        "dx.revision"
+      ],
+      "catalogues": [
+        "metadata/vinshc/catalogues/allergies.json",
+        "metadata/vinshc/catalogues/icd10-mvp.json"
+      ],
+      "contract": "metadata/vinshc/contracts/b4-b9.json",
+      "notes": [
+        "Đặc tả bàn giao, không phải O3 forms schema; source contract/conditional rules required."
+      ],
+      "repeatPolicy": "Repeated diagnosis/allergy/drug/result/bill rows use stable UUID rowKey; fieldStates link the same rowKey, never array index."
+    },
+    {
+      "code": "vinshc-prescription",
+      "version": "0.3.0",
+      "fields": [
+        "rx.uuid",
+        "rx.thuoc",
+        "rx.lieu_dung",
+        "rx.don_vi_lieu",
+        "rx.duong_dung",
+        "rx.tan_suat",
+        "rx.huong_dan_nguon",
+        "rx.so_luong",
+        "rx.don_vi_so_luong",
+        "rx.so_ngay",
+        "rx.don_vi_thoi_gian",
+        "rx.bat_dau",
+        "rx.ket_thuc",
+        "rx.nguoi_ke_uuid",
+        "rx.loi_dan",
+        "rx.trang_thai",
+        "rx.snapshot_uuid",
+        "rx.revision",
+        "rx.previous_order_uuid"
+      ],
+      "catalogues": [
+        "metadata/vinshc/catalogues/medications.json",
+        "metadata/vinshc/catalogues/medication-units.json"
+      ],
+      "contract": "metadata/vinshc/contracts/b4-b9.json",
+      "notes": [
+        "Đặc tả bàn giao, không phải O3 forms schema; source contract/conditional rules required."
+      ],
+      "repeatPolicy": "Repeated diagnosis/allergy/drug/result/bill rows use stable UUID rowKey; fieldStates link the same rowKey, never array index."
+    },
+    {
+      "code": "vinshc-orders-results",
+      "version": "0.3.0",
+      "fields": [
+        "order.uuid",
+        "order.dich_vu",
+        "order.patient_uuid",
+        "order.encounter_uuid",
+        "order.thoi_diem",
+        "order.uu_tien",
+        "order.nguoi_thuc_hien_uuid",
+        "order.trang_thai",
+        "result.order_uuid",
+        "result.chi_so",
+        "result.kieu_gia_tri",
+        "result.gia_tri_so",
+        "result.gia_tri_nguon",
+        "result.don_vi",
+        "result.khoang_tham_chieu",
+        "result.lay_mau_luc",
+        "result.ket_qua_luc",
+        "result.nguoi_duyet_uuid",
+        "result.trang_thai",
+        "result.tep_uuid",
+        "result.revision",
+        "result.previous_revision_uuid",
+        "result.ly_do_dinh_chinh"
+      ],
+      "catalogues": [
+        "metadata/vinshc/catalogues/services.json",
+        "metadata/vinshc/catalogues/diagnostics.json"
+      ],
+      "contract": "metadata/vinshc/contracts/b4-b9.json",
+      "notes": [
+        "Đặc tả bàn giao, không phải O3 forms schema; source contract/conditional rules required."
+      ],
+      "repeatPolicy": "Repeated diagnosis/allergy/drug/result/bill rows use stable UUID rowKey; fieldStates link the same rowKey, never array index."
+    },
+    {
+      "code": "vinshc-billing",
+      "version": "0.3.0",
+      "fields": [
+        "bill.uuid",
+        "bill.patient_uuid",
+        "bill.visit_uuid",
+        "bill.dich_vu",
+        "bill.ten_snapshot",
+        "bill.so_luong",
+        "bill.don_gia",
+        "bill.so_tien",
+        "bill.trang_thai",
+        "payment.uuid",
+        "payment.bill_uuid",
+        "payment.loai",
+        "payment.so_tien",
+        "payment.thoi_diem",
+        "payment.giao_dich_goc_uuid",
+        "payment.ly_do",
+        "payment.idempotency_key",
+        "bill.price_uuid",
+        "bill.price_version",
+        "bill.giam_gia_vnd"
+      ],
+      "catalogues": [
+        "metadata/vinshc/catalogues/services.json",
+        "metadata/vinshc/catalogues/prices.json"
+      ],
+      "contract": "metadata/vinshc/contracts/b4-b9.json",
+      "notes": [
+        "Đặc tả bàn giao, không phải O3 forms schema; source contract/conditional rules required."
+      ],
+      "repeatPolicy": "Repeated diagnosis/allergy/drug/result/bill rows use stable UUID rowKey; fieldStates link the same rowKey, never array index."
+    },
+    {
+      "code": "vinshc-appointment-queue",
+      "version": "0.3.0",
+      "fields": [
+        "appointment.uuid",
+        "appointment.patient_uuid",
+        "appointment.provider_uuid",
+        "appointment.location_uuid",
+        "appointment.bat_dau",
+        "appointment.ket_thuc",
+        "appointment.trang_thai",
+        "appointment.service_uuid",
+        "appointment.type_code",
+        "queue.uuid",
+        "queue.service_point_uuid",
+        "queue.trang_thai",
+        "queue.ly_do_roi"
+      ],
+      "catalogues": [
+        "metadata/vinshc/contracts/workflow.json"
+      ],
+      "contract": "metadata/vinshc/contracts/b4-b9.json",
+      "notes": [
+        "Đặc tả bàn giao, không phải O3 forms schema; source contract/conditional rules required."
+      ],
+      "repeatPolicy": "Repeated diagnosis/allergy/drug/result/bill rows use stable UUID rowKey; fieldStates link the same rowKey, never array index."
+    },
+    {
+      "code": "vinshc-printing",
+      "version": "0.3.0",
+      "fields": [
+        "document.template_version",
+        "document.so_chung_tu"
+      ],
+      "catalogues": [
+        "metadata/vinshc/catalogues/facilities.json"
+      ],
+      "contract": "metadata/vinshc/contracts/printing-reporting.json",
+      "notes": [
+        "Đặc tả bàn giao, không phải O3 forms schema; source contract/conditional rules required."
+      ]
+    }
+  ]
+}

@@ -8,6 +8,8 @@ Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại V
 
 Đọc [kế hoạch triển khai và phân công công việc](PROJECT_PLAN.md) để nắm phạm vi MVP, đầu việc của 4 thành viên, thứ tự phối hợp và tiêu chí nghiệm thu.
 
+Đọc [từ điển dữ liệu và bảng bàn giao cho BE](docs/DATA_DICTIONARY.md) để tra các trường từ hồ sơ mẫu 195 trang, trang nguồn và những điểm còn cần xác nhận. Người phụ trách metadata bắt đầu ở mục 1; mục 10 giữ khung dữ liệu MVP của nhóm.
+
 | Tài liệu | Nội dung |
 | --- | --- |
 | [Quy trình phòng khám](docs/CLINIC_WORKFLOW.md) | Vai trò, luồng khám, giấy tờ đầu ra |
@@ -16,6 +18,8 @@ Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại V
 | [Từ điển dữ liệu](docs/DATA_DICTIONARY.md) | Trường dữ liệu, ánh xạ FHIR/openEHR |
 | [Quyết định kiến trúc](docs/decisions/) | ADR, gồm vai trò OpenMRS/openEHR |
 | [Đóng góp](CONTRIBUTING.md) · [Bảo mật](SECURITY.md) | Quy tắc PR và báo lỗ hổng |
+
+Bộ metadata Việt Nam `0.3.0`: [hướng dẫn bàn giao](docs/METADATA.md), [bảng trường MVP](docs/data/MVP_METADATA_FIELDS.md), [bổ sung B2/B3](docs/METADATA_B2_B3.md), [bàn giao B4–B9 và catalogue test](docs/METADATA_B4_B9.md), [kết quả kiểm tra](docs/METADATA_VALIDATION.md). Kiểm tra bằng `python tools/metadata.py`.
 
 ## Chạy baseline OpenMRS
 
@@ -37,7 +41,6 @@ Mở **http://127.0.0.1:8080/openmrs/spa/**. Đăng nhập bằng `EHR_ADMIN_USE
 - [CI](docs/CI.md): các check trên PR và kiểm tra REST/FHIR/persistence.
 - [Baseline được khóa](config/baseline.json): nguồn upstream, phiên bản và image digest.
 - [Kết quả kiểm chứng](docs/VALIDATION.md): đã chạy thật những gì và các giới hạn còn lại.
-- [Chuyển từ MariaDB sang PostgreSQL](docs/POSTGRESQL_MIGRATION.md): dành cho thành viên đã chạy baseline cũ.
 
 Baseline dùng OpenMRS Reference Application 3.7.1 và PostgreSQL 16.15. Backend được build từ image upstream đã khóa digest và các bản sửa tương thích PostgreSQL; giữ metadata nền và bỏ bộ demo lớn. Xem [ADR-0002](docs/decisions/0002-postgresql.md) và [kết quả kiểm chứng](docs/VALIDATION.md).
 

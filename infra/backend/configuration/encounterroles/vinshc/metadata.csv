@@ -1,0 +1,4 @@
+Uuid,Void/Retire,Name,Description,_order:8100
+21dc99b5-a544-5c12-9dcc-3d12fe1d164b,false,VinSHC Treating clinician,VinSHC key=encounter_role.clinician,
+3d09e225-5185-5db6-a9cc-89a6962dc014,false,VinSHC Recording nurse,VinSHC key=encounter_role.nurse,
+2dc83c7f-83bf-5c36-a769-433274c63809,false,VinSHC Result author,VinSHC key=encounter_role.technician,

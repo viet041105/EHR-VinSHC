@@ -1,0 +1,5 @@
+Uuid,Void/Retire,Name,Description,Required,Format,Format description,Location behavior,Uniqueness behavior,_order:8100
+ca12ea64-d279-5cce-a2a9-e2c46446ac34,false,VinSHC Internal Patient ID,Bắt buộc trong patient.create của ứng dụng; Required=false tại Core để không phá fixture/upstream đã có. Idgen do BE cấu hình.,false,"[A-Za-z0-9][A-Za-z0-9._-]{0,63}",See metadata/vinshc/pack.json,REQUIRED,LOCATION,
+4e5406dc-8ff9-5486-98fa-5d95c6fe8233,false,VinSHC CCCD,"Định danh phụ, không tự merge hoặc dùng làm khóa toàn mạng.",false,[0-9]{12},See metadata/vinshc/pack.json,NOT_USED,NON_UNIQUE,
+d7902062-a695-5bf3-8764-acf7f43e3238,false,VinSHC BHXH,"Định danh phụ, không tự merge hoặc dùng làm khóa toàn mạng.",false,"[A-Za-z0-9-]{1,32}",See metadata/vinshc/pack.json,NOT_USED,NON_UNIQUE,
+e2b901c3-d442-565b-bff5-841aff260d2d,false,VinSHC BHYT,"Định danh phụ, không tự merge hoặc dùng làm khóa toàn mạng.",false,"[A-Za-z0-9-]{1,32}",See metadata/vinshc/pack.json,NOT_USED,NON_UNIQUE,

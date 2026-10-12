@@ -1,11 +1,11 @@
 # ADR-0002: Dùng PostgreSQL làm database
 
-- **Trạng thái:** Đã chấp nhận — chờ kiểm chứng kỹ thuật (BE-10)
+- **Trạng thái:** Đã chấp nhận — đã triển khai trong baseline (BE-10)
 - **Ngày:** 08/10/2026
 
 ## Bối cảnh
 
-Baseline ban đầu dùng MariaDB 10.11, theo cấu hình mặc định của OpenMRS 3 Reference Application. Nhóm quyết định chuyển sang **PostgreSQL** vì:
+Cấu hình mặc định của OpenMRS 3 Reference Application dùng MariaDB. Nhóm chọn **PostgreSQL** vì:
 
 - Một hệ quản trị dùng chung với các thành phần tầng sau: EHRbase (openEHR CDR), OpenCR, data warehouse và phần AI đều chạy tốt trên PostgreSQL.
 - Có sẵn công cụ sao lưu, nhân bản, phân vùng và giám sát phù hợp khi mở rộng lên chuỗi phòng khám và bệnh viện.
@@ -23,18 +23,18 @@ Thông tin kỹ thuật đã biết:
 2. Việc chuyển đổi được làm trong một PR riêng (BE-10). PR đó cập nhật cùng lúc `compose.yaml`, `.env.example`, các script trong `scripts/`, test, CI, `config/baseline.json` và tài liệu.
 3. Image PostgreSQL được khóa bằng digest giống các image khác. Phiên bản major được chốt trong BE-10 sau khi đối chiếu ma trận hỗ trợ của OpenMRS và các module. Bản đề xuất ban đầu là PostgreSQL 16.
 4. Database dùng encoding `UTF8`, phù hợp tiếng Việt.
-5. Cho tới khi BE-10 được merge, `compose.yaml` vẫn dùng MariaDB. Kết quả trong [VALIDATION.md](../VALIDATION.md) là kết quả trên MariaDB.
+5. `compose.yaml` dùng PostgreSQL 16.15, image khóa digest. Bằng chứng kiểm chứng nằm trong [VALIDATION.md](../VALIDATION.md).
 
 ## Tiêu chí hoàn thành BE-10
 
-- [ ] Khởi tạo database mới trên PostgreSQL. Liquibase của Core và **mọi module trong distro 3.7.1** chạy hết, không lỗi.
-- [ ] Danh sách module được kiểm tra, ghi rõ module nào đạt, module nào lỗi và cách xử lý. Ưu tiên kiểm tra các module MVP-2 cần: idgen, emrapi, appointments, queue, billing, stock management, attachments.
-- [ ] Initializer nạp metadata đạt, nạp lại không tạo bản trùng.
-- [ ] `smoke.py` đạt trước và sau restart, giữ volume.
-- [ ] Healthcheck của service `db` dùng `pg_isready`. Volume trỏ tới thư mục dữ liệu PostgreSQL.
-- [ ] Biến môi trường mới (ví dụ `POSTGRES_PASSWORD`) thay cho `MYSQL_ROOT_PASSWORD`. Script che mật khẩu được cập nhật theo.
-- [ ] Hướng dẫn backup–restore bằng `pg_dump` / `pg_restore` đã chạy thử.
-- [ ] CI chạy cả hai job trên PostgreSQL.
+- [x] Khởi tạo database mới trên PostgreSQL. Liquibase của Core và **mọi module trong distro 3.7.1** chạy hết, không lỗi.
+- [x] Danh sách module được kiểm tra, ghi rõ module nào đạt, module nào lỗi và cách xử lý. Ưu tiên kiểm tra các module MVP-2 cần: idgen, emrapi, appointments, queue, billing, stock management, attachments.
+- [ ] Initializer nạp metadata đạt, nạp lại không tạo bản trùng. *(Chuyển sang BE-04/DATA-06 khi có gói metadata Việt Nam.)*
+- [x] `smoke.py` đạt trước và sau restart, giữ volume.
+- [x] Healthcheck của service `db` dùng `pg_isready`. Volume trỏ tới thư mục dữ liệu PostgreSQL.
+- [x] Biến môi trường chỉ dành cho PostgreSQL; không có biến MySQL/MariaDB. Script che mật khẩu được cập nhật theo.
+- [x] Hướng dẫn backup–restore bằng `pg_dump` / `pg_restore` đã chạy thử. *(Đạt một lần local; runbook lặp lại được thuộc BE-07.)*
+- [ ] CI chạy cả hai job trên PostgreSQL. *(Workflow đã cấu hình; chờ xác nhận run trên GitHub trong INT-07.)*
 
 ## Phương án đã cân nhắc
 
@@ -46,5 +46,3 @@ Thông tin kỹ thuật đã biết:
 ## Hệ quả
 
 - Nếu một module cần cho MVP không chạy được trên PostgreSQL, nhóm ghi lỗi, báo upstream và chọn một trong các cách: đóng góp bản sửa, thay module, hoặc lùi module đó khỏi MVP. Không âm thầm quay lại MariaDB; muốn đổi lại phải sửa ADR này.
-- Dữ liệu giả và fixture hiện có trên MariaDB không chuyển sang. Database PostgreSQL được khởi tạo mới.
-- Thành viên cần xóa volume MariaDB cũ hoặc dùng `COMPOSE_PROJECT_NAME` khác khi chuyển. Không dùng lại volume `db-data` cũ.

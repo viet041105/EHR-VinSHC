@@ -1,0 +1,870 @@
+{
+  "version": "0.3.0",
+  "environment": "isolated_test_only",
+  "autoInstalled": false,
+  "prerequisites": [
+    "Base managed Initializer entities imported first, including existing development location",
+    "Explicit test instance/volume; never copy test catalogue into production"
+  ],
+  "initializerVersion": "2.12.0",
+  "csvFiles": [
+    "metadata/vinshc/initializer-test/concepts/vinshc/040-test-catalogues.csv",
+    "metadata/vinshc/initializer-test/drugs/vinshc/medications.csv",
+    "metadata/vinshc/initializer-test/encounterroles/vinshc/result-reviewer.csv",
+    "metadata/vinshc/initializer-test/locations/vinshc/test-rooms.csv",
+    "metadata/vinshc/initializer-test/orderfrequencies/vinshc/frequencies.csv",
+    "metadata/vinshc/initializer-test/privileges/vinshc/metadata.csv",
+    "metadata/vinshc/initializer-test/roles/vinshc/metadata.csv"
+  ],
+  "order": [
+    "privileges",
+    "encounterroles",
+    "roles",
+    "locations",
+    "concepts",
+    "drugs",
+    "orderfrequencies"
+  ],
+  "entities": [
+    {
+      "key": "location.test.consultation",
+      "uuid": "bce6f525-9ec2-5edb-ad86-10af87b9ce88",
+      "domain": "locations"
+    },
+    {
+      "key": "location.test.laboratory",
+      "uuid": "671edb90-11b0-5d0f-b095-c77e1b1f7d78",
+      "domain": "locations"
+    },
+    {
+      "key": "location.test.pharmacy",
+      "uuid": "1dd053ea-06f9-5b1f-9172-b103df9157fc",
+      "domain": "locations"
+    },
+    {
+      "key": "encounter_role.result_reviewer",
+      "uuid": "ca39bcfc-eeef-5f69-aa79-decf5d78c529",
+      "domain": "encounterroles"
+    },
+    {
+      "key": "medunit.dose.tablet",
+      "uuid": "6fff5163-8020-5e91-bf8a-2080167ae29c",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.dose.capsule",
+      "uuid": "4e272e19-5527-5c5f-8190-aad5152f87ef",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.dose.mg",
+      "uuid": "5087bc0c-f9b8-5be1-b78f-857cc0350080",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.dose.ml",
+      "uuid": "305d99b8-b4d2-5153-865d-836c79e64d60",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.quantity.tablet",
+      "uuid": "92df0dbe-6b87-5eae-80d7-d82af3dd0039",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.quantity.capsule",
+      "uuid": "d440cfeb-e005-53f8-b1b9-64a9c2ffecfc",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.quantity.ml",
+      "uuid": "78e00aeb-a381-5b55-b953-aff612264477",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.duration.day",
+      "uuid": "1e480858-8aa4-5254-8358-f893c8f167e9",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.duration.week",
+      "uuid": "44bb03e4-b610-5f01-8b16-407510a127cb",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.routes.oral",
+      "uuid": "468d85b2-0ee0-587d-83fa-3603b51951b7",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.routes.topical",
+      "uuid": "9c43e79c-b8f1-5136-8b40-155a138f1dcb",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.dosageForms.tablet",
+      "uuid": "20df4708-7b4f-5f95-9222-e78f4d774aa8",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.dosageForms.capsule",
+      "uuid": "4b1941f5-1212-5497-8d8b-9b455f5cb259",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.dosageForms.liquid",
+      "uuid": "771f7a8a-3e60-5cd9-808f-8607bc33931c",
+      "domain": "concepts"
+    },
+    {
+      "key": "medunit.frequencies.qd",
+      "uuid": "655ca5ef-21c3-514e-9450-d58243ebb125",
+      "domain": "concepts"
+    },
+    {
+      "key": "frequency.qd",
+      "uuid": "a0e7e5e4-6d3b-5ca5-b0b3-b2298a12e0e8",
+      "domain": "orderfrequencies"
+    },
+    {
+      "key": "medunit.frequencies.bid",
+      "uuid": "67178298-65f0-5486-b6e9-b2fde7de27ed",
+      "domain": "concepts"
+    },
+    {
+      "key": "frequency.bid",
+      "uuid": "56df76b7-e6e3-5813-aca8-82e1750c051f",
+      "domain": "orderfrequencies"
+    },
+    {
+      "key": "medunit.frequencies.tid",
+      "uuid": "e477e9ef-3d67-5c62-86b6-01471119e72a",
+      "domain": "concepts"
+    },
+    {
+      "key": "frequency.tid",
+      "uuid": "45143b5d-a909-5307-a69a-53f443ba5186",
+      "domain": "orderfrequencies"
+    },
+    {
+      "key": "medunit.frequencies.prn",
+      "uuid": "f8583b58-8829-5b0a-a789-566e38ef7718",
+      "domain": "concepts"
+    },
+    {
+      "key": "frequency.prn",
+      "uuid": "ceeb2ef5-10a8-5398-822b-f4743f0bb473",
+      "domain": "orderfrequencies"
+    },
+    {
+      "key": "ingredient.s01-plavix-75",
+      "uuid": "55bb6671-7bf0-5b3f-980c-c1929eb7b485",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.s01-plavix-75",
+      "uuid": "9081d504-0409-50a3-82d0-1f6a2c4afbce",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.s01-plavix-75",
+      "uuid": "b3b53d01-7a94-5b2a-8627-9890eda7d1d0",
+      "domain": "drugs"
+    },
+    {
+      "key": "ingredient.s01-lipitor-20",
+      "uuid": "add7d9cc-e8c1-5c6f-a5ec-d281b6522cec",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.s01-lipitor-20",
+      "uuid": "b1fe3885-976d-5506-8091-8bc3891182cb",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.s01-lipitor-20",
+      "uuid": "9fbae6e0-948b-5f75-9752-82e81ea205e4",
+      "domain": "drugs"
+    },
+    {
+      "key": "ingredient.s01-mobic-7_5",
+      "uuid": "dc25ba96-8067-5588-9b4f-57ecbf754f68",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.s01-mobic-7_5",
+      "uuid": "c8e395e6-9922-541d-97ba-e22510e2bf15",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.s01-mobic-7_5",
+      "uuid": "94710b6f-71c1-5585-befb-d988e4e57bb3",
+      "domain": "drugs"
+    },
+    {
+      "key": "ingredient.s01-colchicin-1",
+      "uuid": "524bf8d5-239d-5b0d-ad55-0d90d4aff5b8",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.s01-colchicin-1",
+      "uuid": "acad252a-c124-5c9e-b673-cd8401ebb94a",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.s01-colchicin-1",
+      "uuid": "6629e21b-d892-5693-8e7a-6fd55845399d",
+      "domain": "drugs"
+    },
+    {
+      "key": "ingredient.s01-pantoloc-20",
+      "uuid": "bbc407b9-34e8-5b08-83d6-afeff6bde75e",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.s01-pantoloc-20",
+      "uuid": "b31f8103-bc48-5173-ae82-1d8259487583",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.s01-pantoloc-20",
+      "uuid": "a92bd67b-6ce0-5409-a5e1-91b6b0311930",
+      "domain": "drugs"
+    },
+    {
+      "key": "ingredient.s01-tebonin-120",
+      "uuid": "9a9818aa-68d8-5c9a-a486-1b02336b1fb8",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.s01-tebonin-120",
+      "uuid": "bbe919b2-368b-5e52-9909-403180962c7c",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.s01-tebonin-120",
+      "uuid": "37e62d0d-4ae2-5e93-b8c1-47bddd063398",
+      "domain": "drugs"
+    },
+    {
+      "key": "ingredient.syn-tablet-a",
+      "uuid": "be34abe1-03c9-5d30-9742-a74bf02ba9b9",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.syn-tablet-a",
+      "uuid": "382c0e1f-1795-5838-9cf2-a049024a7025",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.syn-tablet-a",
+      "uuid": "03114c09-6243-5fac-a13d-cc33f9980466",
+      "domain": "drugs"
+    },
+    {
+      "key": "ingredient.syn-liquid-b",
+      "uuid": "a9756ae9-42fb-573d-a7c3-dee9dd0c0937",
+      "domain": "concepts"
+    },
+    {
+      "key": "drugconcept.syn-liquid-b",
+      "uuid": "4389f47a-66c5-5d3c-b3da-dea6032f1719",
+      "domain": "concepts"
+    },
+    {
+      "key": "drug.syn-liquid-b",
+      "uuid": "a6981596-3b73-5ae6-ab46-75c3a9f4addf",
+      "domain": "drugs"
+    },
+    {
+      "key": "allergen.med-test",
+      "uuid": "0d4ecebb-0367-5582-a242-6585eb1973af",
+      "domain": "concepts"
+    },
+    {
+      "key": "allergen.food-test",
+      "uuid": "ac33c568-0477-597e-adaa-9572011f8947",
+      "domain": "concepts"
+    },
+    {
+      "key": "allergen.env-test",
+      "uuid": "bb1d767d-d5c4-5d1e-abe4-9f6f095170e2",
+      "domain": "concepts"
+    },
+    {
+      "key": "allergen.bio-test",
+      "uuid": "417ab98e-ffa9-54cc-a1f5-5ab4da6608c4",
+      "domain": "concepts"
+    },
+    {
+      "key": "allergen.other",
+      "uuid": "0f9a0b82-5acc-5e68-917f-57aa3de23e34",
+      "domain": "concepts"
+    },
+    {
+      "key": "reaction.rash",
+      "uuid": "e4a68f5a-8194-5602-a2bd-efc345d3e446",
+      "domain": "concepts"
+    },
+    {
+      "key": "reaction.itch",
+      "uuid": "4c469142-086d-5aab-bc62-db3cd6ac5f73",
+      "domain": "concepts"
+    },
+    {
+      "key": "reaction.other",
+      "uuid": "55b7a7f0-036f-5e95-9134-7c2a8d39fd38",
+      "domain": "concepts"
+    },
+    {
+      "key": "allergyseverity.mild",
+      "uuid": "b7ec4437-5bfc-5d92-b5f2-f1f89d72e84c",
+      "domain": "concepts"
+    },
+    {
+      "key": "allergyseverity.moderate",
+      "uuid": "d545a5a9-dd35-5268-98b6-a9f09188518a",
+      "domain": "concepts"
+    },
+    {
+      "key": "allergyseverity.severe",
+      "uuid": "99dbb5e5-ddde-579e-b6ca-f228477dade7",
+      "domain": "concepts"
+    },
+    {
+      "key": "serviceconcept.consult-test",
+      "uuid": "113d6e27-e05b-5f9c-b835-3734678cb892",
+      "domain": "concepts"
+    },
+    {
+      "key": "serviceconcept.lab-glu",
+      "uuid": "d114f6a8-8a4b-5900-af8b-c9bb470c848b",
+      "domain": "concepts"
+    },
+    {
+      "key": "serviceconcept.lab-crea",
+      "uuid": "34fc5350-3462-5c4a-9c26-888dc92ae5a8",
+      "domain": "concepts"
+    },
+    {
+      "key": "serviceconcept.us-abd",
+      "uuid": "970a9b87-c95e-5563-8742-f9e212e70f41",
+      "domain": "concepts"
+    },
+    {
+      "key": "serviceconcept.ecg-bed",
+      "uuid": "e0f130e2-cf5e-5373-8bf4-6cf753de6e60",
+      "domain": "concepts"
+    },
+    {
+      "key": "serviceconcept.proc-test",
+      "uuid": "94cafaff-8d79-588e-937d-97b6b7434b09",
+      "domain": "concepts"
+    },
+    {
+      "key": "serviceconcept.lab-panel-test",
+      "uuid": "d4b0f211-4c8e-5ef7-bd0d-e6aa743a8b76",
+      "domain": "concepts"
+    },
+    {
+      "key": "testresult.glu",
+      "uuid": "42ac7593-f43f-5b6e-8e82-537dd2b0950c",
+      "domain": "concepts"
+    },
+    {
+      "key": "testresult.crea",
+      "uuid": "d461b041-d1b7-5657-baf3-43d214eaed41",
+      "domain": "concepts"
+    },
+    {
+      "key": "role.reception",
+      "uuid": "8ca9af35-fcb9-544f-a700-45effa98a741",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.patient_identity.read",
+      "uuid": "a71386f4-6983-503a-a230-42bfeb599027",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.patient_identity.create",
+      "uuid": "b67f08d3-faf6-5585-97ef-b08ebad98454",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.patient_identity.update",
+      "uuid": "066f1210-1ced-5f11-a48a-fe754774baa6",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.visit.read",
+      "uuid": "e1596920-f1e1-597f-8dbc-fa5eb85374e7",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.visit.create",
+      "uuid": "5ea632b9-de82-52d9-8310-e28e7f65f98d",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.visit.update",
+      "uuid": "a254d235-9aa1-520b-ba86-e9090b996eea",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.visit.cancel",
+      "uuid": "121b8a87-e8dd-5d97-aa24-4a61926845f3",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.appointment.read",
+      "uuid": "67d276da-afc6-5f8c-86fc-2dd4811f4903",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.appointment.create",
+      "uuid": "59415802-df82-5412-9bd9-6d1d7121cce5",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.appointment.update",
+      "uuid": "3bd1c9a9-e09b-598b-84c0-3bbb07e7e214",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.appointment.cancel",
+      "uuid": "b3af6463-8f8a-532a-9c90-2bbaa9d8a486",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.appointment.print",
+      "uuid": "446d4a57-17e3-5df1-8208-e5eb2ce384f7",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.queue.read",
+      "uuid": "2618a5fc-cdb0-548e-8695-042df82fd1da",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.queue.create",
+      "uuid": "1a73bdb2-e15e-5695-9c10-b46cbdba4e7e",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.queue.update",
+      "uuid": "ba91cefe-3b04-5784-9d43-fc0afbcb04ed",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.queue.cancel",
+      "uuid": "ae12b03c-9e8a-5991-b781-270bcbea7358",
+      "domain": "privileges"
+    },
+    {
+      "key": "role.cashier",
+      "uuid": "db9ec101-2135-55a8-9967-2483ac965bcc",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.billing.read",
+      "uuid": "8fa718a8-2bc9-510d-9bfe-a3e6e6434d93",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.billing.create",
+      "uuid": "b0e90ded-a487-5a4a-8efa-0f755b7f44a9",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.billing.cancel",
+      "uuid": "c5450ec3-c072-5072-81e2-742ec7c7e7ad",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.billing.print",
+      "uuid": "95563ca6-f8cd-5f11-a317-88f67b4c8c41",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.billing.download",
+      "uuid": "83157668-7756-513b-83fb-0b8b3251fabf",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.payment.read",
+      "uuid": "0cd61baa-837a-5fe5-b7c1-55056214cac2",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.payment.create",
+      "uuid": "143f048b-a3d2-5c41-b7e1-c6801b87b94c",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.payment.print",
+      "uuid": "b6eb3c07-acaa-58f0-a90c-947a1b571f39",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.payment.download",
+      "uuid": "5ce716ee-6739-5091-b4fd-1049a5385e9f",
+      "domain": "privileges"
+    },
+    {
+      "key": "role.nurse",
+      "uuid": "352df280-e484-5be5-83af-0582bd72911b",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.vitals.read",
+      "uuid": "cbf1f745-beee-5320-8331-0c5c13260eb1",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.vitals.create",
+      "uuid": "0be5704e-f41e-59da-9a73-9b685cbe8e29",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.vitals.update",
+      "uuid": "4a8b3f43-6bfd-5080-86de-ba06dbf52519",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.vitals.void",
+      "uuid": "daed5ace-4d1d-5335-a5f8-27389fefb869",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.clinical_chart.read",
+      "uuid": "f16912ce-f4c0-5ec9-9d8d-85c1624020ff",
+      "domain": "privileges"
+    },
+    {
+      "key": "role.doctor",
+      "uuid": "72c30efb-9b10-5103-a637-7eb81fb40172",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.clinical_chart.print",
+      "uuid": "40f09f5b-53e9-5c63-9873-d46db694aeaa",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.clinical_chart.download",
+      "uuid": "52f884a7-360a-5582-8be8-9f06f785059c",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnosis.read",
+      "uuid": "a5c23dd2-86a7-5d7d-9dac-561d69f00da8",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnosis.create",
+      "uuid": "fa77b6a5-7a78-5478-aca7-d105e4f7ba30",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnosis.update",
+      "uuid": "ea8c96ac-171f-5e0e-88de-642dc83bfd67",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnosis.void",
+      "uuid": "35f77f54-1b07-5f49-a78d-ee8f48875d9e",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.allergy.read",
+      "uuid": "f8115d40-af0a-52b3-8624-5631d22e01ac",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.allergy.create",
+      "uuid": "74965d76-521e-53f1-aada-3badb59a8ba7",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.allergy.update",
+      "uuid": "f429b459-0d31-5e82-b2bc-734fc4e9c1ab",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.allergy.void",
+      "uuid": "c98f5846-b8a3-5d59-971b-b3726a0574ec",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.prescription.read",
+      "uuid": "0b2a43ad-c0eb-5943-85ba-b2d34c106e48",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.prescription.create",
+      "uuid": "61b3c552-139d-5313-b8a1-3dbb75789a88",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.prescription.update",
+      "uuid": "ae12a609-2db4-52f8-a263-b08e570267db",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.prescription.cancel",
+      "uuid": "48bb24cc-3f11-5711-8c5b-f7a1259d5567",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.prescription.print",
+      "uuid": "5c28b279-1792-568e-9e32-226991a9dee7",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.prescription.download",
+      "uuid": "db4b3754-996e-5d51-b87c-7eb16655183c",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_order.read",
+      "uuid": "d3e8b213-d034-5855-8fe8-db359b61afeb",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_order.create",
+      "uuid": "341d48ee-c87f-567b-ad9b-702e0cee0035",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_order.update",
+      "uuid": "2dff02b5-e88c-5aff-ad95-bd194bf47e98",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_order.cancel",
+      "uuid": "0e548c99-87b6-557f-93ab-db2eba1c88be",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_order.print",
+      "uuid": "d6ebca36-85b5-59f4-8a4e-7dbde9c6d135",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_order.download",
+      "uuid": "b83b922f-7ffc-590d-a189-d9b676be29fd",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_result.read",
+      "uuid": "702e7def-06b5-55f4-814e-d8d5e3ec5b29",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_result.print",
+      "uuid": "0599280d-5e06-53c2-98e7-9b8111866705",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_result.download",
+      "uuid": "e52f4726-9720-5688-94f6-6c2ec6cda604",
+      "domain": "privileges"
+    },
+    {
+      "key": "role.lab",
+      "uuid": "136d88da-16ac-5077-9c42-080ac83ca356",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.diagnostic_result.create",
+      "uuid": "203b4744-9b75-52f7-b50a-b69b6b0fec2c",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_result.update",
+      "uuid": "24ca3669-ed42-5a84-bbfb-d1ed050ee276",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.diagnostic_result.void",
+      "uuid": "95dade3e-f440-5b68-8029-d89abaeca35a",
+      "domain": "privileges"
+    },
+    {
+      "key": "role.pharmacy",
+      "uuid": "5ff70d2c-13ad-52c2-9ec0-afffc5f972c9",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.dispensing.read",
+      "uuid": "a6ac1fc0-9981-57bd-ab00-bd903009bf1d",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.dispensing.create",
+      "uuid": "36d9a7dc-1c40-5714-9bf0-72fde1779c50",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.dispensing.print",
+      "uuid": "5522cafc-a3ea-597c-a6a8-ce6e2da6e9dc",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.dispensing.download",
+      "uuid": "9edf3bae-40bf-55d1-86dc-ae1414c20ddc",
+      "domain": "privileges"
+    },
+    {
+      "key": "role.manager",
+      "uuid": "037ef9b9-4780-54b8-9b2b-0266b5e31df2",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.reports.read",
+      "uuid": "433aabbe-325a-535f-9b93-554b872d43ec",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.reports.print",
+      "uuid": "f6be7f01-b163-550b-bbac-c7580bfd3f3e",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.reports.download",
+      "uuid": "7bbcdc7d-9e29-53ed-a32b-063d69169e3d",
+      "domain": "privileges"
+    },
+    {
+      "key": "role.admin",
+      "uuid": "545d9037-557e-5ea3-8557-1f70247768c1",
+      "domain": "roles"
+    },
+    {
+      "key": "privilege.metadata_admin.read",
+      "uuid": "3a94b6bb-6efb-5ded-aed9-6f5ae3243842",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.metadata_admin.create",
+      "uuid": "eb1aaec3-68e9-5376-af16-af93eb880956",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.metadata_admin.update",
+      "uuid": "5a431849-a272-5be6-b4e0-b70bd1948be9",
+      "domain": "privileges"
+    },
+    {
+      "key": "privilege.metadata_admin.void",
+      "uuid": "25dc216b-b7d0-59a7-82e2-8bd09f3d2045",
+      "domain": "privileges"
+    },
+    {
+      "key": "diagnosiscode.e11",
+      "uuid": "51cf5b2e-8268-5f86-80c8-e07fa7504deb",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.e11_9",
+      "uuid": "217f51b2-3a0d-5c5a-aa98-87ba01f3c847",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.i10",
+      "uuid": "b4fe079c-c1ac-5dab-9615-d490a28d60f3",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.i63_9",
+      "uuid": "965867e9-e28f-5c3a-bfe5-0b7844150340",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.j06_9",
+      "uuid": "051e16f5-ec21-5aa6-8a0e-c6dd1f2b5999",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.k29_7",
+      "uuid": "a50154cb-ff53-5981-a7ee-a6a40f9252a1",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.m10_9",
+      "uuid": "f5c45dba-012f-5e36-a362-551b869eb7c8",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.z00_0",
+      "uuid": "071206ea-6647-50d6-8bd0-5d38f39dc623",
+      "domain": "concepts"
+    },
+    {
+      "key": "diagnosiscode.m10_90",
+      "uuid": "f5fd2028-bfe6-5800-8cef-5261f13b09d0",
+      "domain": "concepts"
+    }
+  ],
+  "backendProvisioning": [
+    {
+      "domain": "providers",
+      "source": "metadata/vinshc/catalogues/facilities.json",
+      "identity": "providerCode/providerUuid",
+      "method": "Core service/REST upsert by UUID; never create accounts from metadata"
+    },
+    {
+      "domain": "provider-person-practitioner-binding",
+      "source": "metadata/vinshc/catalogues/facilities.json",
+      "method": "Upsert synthetic Person by personUuid and bind Provider.person; provision Provider by providerUuid. FHIR2 4.2.0 exposes Provider.uuid as Practitioner.id; keep personUuid independent"
+    },
+    {
+      "domain": "drug-ingredients",
+      "source": "metadata/vinshc/catalogues/medications.json",
+      "method": "Drug CSV provisions drug/concept/form/display strength; separately upsert ingredient concept/strength/unit relations through verified Core service/API. No unverified mass-volume conversion"
+    },
+    {
+      "domain": "drug-order-allowed-concept-sets",
+      "source": "metadata/vinshc/catalogues/medication-units.json",
+      "method": "Verify Core dosing/dispensing/duration unit and route/frequency concept-set/global-property constraints on 2.8.8; merge required members idempotently without overwriting upstream members. Unit existence alone does not prove DrugOrder acceptance"
+    },
+    {
+      "domain": "clinical-coding",
+      "source": "metadata/vinshc/contracts/fhir.json",
+      "method": "Keep ICD/local coding system/version in adapter projection; ConceptMap/source provisioning requires reviewed terminology acceptance. Never auto-import pending LOINC mappings"
+    },
+    {
+      "domain": "allergyLifecycle/diagnosisRevision/prescriptionSnapshot/billing/dispensing",
+      "source": "metadata/vinshc/contracts/b4-b9.json",
+      "method": "Adapter storage/migrations/API, not unsupported Initializer domain"
+    },
+    {
+      "domain": "services/prices/specimens/panels",
+      "source": "metadata/vinshc/catalogues/services.json",
+      "method": "Explicit adapter import keyed UUID; stable business code/version; immutable old snapshots"
+    },
+    {
+      "domain": "appointments/queues",
+      "source": "metadata/vinshc/contracts/workflow.json",
+      "method": "Module-specific adapter schema/API to verify on pinned runtime"
+    },
+    {
+      "domain": "PRN orderFrequency",
+      "source": "metadata/vinshc/catalogues/medication-units.json",
+      "method": "Provision null-frequency PRN through tested Core service/REST; no invented per-day rate"
+    }
+  ],
+  "clinicalMappingsImported": false,
+  "accountsOrCredentialsIncluded": false,
+  "idempotency": "Upsert by UUID/stable name for role/privilege; never match mutable labels. Second import no extra rows; update version/label preserves UUID. Runtime proof required from BE",
+  "fileSha256": {
+    "metadata/vinshc/initializer-test/concepts/vinshc/040-test-catalogues.csv": "4b94988c6a43d8310206c9b8c4e11b0e2ae34ec47f301d599da2c6c780685aad",
+    "metadata/vinshc/initializer-test/privileges/vinshc/metadata.csv": "515741f044f7ac56d9a5c5302812641a6b3bc038b4d1e9e99f23d8b060e572f7",
+    "metadata/vinshc/initializer-test/roles/vinshc/metadata.csv": "ad24ee72141539052d365672f0728fe9f5301732cdf0ac4d9ed6d55d87cde24c",
+    "metadata/vinshc/initializer-test/locations/vinshc/test-rooms.csv": "6925759422910325402aee04d56d58b59c11f57e24e01d176f2b210ebfc3a1f5",
+    "metadata/vinshc/initializer-test/encounterroles/vinshc/result-reviewer.csv": "76768142a0632bbbc4c176b89eaca56302b005ad730df13cc3c263039c27d91d",
+    "metadata/vinshc/initializer-test/drugs/vinshc/medications.csv": "b21631bdf7c162dbd35943af085a7ace80fd177b661683c58779bebf968392aa",
+    "metadata/vinshc/initializer-test/orderfrequencies/vinshc/frequencies.csv": "e4b407df9a4ae261b05519ca16912dce75b0c76a400eb78521e557e68b66e587"
+  }
+}

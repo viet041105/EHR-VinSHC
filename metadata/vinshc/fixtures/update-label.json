@@ -1,0 +1,11 @@
+{
+  "fromVersion": "0.3.0",
+  "toVersion": "0.3.1",
+  "basePackSha256": "9f21f5a9b9c75360f1f4b59999bc809f8f6aefec0c7ae84d95e9224a8d450cb3",
+  "entityKey": "vitals.mach",
+  "entityUuid": "263e4d0b-61d2-5517-bcb1-992cfb60675b",
+  "beforeLabel": "Mạch",
+  "afterLabel": "Mạch (lần/phút)",
+  "afterNote": "Controlled metadata label update; clinical units and concept identity unchanged",
+  "changelogEntry": "0.3.1 test overlay: đổi nhãn/note mạch, giữ toàn bộ key/UUID/datatype/unit/catalogue và lịch sử; không phải báo cáo runtime."
+}

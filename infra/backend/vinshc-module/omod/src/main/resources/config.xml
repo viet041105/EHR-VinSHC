@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module configVersion="1.6">
+  <id>vinshc</id>
+  <name>VinSHC Backend Extensions</name>
+  <version>${project.parent.version}</version>
+  <package>org.openmrs.module.vinshc</package>
+  <author>VinSHC</author>
+  <description>${project.parent.description}</description>
+  <activator>org.openmrs.module.vinshc.VinshcActivator</activator>
+  <require_version>2.8.0</require_version>
+  <require_modules>
+    <require_module>org.openmrs.module.webservices.rest</require_module>
+  </require_modules>
+  <privilege>
+    <name>VinSHC: Read patient administration</name>
+    <description>Read VinSHC contact, field-state and address records.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Write patient administration</name>
+    <description>Create, update and void VinSHC contact, field-state and address records.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Record vitals</name>
+    <description>Record vital-sign observations through the validated VinSHC endpoint.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Read clinical record</name>
+    <description>Read VinSHC consultation summaries, diagnoses, allergies and drug orders.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Record consultation</name>
+    <description>Create and correct validated VinSHC consultation observations.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Finalize consultation</name>
+    <description>Finalize a VinSHC consultation after completeness checks.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Record diagnosis</name>
+    <description>Record, replace and void catalogue-coded encounter diagnoses.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Record allergy</name>
+    <description>Record and void catalogue-coded patient allergies.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Prescribe medication</name>
+    <description>Create and discontinue validated outpatient drug orders.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Manage authorization</name>
+    <description>Provision server-side role and facility workspace assignments.</description>
+  </privilege>
+  <privilege>
+    <name>VinSHC: Read audit log</name>
+    <description>Read VinSHC record-access and clinical-change audit evidence.</description>
+  </privilege>
+  <globalProperty>
+    <property>vinshc.diagnosis.icd10ConceptSourceUuid</property>
+    <defaultValue></defaultValue>
+    <description>UUID of the concept reference source holding the approved ICD-10 catalogue. Empty means diagnosis writes return 503.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.diagnosis.icd10CatalogueVersion</property>
+    <defaultValue></defaultValue>
+    <description>Version label of the approved ICD-10 catalogue, returned with every diagnosis.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.diagnosis.icd10SelectableConceptSetUuid</property>
+    <defaultValue></defaultValue>
+    <description>Concept set containing selectable ICD-10 diagnosis concepts.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.allergy.allergenConceptSetUuid.drug</property>
+    <defaultValue></defaultValue>
+    <description>Concept set of approved drug allergens.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.allergy.allergenConceptSetUuid.food</property>
+    <defaultValue></defaultValue>
+    <description>Concept set of approved food allergens.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.allergy.allergenConceptSetUuid.environment</property>
+    <defaultValue></defaultValue>
+    <description>Concept set of approved environmental allergens.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.allergy.reactionConceptSetUuid</property>
+    <defaultValue></defaultValue>
+    <description>Concept set of approved allergy reactions.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.allergy.severityConceptSetUuid</property>
+    <defaultValue></defaultValue>
+    <description>Concept set of approved allergy severities.</description>
+  </globalProperty>
+  <globalProperty>
+    <property>vinshc.allergy.allowNonCoded</property>
+    <defaultValue>false</defaultValue>
+    <description>true permits non-coded allergen/reaction text; default false until facility policy decides.</description>
+  </globalProperty>
+  <messages>
+    <lang>en</lang>
+    <file>messages.properties</file>
+  </messages>
+</module>

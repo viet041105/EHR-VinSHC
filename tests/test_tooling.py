@@ -12,12 +12,13 @@ from unittest.mock import patch
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "scripts"))
 
 from bootstrap import bootstrap
-from check_config import validate_config
+from check_config import same_path, validate_config
 from check_database import REQUIRED_TABLES, verify_snapshot
 from collect_diagnostics import redact
 from common import ROOT, read_settings
 from smoke import (Client, SmokeError, assert_capabilities, assert_core_version, assert_modules,
-                   assert_session, check_local_javascript, create_fixture, verify_fixture, verify_clinical_fixture)
+                   assert_session, check_local_javascript, create_fixture, module_status,
+                   verify_fixture, verify_clinical_fixture)
 
 
 class EnvironmentTests(unittest.TestCase):
@@ -116,6 +117,24 @@ class SmokeRegressionTests(unittest.TestCase):
         with self.assertRaises(SmokeError):
             assert_modules(modules, expected, {"stockmanagement": "3.0.0"})
 
+    def test_module_report_records_started_state_and_version(self):
+        modules = [{"uuid": "billing", "started": True, "version": "2.3.0"},
+                   {"uuid": "queue", "started": True, "version": "3.0.0"}]
+        self.assertEqual(module_status(modules, {"queue": "3.0.0", "billing": "2.3.0"}), {
+            "billing": {"version": "2.3.0", "started": True},
+            "queue": {"version": "3.0.0", "started": True},
+        })
+
+    def test_fhir_report_ignores_malformed_capability_entries(self):
+        statement = {"resourceType": "CapabilityStatement", "fhirVersion": "4.0.1", "rest": [{
+            "mode": "server", "resource": [
+                {"type": name, "interaction": [{"code": "read"}, {}, {"code": None}]}
+                for name in ("Patient", "Encounter", "Observation")
+            ] + [{"interaction": [{"code": "read"}]}]}]}
+        self.assertEqual(assert_capabilities(statement), {
+            "Patient": {"read"}, "Encounter": {"read"}, "Observation": {"read"},
+        })
+
     def test_core_version_uses_nested_installation_field(self):
         info = {"SystemInfo.title.openmrsInformation": {
             "SystemInfo.OpenMRSInstallation.openmrsVersion": "2.8.8  Build 0"}}
@@ -211,7 +230,7 @@ class ConfigurationRegressionTests(unittest.TestCase):
             with self.subTest(key=key), self.assertRaises(ValueError):
                 validate_config(config, self.baseline, self.settings)
 
-    def test_old_mariadb_application_volume_is_rejected(self):
+    def test_unexpected_application_volume_is_rejected(self):
         config = copy.deepcopy(self.config)
         config["services"]["backend"]["volumes"][0]["source"] = "openmrs-data"
         with self.assertRaises(ValueError):
@@ -223,6 +242,35 @@ class ConfigurationRegressionTests(unittest.TestCase):
             mount for mount in config["services"]["db"]["volumes"] if mount["type"] == "volume"]
         with self.assertRaises(ValueError):
             validate_config(config, self.baseline, self.settings)
+
+    def test_reviewed_configuration_passes(self):
+        validate_config(copy.deepcopy(self.config), self.baseline, self.settings)
+
+    def test_host_path_separator_style_does_not_matter(self):
+        self.assertTrue(same_path("D:\\repo\\infra\\postgres\\initdb", "D:/repo/infra/postgres/initdb"))
+        self.assertTrue(same_path("/repo/infra/", "/repo/infra"))
+        self.assertFalse(same_path("D:/repo/other", "D:/repo/infra"))
+        self.assertFalse(same_path(None, "/repo"))
+
+    def test_initializer_person_attribute_patch_is_built_into_backend(self):
+        source = (ROOT / "infra/backend/postgresql/initializer/PersonAttributeTypesCsvParser.java").read_text(
+            encoding="utf-8")
+        dockerfile = (ROOT / "infra/backend/Dockerfile").read_text(encoding="utf-8")
+        self.assertIn("type.setSortWeight(0.0)", source)
+        self.assertIn("initializer-2.12.0.omod", dockerfile)
+        self.assertIn("PersonAttributeTypesCsvParser.class", dockerfile)
+
+    def test_b2_internal_identifier_generation_is_versioned(self):
+        source = (ROOT / "infra/backend/configuration/idgen/vinshc/internal-patient-id.csv").read_text(
+            encoding="utf-8")
+        option = (ROOT / "infra/backend/configuration/autogenerationoptions/vinshc/internal-patient-id.csv").read_text(
+            encoding="utf-8")
+        self.assertIn("3bfdfcf4-987a-521d-8e5d-7d60e782b6fa", source)
+        self.assertIn("ca12ea64-d279-5cce-a2a9-e2c46446ac34", source)
+        self.assertIn("00000001,VSHC-,,13,13", source)
+        self.assertIn("3f790925-f744-5b56-92cd-237d0c54e187", option)
+        self.assertIn("feae71be-957c-4f94-b100-d84bc6915574", option)
+        self.assertIn(",false,true,", option)
 
 
 class DatabaseRegressionTests(unittest.TestCase):

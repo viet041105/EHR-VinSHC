@@ -1,74 +1,17 @@
 """Exercise real local REST/FHIR endpoints and a synthetic persistence fixture."""
 
 import argparse
-import base64
 from datetime import datetime, timezone
 import json
 from pathlib import Path
 import re
 import sys
 import time
-import urllib.error
 import urllib.parse
-import urllib.request
 import uuid
 
+from api_client import Client, SmokeError
 from common import ROOT, read_settings
-
-
-class SmokeError(Exception):
-    pass
-
-
-class NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        # A redirect/login page must not count as a successful API check or receive credentials.
-        return None
-
-
-class Client:
-    def __init__(self, base_url, username, password):
-        parsed = urllib.parse.urlsplit(base_url)
-        if (parsed.scheme != "http" or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
-                or parsed.username or parsed.password or parsed.path not in {"", "/"}
-                or parsed.query or parsed.fragment):
-            raise SmokeError("Smoke tests accept only a local HTTP origin; use an isolated development database.")
-        self.base_url = base_url.rstrip("/")
-        self.username = username
-        self.password = password
-        self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
-
-    def request(self, path, *, method="GET", payload=None, auth=True, password=None, timeout=10):
-        headers = {"Accept": "application/json, application/fhir+json"}
-        data = None
-        if payload is not None:
-            data = json.dumps(payload).encode("utf-8")
-            headers["Content-Type"] = "application/json"
-        if auth:
-            token = base64.b64encode(f"{self.username}:{password or self.password}".encode()).decode()
-            headers["Authorization"] = f"Basic {token}"
-        request = urllib.request.Request(self.base_url + path, data=data, headers=headers, method=method)
-        try:
-            with self.opener.open(request, timeout=timeout) as response:
-                return response.status, response.headers, response.read()
-        except urllib.error.HTTPError as error:
-            return error.code, error.headers, error.read()
-        except (urllib.error.URLError, TimeoutError, OSError) as error:
-            raise SmokeError(f"{method} {path}: cannot reach local service.") from error
-
-    def json(self, path, *, statuses=(200,), **kwargs):
-        status, headers, body = self.request(path, **kwargs)
-        if status not in statuses:
-            raise SmokeError(f"{kwargs.get('method', 'GET')} {path}: expected {statuses}, got HTTP {status}.")
-        if "json" not in headers.get("Content-Type", "").lower():
-            raise SmokeError(f"{path}: expected JSON, not an HTML/login response.")
-        try:
-            result = json.loads(body)
-        except (ValueError, UnicodeDecodeError) as error:
-            raise SmokeError(f"{path}: invalid JSON response.") from error
-        if not isinstance(result, dict):
-            raise SmokeError(f"{path}: expected a JSON object.")
-        return result
 
 
 def require(condition, message):
@@ -104,7 +47,13 @@ def assert_capabilities(statement):
     for rest in statement.get("rest", []):
         if rest.get("mode") == "server":
             for resource in rest.get("resource", []):
-                resources[resource.get("type")] = {item.get("code") for item in resource.get("interaction", [])}
+                resource_type = resource.get("type")
+                if not isinstance(resource_type, str) or not resource_type:
+                    continue
+                resources[resource_type] = {
+                    item.get("code") for item in resource.get("interaction", [])
+                    if isinstance(item.get("code"), str) and item.get("code")
+                }
     for name in ("Patient", "Encounter", "Observation"):
         require("read" in resources.get(name, set()), f"FHIR does not advertise {name} read support.")
     return resources
@@ -127,6 +76,18 @@ def assert_modules(modules, expected_components, expected_modules=None):
                 f"Baseline module {module_id} differs from the reviewed version.")
         versions[module_id] = module["version"]
     return versions
+
+
+def module_status(modules, expected_ids):
+    """Return an explicit, stable module inventory for the B0 evidence report."""
+    by_id = {module.get("uuid"): module for module in modules}
+    return {
+        module_id: {
+            "version": by_id[module_id]["version"],
+            "started": by_id[module_id].get("started") is True,
+        }
+        for module_id in sorted(expected_ids)
+    }
 
 
 def assert_core_version(system_info, expected):
@@ -332,9 +293,11 @@ def run_checks(client, args, report):
     baseline = json.loads((ROOT / "config/baseline.json").read_text(encoding="utf-8"))
     modules = client.json("/openmrs/ws/rest/v1/module?v=full").get("results", [])
     report["moduleVersions"] = assert_modules(modules, baseline["upstreamComponents"], baseline["requiredModules"])
+    report["modules"] = module_status(modules, baseline["requiredModules"])
     system_info = client.json("/openmrs/ws/rest/v1/systeminformation").get("systemInfo", {})
     core_version = baseline["upstreamComponents"]["openmrsCore"]
     report["coreVersion"] = assert_core_version(system_info, core_version)
+    report["referenceApplicationVersion"] = baseline["referenceApplication"]["version"]
     passed("reviewed core, REST, FHIR2 and Initializer versions")
     locations = client.json("/openmrs/ws/rest/v1/location?tag=Login%20Location&v=full").get("results", [])
     expected_location = baseline["developmentLocation"]
@@ -366,7 +329,10 @@ def run_checks(client, args, report):
     patients = client.json("/openmrs/ws/rest/v1/patient?q=VinSHC")
     require(isinstance(patients.get("results"), list), "REST patient search returned an unexpected structure.")
     resources = assert_capabilities(client.json("/openmrs/ws/fhir2/R4/metadata"))
-    report["fhirCapabilities"] = {name: sorted(resources[name]) for name in ("Patient", "Encounter", "Observation")}
+    report["fhirVersion"] = "4.0.1"
+    report["fhirCapabilities"] = {
+        name: sorted(interactions) for name, interactions in sorted(resources.items())
+    }
     passed("REST patient search and FHIR R4 capabilities")
     bundle = client.json("/openmrs/ws/fhir2/R4/Patient?_count=1")
     require(bundle.get("resourceType") == "Bundle" and bundle.get("type") == "searchset",

@@ -12,8 +12,6 @@ def bootstrap(root=ROOT):
     target = root / ".env"
     if target.exists():
         print(".env already exists; keeping its credentials and settings.")
-        if any(line.startswith("MYSQL_ROOT_PASSWORD=") for line in target.read_text(encoding="utf-8-sig").splitlines()):
-            print("Legacy MariaDB settings detected. Read docs/POSTGRESQL_MIGRATION.md before starting the PostgreSQL stack.")
         return
     text = (root / ".env.example").read_text(encoding="utf-8")
     replacements = {

@@ -1,0 +1,98 @@
+{
+  "version": "0.3.0",
+  "testOnly": true,
+  "runtimeStatus": "not_executed_by_metadata_owner",
+  "scenarios": [
+    {
+      "id": "B4-two-visits",
+      "identity": {
+        "patientUuid": "4613f53e-4182-5a7e-a283-3be49b0d6bd4",
+        "visit1Uuid": "d9a03406-bb7b-54e1-9697-9a150635df87",
+        "visit2Uuid": "841e162c-73fb-59d9-8ef0-cec06cdaa844",
+        "encounter1Uuid": "bb2b212b-54a7-5063-a8cf-e7bec2ebb9e5",
+        "encounter2Uuid": "c089c125-760a-5b91-a0ec-c94f35fdce67"
+      },
+      "steps": [
+        "create patient and two distinct visits/encounters",
+        "create primary/secondary diagnosis; update with revision; void secondary with reason",
+        "verify diagnosis remains encounter-scoped on second visit",
+        "create allergy; screen not_asked next visit; update severity; resolve; verify no delete",
+        "enter mistaken second allergy and void with reason"
+      ],
+      "assertions": [
+        "native Diagnosis plus scoped Condition round-trip",
+        "allergy lifecycle adapter and FHIR statuses preserved",
+        "original revisions/audit actor/time retained"
+      ]
+    },
+    {
+      "id": "B5-B6-prescription-rbac",
+      "steps": [
+        "provision four synthetic providers without accounts",
+        "assign test accounts externally to each role/facility on isolated runtime",
+        "create draft with two drugs, edit and confirm",
+        "attempt in-place edit: reject; revise with previousOrder, discontinue obsolete order",
+        "dispense 4, replay same key, dispense remaining 6",
+        "cancel draft; discontinue active order; reject later dispense"
+      ],
+      "assertions": [
+        "8-role read/create/update/void/cancel/print/download restrictions and facility/search scope",
+        "cashier/admin/manager clinical access returns 403",
+        "pharmacy draft returns 403; assigned-only lab and clinician workspace verified",
+        "parallel same-key dispense/receipt/refund creates one effect; changed payload returns 409"
+      ]
+    },
+    {
+      "id": "B8-result-and-billing",
+      "steps": [
+        "snapshot service and unit price; assign order; apply prepay/postpay gate",
+        "technologist starts assigned order and submits preliminary result",
+        "authorized reviewer finalizes; correction creates new revision linked to prior",
+        "issue settled receipt; partial refund then remaining refund",
+        "reject refund over remaining amount and duplicate payment UUID",
+        "try proposed MIME/size rules in test upload service only"
+      ],
+      "assertions": [
+        "order/patient/facility linkage verified",
+        "no invented clinical reference range or unit conversion",
+        "no native Order active status interpreted as result completed",
+        "final result never mutated; no auto refund/visit close",
+        "price change does not rewrite old bills/documents; refund day is own settled day"
+      ]
+    },
+    {
+      "id": "B9-queue-print-report",
+      "steps": [
+        "run STANDARD_POSTPAY with nurse/pharmacy",
+        "run COMPACT_PREPAY without nurse/pharmacy and explicit doctor-vitals grant",
+        "replay workflow event: no duplicate queue item; requeue uses next iteration",
+        "check provider/location slot collision atomically",
+        "render all six print examples with TEST watermark",
+        "query daily totals around UTC+7 boundary and cross-facility rows"
+      ],
+      "assertions": [
+        "queue state/reason and auto/manual transition rules",
+        "no early no_show; follow-up note not automatically a booked slot",
+        "immutable document version/number/line/signature snapshot",
+        "reports count distinct visits and settled receipts/refunds by their own date; manager sees aggregates only"
+      ]
+    },
+    {
+      "id": "metadata-install-update",
+      "steps": [
+        "clean isolated install of base managed CSV",
+        "explicitly import test CSV and provision adapter manifest",
+        "record UUID counts/names",
+        "import identical version again; compare counts",
+        "generate exact 0.3.1 label overlay and import; compare UUID/counts/history",
+        "test scoped FHIR read/write capabilities separately per resource"
+      ],
+      "assertions": [
+        "no extra rows after repeated import",
+        "all keys/UUIDs and historical references unchanged after label update",
+        "unapproved LOINC mappings remain absent",
+        "Condition/Allergy writes and MedicationRequest/ServiceRequest limitations evidenced, not assumed"
+      ]
+    }
+  ]
+}

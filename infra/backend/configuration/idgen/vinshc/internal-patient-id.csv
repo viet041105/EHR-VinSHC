@@ -1,0 +1,2 @@
+Uuid,Void/Retire,Name,Description,Identifier type,Base character set,First identifier base,Prefix,Suffix,Min length,Max length,_order:8200
+3bfdfcf4-987a-521d-8e5d-7d60e782b6fa,false,VinSHC Internal Patient ID Generator,Sequential source for clinic-owned patient record numbers,ca12ea64-d279-5cce-a2a9-e2c46446ac34,0123456789,00000001,VSHC-,,13,13,

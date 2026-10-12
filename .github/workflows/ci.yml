@@ -42,13 +42,16 @@ jobs:
           /tmp/actionlint -color
 
   smoke:
-    name: PostgreSQL, OpenMRS REST, FHIR and persistence
+    name: B1-B9 PostgreSQL, API, FHIR, restart and restore
     needs: configuration
     runs-on: ubuntu-24.04
-    timeout-minutes: 60
+    timeout-minutes: 90
     env:
       COMPOSE_PROJECT_NAME: ehr-ci-${{ github.run_id }}-${{ github.run_attempt }}
+      B9_RESTORE_PROJECT: ehr-ci-restore-${{ github.run_id }}-${{ github.run_attempt }}
+      COMPOSE_FILE: compose.yaml:tests/integration/compose.b4-metadata.yaml
       EHR_HTTP_PORT: '8080'
+      VINSHC_B4_CATALOGUE: metadata
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
@@ -60,6 +63,10 @@ jobs:
         run: python scripts/bootstrap.py
       - name: Validate settings
         run: python scripts/check_config.py
+      - name: Validate generated metadata and catalogue fixtures
+        run: |
+          python tools/metadata.py
+          python -m unittest discover -s metadata/tests -v
       - name: Pull exact reviewed images
         run: docker compose pull --quiet --ignore-buildable
       - name: Build PostgreSQL-compatible backend from the fixed upstream release
@@ -68,16 +75,66 @@ jobs:
         run: timeout 2400s docker compose up -d --wait --wait-timeout 2400
       - name: Verify PostgreSQL version, extensions and OpenMRS schema
         run: python scripts/check_database.py
+      - name: Verify imported metadata before workflow tests
+        run: >-
+          python tools/metadata.py --verify-url http://127.0.0.1:8080/openmrs
+          --report .runtime/reports/metadata-ci-before.json
       - name: Verify APIs and create synthetic patient and clinical data
         run: python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
+      - name: Verify ordered B1-B8 API, authorization, FHIR and MVP-2 contracts
+        # Explicit order: test_b23 needs the B2/B3 fixtures, but discover sorts it before test_b2_.
+        run: >-
+          python -m unittest -v
+          tests.integration.test_b1_contract tests.integration.test_b2_patient
+          tests.integration.test_b3_vitals tests.integration.test_b23_extensions
+          tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical
+          tests.integration.test_b5_authorization tests.integration.test_b7_fhir
+          tests.integration.test_b8_operations
       - name: Recreate containers and retain named volumes
         run: |
           docker compose down
           timeout 600s docker compose up -d --wait --wait-timeout 600
-      - name: Verify the same clinical data survived through REST and FHIR
+      - name: Verify Initializer idempotency and all data after restart
         run: |
           python scripts/check_database.py
+          python tools/metadata.py --verify-url http://127.0.0.1:8080/openmrs --report .runtime/reports/metadata-ci-after-restart.json
           python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
+          VINSHC_ACCEPTANCE_PHASE=restart python -m unittest -v tests.integration.test_b9_persistence
+      - name: Back up the complete synthetic clinic
+        run: >-
+          python scripts/recovery.py backup
+          --project "$COMPOSE_PROJECT_NAME"
+          --output .runtime/backups/b9-ci
+          --compose-file compose.yaml
+          --compose-file tests/integration/compose.b4-metadata.yaml
+          --wait-timeout 600
+      - name: Restore into a different empty project
+        run: >-
+          python scripts/recovery.py restore
+          --project "$B9_RESTORE_PROJECT"
+          --input .runtime/backups/b9-ci
+          --compose-file compose.yaml
+          --compose-file tests/integration/compose.b4-metadata.yaml
+          --http-port 18089
+          --fixture .runtime/smoke-fixture.json
+          --wait-timeout 1200
+          --cleanup-on-failure
+      - name: Verify metadata and workflow state after restore
+        run: |
+          python tools/metadata.py --verify-url http://127.0.0.1:18089/openmrs --report .runtime/reports/metadata-ci-after-restore.json
+          EHR_HTTP_PORT=18089 VINSHC_ACCEPTANCE_PHASE=restore python -m unittest -v tests.integration.test_b9_persistence
+      - name: Build redacted backend handoff evidence
+        run: |
+          python scripts/b9_handoff.py \
+            --require-persistence restart \
+            --require-persistence restore \
+            --metadata-report .runtime/reports/metadata-ci-before.json \
+            --metadata-report .runtime/reports/metadata-ci-after-restart.json \
+            --metadata-report .runtime/reports/metadata-ci-after-restore.json \
+            --recovery-report ".runtime/reports/b6-${B9_RESTORE_PROJECT}-recovery.json"
+      - name: Verify backend review regressions on the source stack
+        # Runs last: it adds synthetic transactions, and B9 asserts that nothing changed since B8.
+        run: python -m unittest -v tests.integration.test_b10_review_regressions
       - name: Collect redacted diagnostics
         if: always()
         run: python scripts/collect_diagnostics.py
@@ -91,4 +148,6 @@ jobs:
           if-no-files-found: warn
       - name: Remove only this CI run's containers and volumes
         if: always()
-        run: docker compose down --volumes --remove-orphans
+        run: |
+          docker compose -p "$B9_RESTORE_PROJECT" down --volumes --remove-orphans
+          docker compose -p "$COMPOSE_PROJECT_NAME" down --volumes --remove-orphans

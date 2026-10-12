@@ -1,6 +1,8 @@
 """Verify the real local PostgreSQL version, OpenMRS extensions and schema."""
 
 import json
+import os
+from pathlib import Path
 import subprocess
 import sys
 
@@ -62,7 +64,8 @@ def main():
               "tableCount": len(snapshot["tables"]),
               "stockForeignKeyCount": snapshot["stockForeignKeyCount"],
               "moduleBinaryColumnCount": snapshot["moduleBinaryColumnCount"]}
-    destination = ROOT / ".runtime/reports/database.json"
+    destination = Path(os.environ.get("VINSHC_DATABASE_REPORT",
+                                      ROOT / ".runtime/reports/database.json"))
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
     print(f"PASS: PostgreSQL {baseline['database']['version']}, UTF8, OpenMRS extensions "
