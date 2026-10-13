@@ -69,4 +69,13 @@
 @media(max-width:1100px){.workspace-card-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pending-filters{display:block}.pending-filters>button{margin-top:12px}}
 @media(max-width:600px){.workspace-card-grid{grid-template-columns:1fr}.workspace-welcome{display:block;padding:20px}.workspace-stat{margin-top:18px;align-items:flex-start;min-width:0}.context-panel,.preparation-panel,.workspace-records,.workflow-guide{padding:16px}.workspace-heading{flex-wrap:wrap}.context-panel summary{flex-wrap:wrap}.context-panel summary small{width:100%;padding-left:22px}.connected-content .form-actions{display:flex;flex-wrap:wrap}.task-card{padding:18px}.header-controls{flex-wrap:wrap}}
 @media(max-width:800px){.clinic-main:has(.connected-content) .clinic-sidebar{flex-direction:row;flex-wrap:nowrap;height:auto;overflow-x:auto;align-items:center}.clinic-main:has(.connected-content) .clinic-sidebar>button{flex-shrink:0;white-space:nowrap}}
+.session-identity{padding-right:18px;border-right:1px solid var(--line);font-size:12px;line-height:1.6;cursor:default}
+.session-identity dl{margin:0}
+.session-identity dl>div{display:flex;flex-wrap:wrap;gap:6px}
+.session-identity dt{color:var(--muted);font-weight:400}
+.session-identity dd{margin:0;font-weight:600;overflow-wrap:anywhere;min-width:0}
+.session-connection{display:block;color:#316b58;font-size:11px}
+.session-connection::before{content:"";display:inline-block;width:6px;height:6px;margin-right:6px;border-radius:50%;background:#498e77}
+.session-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+@media(max-width:600px){.clinic-header:has(.session-identity) .header-controls{width:100%;margin-left:0;gap:12px}.session-identity{width:100%;padding:0 0 10px;border-right:0;border-bottom:1px solid var(--line)}.session-actions{gap:8px}}
 @media print{#app{display:block!important}.result-panel{padding:0}.context-panel,.workspace-records,.preparation-panel,.workspace-welcome,.workspace-card-grid,.workflow-guide,.admin-directory{display:none!important}}

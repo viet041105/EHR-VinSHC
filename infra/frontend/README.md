@@ -54,6 +54,9 @@ Project Docker riêng: `vinshc-fe-local`. PostgreSQL và dữ liệu OpenMRS dù
 volume riêng, không ghi đè volume có sẵn của project khác. Gateway ở cổng 8080.
 Lần build/khởi tạo schema đầu cần nhiều thời gian; `up` đợi healthcheck tối đa 40 phút.
 
+Vị trí mã nguồn, dữ liệu, volume Docker và cách mở API/database của môi trường này:
+[LOCAL_BACKEND.md](LOCAL_BACKEND.md).
+
 Đăng nhập bằng `EHR_ADMIN_USERNAME` / `EHR_ADMIN_PASSWORD` trong
 `.runtime/backend/.env` (đọc bằng editor trên máy, không chia sẻ file này).
 `backend:admin` cấu hình tài khoản quản trị hiện có: thêm `VinSHC App: admin`,
@@ -85,6 +88,8 @@ thành danh mục lâm sàng đã được duyệt.
 ## Giao diện công việc
 
 Sau khi mở workspace, trang **Tổng quan công việc** hiển thị các chức năng đúng vai trò.
+Đầu trang hiển thị thông tin **Tài khoản**, **Vai trò hiện tại** và trạng thái kết nối;
+phần thông tin này tách khỏi hai nút **Đổi vai trò/cơ sở**, **Đăng xuất**.
 Chọn **Bệnh nhân** hoặc **Lượt khám** để mở màn hình mới (nếu role được phép).
 Trong **Hồ sơ đang làm việc**, áp dụng mã patient/visit/encounter có sẵn để dùng chung
 giữa các biểu mẫu; backend kiểm tra quyền và liên kết khi gửi.
