@@ -135,6 +135,9 @@ jobs:
       - name: Verify backend review regressions on the source stack
         # Runs last: it adds synthetic transactions, and B9 asserts that nothing changed since B8.
         run: python -m unittest -v tests.integration.test_b10_review_regressions
+      - name: Verify the staff workflow with real workspace accounts
+        # Registration, visits, vitals, worklists, dispensing and closure through the VinSHC adapter only.
+        run: python -m unittest -v tests.integration.test_b11_care_workflow
       - name: Collect redacted diagnostics
         if: always()
         run: python scripts/collect_diagnostics.py

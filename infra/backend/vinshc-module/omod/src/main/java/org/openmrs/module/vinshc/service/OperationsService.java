@@ -84,6 +84,8 @@ public class OperationsService {
 
 	private static final Set<String> RESULT_STATES = set("draft", "preliminary", "final", "corrected", "entered-in-error");
 
+	private static final Set<String> BILL_STATES = set("unpaid", "partially_paid", "paid", "refunded", "cancelled");
+
 	private static final ObjectMapper JSON = new ObjectMapper();
 
 	private static final Map<String, Set<String>> APPOINTMENT_TRANSITIONS = transitions("booked",
@@ -928,13 +930,311 @@ public class OperationsService {
 		return out;
 	}
 
+	// ---------------------------------------------------------------- worklists
+
+	private static final String TREE_CTE = "WITH RECURSIVE tree AS (SELECT location_id FROM location WHERE location_id=?"
+	        + " UNION SELECT l.location_id FROM location l JOIN tree t ON l.parent_location=t.location_id) ";
+
+	/** Minimal patient label for worklist rows: Vietnamese-order name and the internal record number. */
+	private static String patientLabels(String alias) {
+		return ", (SELECT concat_ws(' ', n.family_name, n.middle_name, n.given_name) FROM person_name n WHERE n.person_id="
+		        + alias + ".patient_id AND n.voided=false ORDER BY n.preferred DESC, n.person_name_id LIMIT 1) AS patient_name"
+		        + ", (SELECT pi.identifier FROM patient_identifier pi JOIN patient_identifier_type t"
+		        + " ON t.patient_identifier_type_id=pi.identifier_type WHERE pi.patient_id=" + alias + ".patient_id"
+		        + " AND pi.voided=false AND t.uuid='" + CareService.INTERNAL_ID_TYPE + "' ORDER BY pi.preferred DESC LIMIT 1)"
+		        + " AS patient_identifier";
+	}
+
+	private static String providerLabel(String column, String as) {
+		return ", (SELECT COALESCE(NULLIF(trim(concat_ws(' ', n.family_name, n.middle_name, n.given_name)),''), pr.name)"
+		        + " FROM provider pr LEFT JOIN person_name n ON n.person_id=pr.person_id AND n.voided=false AND n.preferred=true"
+		        + " WHERE pr.provider_id=" + column + " LIMIT 1) AS " + as;
+	}
+
+	private static void labels(Map<String, Object> out, Map<String, Object> row) {
+		out.put("patientName", row.get("patient_name"));
+		out.put("patientIdentifier", row.get("patient_identifier"));
+	}
+
+	/** Appointments of the caller's facility; one clinic day (default today) unless a patient is given. */
+	public Map<String, Object> appointments(String date, String providerUuid, String patientUuid, String status,
+	        Integer limit, Integer offset) {
+		require("appointment", "read");
+		Listing q = new Listing("a", "vinshc_appointment");
+		q.select(patientLabels("a") + providerLabel("a.provider_id", "provider_name"));
+		q.locationScope("a.facility_location_id");
+		if (patientUuid != null)
+			q.where("a.patient_id=?", scopedPatient(patientUuid).getPatientId());
+		if (providerUuid != null)
+			q.where("a.provider_id=?", provider(providerUuid).getProviderId());
+		if (status != null) {
+			if (!APPOINTMENT_STATES.contains(status))
+				throw bad("invalid appointment status");
+			q.where("a.status=?", status);
+		}
+		if (date != null || patientUuid == null)
+			q.day("a.start_at", date == null ? LocalDate.now(CLINIC_ZONE) : day(date, "date"));
+		List<Map<String, Object>> rows = new ArrayList<>();
+		Page page = q.run("a.start_at, a.appointment_id", limit, offset);
+		for (Map<String, Object> row : page.rows) {
+			Map<String, Object> view = appointmentView(row);
+			labels(view, row);
+			view.put("providerName", row.get("provider_name"));
+			view.put("serviceName", serviceName(row.get("service_uuid")));
+			rows.add(view);
+		}
+		return page.view(rows);
+	}
+
+	/** Queue tickets of the caller's facility for one clinic day; state=active (default) | all | a state. */
+	public Map<String, Object> queueList(String point, String state, String date, Integer limit, Integer offset) {
+		require("queue", "read");
+		Listing q = new Listing("q", "vinshc_queue_item");
+		q.select(patientLabels("q"));
+		q.locationScope("q.facility_location_id");
+		if (point != null) {
+			if (!metadata().queuePoints.containsKey(point))
+				throw bad("unknown queue point");
+			q.where("q.point_code=?", point);
+		}
+		states(q, "q.state", state, QUEUE_STATES, "waiting", "called", "in_service");
+		q.day("q.date_created", date == null ? LocalDate.now(CLINIC_ZONE) : day(date, "date"));
+		List<Map<String, Object>> rows = new ArrayList<>();
+		Page page = q.run("q.queue_number, q.queue_item_id", limit, offset);
+		for (Map<String, Object> row : page.rows) {
+			Map<String, Object> view = queueView(row);
+			labels(view, row);
+			Map<String, Object> pointRecord = metadata().queuePoints.get(string(row.get("point_code")));
+			view.put("pointName", pointRecord == null ? null : pointRecord.get("name"));
+			rows.add(view);
+		}
+		return page.view(rows);
+	}
+
+	/** Bills of the caller's facility; status=open → unpaid/partially paid. One day unless patient/visit. */
+	public Map<String, Object> bills(String status, String patientUuid, String visitUuid, String date, Integer limit,
+	        Integer offset) {
+		require("billing", "read");
+		Listing q = new Listing("b", "vinshc_bill");
+		q.select(patientLabels("b"));
+		q.facilityScope("b.facility_uuid");
+		if (patientUuid != null)
+			q.where("b.patient_id=?", scopedPatient(patientUuid).getPatientId());
+		if (visitUuid != null)
+			q.where("b.visit_id=?", visit(visitUuid).getVisitId());
+		if ("open".equals(status))
+			q.where("b.status IN ('unpaid','partially_paid')");
+		else if (status != null && !"all".equals(status)) {
+			if (!BILL_STATES.contains(status))
+				throw bad("invalid bill status");
+			q.where("b.status=?", status);
+		}
+		if (date != null || (patientUuid == null && visitUuid == null))
+			q.day("b.date_created", date == null ? LocalDate.now(CLINIC_ZONE) : day(date, "date"));
+		List<Map<String, Object>> rows = new ArrayList<>();
+		Page page = q.run("b.date_created DESC, b.bill_id DESC", limit, offset);
+		for (Map<String, Object> row : page.rows) {
+			Map<String, Object> view = billView(row);
+			labels(view, row);
+			rows.add(view);
+		}
+		return page.view(rows);
+	}
+
+	/** Receipts/refunds of the caller's facility; status=pending lists transfers awaiting settlement. */
+	public Map<String, Object> payments(String status, String billUuid, String date, Integer limit, Integer offset) {
+		require("payment", "read");
+		Listing q = new Listing("p", "vinshc_payment");
+		q.join(" JOIN vinshc_bill b ON b.bill_id=p.bill_id");
+		q.select(", b.patient_id AS bill_patient_id" + patientLabels("b"));
+		q.facilityScope("b.facility_uuid");
+		if (billUuid != null)
+			q.where("p.bill_id=?", billRow(billUuid).get("bill_id"));
+		if (status != null && !"all".equals(status)) {
+			if (!Arrays.asList("pending", "settled", "cancelled").contains(status))
+				throw bad("status must be pending, settled, cancelled or all");
+			q.where("p.status=?", status);
+		}
+		if (date != null || (billUuid == null && !"pending".equals(status)))
+			q.day("p.date_created", date == null ? LocalDate.now(CLINIC_ZONE) : day(date, "date"));
+		List<Map<String, Object>> rows = new ArrayList<>();
+		Page page = q.run("p.date_created DESC, p.payment_id DESC", limit, offset);
+		for (Map<String, Object> row : page.rows) {
+			Map<String, Object> view = paymentView(row);
+			labels(view, row);
+			view.put("patientUuid", uuid("patient", "patient_id", row.get("bill_patient_id")));
+			rows.add(view);
+		}
+		return page.view(rows);
+	}
+
+	/**
+	 * Service orders of the caller's facility; state=active (default) | all | a state. A lab workspace
+	 * only sees orders assigned to its own provider plus the unassigned (requested) pool.
+	 */
+	public Map<String, Object> serviceOrders(String state, String patientUuid, String visitUuid, String date,
+	        Integer limit, Integer offset) {
+		require("diagnostic_order", "read");
+		Listing q = new Listing("s", "vinshc_service_order");
+		q.select(patientLabels("s") + providerLabel("s.assigned_provider_id", "assigned_provider_name"));
+		q.facilityScope("s.facility_uuid");
+		if (patientUuid != null)
+			q.where("s.patient_id=?", scopedPatient(patientUuid).getPatientId());
+		if (visitUuid != null)
+			q.where("s.visit_id=?", visit(visitUuid).getVisitId());
+		states(q, "s.state", state, ORDER_STATES, "requested", "assigned", "in_progress");
+		if (date != null)
+			q.day("s.date_created", day(date, "date"));
+		if ("lab".equals(AuthorizationService.activeRoleStatic())) {
+			List<Integer> own = new ArrayList<>();
+			User user = Context.getAuthenticatedUser();
+			if (user.getPerson() != null)
+				for (Provider provider : Context.getProviderService().getProvidersByPerson(user.getPerson(), false))
+					own.add(provider.getProviderId());
+			if (own.isEmpty())
+				q.where("s.state='requested'");
+			else
+				q.where("(s.state='requested' OR s.assigned_provider_id IN (" + String.join(",",
+				    Collections.nCopies(own.size(), "?")) + "))", own.toArray());
+		}
+		List<Map<String, Object>> rows = new ArrayList<>();
+		Page page = q.run("s.date_created, s.service_order_id", limit, offset);
+		for (Map<String, Object> row : page.rows) {
+			Map<String, Object> view = serviceOrderView(row);
+			labels(view, row);
+			view.put("assignedProviderName", row.get("assigned_provider_name"));
+			rows.add(view);
+		}
+		return page.view(rows);
+	}
+
+	private static void states(Listing q, String column, String state, Set<String> allowed, String... active) {
+		if (state == null || "active".equals(state))
+			q.where(column + " IN (" + String.join(",", Collections.nCopies(active.length, "?")) + ")", (Object[]) active);
+		else if (!"all".equals(state)) {
+			if (!allowed.contains(state))
+				throw bad("invalid state filter");
+			q.where(column + "=?", state);
+		}
+	}
+
+	private Object serviceName(Object serviceUuid) {
+		Map<String, Object> service = metadata().services.get(string(serviceUuid));
+		return service == null ? null : service.get("name");
+	}
+
+	private Patient scopedPatient(String uuid) {
+		Patient value = patient(uuid);
+		AuthorizationService.requirePatientScopeStatic(value);
+		return value;
+	}
+
+	private static LocalDate day(String value, String field) {
+		try {
+			return LocalDate.parse(value);
+		}
+		catch (Exception ex) {
+			throw bad(field + " must be YYYY-MM-DD");
+		}
+	}
+
+	/** Business facility UUID (billing/service-order tables) for a workspace facility location. */
+	private String businessFacility(Location location) {
+		for (Map<String, Object> facility : metadata().facilities.values())
+			if (location.getUuid().equals(facility.get("locationUuid")))
+				return string(facility.get("uuid"));
+		throw bad("workspace facility is not a configured clinic");
+	}
+
+	/** Small builder for facility-scoped worklist queries with limit/offset paging. */
+	private final class Listing {
+
+		private final String alias, table;
+
+		private final StringBuilder select = new StringBuilder(), joins = new StringBuilder(), where = new StringBuilder();
+
+		private final List<Object> args = new ArrayList<>();
+
+		private Location tree;
+
+		Listing(String alias, String table) {
+			this.alias = alias;
+			this.table = table;
+		}
+
+		void select(String columns) {
+			select.append(columns);
+		}
+
+		void join(String clause) {
+			joins.append(clause);
+		}
+
+		void where(String condition, Object... values) {
+			where.append(" AND ").append(condition);
+			args.addAll(Arrays.asList(values));
+		}
+
+		void locationScope(String column) {
+			Location facility = AuthorizationService.listingFacilityStatic();
+			if (facility != null) {
+				tree = facility;
+				where.append(" AND ").append(column).append(" IN (SELECT location_id FROM tree)");
+			}
+		}
+
+		void facilityScope(String column) {
+			Location facility = AuthorizationService.listingFacilityStatic();
+			if (facility != null)
+				where(column + "=?", businessFacility(facility));
+		}
+
+		void day(String column, LocalDate day) {
+			where(column + ">=? AND " + column + "<?", Timestamp.from(dayStart(day)), Timestamp.from(dayStart(day.plusDays(1))));
+		}
+
+		Page run(String order, Integer limit, Integer offset) {
+			int size = CareService.page(limit), skip = CareService.offset(offset);
+			List<Object> all = new ArrayList<>();
+			if (tree != null)
+				all.add(tree.getLocationId());
+			all.addAll(args);
+			all.add(size + 1);
+			all.add(skip);
+			String sql = (tree == null ? "" : TREE_CTE) + "SELECT " + alias + ".*" + select + " FROM " + table + " " + alias
+			        + joins + " WHERE 1=1" + where + " ORDER BY " + order + " LIMIT ? OFFSET ?";
+			List<Map<String, Object>> rows = jdbc.queryForList(sql, all.toArray());
+			Page page = new Page();
+			page.more = rows.size() > size;
+			page.rows = rows.subList(0, Math.min(size, rows.size()));
+			page.limit = size;
+			page.offset = skip;
+			return page;
+		}
+	}
+
+	private static final class Page {
+
+		List<Map<String, Object>> rows;
+
+		boolean more;
+
+		int limit, offset;
+
+		Map<String, Object> view(List<Map<String, Object>> results) {
+			return CareService.page(results, more, limit, offset);
+		}
+	}
+
 	// ---------------------------------------------------------------- printable DTOs and daily report
 
 	public Map<String, Object> document(String template, String sourceUuid) {
 		if (!metadata().templates.contains(template))
 			throw bad("unknown print template");
 		String privilege = "receipt".equals(template) || "refund".equals(template) ? "billing"
-		        : "appointment".equals(template) ? "appointment" : "diagnostic_order";
+		        : "appointment".equals(template) ? "appointment"
+		                : "result".equals(template) ? "diagnostic_result"
+		                        : "prescription".equals(template) ? "prescription" : "diagnostic_order";
 		require(privilege, "print");
 		String source = canonicalUuid(sourceUuid, "sourceUuid");
 		// Building first validates the source and the caller's facility scope, also for reprints.
@@ -967,16 +1267,52 @@ public class OperationsService {
 
 	public Map<String, Object> dailyReport(String date, String facilityUuid) {
 		require("reports", "read");
-		LocalDate day;
-		try {
-			day = LocalDate.parse(date);
-		}
-		catch (Exception ex) {
-			throw bad("date must be YYYY-MM-DD");
-		}
+		LocalDate day = day(date, "date");
 		facilityUuid = canonicalUuid(facilityUuid, "facility");
 		Location location = facilityLocation(facilityUuid);
 		AuthorizationService.requireLocationScopeStatic(location);
+		return daily(day, facilityUuid, location);
+	}
+
+	/** Aggregate per day for up to 31 days plus totals; the same figures as the daily report. */
+	public Map<String, Object> rangeReport(String from, String to, String facilityUuid) {
+		require("reports", "read");
+		LocalDate first = day(from, "from"), last = day(to, "to");
+		if (last.isBefore(first))
+			throw bad("to cannot be before from");
+		if (first.plusDays(30).isBefore(last))
+			throw bad("a report range covers at most 31 days");
+		facilityUuid = canonicalUuid(facilityUuid, "facility");
+		Location location = facilityLocation(facilityUuid);
+		AuthorizationService.requireLocationScopeStatic(location);
+		List<Map<String, Object>> days = new ArrayList<>();
+		long opened = 0, completed = 0, gross = 0, refund = 0;
+		for (LocalDate day = first; !day.isAfter(last); day = day.plusDays(1)) {
+			Map<String, Object> row = daily(day, facilityUuid, location);
+			opened += number(row.get("openedVisits")).longValue();
+			completed += number(row.get("completedVisits")).longValue();
+			gross += number(row.get("grossVnd")).longValue();
+			refund += number(row.get("refundVnd")).longValue();
+			days.add(row);
+		}
+		Map<String, Object> totals = new LinkedHashMap<>();
+		totals.put("openedVisits", opened);
+		totals.put("completedVisits", completed);
+		totals.put("grossVnd", gross);
+		totals.put("refundVnd", refund);
+		totals.put("netVnd", gross - refund);
+		Map<String, Object> out = new LinkedHashMap<>();
+		out.put("from", first.toString());
+		out.put("to", last.toString());
+		out.put("timezone", CLINIC_ZONE.getId());
+		out.put("facilityUuid", facilityUuid);
+		out.put("days", days);
+		out.put("totals", totals);
+		out.put("aggregateOnly", true);
+		return out;
+	}
+
+	private Map<String, Object> daily(LocalDate day, String facilityUuid, Location location) {
 		Instant start = dayStart(day), end = dayStart(day.plusDays(1));
 		String locationCte = "WITH RECURSIVE locations AS (SELECT location_id FROM location WHERE location_id=? UNION ALL SELECT l.location_id FROM location l JOIN locations p ON l.parent_location=p.location_id) ";
 		Number opened = jdbc.queryForObject(locationCte

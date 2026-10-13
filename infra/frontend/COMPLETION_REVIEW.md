@@ -1,93 +1,63 @@
 # Đánh giá mức hoàn thành BE và FE
 
-Kết quả đối chiếu tiếp theo với bản sửa BE đã merge, image/migration đang chạy và
-kiểm thử trên máy local: [LOCAL_BACKEND_VERIFICATION.md](LOCAL_BACKEND_VERIFICATION.md).
-Phần dưới giữ kết quả và phạm vi của đợt đánh giá ban đầu.
-
-Kiểm tra ngày 13/10/2026, Asia/Ho_Chi_Minh. Nhánh FE: `fe`; main mới nhất sau
-`git fetch origin main`: `d9d5b957223f6bc73db173dbbc1d413910689526`, trùng bản BE
-Docker xuất trong `.runtime/backend` và nguồn metadata FE. Không merge hoặc đổi BE.
+Cập nhật 13/10/2026 trên nhánh `feat/complete-clinic-workflow` (tách từ `main` `54a4fda`).
+Bản đánh giá trước (FE chỉ có caller cho 56 route, chưa có API tìm bệnh nhân, lượt khám,
+danh sách và cấp thuốc) nằm trong lịch sử Git của file này.
 
 ## Kết luận
 
-FE đã bổ sung tổng quan, chọn context, bảng bản ghi trong phiên và bố cục chuẩn bị
-cho các chức năng thiếu API sau đợt kiểm tra này; xem [UI_BACKEND_MAP.md](UI_BACKEND_MAP.md).
-Các khoảng trống bên dưới mô tả phần chưa hoạt động trọn vẹn, không có nghĩa mọi
-màn hình đều chưa được dựng. BE giữ nguyên; FE chưa thể bật chức năng đang chờ API.
+Nhân viên có thể đi trọn luồng **tiếp nhận → sinh hiệu → khám/kê đơn → thu ngân → cấp thuốc →
+kết thúc lượt** chỉ qua FE, với tài khoản thật theo vai trò và cơ sở. Đã chứng minh bằng
+bộ tích hợp B11 (API) và một lần chạy Playwright trên backend thật (không mock).
 
-**BE và FE chưa hoàn thành toàn bộ ứng dụng phòng khám.** BE đã có nhiều API được
-kiểm thử; FE đã có caller cho 56/56 mapping VinSHC hiện tại. Đây là độ phủ route,
-không chứng minh mọi thao tác ghi thành công hoặc đủ nghiệp vụ MVP.
-Chưa thể dùng tài khoản nhân viên thực hiện trọn tiếp nhận → khám → thanh toán →
-cấp thuốc → kết thúc lượt chỉ qua FE. Không có cơ sở để báo một tỷ lệ hoàn thành
-chung khi chưa chốt tiêu chí nghiệm thu từng luồng.
+Phần chưa làm theo yêu cầu: quản lý tài khoản/provider/cấu hình cơ sở. Ngoài phạm vi pilot:
+kho/tồn/lô chi tiết, BHYT, hóa đơn điện tử, đơn thuốc quốc gia, LIS/PACS.
 
-## Đã có
+## Đã bổ sung
 
-- BE: PostgreSQL/OpenMRS, metadata, session, workspace theo vai trò/cơ sở, audit;
-  identity/contact/address/field-state; ghi sinh hiệu; phiếu khám/đính chính/chốt,
-  chẩn đoán, dị ứng, kê/ngừng thuốc; lịch hẹn, hàng đợi, phí/thu/hoàn tiền,
-  chỉ định/kết quả/tệp CLS, DTO chứng từ và báo cáo ngày.
-- FE: đăng nhập/chọn workspace; lọc chức năng theo role; các form gọi API trên,
-  validation cơ bản, xử lý lỗi, retry thủ công với cùng idempotency key;
-  quản trị assignment/quyền, tìm tài khoản và thêm role cho System Developer.
-  Đã có hiển thị và in chứng từ cơ bản từ DTO; chưa nghiệm thu mẫu chuyên môn.
-- Docker hiện có bốn container healthy. Tài khoản admin có một assignment active
-  tại VinSHC Development Clinic. Không cần cài thêm npm để giải quyết các API còn thiếu.
-
-## Khoảng trống
-
-| Phần | BE | FE / kiểm chứng còn thiếu |
+| Phần | BE (`infra/backend`, hợp đồng [care.md](../../docs/api/care.md)) | FE |
 | --- | --- | --- |
-| Bệnh nhân | Core có patient/person CRUD/search, nhưng app roles bị chặn Core; chưa có VinSHC scoped tương đương, identity chưa chứa đầy đủ Person Core | Tìm kiếm, đăng ký, chỉnh hồ sơ và chọn bệnh nhân trong luồng tiếp nhận; hiện phải nhập UUID |
-| Lượt khám | Core có visit/encounter lifecycle; chưa có adapter scoped cho nhân viên | Mở/đóng lượt, tạo/chọn encounter và chuyển ngữ cảnh giữa các bước |
-| Sinh hiệu | Có ghi có validation; chưa có list/read/correction/void scoped; clinical-summary chưa trả vitals | Lịch sử đo, xem/sửa/hủy lần đo; hiện có form ghi |
-| Danh sách vận hành | B8 có tạo, đọc theo UUID và chuyển trạng thái; chưa có list/search appointment, queue, bill/payment, service-order/result | Lịch làm việc, bảng hàng đợi, danh sách thu ngân/CLS có lọc, phân trang và chọn dòng thay UUID |
-| Khám và kê thuốc | Các adapter chính đã có; cần patient/visit/encounter/provider hợp lệ | Hồ sơ/timeline dễ dùng, chuyển ngữ cảnh tự động, kiểm thử ghi thật bằng từng vai trò; hiện phần lớn là chọn thao tác và nhập form |
-| Kho/cấp thuốc | Stock Management mới ở mức baseline; chưa có VinSHC dispensing và bằng chứng luồng nhập/xuất/cấp theo đơn | Quầy thuốc, tồn/lô/hạn dùng và xác nhận cấp thuốc |
-| Tài khoản/cấu hình | Core có quản lý user; chưa có CRUD ứng dụng scoped cho user/form/cơ sở | Chưa có tạo tài khoản, đổi mật khẩu hoặc màn hình quản lý form/cơ sở. Tìm user/thêm role không phải CRUD đầy đủ |
-| Chứng từ/báo cáo | Có DTO/số chứng từ và aggregate ngày; quyền document hiện dùng diagnostic_order print cả cho đơn/kết quả | Mẫu in riêng được duyệt, thử in qua từng role, dashboard/đối soát nhiều ngày; có nút in cơ bản, chưa nghiệm thu pháp lý/chữ ký |
-| Tài liệu bệnh nhân | Patient Documents được cài nhưng chưa chứng minh quy trình riêng | Chưa có quản lý đầy đủ tài liệu bệnh nhân; tệp CLS không thay thế toàn bộ chức năng này |
-| Tích hợp ngoài | BHYT, HĐĐT, đơn thuốc quốc gia, LIS/PACS chỉ có contract, connector disabled | Chưa có quy trình tích hợp thật |
+| Bệnh nhân | Tìm theo tên không dấu/mã/CCCD/BHYT/điện thoại; đăng ký với mã idgen, idempotency, chặn trùng định danh và cảnh báo hồ sơ tương tự (409 kèm `matches`); sửa một phần có lý do; projection theo vai trò; phạm vi theo cơ sở đăng ký | Danh sách tìm kiếm, form đăng ký/sửa, chọn hồ sơ có sẵn khi 409 |
+| Lượt khám | Mở (một lượt mở/bệnh nhân, check-in lịch hẹn), danh sách theo trạng thái/ngày, kết thúc có lý do + ghi chú (Obs hành chính), chặn hoàn tất khi còn chỉ định/phiếu phí, đóng phiếu hàng đợi; encounter sinh hiệu/khám theo vai trò với provider của tài khoản | Danh sách lượt, nút chuyển sang sinh hiệu/khám/xếp hàng/lập phí/kết thúc |
+| Sinh hiệu | Đọc lịch sử, đính chính (void + nhóm mới), hủy có lý do, chặn ghi khi lượt đã đóng; clinical-summary kèm sinh hiệu | Encounter → form đo tự điền mã; lịch sử; đính chính/hủy |
+| Danh sách vận hành | Lịch hẹn, hàng đợi, phiếu phí, giao dịch chờ xác nhận, chỉ định CLS (KTV: được giao + chờ phân công), phân trang | Danh sách tự tải, lọc, “Tải thêm”, thao tác trên dòng điền sẵn biểu mẫu |
+| Cấp thuốc | Đơn chờ cấp, ghi cấp idempotent theo số lượng còn lại, số lô/hạn dùng; chặn đơn ngừng/hết hiệu lực, lượt hủy, lô hết hạn | Danh sách đơn, form cấp, chi tiết các lần cấp |
+| Chứng từ/báo cáo | Quyền in đơn thuốc dùng `prescription print`, phiếu kết quả dùng `diagnostic_result print`; báo cáo nhiều ngày ≤ 31 | Dược in được đơn; báo cáo nhiều ngày cho quản lý |
 
-Core API đã được thử bằng system admin không đồng nghĩa nhân viên workspace có
-thể gọi được. Không cấp quyền Core rộng cho nhân viên để giả lập việc hoàn thành.
-Một số việc FE như cải thiện trình bày và form quản trị Core có thể làm độc lập;
-các màn hình tìm bệnh nhân/lượt khám/danh sách vẫn cần hợp đồng BE phù hợp.
+Sửa thêm trong quá trình kiểm thử với tài khoản thật: adapter cấp proxy privilege còn thiếu cho
+idgen, Care Settings, và các SaveHandler của module bedmanagement/queue chạy khi lưu visit/encounter
+(trước đây kê đơn qua tài khoản bác sĩ thật bị 403 `Get Care Settings`). Các quyền này chỉ có hiệu
+lực trong request của adapter, REST/FHIR Core vẫn đóng với role ứng dụng.
 
-## Kiểm tra chạy lại trong lần này
+Công cụ FE: `npm run backend:*` build backend từ working tree (không còn xuất commit cũ đã khóa),
+`test:api` đọc controller trong repo.
+
+## Kiểm chứng ngày 13/10/2026
+
+Stack Docker cô lập `ehr-complete`, volume mới, overlay catalogue metadata như CI.
 
 | Kiểm tra | Kết quả |
 | --- | --- |
-| `npm test` | 11/11 đạt |
-| `npm run test:api` | Caller cho 56/56 mapping VinSHC |
-| `npm run test:browser` | Hai bộ Playwright đạt; desktop/mobile, role scope và các form dùng mock, không ghi DB |
-| `npm run test:live` | Đạt: Vite → gateway → OpenMRS; đăng nhập admin/mở workspace, tìm user, đọc audit/báo cáo, metadata; không tạo fixture |
-| Docker | DB/backend/O3/gateway healthy |
-| DB chỉ đọc | 2 user: admin và daemon nội bộ; 1 assignment admin active; 0 patient, 0 visit, 0 encounter, 0 obs |
-| GitHub check-runs của main | Hai job configuration/tooling và B1–B9 đều success; hoàn tất 21:43 ngày 12/10/2026 UTC+7 |
+| Build module + JUnit trong Docker | BUILD SUCCESS, 18/18 |
+| `check_database.py`, metadata verify, smoke tạo fixture | PASS |
+| B1–B8 theo thứ tự CI trên DB sạch | 53/53 |
+| Dựng lại container giữ volume: smoke, metadata, B9 restart | PASS, 4/4 |
+| B10 review regressions | 16/16 |
+| B11 luồng nhân viên, tài khoản thật 7 role | 12/12 |
+| Python tooling tests | 35/35 |
+| `npm test` | 16/16 |
+| `npm run test:browser` (3 bộ Playwright mock, desktop/mobile) | Đạt |
+| `npm run test:api` | Caller FE phủ 79/79 mapping VinSHC |
+| `npm run test:live` (Vite → gateway → OpenMRS, chỉ đọc) | Đạt |
+| Playwright trên backend thật: tiếp đón đăng ký/mở lượt/xếp hàng → điều dưỡng ghi sinh hiệu → bác sĩ khám/kê đơn → thu ngân lập phí/thu → dược cấp thuốc → tiếp đón kết thúc lượt | Đạt (kịch bản tạm, không commit; dữ liệu synthetic trong stack cô lập) |
 
-CI: [run 38263645897](https://github.com/viet041105/EHR-VinSHC/actions/runs/38263645897).
-Báo cáo BE nguồn ghi B1–B8 53/53, B9 restart/restore mỗi bộ 4/4, B10 16/16,
-Java unit 18/18. Không chạy lại các bộ tạo fixture đó trên DB local trong lần này;
-không coi mock hoặc CI bằng synthetic là nghiệm thu luồng nhân viên trên trình duyệt.
-Chưa có tài khoản nghiệp vụ ngoài admin; daemon không dùng đăng nhập test.
+Chưa chạy: B9 backup/restore sang project thứ hai và CI trên GitHub Actions cho nhánh này.
 
-## Thứ tự hoàn thiện
+## Còn lại
 
-1. Chốt hợp đồng và bổ sung API scoped cho patient, visit/encounter, vitals và
-   list/search B8. Đây là các điểm chặn chính của luồng FE.
-2. Nối các màn hình tìm/chọn/danh sách và ngữ cảnh bệnh nhân/lượt khám; hoàn thiện
-   giao diện theo công việc của từng vai trò, thay các bước nhập UUID thủ công.
-3. Provision tài khoản nghiệp vụ theo yêu cầu riêng; kiểm thử end-to-end từng vai trò
-   trên môi trường test riêng và giữ fixture khỏi DB hiện tại khi chưa được yêu cầu.
-4. Hoàn thiện dispensing, mẫu in/báo cáo và các tính năng được chốt thuộc MVP.
-5. Nghiệm thu danh mục, nghiệp vụ và vận hành trước khi dùng dữ liệu bệnh nhân thật.
-
-`docs/PILOT_READINESS.md` của main vẫn kết luận **NOT APPROVED FOR REAL DATA**:
-catalogue hiện test-only/productionEnabled=false; HTTPS, secret store, DB least
-privilege, vận hành backup/monitoring, file scanner/storage và UAT/owner approval
-còn mở. FHIR còn giới hạn thuật ngữ/profile; không suy tương thích đầy đủ từ module started.
-
-Đợt này chỉ kiểm tra và ghi báo cáo trong FE, không tạo tài khoản/bệnh nhân,
-không sửa BE. Các thay đổi BE ở bước 1/4 cần được người dùng xác nhận phạm vi riêng.
+1. Quản lý tài khoản, liên kết provider–tài khoản, cấu hình cơ sở/biểu mẫu (đã loại khỏi đợt này).
+   Hiện nhân viên lâm sàng cần quản trị liên kết provider trước khi tạo encounter; FE báo rõ khi thiếu.
+2. Bệnh nhân đăng ký ở cơ sở khác hoặc tạo trực tiếp qua Core không tìm được từ cơ sở này.
+3. Chưa có sửa/hủy phiếu cấp thuốc vì ma trận quyền chưa có `dispensing update/void`.
+4. Mẫu in pháp lý/chữ ký, kho đầy đủ, tích hợp ngoài và nghiệm thu danh mục production vẫn
+   theo `docs/PILOT_READINESS.md` (**NOT APPROVED FOR REAL DATA**).

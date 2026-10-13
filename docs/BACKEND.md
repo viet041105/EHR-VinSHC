@@ -66,6 +66,7 @@ Từ 09/10/2026, BE-03, BE-07, BE-09 và BE-12 (appointments, service queues, t�
 | B7 — FHIR và mở rộng liên phòng khám | INT-04, INT-05, DATA-07, DATA-10 | M3 (mapping), M7 (liên thông) |
 | B8 — Vận hành phòng khám (MVP-2) | BE-12 (lịch hẹn, hàng đợi), BE-08 (thu tiền, thuốc), BE-09, DATA-09, INT-10, phối hợp FE-08/FE-09 | M4 |
 | B9 — Tích hợp, CI và nghiệm thu | INT-06, INT-07, INT-08 | M3–M5 |
+| B11 — Luồng nhân viên qua adapter (bệnh nhân, lượt, sinh hiệu, danh sách, cấp thuốc) | BE-03, BE-08 (cấp thuốc tối thiểu), BE-12; hợp đồng [`api/care.md`](api/care.md), test `test_b11_care_workflow` | M4 |
 
 ### Mốc B0 — Khóa phạm vi và chứng minh baseline
 

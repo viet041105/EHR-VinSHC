@@ -16,6 +16,7 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 | [Xử lý lỗi](error-handling.md) | Runtime: 400/401/403/404/503; quy tắc FHIR 500 khi thiếu quyền |
 | [FHIR mapping](fhir-mapping.md) | B7 runtime: 9 resource, multi-visit/timezone/void/missing-state và 6 gap có assertion |
 | [Vận hành phòng khám](clinic-operations.md) | B8 runtime: lịch hẹn, hàng đợi, VND billing, CLS/file, mẫu in, báo cáo và hai cấu hình |
+| [Luồng nhân viên](care.md) | B11 runtime với tài khoản 7 role: tìm/đăng ký/sửa bệnh nhân, mở/kết thúc lượt, encounter theo vai trò, sinh hiệu đọc/đính chính/hủy, danh sách vận hành, cấp thuốc và báo cáo nhiều ngày |
 | [Bàn giao backend](../BACKEND_HANDOFF.md) | B9: CI B1–B8, verifier restart/restore, report bàn giao và giới hạn pilot |
 | [Ma trận capability](capabilities.md) | B0: module/API/metadata/mức thử/khoảng trống |
 
@@ -45,6 +46,8 @@ Các tài liệu trong thư mục này mô tả hành vi đã quan sát trên Op
 ```powershell
 python -m unittest -v tests.integration.test_b1_contract tests.integration.test_b2_patient tests.integration.test_b3_vitals tests.integration.test_b23_extensions tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical tests.integration.test_b5_authorization tests.integration.test_b7_fhir tests.integration.test_b8_operations
 ```
+
+B10 và B11 (`test_b10_review_regressions`, `test_b11_care_workflow`) ghi thêm giao dịch synthetic nên chạy sau kiểm chứng restart/restore B9. B11 cần catalogue B4 đã liên kết và tạo tài khoản/provider test cho 7 role, rồi void sau khi chạy.
 
 Để dùng catalogue metadata 0.3.0 thay cho fallback synthetic, chạy Compose với `tests/integration/compose.b4-metadata.yaml` và đặt `$env:VINSHC_B4_CATALOGUE='metadata'`. Adapter sẽ từ chối catalogue nếu `productionEnabled=true`, tránh dùng nhầm dữ liệu production trong test.
 
