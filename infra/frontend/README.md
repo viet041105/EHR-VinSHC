@@ -52,6 +52,7 @@ và dùng image riêng `vinshc-fe-local-backend:main-d9d5b95`.
 
 Project Docker riêng: `vinshc-fe-local`. PostgreSQL và dữ liệu OpenMRS dùng named
 volume riêng, không ghi đè volume có sẵn của project khác. Gateway ở cổng 8080.
+PostgreSQL mở tại `127.0.0.1:15432` cho DBeaver trên máy Mac; trong Docker vẫn dùng `db:5432`.
 Lần build/khởi tạo schema đầu cần nhiều thời gian; `up` đợi healthcheck tối đa 40 phút.
 
 Vị trí mã nguồn, dữ liệu, volume Docker và cách mở API/database của môi trường này:

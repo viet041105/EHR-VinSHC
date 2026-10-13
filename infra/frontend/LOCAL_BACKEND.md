@@ -25,12 +25,33 @@
 | Gateway / OpenMRS O3 | http://127.0.0.1:8080/openmrs/spa/ | `vinshc-fe-local-gateway-1` và `vinshc-fe-local-frontend-1` |
 | REST API | http://127.0.0.1:8080/openmrs/ws/rest/v1/ | `vinshc-fe-local-backend-1` qua gateway |
 | API VinSHC | http://127.0.0.1:8080/openmrs/ws/rest/v1/vinshc/ | Cùng backend |
-| PostgreSQL | Nội bộ Docker: `db:5432`, database `openmrs` | `vinshc-fe-local-db-1` |
+| PostgreSQL | Mac: `127.0.0.1:15432`; nội bộ Docker: `db:5432`; database `openmrs` | `vinshc-fe-local-db-1` |
 
-Vite chuyển tiếp `/openmrs` sang gateway cổng 8080. PostgreSQL không publish cổng
-ra máy Mac, nên DBeaver/pgAdmin trên Mac chưa thể kết nối bằng `localhost:5432`.
-Có thể xem DB ngay bằng terminal theo phần dưới. Muốn kết nối GUI từ Mac cần
-cấu hình thêm cổng loopback cho DB; cấu hình hiện tại chưa thực hiện bước đó.
+Vite chuyển tiếp `/openmrs` sang gateway cổng 8080. Overlay FE `compose.local.yaml`
+mở PostgreSQL tại `127.0.0.1:15432` để DBeaver/pgAdmin trên máy Mac kết nối. Cổng
+chỉ bind loopback, không mở trên mạng LAN. Các service trong Docker vẫn dùng
+`db:5432`. Cấu hình baseline ở root giữ nguyên.
+
+## Kết nối bằng DBeaver trên Mac
+
+Chọn **New Database Connection → PostgreSQL**, nhập:
+
+| Trường | Giá trị |
+| --- | --- |
+| Host | `127.0.0.1` |
+| Port | `15432` |
+| Database | `openmrs` |
+| Username | Giá trị `OMRS_DB_USER` trong `infra/frontend/.runtime/backend/.env` (hiện là `openmrs`) |
+| Password | Giá trị `OMRS_DB_PASSWORD` trong cùng file `.env` |
+| SSL | Tắt cho PostgreSQL local hiện tại |
+
+Chọn **Test Connection**, tải PostgreSQL JDBC driver nếu DBeaver yêu cầu, rồi
+**Finish**. JDBC URL tương ứng: `jdbc:postgresql://127.0.0.1:15432/openmrs`.
+Trong Database Navigator mở **openmrs → Schemas → public → Tables** để xem bảng.
+Credentials DB khác tài khoản admin dùng để đăng nhập FE.
+
+Nếu dựng lại stack, chạy `npm run backend:up` trong `infra/frontend` để áp dụng
+overlay này. Dữ liệu tiếp tục dùng volume PostgreSQL hiện có.
 
 ## Dữ liệu được lưu ở đâu?
 
