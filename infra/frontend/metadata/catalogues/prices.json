@@ -1,0 +1,165 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0",
+  "effectiveFrom": "2026-10-11",
+  "testOnly": true,
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "production": "pending_facility_and_clinical_review"
+  },
+  "records": [
+    {
+      "uuid": "6183460f-dd7e-5374-9dcc-cfc26274e01a",
+      "code": "CONSULT-TEST-V1",
+      "name": "Giá kiểm thử Khám ngoại trú kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "serviceUuid": "3af54839-c356-5502-9cb0-d96b25dc1385",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "amountVnd": 100000,
+      "currency": "VND",
+      "priceBasis": "historical_sample_or_synthetic_test_only"
+    },
+    {
+      "uuid": "f2bc4683-5124-5a4c-b605-69b9efcd7d4d",
+      "code": "LAB-GLU-V1",
+      "name": "Giá kiểm thử Định lượng Glucose",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          188
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "serviceUuid": "cbbc0de2-b7c2-552b-863c-0cf1deb2e264",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "amountVnd": 22400,
+      "currency": "VND",
+      "priceBasis": "historical_sample_or_synthetic_test_only"
+    },
+    {
+      "uuid": "78b394e3-a37d-5669-a7a8-73180be279a9",
+      "code": "LAB-CREA-V1",
+      "name": "Giá kiểm thử Định lượng Creatinin (máu)",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          188
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "serviceUuid": "5fed92b0-3212-5303-9368-8200e1f00318",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "amountVnd": 22400,
+      "currency": "VND",
+      "priceBasis": "historical_sample_or_synthetic_test_only"
+    },
+    {
+      "uuid": "6700d542-9f90-515d-9e3a-09a461a936a0",
+      "code": "US-ABD-V1",
+      "name": "Giá kiểm thử Siêu âm ổ bụng (gan mật, tụy, lách, thận)",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          189
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "serviceUuid": "9a1dd6d0-762b-507c-b488-f9f425ede5ff",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "amountVnd": 58600,
+      "currency": "VND",
+      "priceBasis": "historical_sample_or_synthetic_test_only"
+    },
+    {
+      "uuid": "3bef89b7-9969-542f-85a2-53f1e2f8c24b",
+      "code": "ECG-BED-V1",
+      "name": "Giá kiểm thử Ghi điện tim cấp cứu tại giường",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "sample",
+        "document": "S01",
+        "pages": [
+          189
+        ],
+        "use": "Historical label/price reused only for tests"
+      },
+      "serviceUuid": "9c1d2093-bc85-578d-aaf7-f4dc9399bd22",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "amountVnd": 39900,
+      "currency": "VND",
+      "priceBasis": "historical_sample_or_synthetic_test_only"
+    },
+    {
+      "uuid": "03dfa712-b8ab-537c-afe6-7a0b321195a4",
+      "code": "PROC-TEST-V1",
+      "name": "Giá kiểm thử Thủ thuật mô phỏng kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "serviceUuid": "9163e39e-0e25-5dc9-ace9-25e7449012fa",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "amountVnd": 200000,
+      "currency": "VND",
+      "priceBasis": "historical_sample_or_synthetic_test_only"
+    },
+    {
+      "uuid": "94de6060-1d4e-5007-b8db-3d4737c917ef",
+      "code": "LAB-PANEL-TEST-V1",
+      "name": "Giá kiểm thử Panel hóa sinh kiểm thử",
+      "version": "0.3.0",
+      "effectiveFrom": "2026-10-11",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "source": {
+        "kind": "synthetic",
+        "reference": "Project user authorized supplementing sample with synthetic data for tests",
+        "recordedOn": "2026-10-11"
+      },
+      "serviceUuid": "94b38889-2b02-5297-929f-500b79dbe64a",
+      "facilityUuid": "06ba3ea8-cbb2-5166-ad59-29cac41ec6ab",
+      "amountVnd": 44800,
+      "currency": "VND",
+      "priceBasis": "historical_sample_or_synthetic_test_only"
+    }
+  ]
+}

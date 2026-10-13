@@ -6,12 +6,23 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "dev": "vite --host 127.0.0.1 --port 5173 --strictPort",
-    "test": "node verify.mjs",
-    "test:browser": "node browser-check.cjs && node design-check.cjs"
+    "dev": "node dev.mjs --host 127.0.0.1 --port 5173 --strictPort",
+    "test": "node --test backend-client.test.mjs workspace-model.test.mjs",
+    "test:browser": "node connected-check.cjs && node additional-check.cjs && node workspace-check.cjs",
+    "test:connected": "node connected-check.cjs",
+    "backend:prepare": "node docker-local.mjs prepare",
+    "backend:build": "node docker-local.mjs build",
+    "backend:up": "node docker-local.mjs up",
+    "backend:status": "node docker-local.mjs status",
+    "backend:down": "node docker-local.mjs down",
+    "test:live": "node live-check.cjs",
+    "backend:metadata": "python3 configure-metadata.py",
+    "backend:admin": "python3 configure-admin.py",
+    "test:api": "node check-api-coverage.mjs"
   },
   "devDependencies": {
     "playwright": "1.64.0",
     "vite": "8.3.4"
-  }
+  },
+  "type": "module"
 }

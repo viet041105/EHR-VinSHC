@@ -1,0 +1,355 @@
+{
+  "schemaVersion": 1,
+  "version": "0.3.0",
+  "effectiveFrom": "2026-10-11",
+  "testOnly": true,
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "production": "pending_facility_and_clinical_review"
+  },
+  "records": [],
+  "catalogues": {
+    "dose": [
+      {
+        "uuid": "8cdb184c-a289-5cb6-a2de-af7526086ea0",
+        "code": "TABLET",
+        "name": "Viên",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "6fff5163-8020-5e91-bf8a-2080167ae29c",
+        "system": "http://unitsofmeasure.org",
+        "unit": "{tbl}"
+      },
+      {
+        "uuid": "4a1102cc-57af-5895-b6b5-adf0c4cc3bb7",
+        "code": "CAPSULE",
+        "name": "Viên nang",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "4e272e19-5527-5c5f-8190-aad5152f87ef",
+        "system": "http://unitsofmeasure.org",
+        "unit": "{capsule}"
+      },
+      {
+        "uuid": "0e3d0222-b9e9-5756-b4bb-d1dd4c55cc4e",
+        "code": "MG",
+        "name": "mg",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "5087bc0c-f9b8-5be1-b78f-857cc0350080",
+        "system": "http://unitsofmeasure.org",
+        "unit": "mg"
+      },
+      {
+        "uuid": "165510c2-425a-542c-b790-48411797f32a",
+        "code": "ML",
+        "name": "mL",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "305d99b8-b4d2-5153-865d-836c79e64d60",
+        "system": "http://unitsofmeasure.org",
+        "unit": "mL"
+      }
+    ],
+    "quantity": [
+      {
+        "uuid": "43cab505-3e6b-5263-8d11-a36ba574e3e2",
+        "code": "TABLET",
+        "name": "Viên",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "92df0dbe-6b87-5eae-80d7-d82af3dd0039",
+        "system": "http://unitsofmeasure.org",
+        "unit": "{tbl}"
+      },
+      {
+        "uuid": "af42df12-48e1-57a9-b173-a1a0e11b4a15",
+        "code": "CAPSULE",
+        "name": "Viên nang",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "d440cfeb-e005-53f8-b1b9-64a9c2ffecfc",
+        "system": "http://unitsofmeasure.org",
+        "unit": "{capsule}"
+      },
+      {
+        "uuid": "98cd7f67-8b50-5ce1-9175-ceea4920e99b",
+        "code": "ML",
+        "name": "mL",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "78e00aeb-a381-5b55-b953-aff612264477",
+        "system": "http://unitsofmeasure.org",
+        "unit": "mL"
+      }
+    ],
+    "duration": [
+      {
+        "uuid": "678d8beb-3f4e-5a43-9a84-2444713e0745",
+        "code": "DAY",
+        "name": "Ngày",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "1e480858-8aa4-5254-8358-f893c8f167e9",
+        "system": "http://unitsofmeasure.org",
+        "unit": "d"
+      },
+      {
+        "uuid": "546d5ff1-91d2-5981-b5b5-bbe37331870c",
+        "code": "WEEK",
+        "name": "Tuần",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "44bb03e4-b610-5f01-8b16-407510a127cb",
+        "system": "http://unitsofmeasure.org",
+        "unit": "wk"
+      }
+    ],
+    "routes": [
+      {
+        "uuid": "85f60f59-1c0a-5482-9c4b-a5f1989a108f",
+        "code": "ORAL",
+        "name": "Uống",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "468d85b2-0ee0-587d-83fa-3603b51951b7",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null
+      },
+      {
+        "uuid": "f249ab73-2bb7-563a-8e68-30ac131de039",
+        "code": "TOPICAL",
+        "name": "Ngoài da",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "9c43e79c-b8f1-5136-8b40-155a138f1dcb",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null
+      }
+    ],
+    "dosageForms": [
+      {
+        "uuid": "530cf93a-4696-5187-a975-52ce651ba96c",
+        "code": "TABLET",
+        "name": "Viên",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "20df4708-7b4f-5f95-9222-e78f4d774aa8",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null
+      },
+      {
+        "uuid": "3984486b-2750-500b-adc8-0e6a4a0963f5",
+        "code": "CAPSULE",
+        "name": "Viên nang",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "4b1941f5-1212-5497-8d8b-9b455f5cb259",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null
+      },
+      {
+        "uuid": "70cfa6af-2ba1-5066-a11b-6a9eddb37415",
+        "code": "LIQUID",
+        "name": "Dung dịch",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "771f7a8a-3e60-5cd9-808f-8607bc33931c",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null
+      }
+    ],
+    "frequencies": [
+      {
+        "uuid": "a0e7e5e4-6d3b-5ca5-b0b3-b2298a12e0e8",
+        "code": "QD",
+        "name": "Một lần/ngày",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "655ca5ef-21c3-514e-9450-d58243ebb125",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null,
+        "frequencyPerDay": "1"
+      },
+      {
+        "uuid": "56df76b7-e6e3-5813-aca8-82e1750c051f",
+        "code": "BID",
+        "name": "Hai lần/ngày",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "67178298-65f0-5486-b6e9-b2fde7de27ed",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null,
+        "frequencyPerDay": "2"
+      },
+      {
+        "uuid": "45143b5d-a909-5307-a69a-53f443ba5186",
+        "code": "TID",
+        "name": "Ba lần/ngày",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "e477e9ef-3d67-5c62-86b6-01471119e72a",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null,
+        "frequencyPerDay": "3"
+      },
+      {
+        "uuid": "ceeb2ef5-10a8-5398-822b-f4743f0bb473",
+        "code": "PRN",
+        "name": "Khi cần",
+        "version": "0.3.0",
+        "effectiveFrom": "2026-10-11",
+        "effectiveTo": null,
+        "active": true,
+        "retired": false,
+        "source": {
+          "kind": "internal",
+          "reference": "VinSHC metadata convention",
+          "recordedOn": "2026-10-11"
+        },
+        "conceptUuid": "f8583b58-8829-5b0a-a789-566e38ef7718",
+        "system": "urn:uuid:5ada5cd7-965c-5164-bc34-2bdf584351c5",
+        "unit": null,
+        "frequencyPerDay": null
+      }
+    ]
+  },
+  "semantics": "UCUM annotations for dosage forms are local display annotations; never infer mass/concentration conversion"
+}

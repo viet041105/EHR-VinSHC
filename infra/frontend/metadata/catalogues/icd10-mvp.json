@@ -1,0 +1,286 @@
+{
+  "schemaVersion": 1,
+  "version": "VN-06-2026-2026-07-01",
+  "effectiveFrom": "2026-07-01",
+  "sourceDocument": "06/2026/TT-BYT",
+  "scope": "Explicit outpatient MVP allowlist, NOT full 1271-page national catalogue. E11/M10.9 retained as unselectable categories for negative tests; never auto recode legacy diagnosis.",
+  "productionEnabled": false,
+  "approval": {
+    "testUse": "authorized_by_project_user",
+    "clinicalUse": "pending_professional_review"
+  },
+  "sourceUrl": "https://vanban.chinhphu.vn/?classid=0&docid=217536&pageid=27160",
+  "sourceSha256": "8639f5eeb77b571363dc841923095895d2498748f9bc6620f50710a6da9159e2",
+  "records": [
+    {
+      "uuid": "4851d138-cafa-57f7-aa20-9f183f70528b",
+      "code": "E11",
+      "undottedCode": "E11",
+      "nameVi": "Bệnh đái tháo đường típ 2",
+      "nameOriginal": "Type 2 diabetes mellitus",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "51cf5b2e-8268-5f86-80c8-e07fa7504deb",
+      "selectable": false,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": true,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 224,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "f7e9f83e-1a02-54fe-8451-af068fc70e92",
+      "code": "E11.9",
+      "undottedCode": "E119",
+      "nameVi": "Bệnh đái tháo đường típ 2, không kèm biến chứng",
+      "nameOriginal": "Type 2 diabetes mellitus, without complications",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "217f51b2-3a0d-5c5a-aa98-87ba01f3c847",
+      "selectable": true,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": false,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 225,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "6f9f2987-2632-57dc-9e14-8cf74b9b49da",
+      "code": "I10",
+      "undottedCode": "I10",
+      "nameVi": "Bệnh tăng huyết áp vô căn (nguyên phát)",
+      "nameOriginal": "Essential (primary) hypertension",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "b4fe079c-c1ac-5dab-9615-d490a28d60f3",
+      "selectable": true,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": false,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 398,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "2b7f372c-db3b-52c7-b20c-16411b8474b7",
+      "code": "I63.9",
+      "undottedCode": "I639",
+      "nameVi": "Nhồi máu não, không xác định",
+      "nameOriginal": "Cerebral infarction, unspecified",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "965867e9-e28f-5c3a-bfe5-0b7844150340",
+      "selectable": true,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": false,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 413,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "faff7760-ace9-5af2-90f8-04cdacdfe413",
+      "code": "J06.9",
+      "undottedCode": "J069",
+      "nameVi": "Nhiễm trùng đường hô hấp trên cấp tính, không xác định",
+      "nameOriginal": "Acute upper respiratory infection, unspecified",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "051e16f5-ec21-5aa6-8a0e-c6dd1f2b5999",
+      "selectable": true,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": false,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 429,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "2921be25-a364-50b4-8022-37ed232f15c9",
+      "code": "K29.7",
+      "undottedCode": "K297",
+      "nameVi": "Viêm dạ dày, không xác định",
+      "nameOriginal": "Gastritis, unspecified",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "a50154cb-ff53-5981-a7ee-a6a40f9252a1",
+      "selectable": true,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": false,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 465,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "5b553f0a-b273-5175-86f1-29bafe7da039",
+      "code": "M10.9",
+      "undottedCode": "M109",
+      "nameVi": "Bệnh gút, không xác định",
+      "nameOriginal": "Gout, unspecified",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "f5c45dba-012f-5e36-a362-551b869eb7c8",
+      "selectable": false,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": true,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 544,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "6a8c92fb-5284-56a7-b64d-f44791276172",
+      "code": "Z00.0",
+      "undottedCode": "Z000",
+      "nameVi": "Khám sức khỏe tổng quát",
+      "nameOriginal": "General medical examination",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "071206ea-6647-50d6-8bd0-5d38f39dc623",
+      "selectable": true,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": false,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 1205,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    },
+    {
+      "uuid": "39b7c5bf-444a-5f93-9e33-046ce2ad5312",
+      "code": "M10.90",
+      "undottedCode": "M1090",
+      "nameVi": "Bệnh gút, không xác định, nhiều vị trí",
+      "nameOriginal": "Gout, unspecified, multiple sites",
+      "system": "http://hl7.org/fhir/sid/icd-10",
+      "terminologyVersion": "2019",
+      "version": "VN-06-2026-2026-07-01",
+      "effectiveFrom": "2026-07-01",
+      "effectiveTo": null,
+      "active": true,
+      "retired": false,
+      "conceptUuid": "f5fd2028-bfe6-5800-8cef-5261f13b09d0",
+      "selectable": true,
+      "restrictions": {
+        "notPrimary": false,
+        "discouragedPrimary": false,
+        "moreSpecificRequired": false,
+        "mortalityOnly": false,
+        "femaleOnly": false,
+        "maleOnly": false
+      },
+      "source": {
+        "kind": "official",
+        "document": "06/2026/TT-BYT",
+        "annexPdfPage": 544,
+        "url": "https://datafiles.chinhphu.vn/cpp/files/vbpq/2026/4/06-byt-kem.pdf"
+      }
+    }
+  ]
+}
