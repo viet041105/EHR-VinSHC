@@ -135,6 +135,9 @@ Reload/đổi workspace làm mất key: cần đối soát giao dịch nếu m�
 Đánh giá BE/FE cập nhật ngày 13/10/2026, kết quả kiểm thử và thứ tự hoàn thiện:
 [COMPLETION_REVIEW.md](COMPLETION_REVIEW.md).
 
+Đối chiếu bản sửa BE sau review `873e37d` với image, migration và hồi quy trên máy local:
+[LOCAL_BACKEND_VERIFICATION.md](LOCAL_BACKEND_VERIFICATION.md).
+
 B5 chặn Core `/patient`, `/visit`, `/encounter`, `/obs` với app roles. Chưa có API
 VinSHC scoped thay thế tìm/tạo/sửa patient Core, mở/kết thúc visit, tạo encounter,
 đọc các lần đo sinh hiệu hoặc sửa/void sinh hiệu. B8 chỉ có GET theo UUID, chưa có

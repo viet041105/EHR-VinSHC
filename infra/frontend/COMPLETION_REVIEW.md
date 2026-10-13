@@ -1,5 +1,9 @@
 # Đánh giá mức hoàn thành BE và FE
 
+Kết quả đối chiếu tiếp theo với bản sửa BE đã merge, image/migration đang chạy và
+kiểm thử trên máy local: [LOCAL_BACKEND_VERIFICATION.md](LOCAL_BACKEND_VERIFICATION.md).
+Phần dưới giữ kết quả và phạm vi của đợt đánh giá ban đầu.
+
 Kiểm tra ngày 13/10/2026, Asia/Ho_Chi_Minh. Nhánh FE: `fe`; main mới nhất sau
 `git fetch origin main`: `d9d5b957223f6bc73db173dbbc1d413910689526`, trùng bản BE
 Docker xuất trong `.runtime/backend` và nguồn metadata FE. Không merge hoặc đổi BE.
