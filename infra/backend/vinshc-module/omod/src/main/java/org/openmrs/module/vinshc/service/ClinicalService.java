@@ -11,7 +11,6 @@ import static org.openmrs.module.vinshc.service.VinshcService.requiredString;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -146,8 +145,11 @@ public class ClinicalService {
 	
 	private final SessionFactory sessionFactory;
 	
-	public ClinicalService(SessionFactory sessionFactory) {
+	private final VinshcService administration;
+	
+	public ClinicalService(SessionFactory sessionFactory, VinshcService administration) {
 		this.sessionFactory = sessionFactory;
+		this.administration = administration;
 	}
 	
 	// ---------------------------------------------------------------- consultation
@@ -278,6 +280,7 @@ public class ClinicalService {
 				orders.add(drugOrderView((DrugOrder) order));
 		result.put("drugOrders", orders);
 		result.put("allergies", allergies(patient.getUuid()));
+		result.put("vitals", administration.vitalsOfVisit(encounter.getVisit()));
 		result.put("events", events(encounter));
 		AuthorizationService.auditReadStatic("clinical_chart", patient, encounter, encounter.getUuid(), "clinical-summary");
 		return result;
@@ -1001,24 +1004,7 @@ public class ClinicalService {
 	// ---------------------------------------------------------------- audit events
 	
 	private void event(String type, Patient patient, Encounter encounter, String entityUuid, String reason, String detail) {
-		Integer patientId = patient.getPatientId();
-		Integer encounterId = encounter == null ? null : encounter.getEncounterId();
-		Integer creator = Context.getAuthenticatedUser().getUserId();
-		sessionFactory.getCurrentSession().doWork(connection -> {
-			try (PreparedStatement statement = connection.prepareStatement(
-			    "INSERT INTO vinshc_clinical_event(event_uuid,event_type,patient_id,encounter_id,entity_uuid,reason,detail,creator,date_created) VALUES (?,?,?,?,?,?,?,?,?)")) {
-				statement.setString(1, java.util.UUID.randomUUID().toString());
-				statement.setString(2, type);
-				statement.setInt(3, patientId);
-				statement.setObject(4, encounterId);
-				statement.setString(5, entityUuid);
-				statement.setString(6, reason);
-				statement.setString(7, detail == null ? null : detail.length() > 2000 ? detail.substring(0, 2000) : detail);
-				statement.setInt(8, creator);
-				statement.setTimestamp(9, Timestamp.from(Instant.now()));
-				statement.executeUpdate();
-			}
-		});
+		ClinicalEvents.record(sessionFactory, type, patient, encounter, entityUuid, reason, detail);
 	}
 	
 	private Map<String, Object> finalization(Encounter encounter) {

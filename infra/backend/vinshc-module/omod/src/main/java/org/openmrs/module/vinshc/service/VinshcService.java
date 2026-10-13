@@ -82,6 +82,8 @@ public class VinshcService {
 	    "vitals.can_nang", 0.2, 650, "vitals.chieu_cao", 20, 300);
 	
 	private static final String VITALS_ENCOUNTER_TYPE = "8368ff74-1b50-592b-8e78-2f0f2ddc1e06";
+
+	private static final String VITALS_GROUP = "7a7cebb3-1a82-5aab-975e-58d93c68eafc";
 	
 	private final JdbcTemplate jdbc;
 
@@ -449,6 +451,204 @@ public class VinshcService {
 			throw bad("encounter belongs to another patient");
 		if (!VITALS_ENCOUNTER_TYPE.equals(encounter.getEncounterType().getUuid()))
 			throw bad("encounter is not a VinSHC vitals encounter");
+		// Workspace staff may only add measurements to an open visit; unscoped system developers keep
+		// the break-glass path used by the B3/B23 contract fixtures.
+		if (AuthorizationService.activeRoleStatic() != null && encounter.getVisit() != null
+		        && encounter.getVisit().getStopDatetime() != null)
+			throw new OperationsService.OperationsConflictException("visit is closed; vital signs cannot be added");
+		java.util.Date measuredAt = body.get("measuredAt") == null ? encounter.getEncounterDatetime()
+		        : java.util.Date.from(parseInstant(string(body.get("measuredAt"))));
+		Obs saved = Context.getObsService().saveObs(vitalsGroup(patient, encounter, measuredAt, body),
+		    "VinSHC validated vital-sign write");
+		Map<String, Object> response = new LinkedHashMap<>();
+		response.put("uuid", saved.getUuid());
+		response.put("patient", patient.getUuid());
+		response.put("encounter", encounter.getUuid());
+		response.put("needsVerification", needsVerification(saved));
+		response.put("members", saved.getGroupMembers().stream().map(Obs::getUuid).collect(Collectors.toList()));
+		return response;
+	}
+
+	/**
+	 * Vital-sign groups of a patient (optionally one visit or encounter) in the caller's facility,
+	 * newest first. Voided groups are included only on request, with their void reason.
+	 */
+	@Transactional
+	public Map<String, Object> vitals(String patientUuid, String visitUuid, String encounterUuid, boolean includeVoided) {
+		AuthorizationService.requireOperation("vitals", "read");
+		Patient patient = patient(requiredParameter(patientUuid, "patient"));
+		AuthorizationService.requirePatientScopeStatic(patient);
+		StringBuilder sql = new StringBuilder("SELECT o.obs_id FROM obs o JOIN concept c ON c.concept_id=o.concept_id"
+		        + " JOIN encounter e ON e.encounter_id=o.encounter_id LEFT JOIN visit v ON v.visit_id=e.visit_id"
+		        + " WHERE c.uuid=? AND o.person_id=? AND o.obs_group_id IS NULL AND e.voided=false");
+		List<Object> args = new ArrayList<>(Arrays.asList(VITALS_GROUP, patient.getPatientId()));
+		if (!includeVoided)
+			sql.append(" AND o.voided=false");
+		if (visitUuid != null) {
+			sql.append(" AND v.uuid=?");
+			args.add(canonicalUuid(visitUuid, "visit"));
+		}
+		if (encounterUuid != null) {
+			sql.append(" AND e.uuid=?");
+			args.add(canonicalUuid(encounterUuid, "encounter"));
+		}
+		sql.append(" ORDER BY o.obs_datetime DESC, o.obs_id DESC LIMIT 200");
+		List<Map<String, Object>> groups = new ArrayList<>();
+		for (Integer id : jdbc.queryForList(sql.toString(), Integer.class, args.toArray())) {
+			Obs group = Context.getObsService().getObs(id);
+			if (inScope(group.getEncounter()))
+				groups.add(vitalsView(group));
+		}
+		AuthorizationService.auditReadStatic("vitals", patient, null, patient.getUuid(), "groups=" + groups.size());
+		Map<String, Object> out = new LinkedHashMap<>();
+		out.put("patientUuid", patient.getUuid());
+		out.put("results", groups);
+		return out;
+	}
+
+	/** Non-voided vital-sign groups of every encounter of a visit, for the clinical summary. */
+	List<Map<String, Object>> vitalsOfVisit(org.openmrs.Visit visit) {
+		List<Map<String, Object>> groups = new ArrayList<>();
+		if (visit == null)
+			return groups;
+		for (Encounter encounter : visit.getNonVoidedEncounters())
+			for (Obs obs : encounter.getObsAtTopLevel(false))
+				if (VITALS_GROUP.equals(obs.getConcept().getUuid()))
+					groups.add(vitalsView(obs));
+		groups.sort((a, b) -> string(b.get("measuredAt")).compareTo(string(a.get("measuredAt"))));
+		return groups;
+	}
+
+	/**
+	 * Replaces a vital-sign group: the old group is voided with the reason and a new group with the
+	 * corrected values is written to the same encounter. Only allowed while the visit is open.
+	 */
+	@Transactional
+	public Map<String, Object> correctVitals(String groupUuid, Map<String, Object> body) {
+		AuthorizationService.requireOperation("vitals", "update");
+		String reason = requiredReason(optionalString(body, "reason"));
+		Obs old = vitalsGroup(groupUuid);
+		Encounter encounter = old.getEncounter();
+		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lockEncounter(encounter);
+		Context.refreshEntity(old);
+		if (old.getVoided())
+			throw bad("vital-sign group does not exist");
+		if (encounter.getVisit() != null && encounter.getVisit().getStopDatetime() != null)
+			throw new OperationsService.OperationsConflictException("visit is closed; vital signs can only be voided");
+		Patient patient = patient(encounter.getPatient().getUuid());
+		java.util.Date measuredAt = body.get("measuredAt") == null ? old.getObsDatetime()
+		        : java.util.Date.from(parseInstant(string(body.get("measuredAt"))));
+		Obs replacement = vitalsGroup(patient, encounter, measuredAt, body);
+		voidGroup(old, reason);
+		Obs saved = Context.getObsService().saveObs(replacement, "VinSHC vital-sign correction");
+		ClinicalEvents.record(sessionFactory, "vitals_corrected", patient, encounter, saved.getUuid(), reason,
+		    "replaces " + old.getUuid());
+		return vitalsView(saved);
+	}
+
+	@Transactional
+	public Map<String, Object> voidVitals(String groupUuid, String reason) {
+		AuthorizationService.requireOperation("vitals", "void");
+		String why = requiredReason(reason);
+		Obs old = vitalsGroup(groupUuid);
+		Encounter encounter = old.getEncounter();
+		AuthorizationService.requireEncounterScopeStatic(encounter);
+		lockEncounter(encounter);
+		Context.refreshEntity(old);
+		if (old.getVoided())
+			throw bad("vital-sign group does not exist");
+		voidGroup(old, why);
+		ClinicalEvents.record(sessionFactory, "vitals_voided", encounter.getPatient(), encounter, old.getUuid(), why, null);
+		Context.flushSession();
+		return vitalsView(Context.getObsService().getObsByUuid(old.getUuid()));
+	}
+
+	private Obs vitalsGroup(String uuid) {
+		Obs group = Context.getObsService().getObsByUuid(canonicalUuid(uuid, "vitals group"));
+		if (group == null || group.getVoided() || !VITALS_GROUP.equals(group.getConcept().getUuid())
+		        || group.getEncounter() == null)
+			throw bad("vital-sign group does not exist");
+		return group;
+	}
+
+	private static void voidGroup(Obs group, String reason) {
+		for (Obs member : group.getGroupMembers(false))
+			Context.getObsService().voidObs(member, reason);
+		Context.getObsService().voidObs(group, reason);
+	}
+
+	private Map<String, Object> vitalsView(Obs group) {
+		Map<String, Object> out = new LinkedHashMap<>();
+		out.put("uuid", group.getUuid());
+		Encounter encounter = group.getEncounter();
+		out.put("patientUuid", group.getPerson().getUuid());
+		out.put("encounterUuid", encounter == null ? null : encounter.getUuid());
+		out.put("visitUuid", encounter == null || encounter.getVisit() == null ? null : encounter.getVisit().getUuid());
+		out.put("measuredAt", CareService.iso(group.getObsDatetime()));
+		Map<String, Object> values = new LinkedHashMap<>();
+		Map<String, Object> states = new LinkedHashMap<>();
+		for (Obs member : group.getGroupMembers(group.getVoided())) {
+			String concept = member.getConcept().getUuid();
+			for (Map.Entry<String, String> field : VITAL_CONCEPTS.entrySet())
+				if (field.getValue().equals(concept))
+					values.put(field.getKey(), member.getValueNumeric());
+			for (Map.Entry<String, String> field : STATUS_CONCEPTS.entrySet())
+				if (field.getValue().equals(concept) && member.getValueCoded() != null)
+					for (Map.Entry<String, String> answer : STATUS_ANSWERS.entrySet())
+						if (answer.getValue().equals(member.getValueCoded().getUuid()) && !"recorded".equals(answer.getKey()))
+							states.put(field.getKey(), answer.getKey());
+		}
+		out.put("values", values);
+		out.put("states", states);
+		out.put("needsVerification", needsVerification(group));
+		out.put("voided", group.getVoided());
+		out.put("voidReason", group.getVoidReason());
+		out.put("recordedAt", CareService.iso(group.getDateCreated()));
+		out.put("recordedByUserUuid", group.getCreator() == null ? null : group.getCreator().getUuid());
+		return out;
+	}
+
+	private static boolean needsVerification(Obs group) {
+		Double systolic = null, diastolic = null;
+		for (Obs member : group.getGroupMembers(group.getVoided())) {
+			if (VITAL_CONCEPTS.get("vitals.ha_tam_thu").equals(member.getConcept().getUuid()))
+				systolic = member.getValueNumeric();
+			if (VITAL_CONCEPTS.get("vitals.ha_tam_truong").equals(member.getConcept().getUuid()))
+				diastolic = member.getValueNumeric();
+		}
+		return systolic != null && diastolic != null && systolic <= diastolic;
+	}
+
+	private boolean inScope(Encounter encounter) {
+		try {
+			AuthorizationService.requireEncounterScopeStatic(encounter);
+			return true;
+		}
+		catch (org.openmrs.api.APIAuthenticationException ex) {
+			return false;
+		}
+	}
+
+	private void lockEncounter(Encounter encounter) {
+		TransactionLocks.lock(sessionFactory, "vinshc-encounter:" + encounter.getEncounterId());
+	}
+
+	private static String requiredReason(String reason) {
+		if (reason == null || reason.trim().isEmpty())
+			throw bad("reason is required");
+		limit(reason.trim(), 255, "reason");
+		return reason.trim();
+	}
+
+	private static String requiredParameter(String value, String name) {
+		if (value == null || value.trim().isEmpty())
+			throw bad(name + " is required");
+		return value.trim();
+	}
+
+	/** Builds an unsaved, validated vital-sign group from a values/states request body. */
+	private Obs vitalsGroup(Patient patient, Encounter encounter, java.util.Date measuredAt, Map<String, Object> body) {
 		Map<String, Object> values = objectMap(body.get("values"));
 		Map<String, Object> states = objectMap(body.get("states"));
 		if (values.isEmpty() && states.isEmpty())
@@ -459,11 +659,9 @@ public class VinshcService {
 		for (String key : states.keySet())
 			if (!VITAL_CONCEPTS.containsKey(key))
 				throw bad("unknown vital state field: " + key);
-		java.util.Date measuredAt = body.get("measuredAt") == null ? encounter.getEncounterDatetime()
-		        : java.util.Date.from(parseInstant(string(body.get("measuredAt"))));
-		
-		Obs group = baseObs(patient, encounter, measuredAt, concept("7a7cebb3-1a82-5aab-975e-58d93c68eafc"));
-		boolean needsVerification = false;
+		if (measuredAt.toInstant().isAfter(Instant.now().plusSeconds(120)))
+			throw bad("measuredAt cannot be in the future");
+		Obs group = baseObs(patient, encounter, measuredAt, concept(VITALS_GROUP));
 		for (String field : VITAL_CONCEPTS.keySet()) {
 			boolean hasValue = values.containsKey(field) && values.get(field) != null;
 			String state = states.containsKey(field) ? string(states.get(field)) : null;
@@ -503,19 +701,9 @@ public class VinshcService {
 			if (!states.containsKey(missing) || "recorded".equals(string(states.get(missing))))
 				throw bad("missing blood-pressure partner requires an explicit missing state");
 		}
-		if (systolic instanceof Number && diastolic instanceof Number
-		        && ((Number) systolic).doubleValue() <= ((Number) diastolic).doubleValue())
-			needsVerification = true;
 		if (group.getGroupMembers().isEmpty())
 			throw bad("no supported vital observations supplied");
-		Obs saved = Context.getObsService().saveObs(group, "VinSHC validated vital-sign write");
-		Map<String, Object> response = new LinkedHashMap<>();
-		response.put("uuid", saved.getUuid());
-		response.put("patient", patient.getUuid());
-		response.put("encounter", encounter.getUuid());
-		response.put("needsVerification", needsVerification);
-		response.put("members", saved.getGroupMembers().stream().map(Obs::getUuid).collect(Collectors.toList()));
-		return response;
+		return group;
 	}
 	
 	private Obs baseObs(Patient patient, Encounter encounter, java.util.Date date, Concept concept) {

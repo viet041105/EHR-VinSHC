@@ -95,4 +95,22 @@ public class VinshcController extends BaseVinshcController {
 	public Map<String, Object> recordVitals(@RequestBody Map<String, Object> body) {
 		return service.recordVitals(body);
 	}
+	
+	@GetMapping("/vitals")
+	public Map<String, Object> vitals(@RequestParam String patient, @RequestParam(required = false) String visit,
+	        @RequestParam(required = false) String encounter,
+	        @RequestParam(defaultValue = "false") boolean includeVoided) {
+		return service.vitals(patient, visit, encounter, includeVoided);
+	}
+	
+	@PostMapping("/vitals/{groupUuid}/correction")
+	@ResponseStatus(HttpStatus.CREATED)
+	public Map<String, Object> correctVitals(@PathVariable String groupUuid, @RequestBody Map<String, Object> body) {
+		return service.correctVitals(groupUuid, body);
+	}
+	
+	@DeleteMapping("/vitals/{groupUuid}")
+	public Map<String, Object> voidVitals(@PathVariable String groupUuid, @RequestParam String reason) {
+		return service.voidVitals(groupUuid, reason);
+	}
 }

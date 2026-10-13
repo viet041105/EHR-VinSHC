@@ -99,6 +99,30 @@ public class AuthorizationService {
 	        String detail) {
 		instance().auditRead(resource, patient, encounter, entityUuid, detail);
 	}
+
+	/** Active app role of a scoped caller, or null for system developers and legacy unscoped users. */
+	public static String activeRoleStatic() {
+		AuthorizationService service = instance();
+		return service.bypassWorkspace() ? null : service.workspaceRole(true);
+	}
+
+	/**
+	 * Facility that listings are restricted to. Scoped callers always get their assigned facility;
+	 * unscoped callers get the facility named by the workspace header when present (a display filter,
+	 * not a security boundary), otherwise null meaning every facility.
+	 */
+	public static Location listingFacilityStatic() {
+		AuthorizationService service = instance();
+		if (!service.bypassWorkspace())
+			return service.assignedFacility();
+		String uuid = header(FACILITY_HEADER);
+		if (uuid == null || uuid.isEmpty())
+			return null;
+		Location location = Context.getLocationService().getLocationByUuid(uuid);
+		if (location == null || location.getRetired())
+			throw VinshcService.bad("workspace facility does not exist");
+		return location;
+	}
 	
 	public static void requireOperation(String resource, String action) {
 		AuthorizationService service = instance();
@@ -261,8 +285,8 @@ public class AuthorizationService {
 	}
 	
 	/**
-	 * A patient is in scope when it has a non-voided visit in the workspace facility or its
-	 * descendants.
+	 * A patient is in scope when it was registered at the workspace facility (or its descendants)
+	 * through the VinSHC adapter, or has a non-voided visit there.
 	 */
 	public void requirePatientScope(Patient patient) {
 		if (bypassWorkspace())
@@ -272,11 +296,14 @@ public class AuthorizationService {
 			try (PreparedStatement statement = connection
 			        .prepareStatement("WITH RECURSIVE tree AS (SELECT location_id FROM location WHERE location_id=?"
 			                + " UNION SELECT l.location_id FROM location l JOIN tree t ON l.parent_location=t.location_id)"
-			                + " SELECT count(*) FROM visit v JOIN location l ON l.location_id=v.location_id"
+			                + " SELECT (SELECT count(*) FROM visit v JOIN location l ON l.location_id=v.location_id"
 			                + " WHERE v.patient_id=? AND v.voided=false AND l.retired=false"
-			                + " AND v.location_id IN (SELECT location_id FROM tree)")) {
+			                + " AND v.location_id IN (SELECT location_id FROM tree))"
+			                + " + (SELECT count(*) FROM vinshc_patient_registration r WHERE r.patient_id=?"
+			                + " AND r.facility_location_id IN (SELECT location_id FROM tree))")) {
 				statement.setInt(1, facility.getLocationId());
 				statement.setInt(2, patient.getPatientId());
+				statement.setInt(3, patient.getPatientId());
 				try (ResultSet result = statement.executeQuery()) {
 					result.next();
 					return result.getLong(1);

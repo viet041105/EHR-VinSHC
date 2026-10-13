@@ -41,6 +41,14 @@ public abstract class BaseVinshcController {
 		return error(HttpStatus.CONFLICT, error.getMessage());
 	}
 	
+	@ExceptionHandler(VinshcExceptions.Conflict.class)
+	public ResponseEntity<Map<String, Object>> conflictWithMatches(VinshcExceptions.Conflict error) {
+		Map<String, Object> body = new LinkedHashMap<>();
+		body.put("error", error.getMessage());
+		body.put("matches", error.getMatches());
+		return ResponseEntity.status(HttpStatus.CONFLICT).body(body);
+	}
+
 	@ExceptionHandler(VinshcExceptions.BadRequest.class)
 	public ResponseEntity<Map<String, String>> badRequest(VinshcExceptions.BadRequest error) {
 		return error(HttpStatus.BAD_REQUEST, error.getMessage());

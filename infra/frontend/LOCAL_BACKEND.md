@@ -8,10 +8,10 @@
 - Source backend trong repo: `infra/backend/`, module Java tại
   `infra/backend/vinshc-module/`. Backend dùng OpenMRS Core 2.8.8 và module VinSHC.
 - Metadata nguồn: `metadata/vinshc/`; bản FE dùng nằm ở `infra/frontend/metadata/`.
-- Stack đang chạy được build từ bản xuất nguyên commit `main` đã khóa trong
-  `infra/frontend/metadata/source.json`, đặt ở `infra/frontend/.runtime/backend/`.
-  Hiện image backend là `vinshc-fe-local-backend:main-d9d5b95`.
-  Sửa source trong repo không tự thay image đang chạy; cần quy trình cập nhật/build lại.
+- Từ khi BE đã merge vào `main`, `npm run backend:build` build trực tiếp từ working tree
+  (`compose.yaml` ở gốc repo + overlay `infra/frontend/compose.local.yaml`), image
+  `vinshc-fe-local-backend:dev`. Sửa source BE cần chạy lại `backend:build` rồi `backend:up`.
+  Thư mục `infra/frontend/.runtime/backend/` của quy trình cũ (xuất commit đã khóa) không còn được dùng.
 - Database thật của stack là PostgreSQL 16.15, database `openmrs`; không phải
   localStorage hay dữ liệu JSON trong FE.
 - Backend, PostgreSQL, giao diện OpenMRS O3 và gateway đều chạy trong Docker Desktop
@@ -41,7 +41,7 @@ Chọn **New Database Connection → PostgreSQL**, nhập:
 | Host | `127.0.0.1` |
 | Port | `15432` |
 | Database | `openmrs` |
-| Username | Giá trị `OMRS_DB_USER` trong `infra/frontend/.runtime/backend/.env` (hiện là `openmrs`) |
+| Username | Giá trị `OMRS_DB_USER` trong `.env` ở gốc repo |
 | Password | Giá trị `OMRS_DB_PASSWORD` trong cùng file `.env` |
 | SSL | Tắt cho PostgreSQL local hiện tại |
 
@@ -100,7 +100,7 @@ SELECT COUNT(*) AS visit_count FROM visit;
 trên chỉ lấy định danh/trạng thái, không lấy hash mật khẩu.
 
 Thông tin DB cấu hình bằng `OMRS_DB_USER` / `OMRS_DB_PASSWORD` trong
-`infra/frontend/.runtime/backend/.env`. Đây là tài khoản PostgreSQL, khác tài khoản
+`.env` ở gốc repo (do `npm run backend:prepare` / `scripts/bootstrap.py` tạo). Đây là tài khoản PostgreSQL, khác tài khoản
 đăng nhập ứng dụng `EHR_ADMIN_USERNAME` / `EHR_ADMIN_PASSWORD`. File này chỉ ở máy
 local, bị Git bỏ qua; không dùng `.env` của một project Docker khác để suy ra
 credentials của `vinshc-fe-local`.

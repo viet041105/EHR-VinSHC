@@ -1,6 +1,5 @@
 package org.openmrs.module.vinshc.web;
 
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.openmrs.module.vinshc.service.OperationsService;
@@ -45,6 +44,14 @@ public class OperationsController extends BaseVinshcController {
 		return service.createAppointment(body);
 	}
 
+	@GetMapping("/appointments")
+	public Map<String, Object> appointments(@RequestParam(required = false) String date,
+	        @RequestParam(required = false) String provider, @RequestParam(required = false) String patient,
+	        @RequestParam(required = false) String status, @RequestParam(required = false) Integer limit,
+	        @RequestParam(required = false) Integer offset) {
+		return service.appointments(date, provider, patient, status, limit, offset);
+	}
+
 	@GetMapping("/appointments/{uuid}")
 	public Map<String, Object> appointment(@PathVariable String uuid) {
 		return service.appointment(uuid);
@@ -59,6 +66,13 @@ public class OperationsController extends BaseVinshcController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Map<String, Object> createQueue(@RequestBody Map<String, Object> body) {
 		return service.createQueue(body);
+	}
+
+	@GetMapping("/queue")
+	public Map<String, Object> queueList(@RequestParam(required = false) String point,
+	        @RequestParam(required = false) String state, @RequestParam(required = false) String date,
+	        @RequestParam(required = false) Integer limit, @RequestParam(required = false) Integer offset) {
+		return service.queueList(point, state, date, limit, offset);
 	}
 
 	@GetMapping("/queue/{uuid}")
@@ -83,6 +97,14 @@ public class OperationsController extends BaseVinshcController {
 		return service.createBill(body);
 	}
 
+	@GetMapping("/bills")
+	public Map<String, Object> bills(@RequestParam(required = false) String status,
+	        @RequestParam(required = false) String patient, @RequestParam(required = false) String visit,
+	        @RequestParam(required = false) String date, @RequestParam(required = false) Integer limit,
+	        @RequestParam(required = false) Integer offset) {
+		return service.bills(status, patient, visit, date, limit, offset);
+	}
+
 	@GetMapping("/bills/{uuid}")
 	public Map<String, Object> bill(@PathVariable String uuid) {
 		return service.bill(uuid);
@@ -97,6 +119,13 @@ public class OperationsController extends BaseVinshcController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Map<String, Object> receipt(@PathVariable String uuid, @RequestBody Map<String, Object> body) {
 		return service.receipt(uuid, body);
+	}
+
+	@GetMapping("/payments")
+	public Map<String, Object> payments(@RequestParam(required = false) String status,
+	        @RequestParam(required = false) String bill, @RequestParam(required = false) String date,
+	        @RequestParam(required = false) Integer limit, @RequestParam(required = false) Integer offset) {
+		return service.payments(status, bill, date, limit, offset);
 	}
 
 	@GetMapping("/payments/{uuid}")
@@ -119,6 +148,14 @@ public class OperationsController extends BaseVinshcController {
 	@ResponseStatus(HttpStatus.CREATED)
 	public Map<String, Object> createServiceOrder(@RequestBody Map<String, Object> body) {
 		return service.createServiceOrder(body);
+	}
+
+	@GetMapping("/service-orders")
+	public Map<String, Object> serviceOrders(@RequestParam(required = false) String state,
+	        @RequestParam(required = false) String patient, @RequestParam(required = false) String visit,
+	        @RequestParam(required = false) String date, @RequestParam(required = false) Integer limit,
+	        @RequestParam(required = false) Integer offset) {
+		return service.serviceOrders(state, patient, visit, date, limit, offset);
 	}
 
 	@GetMapping("/service-orders/{uuid}")
@@ -181,6 +218,12 @@ public class OperationsController extends BaseVinshcController {
 	@GetMapping("/reports/daily")
 	public Map<String, Object> daily(@RequestParam String date, @RequestParam String facility) {
 		return service.dailyReport(date, facility);
+	}
+
+	@GetMapping("/reports/range")
+	public Map<String, Object> range(@RequestParam String from, @RequestParam String to,
+	        @RequestParam String facility) {
+		return service.rangeReport(from, to, facility);
 	}
 
 	private static String safeFilename(String value) {
