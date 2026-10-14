@@ -23,7 +23,7 @@ from .text import fold
 
 UUID_RE = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}", re.IGNORECASE)
 CCCD_RE = re.compile(r"(?<!\d)\d{12}(?!\d)")
-PHONE_RE = re.compile(r"(?<![\d+])(?:\+84|84|0)(?:[\s.\-]?\d){9}(?![\d])")
+PHONE_RE = re.compile(r"(?<![\d+])(?:\+84|84|0)(?:[\s.\-]?\d){9,10}(?![\d])")
 EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 REDACTED = "[đã ẩn]"
 

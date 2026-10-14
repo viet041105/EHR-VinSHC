@@ -73,4 +73,13 @@ COPY --chown=1001:0 metadata/vinshc/contracts/printing-reporting.json /openmrs/d
 COPY --chown=1001:0 metadata/vinshc/contracts/workflow.json /openmrs/distribution/vinshc_metadata/workflow.json
 COPY --chown=1001:0 metadata/vinshc/pack.json /openmrs/distribution/vinshc_metadata/pack.json
 COPY --chown=1001:0 infra/backend/configuration/ /openmrs/distribution/openmrs_config/
+# HAPI forwards outside Spring MVC; block portal accounts after its authentication filter.
+COPY --from=vinshc-module-build /src/omod/target/classes/org/vinshc/security/PortalFhirGuardFilter.class /tmp/vinshc-portal-filter/org/vinshc/security/PortalFhirGuardFilter.class
+RUN set -eu; mkdir -p /tmp/vinshc-portal-war; cd /tmp/vinshc-portal-war; \
+    jar xf /openmrs/distribution/openmrs_core/openmrs.war WEB-INF/web.xml; \
+    mkdir -p WEB-INF/lib; \
+    jar cf WEB-INF/lib/vinshc-portal-filter.jar -C /tmp/vinshc-portal-filter org/vinshc/security; \
+    sed -i '/<\/web-app>/i\    <filter><filter-name>VinSHCPortalFhirGuard</filter-name><filter-class>org.vinshc.security.PortalFhirGuardFilter</filter-class></filter>\n    <filter-mapping><filter-name>VinSHCPortalFhirGuard</filter-name><url-pattern>/ms/fhir2Servlet/*</url-pattern><dispatcher>REQUEST</dispatcher><dispatcher>FORWARD</dispatcher></filter-mapping>\n    <filter-mapping><filter-name>VinSHCPortalFhirGuard</filter-name><url-pattern>/ms/fhir2R3Servlet/*</url-pattern><dispatcher>REQUEST</dispatcher><dispatcher>FORWARD</dispatcher></filter-mapping>' WEB-INF/web.xml; \
+    jar uf /openmrs/distribution/openmrs_core/openmrs.war WEB-INF/web.xml WEB-INF/lib/vinshc-portal-filter.jar; \
+    rm -rf /tmp/vinshc-portal-war /tmp/vinshc-portal-filter
 USER 1001

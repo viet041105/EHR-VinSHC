@@ -130,6 +130,34 @@ export class BackendClient {
     }
     return data;
   }
+  async chat(persona, body, { signal } = {}) {
+    if (!["doctor", "patient"].includes(persona) || !this.#token)
+      throw new BackendError("Cần đăng nhập đúng tài khoản để dùng trợ lý.", 401);
+    if (persona === "doctor" && this.workspace?.role !== "doctor")
+      throw new BackendError("Chọn workspace bác sĩ trước khi hỏi.", 403);
+    const generation = this.generation;
+    const headers = { Authorization: "Basic " + this.#token, Accept: "application/json", "Content-Type": "application/json" };
+    if (persona === "doctor") {
+      headers["X-VinSHC-Workspace-Role"] = this.workspace.role;
+      headers["X-VinSHC-Workspace-Facility"] = this.workspace.facility;
+    }
+    let response;
+    try {
+      response = await this.fetcher("/agent/v1/" + persona + "/chat", {
+        method: "POST", headers, body: JSON.stringify(body), credentials: "omit", redirect: "error", cache: "no-store",
+        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(95000)]) : AbortSignal.timeout(95000),
+      });
+    } catch (error) {
+      if (signal?.aborted) throw error;
+      throw new BackendError("Trợ lý chưa kết nối hoặc phản hồi quá lâu. Bạn vẫn có thể đọc hồ sơ trực tiếp.");
+    }
+    if (generation !== this.generation) throw new BackendError("Phiên đã thay đổi; bỏ phản hồi cũ.");
+    if (response.status === 401) this.clear();
+    let data;
+    try { data = await response.json(); } catch { throw new BackendError("Trợ lý không trả dữ liệu hợp lệ.", response.status); }
+    if (!response.ok) throw new BackendError(data.detail || messages[response.status] || "Trợ lý chưa sẵn sàng.", response.status);
+    return data;
+  }
   async login(username, password) {
     this.clear();
     if (!username.trim() || !password)

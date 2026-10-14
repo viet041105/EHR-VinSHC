@@ -40,7 +40,10 @@ def clock(value: Any) -> str | None:
     if not value:
         return None
     try:
-        return datetime.fromisoformat(value).strftime("%H:%M %d/%m/%Y")
+        parsed = datetime.fromisoformat(value)
+        if parsed.tzinfo is not None:
+            parsed = parsed.astimezone(CLINIC_ZONE)
+        return parsed.strftime("%H:%M %d/%m/%Y")
     except ValueError:
         return value
 

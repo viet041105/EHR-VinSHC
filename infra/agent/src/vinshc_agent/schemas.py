@@ -41,7 +41,7 @@ class DoctorChatIn(ChatIn):
 
 
 class PatientChatIn(ChatIn):
-    pass
+    visitUuid: str | None = None
 
 
 class SourceOut(BaseModel):
@@ -53,6 +53,8 @@ class SourceOut(BaseModel):
     field: str | None
     recordedAt: str | None
     status: str | None
+    encounterUuid: str | None = None
+    visitUuid: str | None = None
 
 
 class AnswerOut(BaseModel):

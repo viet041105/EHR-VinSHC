@@ -23,4 +23,5 @@
   <bean id="vinshcOperationsService" class="org.openmrs.module.vinshc.service.OperationsService">
     <constructor-arg ref="sessionFactory"/>
   </bean>
+  <bean id="vinshcPortalService" class="org.openmrs.module.vinshc.service.PortalService"><constructor-arg ref="sessionFactory"/><constructor-arg ref="vinshcClinicalService"/><constructor-arg ref="vinshcAuthorizationService"/></bean>
 </beans>

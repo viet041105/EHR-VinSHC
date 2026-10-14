@@ -67,5 +67,8 @@ def validate(final: FinalAnswer, registry: FactRegistry, persona: str) -> Valida
         if reason:
             result.rejected.append((statement, reason))
             continue
-        result.accepted.append(Checked(Statement(text=text, fact_ids=ids), facts))
+        # MVP renders clinical statements from source facts. The model selects facts and
+        # ordering; free-form prose cannot change a diagnosis, unit, BP pair or missing state.
+        grounded = "\n".join(f"{f.label}: {f.value}" for f in facts)
+        result.accepted.append(Checked(Statement(text=grounded, fact_ids=ids), facts))
     return result

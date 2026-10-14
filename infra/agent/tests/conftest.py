@@ -74,7 +74,7 @@ class FakeVinshc:
         if tail == "vitals":
             return "vitals", self.payloads["vitals"]
         if tail == "allergy":
-            return "allergy", {"patientUuid": PATIENT, "allergies": summary_payload()["allergies"]}
+            return "allergy", {"patientUuid": PATIENT, "allergies": summary_payload()["allergies"]["allergies"]}
         if tail == "operations/service-orders":
             return "service-orders", self.payloads["service_orders"]
         if parts[:2] == ["operations", "results"]:

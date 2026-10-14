@@ -33,7 +33,7 @@ class ClaudeChatModel:
     provider = "anthropic"
 
     def __init__(
-        self, model: str, effort: str, timeout: float, max_retries: int, client: Any = None, api_key: str | None = None
+        self, model: str, effort: str, timeout: float, max_retries: int, client: Any = None, api_key: str | None = None, max_tokens: int = 4096
     ):
         import anthropic  # chỉ cần khi bật provider này: pip install "vinshc-agent[anthropic]"
 
@@ -42,6 +42,7 @@ class ClaudeChatModel:
         self._client = client or anthropic.AsyncAnthropic(api_key=api_key, timeout=timeout, max_retries=max_retries)
         self.name = model
         self._effort = effort
+        self._max_tokens = max_tokens
 
     def _unavailable(self, ex: Exception) -> ModelUnavailable:
         anthropic = self._anthropic
@@ -69,7 +70,7 @@ class ClaudeChatModel:
         try:
             response = await self._client.beta.messages.create(
                 model=self.name,
-                max_tokens=16000,
+                max_tokens=self._max_tokens,
                 system=system,
                 tools=[{**tool, "strict": True} for tool in tools],
                 messages=build_messages(conversation),

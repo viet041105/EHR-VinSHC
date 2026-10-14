@@ -47,6 +47,8 @@ class Source:
     field: str | None
     recordedAt: str | None
     status: str | None
+    encounterUuid: str | None = None
+    visitUuid: str | None = None
 
 
 @dataclass(frozen=True)
@@ -104,7 +106,8 @@ class FactRegistry:
         return self._facts.get(fact_id)
 
     def add(self, section: str, label: str, value: str, state: str, source: Source) -> Fact:
-        fact = Fact(f"F{len(self._facts) + 1}", section, label, value, state, source)
+        from .guardrails import redact
+        fact = Fact(f"F{len(self._facts) + 1}", section, redact(label), redact(value), state, source)
         self._facts[fact.id] = fact
         return fact
 

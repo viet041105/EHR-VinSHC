@@ -55,7 +55,10 @@ async def get_encounter_summary(ctx: ToolContext, args: dict[str, Any]) -> ToolO
     rec = Recorder(ctx.registry)
     visit = records.clinical_summary(rec, await _summary(ctx, encounter), ctx.catalog, ctx.patient_uuid, encounter)
     if encounter == ctx.encounter_uuid and visit:
-        ctx.visit_uuid = ctx.visit_uuid or visit
+        if ctx.visit_uuid and ctx.visit_uuid != visit:
+            from ..facts import ContextMismatch
+            raise ContextMismatch("visit không thuộc encounter đang mở")
+        ctx.visit_uuid = visit
     return rec.output
 
 

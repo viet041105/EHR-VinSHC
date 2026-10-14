@@ -35,6 +35,8 @@ const userView =
   "custom:(uuid,username,systemId,display,retired,roles:(uuid,name))";
 
 const actions = {
+  linkPortal: action("Liên kết tài khoản bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân"), id("patient", "Mã bệnh nhân")], () => "portal/accounts", d => ({userUuid:uuid(d.user),patientUuid:uuid(d.patient)}), {systemOnly:true}),
+  unlinkPortal: action("Thu hồi truy cập cổng bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân")], d => "portal/accounts/"+uuid(d.user), () => undefined, {method:"DELETE",systemOnly:true}),
   configuration: action(
     "Kiểm tra cấu hình nghiệp vụ",
     "metadata_admin",
@@ -250,7 +252,7 @@ export default defineModule({
       title: "Quản trị",
       resource: "metadata_admin",
       order: 120,
-      actions: [
+      actions: ["linkPortal", "unlinkPortal",
         "configuration",
         "audit",
         "workspace",

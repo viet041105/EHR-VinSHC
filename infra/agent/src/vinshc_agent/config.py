@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import os
+import math
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Mapping
@@ -38,7 +39,9 @@ class Settings:
     anthropic_api_key_file: Path | None = None
     # Mô tả nguồn credential đã tìm thấy (không bao giờ là giá trị khóa), để hiển thị khi khởi động.
     anthropic_credential: str | None = None
-    model_timeout: float = 120.0
+    model_timeout: float = 45.0
+    request_timeout: float = 90.0
+    model_max_tokens: int = 4096
     model_max_retries: int = 2
     patient_portal: str = "disabled"
     patient_fixture: Path = DEMO_PATIENT_FIXTURE
@@ -66,6 +69,8 @@ def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
         if (env.get("VINSHC_AGENT_ANTHROPIC_API_KEY_FILE") or "").strip()
         else None,
         model_timeout=float(env.get("VINSHC_AGENT_MODEL_TIMEOUT", d.model_timeout)),
+        request_timeout=float(env.get("VINSHC_AGENT_REQUEST_TIMEOUT", d.request_timeout)),
+        model_max_tokens=int(env.get("VINSHC_AGENT_MODEL_MAX_TOKENS", d.model_max_tokens)),
         model_max_retries=int(env.get("VINSHC_AGENT_MODEL_MAX_RETRIES", d.model_max_retries)),
         patient_portal=env.get("VINSHC_AGENT_PATIENT_PORTAL", d.patient_portal).strip().lower(),
         patient_fixture=Path(env.get("VINSHC_AGENT_PATIENT_FIXTURE", str(d.patient_fixture))),
@@ -129,11 +134,17 @@ def validate(settings: Settings) -> None:
         )
     if settings.anthropic_effort not in EFFORTS:
         raise ConfigError(f"VINSHC_AGENT_ANTHROPIC_EFFORT phải thuộc {', '.join(EFFORTS)}.")
-    if settings.patient_portal not in ("disabled", "fixture"):
+    if settings.patient_portal not in ("disabled", "fixture", "http"):
         # "http" được thêm khi backend có API cổng bệnh nhân (xem README, mục Luồng bệnh nhân).
-        raise ConfigError("VINSHC_AGENT_PATIENT_PORTAL chỉ nhận 'disabled' hoặc 'fixture'.")
+        raise ConfigError("VINSHC_AGENT_PATIENT_PORTAL chỉ nhận 'disabled', 'fixture' hoặc 'http'.")
     if settings.patient_portal == "fixture" and not settings.patient_fixture.is_file():
         raise ConfigError(f"Không tìm thấy fixture cổng bệnh nhân: {settings.patient_fixture}")
+    if not all(math.isfinite(v) for v in (settings.backend_timeout,settings.model_timeout,settings.request_timeout)):
+        raise ConfigError("Timeout phải hữu hạn.")
+    if not 1 <= settings.max_tool_rounds <= 6 or not 1 <= settings.max_tool_calls_per_round <= 8 or not 0 <= settings.model_max_retries <= 3:
+        raise ConfigError("Tool rounds 1–6, calls/round 1–8, retries 0–3.")
+    if settings.request_timeout <= 0 or not 256 <= settings.model_max_tokens <= 16000:
+        raise ConfigError("Request timeout phải dương; model max tokens phải nằm trong 256–16000.")
     if settings.backend_timeout <= 0 or settings.model_timeout <= 0 or settings.model_max_retries < 0:
         raise ConfigError("Timeout phải dương và số lần retry không âm.")
     if settings.rate_limit_per_minute < 1 or settings.max_tool_rounds < 1 or settings.max_tool_calls_per_round < 1:

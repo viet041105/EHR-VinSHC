@@ -10,6 +10,7 @@ Vai trò (và do đó prompt, tool, guardrail) được quyết định từ dan
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 import time
@@ -21,6 +22,8 @@ from fastapi import FastAPI, Header, Request
 from fastapi.responses import JSONResponse
 
 from . import __version__
+from langsmith import tracing_context
+
 from .agent import AgentDeps, build_graph, build_response
 from .backend import BackendError, Credentials, VinshcBackend, require_uuid
 from .config import Settings, load_settings, read_api_key
@@ -53,6 +56,7 @@ def make_model(settings: Settings) -> ChatModel:
             settings.model_timeout,
             settings.model_max_retries,
             api_key=api_key,
+            max_tokens=settings.model_max_tokens,
         )
     return FakeChatModel()
 
@@ -95,6 +99,11 @@ def create_app(
             base_url=settings.backend_url + "/", timeout=settings.backend_timeout, follow_redirects=False
         )
         app.state.backend = VinshcBackend(client)
+        if settings.patient_portal == "http":
+            from .portal import HttpPortal
+            app.state.portal = HttpPortal(client)
+        else:
+            app.state.portal = portal
         try:
             yield
         finally:
@@ -130,7 +139,11 @@ def create_app(
 
     async def run(request: Request, deps: AgentDeps, conversation: Conversation, context: DoctorContextOut | None) -> ChatOut:
         started = time.perf_counter()
-        state = await GRAPH.ainvoke({"conversation": conversation}, context=deps)
+        try:
+            with tracing_context(enabled=False):
+                state = await asyncio.wait_for(GRAPH.ainvoke({"conversation": conversation}, context=deps), settings.request_timeout)
+        except asyncio.TimeoutError as ex:
+            raise BackendError(504, "agent_timeout", "Trợ lý chưa trả lời kịp; hãy đọc hồ sơ hoặc thử lại.") from ex
         result = build_response(state, request.state.request_id, deps, context)
         validation = state.get("validation")
         # Chỉ ghi số liệu vận hành; không ghi nội dung hồ sơ, câu hỏi, câu trả lời hay header.
@@ -154,7 +167,7 @@ def create_app(
 
     @app.get("/healthz")
     async def healthz():
-        return {"status": "ok", "version": __version__, "modelProvider": model.provider, "patientPortal": portal.mode}
+        return {"status": "ok", "version": __version__, "modelProvider": model.provider, "patientPortal": settings.patient_portal if settings.patient_portal == "http" else portal.mode}
 
     @app.post("/v1/doctor/chat", response_model=ChatOut)
     async def doctor_chat(
@@ -171,6 +184,7 @@ def create_app(
         visit = require_uuid(body.visitUuid, "visitUuid") if body.visitUuid else None
         backend: VinshcBackend = request.app.state.backend
         workspace = await backend.workspace(credentials)
+        throttle("doctor-user", str(workspace.get("userUuid") or credentials.authorization))
         if workspace.get("role") != "doctor":
             raise BackendError(403, "role_not_supported", "Trợ lý hồ sơ cho nhân viên hiện chỉ mở cho workspace bác sĩ.")
         if str(workspace.get("facilityUuid") or "").lower() != credentials.facility:
@@ -205,14 +219,20 @@ def create_app(
         if not authorization:
             raise BackendError(401, "unauthenticated", "Thiếu thông tin đăng nhập.")
         throttle("patient", authorization)
-        session = await portal.authenticate(authorization)
+        active_portal = request.app.state.portal
+        session = await active_portal.authenticate(authorization)
+        throttle("patient-user", session.patient_uuid)
+        visit = require_uuid(body.visitUuid, "visitUuid") if body.visitUuid else None
+        if visit:
+            await active_portal.visit_instructions(session, visit)  # server verifies ownership and publication
         ctx = ToolContext(
             persona="patient",
             registry=FactRegistry(),
             catalog=catalog,
             patient_uuid=session.patient_uuid,
-            portal=portal,
+            portal=active_portal,
             session=session,
+            visit_uuid=visit,
         )
         deps = AgentDeps(
             model=model,

@@ -36,6 +36,7 @@ class ToolContext:
     session: PatientSession | None = None
     used: list[str] = field(default_factory=list)
     cache: dict[str, Any] = field(default_factory=dict)
+    read_errors: list[str] = field(default_factory=list)
 
 
 Handler = Callable[[ToolContext, dict[str, Any]], Awaitable[ToolOutput]]
@@ -89,6 +90,9 @@ async def execute(tools: dict[str, Tool], ctx: ToolContext, call: ToolCall) -> T
     except BackendError as ex:
         if ex.status == 401:
             raise
+        ctx.read_errors.append(ex.code)
+        from ..facts import Gap
+        ctx.registry.gap(Gap("other", tool.name, ex.code, ex.message))
         return ToolResult(call.id, _error(ex.message), True)
     return ToolResult(call.id, output.to_model(), False)
 

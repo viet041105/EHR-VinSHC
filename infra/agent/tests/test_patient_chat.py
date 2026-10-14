@@ -83,7 +83,9 @@ def test_medication_advice_from_model_is_dropped(make_client):
     model = ScriptedModel([("get_my_prescriptions", {"visit_ref": "all"})], final)
     body = ask(make_client(model=model), "Thuốc của tôi uống thế nào?").json()
     assert body["status"] == "limited"
-    assert texts(body) == ["Đơn ghi Paracetamol 500 mg, mỗi lần 1 viên, 3 lần/ngày, uống sau ăn."]
+    assert len(texts(body)) == 1
+    assert "Paracetamol 500 mg: mỗi lần 1 viên; 3 lần/ngày" in texts(body)[0]
+    assert "Uống sau ăn" in texts(body)[0]
 
 
 def test_patient_tools_only(make_client, vinshc):

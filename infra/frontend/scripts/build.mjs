@@ -71,7 +71,7 @@ if (only) {
   const [name, url] = await buildPackage(pkg);
   map.imports[name] = url;
   writeImportMap(map);
-  const page = join(DIST, "connected.html");
+  for (const page of [join(DIST, "connected.html"), join(DIST, "portal.html")]) {
   if (existsSync(page))
     writeFileSync(
       page,
@@ -80,6 +80,7 @@ if (only) {
         importMapTag(map),
       ),
     );
+  }
   console.log(`updated dist/importmap.json and dist/connected.html for ${name}`);
 } else {
   rmSync(DIST, { recursive: true, force: true });

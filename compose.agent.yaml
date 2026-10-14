@@ -1,0 +1,40 @@
+# Add to compose.yaml for the complete VinSHC staff/patient web app and agent.
+services:
+  agent:
+    image: ehr-vinshc-agent:0.1.0
+    build:
+      context: .
+      dockerfile: infra/agent/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      VINSHC_AGENT_BACKEND_URL: http://backend:8080/openmrs/ws/rest/v1
+      VINSHC_AGENT_PATIENT_PORTAL: http
+      VINSHC_AGENT_MODEL_PROVIDER: fake
+      VINSHC_AGENT_ALLOW_EXTERNAL_MODEL: "false"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+  clinic:
+    image: ehr-vinshc-clinic:0.2.0
+    build:
+      context: .
+      dockerfile: infra/frontend/Dockerfile
+    restart: unless-stopped
+    depends_on:
+      agent:
+        condition: service_healthy
+      gateway:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:${VINSHC_APP_PORT:-5173}:80"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1/portal.html"]
+      interval: 10s
+      timeout: 5s
+      retries: 12

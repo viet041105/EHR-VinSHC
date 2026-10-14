@@ -4,8 +4,7 @@ Service Python (FastAPI + LangGraph) cho hai luồng trong [AGENT_PLAN.md](../..
 
 - **Bác sĩ (A):** hỏi đáp, tóm tắt về bệnh nhân và lần khám đang mở, đọc thêm các lần khám trước, sinh hiệu,
   dị ứng, cận lâm sàng và lịch hẹn qua API nhân viên của adapter VinSHC.
-- **Bệnh nhân (P):** hiểu lời dặn, đơn thuốc đã xác nhận, lịch hẹn của chính mình. Backend **chưa có** API
-  cổng bệnh nhân, nên luồng này chạy trên một hợp đồng đề xuất với dữ liệu synthetic và tắt mặc định.
+- **Bệnh nhân (P):** hiểu lời dặn, đơn thuốc đã xác nhận, lịch hẹn của chính mình. Có API cổng bệnh nhân trên BE; chế độ http xác nhận account–patient và chỉ đọc bản công bố. Chế độ fixture giữ lại cho test.
 
 Agent chỉ đọc: không ghi, chốt phiếu, kê thuốc, đặt chỉ định hay chẩn đoán.
 
@@ -23,7 +22,7 @@ FE ──► API (xác thực, chọn vai trò từ danh tính, giới hạn t�
          ▼
    check ── mỗi câu phải trích dữ kiện có thật, số khớp nguồn, không khuyên điều trị/đổi thuốc, không lộ prompt
          ▼
-   phản hồi: câu trả lời + nguồn (UUID, field, thời điểm) + thông tin thiếu + lưu ý + disclaimer
+   phản hồi: dữ kiện dựng từ nguồn + nguồn (UUID, field, thời điểm) + thông tin thiếu + lưu ý + disclaimer
 ```
 
 ## Cấu trúc
@@ -173,7 +172,7 @@ Thông tin thay đổi theo lượt (thời điểm, liên hệ phòng khám) n�
 | Đầu vào | Chặn mẫu prompt injection (tiếng Việt/Anh, thẻ giả `<system>`), cả trong `history`; chặn UUID ngoài ngữ cảnh; bệnh nhân hỏi hồ sơ người thân → từ chối; ẩn CCCD/SĐT/email trước khi gửi model |
 | Cấp cứu | Bệnh nhân mô tả khó thở, đau ngực, ngất, co giật, chảy máu nhiều, sưng môi/lưỡi, ý nghĩ tự hại… → trả hướng dẫn gọi 115 ngay, không gọi model |
 | Tool | Allowlist theo vai trò; tham số được kiểm tra; mã tham chiếu chỉ do tool cấp; dữ liệu khác bệnh nhân → dừng cả lượt (`context_mismatch`); tối đa 4 vòng × 4 tool |
-| Đầu ra | Mỗi câu phải trích dữ kiện có thật và số liệu khớp nguồn; bác sĩ: loại câu khuyến nghị điều trị; bệnh nhân: loại câu khuyên đổi/ngừng/thêm thuốc, đổi liều, khẳng định chẩn đoán không có nguồn; loại câu chứa định danh cá nhân; lộ chuỗi canary → chặn cả câu trả lời |
+| Đầu ra | Mỗi câu phải trích dữ kiện có thật; MVP dựng nội dung hiển thị trực tiếp từ nhãn/giá trị nguồn để giữ đúng số, đơn vị, chẩn đoán và trạng thái; bác sĩ: loại câu khuyến nghị điều trị; bệnh nhân: loại câu khuyên đổi/ngừng/thêm thuốc, đổi liều, khẳng định chẩn đoán không có nguồn; loại câu chứa định danh cá nhân; lộ chuỗi canary → chặn cả câu trả lời |
 | Vận hành | Giới hạn 20 lượt hỏi/phút/người dùng; `Cache-Control: no-store`; log chỉ ghi số liệu (request ID, trạng thái, tool, số câu bị loại và lý do, thời gian), không ghi header, câu hỏi, câu trả lời hay hồ sơ |
 
 Guardrail bằng luật là lớp bổ sung, không bắt được mọi cách diễn đạt. Bộ ca đánh giá (AGENT_PLAN §10) vẫn là
@@ -225,9 +224,9 @@ Service không khởi động khi thiếu SDK, thiếu cờ cho phép hoặc kh�
 được lưu trong cấu hình, không in ra màn hình và không ghi log; chỉ nguồn của khóa được hiển thị. Không dán khóa
 vào chat, issue hay file được commit; nếu lộ, thu hồi khóa trên Anthropic Console và tạo khóa mới.
 
-## Luồng bệnh nhân: hợp đồng cần backend xây
+## Luồng bệnh nhân: API đã triển khai
 
-`VINSHC_AGENT_PATIENT_PORTAL=disabled` (mặc định) trả 503. `fixture` đọc
+`VINSHC_AGENT_PATIENT_PORTAL=http` nối API thật; disabled (mặc định khi chạy Python riêng) trả 503. `fixture` đọc
 [patient_portal.demo.json](fixtures/patient_portal.demo.json) (token demo `Bearer demo-patient-binh`) để FE và
 agent phát triển song song. Bản thật cần backend cung cấp, theo đề xuất:
 
@@ -237,20 +236,23 @@ agent phát triển song song. Bản thật cần backend cung cấp, theo đề
 - `GET portal/prescriptions?visit=` → `{"results": [{"uuid", "visitUuid", "drugName", "strength", "dose", "frequency", "route", "duration", "instructions", "status", "confirmedAt"}]}`
 - `GET portal/appointments` → `{"results": [{"uuid", "startAt", "serviceName", "status"}]}`
 
-Backend chỉ trả phần đã được bác sĩ/phòng khám công bố, không trả bản nháp hay ghi chú nội bộ. Khi có API thật,
-thêm một lớp `HttpPortal` trong `portal.py`; tool và guardrail không đổi. Không dùng API nhân viên hay tài khoản
+Contract đã triển khai xem docs/api/patient-portal.md. Backend chỉ trả phần đã được bác sĩ/phòng khám công bố, không trả bản nháp hay ghi chú nội bộ. Lớp HttpPortal trong portal.py chuyển tiếp credential, không gửi cookie phiên từ người dùng khác. Không dùng API nhân viên hay tài khoản
 dùng chung để đọc thay bệnh nhân.
 
 ## Nối với FE
 
-FE gọi agent qua cùng origin, ví dụ proxy `/agent` → `http://127.0.0.1:8000` trong `vite.config.mjs` (vùng file
+FE đã gọi agent qua cùng origin, proxy `/agent` → `http://127.0.0.1:8000` trong `vite.config.mjs` (vùng file
 của người 2), và gửi cùng header như `BackendClient`. Agent không bật CORS.
 
 ## Giới hạn và việc tiếp theo
 
-- Chưa chạy với OpenMRS thật và model thật; cần chạy E2E và bộ 10–20 ca synthetic có expected output.
+- B12 đã kiểm tra OpenMRS thật với model fake. Đánh giá chất lượng/model thật và bộ 10–20 ca có expected output được để lại theo phạm vi đã chốt.
 - Đơn vị sinh hiệu lấy từ `metadata/vinshc/fields.csv` vì API chưa trả `unit`.
-- Audit backend chưa phân biệt lượt đọc do agent với lượt bác sĩ tự mở.
-- Điều kiện `assigned_patient` trong ma trận quyền chưa được backend thực thi; agent đọc theo phạm vi cơ sở như UI.
+- Audit backend đánh dấu agent: cho lượt đọc do service agent thực hiện; marker không cấp quyền.
+- BE kiểm tra quan hệ provider–bệnh nhân cho lượt đọc của agent, cùng scope cơ sở/workspace.
 - Giới hạn tần suất lưu trong bộ nhớ một tiến trình; chạy nhiều bản cần chuyển sang kho dùng chung (Redis…).
-- Chưa có job CI cho thư mục này (`.github/workflows/` thuộc người 4).
+- CI tại .github/workflows/agent.yml và B12 trong CI hệ thống; Compose tại compose.agent.yaml.
+
+## Tích hợp MVP
+
+Xem ../../docs/AGENT_MVP_HANDOFF.md để chạy npm run mvp:up, mở trang bác sĩ/bệnh nhân và cấp liên kết tài khoản. PatientChatIn có visitUuid tùy chọn được BE kiểm tra trước khi gọi model. Câu trả lời MVP được dựng từ dữ kiện nguồn; diễn giải tự do sẽ được bổ sung sau đánh giá. HTTP client không chuyển cookie phiên giữa các user, và tracing LangSmith được tắt cho lượt hỏi. Dependency constraints được lưu trong constraints.txt.

@@ -135,7 +135,7 @@ def test_unsupported_and_unsafe_statements_are_dropped(make_client, caplog):
     model = ScriptedModel([("get_encounter_summary", {"encounter_ref": "current"})], final)
     body = ask(make_client(model=model), "Tóm tắt").json()
     assert body["status"] == "limited"
-    assert texts(body) == ["Nhiệt độ 38.5 °C lúc 08:50."]
+    assert texts(body) == ["Nhiệt độ: 38.5 °C (đo lúc 08:50 13/10/2026)"]
     assert "unsupported_number" in caplog.text and "treatment_advice" in caplog.text
     assert AUTH not in caplog.text and "38.5" not in caplog.text and "Tóm tắt" not in caplog.text
 
@@ -182,7 +182,8 @@ def test_non_doctor_workspace_is_refused_before_reading(make_client):
 def test_forbidden_tool_is_reported_not_guessed(make_client, vinshc):
     vinshc.status["service-orders"] = 403
     body = ask(make_client(vinshc), "Kết quả xét nghiệm?").json()
-    assert body["status"] == "not_found" and body["answer"] == []
+    assert body["status"] == "limited" and body["answer"] == []
+    assert any(m["reason"] == "forbidden" for m in body["missing"])
 
 
 def test_backend_session_and_transport_errors(make_client, vinshc):

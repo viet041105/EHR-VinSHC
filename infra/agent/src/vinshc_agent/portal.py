@@ -105,3 +105,50 @@ class FixturePortal:
 
 def make_portal(mode: str, fixture: Path) -> PatientPortal:
     return FixturePortal(fixture) if mode == "fixture" else DisabledPortal()
+
+
+class HttpPortal:
+    """Forward the patient's credential to the portal API; identity is never chosen by the model."""
+    mode = "http"
+
+    def __init__(self, client):
+        self._client = client
+
+    async def _get(self, authorization: str, path: str, params=None):
+        import httpx
+        from .backend import decode
+        try:
+            response = await self._client.get("vinshc/portal/" + path, params=params,
+                headers={"Authorization": authorization, "Accept": "application/json", "Cookie": "", "X-VinSHC-Request-Origin": "agent"})
+        except httpx.TimeoutException as ex:
+            raise BackendError(504, "backend_timeout", "Cổng bệnh nhân không phản hồi kịp.") from ex
+        except httpx.HTTPError as ex:
+            raise BackendError(503, "backend_unavailable", "Không kết nối được cổng bệnh nhân.") from ex
+        return decode(response)
+
+    async def authenticate(self, authorization: str) -> PatientSession:
+        from .backend import require_uuid
+        data = await self._get(authorization, "session")
+        if data.get("persona") != "patient":
+            raise BackendError(403, "role_not_supported", "Tài khoản chưa có quyền cổng bệnh nhân.")
+        return PatientSession(require_uuid(data.get("patientUuid"), "patientUuid"), authorization)
+
+    async def _owned_get(self, session, path, params=None):
+        from .facts import ContextMismatch
+        data = await self._get(session.authorization, path, params)
+        if data.get("patientUuid") != session.patient_uuid:
+            raise ContextMismatch("portal trả dữ liệu khác bệnh nhân")
+        return data
+
+    async def visits(self, session):
+        return await self._owned_get(session, "visits")
+
+    async def visit_instructions(self, session, visit):
+        from .backend import require_uuid
+        return await self._owned_get(session, f"visits/{require_uuid(visit, 'visitUuid')}/instructions")
+
+    async def prescriptions(self, session, visit):
+        return await self._owned_get(session, "prescriptions", {"visit": visit} if visit else None)
+
+    async def appointments(self, session):
+        return await self._owned_get(session, "appointments")

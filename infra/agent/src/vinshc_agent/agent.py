@@ -172,6 +172,8 @@ def build_response(
 ) -> ChatOut:
     persona = deps.ctx.persona
     status, message, show = _status(state, persona, deps.clinic_contact)
+    if deps.ctx.read_errors and status not in ("refused", "emergency"):
+        status, message = "limited", "Một số nguồn chưa đọc được; xem thông tin thiếu/lỗi bên dưới."
     answer: list[AnswerOut] = []
     if show:
         for checked in state["validation"].accepted:

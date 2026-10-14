@@ -18,7 +18,10 @@ def _portal(ctx: ToolContext):
 async def list_my_visits(ctx: ToolContext, args: dict[str, Any]) -> ToolOutput:
     portal, session = _portal(ctx)
     rec = Recorder(ctx.registry)
-    records.portal_visits(rec, await portal.visits(session))
+    data = await portal.visits(session)
+    if ctx.visit_uuid:
+        data = {**data, "results": [v for v in data.get("results", []) if v.get("uuid") == ctx.visit_uuid]}
+    records.portal_visits(rec, data)
     return rec.output
 
 
@@ -33,7 +36,7 @@ async def get_visit_instructions(ctx: ToolContext, args: dict[str, Any]) -> Tool
 async def get_my_prescriptions(ctx: ToolContext, args: dict[str, Any]) -> ToolOutput:
     portal, session = _portal(ctx)
     ref = args["visit_ref"]
-    visit = None if ref.lower() == "all" else ctx.registry.resolve(ref, "visit")[0]
+    visit = ctx.visit_uuid if ref.lower() == "all" else ctx.registry.resolve(ref, "visit")[0]
     rec = Recorder(ctx.registry)
     records.portal_prescriptions(rec, await portal.prescriptions(session, visit))
     return rec.output

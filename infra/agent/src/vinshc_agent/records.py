@@ -125,7 +125,11 @@ def clinical_summary(
     for record in ([consultation] if consultation else []) + (summary.get("diagnoses") or []) + (summary.get("drugOrders") or []):
         _owned(record, patient)
         _owned(record, encounter, "encounterUuid")
-    for record in summary.get("allergies") or []:
+    allergy_payload = summary.get("allergies") or {}
+    allergies = allergy_payload.get("allergies", []) if isinstance(allergy_payload, dict) else allergy_payload
+    if isinstance(allergy_payload, dict):
+        _owned(allergy_payload, patient)
+    for record in allergies:
         _owned(record, patient)
     for record in summary.get("vitals") or []:
         _owned(record, patient)
@@ -158,7 +162,7 @@ def clinical_summary(
         rec.gap("medications", "Thuốc", "none_in_source", "Lần khám này không có dòng thuốc nào trong dữ liệu trả về.")
     for order in orders:
         _drug_order(rec, order)
-    for allergy in summary.get("allergies") or []:
+    for allergy in allergies:
         _allergy(rec, allergy)
     if summary.get("allergies") or orders:
         rec.note("Danh sách dị ứng và trạng thái thuốc phản ánh thời điểm đọc, không phải ảnh chụp tại ngày khám.")
@@ -181,7 +185,7 @@ def _consultation(rec: Recorder, consultation: dict[str, Any] | None, status: st
         if raw is None or (isinstance(raw, str) and not raw.strip()):
             continue
         meta = catalog.get(code)
-        source = Source("consultation", members.get(code), code, None, status)
+        source = Source("consultation", members.get(code), code, None, status, consultation.get("encounterUuid"))
         section = CONSULTATION_LAYOUT.get(code, "other")
         if meta.type == "coded" and isinstance(raw, str) and raw in STATE_TEXT:
             state = "recorded" if raw in ANSWERED_STATES else raw
@@ -206,7 +210,7 @@ def _vital_group(rec: Recorder, group: dict[str, Any], catalog: FieldCatalog) ->
     states: dict[str, str] = group.get("states") or {}
     for code in list(values) + [c for c in states if c not in values]:
         meta = catalog.get(code)
-        source = Source("vitals", group.get("uuid"), code, measured, status)
+        source = Source("vitals", group.get("uuid"), code, measured, status, group.get("encounterUuid"), group.get("visitUuid"))
         if code in values and values[code] is not None:
             unit = f" {meta.unit_display}" if meta.unit_display else ""
             at = f" (đo lúc {when})" if when else ""
@@ -222,7 +226,7 @@ def _diagnosis(rec: Recorder, dx: dict[str, Any]) -> None:
     code = f" ({dx['code']})" if dx.get("code") else ""
     certainty = CERTAINTY.get(dx.get("certainty") or "", dx.get("certainty") or "chưa ghi mức độ chắc chắn")
     status = "/".join(str(x) for x in (dx.get("rank"), dx.get("certainty")) if x) or None
-    source = Source("diagnosis", dx.get("uuid"), "diagnosis", dx.get("dateCreated"), status)
+    source = Source("diagnosis", dx.get("uuid"), "diagnosis", dx.get("dateCreated"), status, dx.get("encounterUuid"))
     rec.add("diagnoses", RANK.get(dx.get("rank") or "", "Chẩn đoán"), f"{name}{code} — {certainty}", "recorded", source)
 
 
@@ -245,7 +249,7 @@ def _drug_order(rec: Recorder, order: dict[str, Any]) -> None:
         parts.append(f"hướng dẫn: {order['dosingInstructions']}")
     status = order.get("status") or "active"
     parts.append(f"trạng thái lúc đọc: {ORDER_STATUS.get(status, status)}")
-    source = Source("drug_order", order.get("uuid"), "drug_order", order.get("dateActivated"), status)
+    source = Source("drug_order", order.get("uuid"), "drug_order", order.get("dateActivated"), status, order.get("encounterUuid"))
     rec.add("medications", name, "; ".join(parts), "recorded", source)
 
 

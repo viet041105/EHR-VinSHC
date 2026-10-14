@@ -38,6 +38,7 @@ class Credentials:
             "Authorization": self.authorization,
             "X-VinSHC-Workspace-Role": self.role,
             "X-VinSHC-Workspace-Facility": self.facility,
+            "X-VinSHC-Request-Origin": "agent",
         }
 
 
@@ -90,7 +91,7 @@ class VinshcBackend:
     async def _get(self, path: str, credentials: Credentials, params: dict[str, Any] | None = None) -> dict[str, Any]:
         try:
             response = await self._client.get(
-                path, params=params, headers={"Accept": "application/json", **credentials.headers()}
+                path, params=params, headers={"Accept": "application/json", "Cookie": "", **credentials.headers()}
             )
         except httpx.TimeoutException as ex:
             raise BackendError(504, "backend_timeout", "OpenMRS không phản hồi kịp.") from ex
