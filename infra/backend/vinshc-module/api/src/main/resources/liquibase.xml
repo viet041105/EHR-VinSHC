@@ -479,4 +479,44 @@
     </sql>
     <rollback><sql>DROP TABLE vinshc_dispense_revision;</sql></rollback>
   </changeSet>
+  <changeSet id="vinshc-p3-20261015-publication-governance" author="vinshc" dbms="postgresql">
+    <comment>Auditable patient identity verification and immutable publication lifecycle events.</comment>
+    <sql>
+      CREATE TABLE vinshc_portal_link_event (
+        event_id BIGSERIAL PRIMARY KEY,
+        event_uuid VARCHAR(38) NOT NULL UNIQUE,
+        user_id INT NOT NULL REFERENCES users(user_id),
+        patient_id INT NOT NULL REFERENCES patient(patient_id),
+        version_number INT NOT NULL CHECK(version_number &gt; 0),
+        status VARCHAR(12) NOT NULL CHECK(status IN ('pending','active','revoked')),
+        verification_method VARCHAR(60),
+        reason VARCHAR(1000),
+        creator INT NOT NULL REFERENCES users(user_id),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL,
+        UNIQUE(user_id,version_number)
+      );
+      CREATE INDEX ix_vinshc_link_latest ON vinshc_portal_link_event(user_id,version_number DESC);
+      CREATE TABLE vinshc_portal_publication_event (
+        event_id BIGSERIAL PRIMARY KEY,
+        event_uuid VARCHAR(38) NOT NULL UNIQUE,
+        publication_id BIGINT NOT NULL REFERENCES vinshc_portal_publication(publication_id),
+        status VARCHAR(16) NOT NULL CHECK(status IN ('draft','published','revoked','superseded')),
+        reason VARCHAR(1000),
+        creator INT NOT NULL REFERENCES users(user_id),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL
+      );
+      CREATE INDEX ix_vinshc_publication_history ON vinshc_portal_publication_event(publication_id,event_id);
+      ALTER TABLE vinshc_portal_publication
+        ADD COLUMN source_type VARCHAR(32) NOT NULL DEFAULT 'consultation',
+        ADD COLUMN source_uuid VARCHAR(38),
+        ADD COLUMN source_version INT NOT NULL DEFAULT 1,
+        ADD COLUMN facility_location_id INT REFERENCES location(location_id);
+    </sql>
+    <rollback><sql>
+      ALTER TABLE vinshc_portal_publication DROP COLUMN facility_location_id,
+        DROP COLUMN source_version, DROP COLUMN source_uuid, DROP COLUMN source_type;
+      DROP TABLE vinshc_portal_publication_event;
+      DROP TABLE vinshc_portal_link_event;
+    </sql></rollback>
+  </changeSet>
 </databaseChangeLog>

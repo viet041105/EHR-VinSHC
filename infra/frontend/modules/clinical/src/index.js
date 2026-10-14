@@ -138,8 +138,33 @@ const diagnosis = action(
   () => "diagnosis",
 );
 const actions = {
-  publishPortal: action("Công bố lời dặn/đơn cho bệnh nhân", "clinical_chart", "finalize", [id("visit", "Mã lượt khám"), id("encounter", "Mã lần khám")], d => "portal/visits/" + uuid(d.visit) + "/publication", d => ({encounterUuid: uuid(d.encounter)}), {onlyRoles:["doctor"]}),
-  revokePortal: action("Thu hồi hồ sơ đã công bố", "clinical_chart", "finalize", [id("visit", "Mã lượt khám")], d => "portal/visits/" + uuid(d.visit) + "/publication", () => undefined, {method:"DELETE",onlyRoles:["doctor"]}),
+  publishPortal: action(
+    "Công bố dữ liệu được chọn cho bệnh nhân", "clinical_chart", "finalize",
+    [id("visit", "Mã lượt khám"), id("encounter", "Mã lần khám"),
+     choice("section", "Chỉ công bố", [
+       ["instructions","Lời dặn"],["prescriptions","Đơn thuốc"],
+       ["results","Kết quả CLS đã duyệt (không đính kèm file)"],
+       ["both","Lời dặn và đơn thuốc"],
+       ["all_approved","Lời dặn, đơn thuốc và kết quả CLS đã duyệt"]
+     ])],
+    d => "portal/visits/" + uuid(d.visit) + "/publication",
+    d => ({encounterUuid: uuid(d.encounter),
+      sections: d.section==="both" ? ["instructions","prescriptions"]
+        : d.section==="all_approved" ? ["instructions","prescriptions","results"] : [d.section]}),
+    {onlyRoles:["doctor"],confirm:"Xác nhận công bố phần hồ sơ đã chọn tới cổng bệnh nhân?"}
+  ),
+  publicationHistory: action(
+    "Lịch sử công bố, thay thế và thu hồi", "clinical_chart", "finalize",
+    [id("visit","Mã lượt khám")],
+    d=>"portal/visits/"+uuid(d.visit)+"/publication/history",
+    null,{method:"GET",onlyRoles:["doctor"]},
+  ),
+  revokePortal: action(
+    "Thu hồi hồ sơ đã công bố", "clinical_chart", "finalize",
+    [id("visit", "Mã lượt khám"), F("reason","Lý do thu hồi","textarea",{max:1000})],
+    d => "portal/visits/" + uuid(d.visit) + "/publication/revoke",
+    d => ({reason:d.reason}), {onlyRoles:["doctor"],confirm:"Thu hồi quyền xem bản công bố của bệnh nhân?"}
+  ),
   summary: action(
     "Đọc hồ sơ lần khám",
     "clinical_chart",
@@ -387,6 +412,7 @@ export default defineModule({
         "summary",
         "publishPortal",
         "revokePortal",
+        "publicationHistory",
         "startConsultation",
         "clinicalConfiguration",
         "consultation",

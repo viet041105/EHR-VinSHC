@@ -36,7 +36,25 @@ const userView =
 
 const actions = {
   linkPortal: action("Liên kết tài khoản bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân"), id("patient", "Mã bệnh nhân")], () => "portal/accounts", d => ({userUuid:uuid(d.user),patientUuid:uuid(d.patient)}), {systemOnly:true}),
-  unlinkPortal: action("Thu hồi truy cập cổng bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân")], d => "portal/accounts/"+uuid(d.user), () => undefined, {method:"DELETE",systemOnly:true}),
+  portalLinkHistory: action(
+    "Lịch sử xác minh và thu hồi liên kết", "metadata_admin", "read",
+    [id("user","UUID tài khoản bệnh nhân")],
+    d=>"portal/accounts/"+uuid(d.user)+"/history",null,
+    {method:"GET",systemOnly:true},
+  ),
+  verifyPortal: action(
+    "Xác minh danh tính bệnh nhân", "metadata_admin", "update",
+    [id("user","UUID tài khoản"),
+     choice("verificationMethod","Phương pháp đã xác minh",[
+       ["in_person_document","Đối chiếu giấy tờ trực tiếp"],
+       ["verified_eid","Định danh điện tử đã xác minh"],
+       ["verified_clinic_record","Đối chiếu hồ sơ cơ sở đã xác minh"]
+     ])],
+    d=>"portal/accounts/"+uuid(d.user)+"/verify",
+    d=>({verificationMethod:d.verificationMethod}),
+    {systemOnly:true,confirm:"Xác nhận đã đối chiếu danh tính bệnh nhân? Thao tác sẽ kích hoạt quyền xem dữ liệu đã công bố."}
+  ),
+  unlinkPortal: action("Thu hồi truy cập cổng bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân"), F("reason","Lý do thu hồi","textarea",{max:1000})], d => "portal/accounts/"+uuid(d.user)+"/revoke", d=>({reason:d.reason}), {systemOnly:true,confirm:"Thu hồi ngay quyền xem dữ liệu công bố?"}),
   configuration: action(
     "Kiểm tra cấu hình nghiệp vụ",
     "metadata_admin",
@@ -317,7 +335,7 @@ export default defineModule({
       title: "Quản trị",
       resource: "metadata_admin",
       order: 120,
-      actions: ["linkPortal", "unlinkPortal",
+      actions: ["linkPortal", "verifyPortal", "unlinkPortal", "portalLinkHistory",
         "configuration",
         "audit",
         "workspace",

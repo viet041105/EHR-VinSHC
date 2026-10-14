@@ -218,47 +218,47 @@ P3 là điều kiện bắt buộc trước portal và chatbot bệnh nhân.
 
 ### 7.1. Mô hình liên kết account–patient
 
-- [ ] Thêm bảng version hóa liên kết OpenMRS User/Person với Patient.
-- [ ] Một account bệnh nhân mặc định chỉ liên kết một patient; nếu hỗ trợ người giám hộ, dùng loại quan hệ/ủy quyền riêng.
-- [ ] Lưu trạng thái pending/active/revoked, phương thức xác minh, actor xác minh, thời gian hiệu lực và lý do thu hồi.
-- [ ] Không suy liên kết từ trùng tên, điện thoại, CCCD, email hoặc contact.
-- [ ] Không coi contact/người nhà hiện có là người được quyền đọc hồ sơ.
-- [ ] Chặn liên kết một user tới patient khác khi liên kết active còn tồn tại, trừ workflow chuyển có kiểm soát.
-- [ ] Thêm audit cho tạo, xác minh, kích hoạt và thu hồi liên kết.
-- [ ] Thêm API System Developer/admin được ủy quyền để quản lý liên kết.
+- [x] Thêm bảng version hóa liên kết OpenMRS User/Person với Patient.
+- [x] Một account bệnh nhân mặc định chỉ liên kết một patient; nếu hỗ trợ người giám hộ, dùng loại quan hệ/ủy quyền riêng.
+- [x] Lưu trạng thái pending/active/revoked, phương thức xác minh, actor xác minh, thời gian hiệu lực và lý do thu hồi.
+- [x] Không suy liên kết từ trùng tên, điện thoại, CCCD, email hoặc contact.
+- [x] Không coi contact/người nhà hiện có là người được quyền đọc hồ sơ.
+- [x] Chặn liên kết một user tới patient khác khi liên kết active còn tồn tại, trừ workflow chuyển có kiểm soát.
+- [x] Thêm audit cho tạo, xác minh, kích hoạt và thu hồi liên kết.
+- [x] Thêm API System Developer/admin được ủy quyền để quản lý liên kết.
 - [ ] Thêm test giả mạo patient UUID, liên kết chéo cơ sở, account retired và link revoked.
 
 ### 7.2. Mô hình công bố
 
-- [ ] Thêm entity/table publication append-only hoặc versioned.
-- [ ] Công bố phải tham chiếu rõ patient, visit/encounter, loại tài liệu/bản ghi, UUID nguồn và revision/version.
-- [ ] Lưu trạng thái draft/published/revoked/superseded.
-- [ ] Lưu publishedBy/publishedAt, revokedBy/revokedAt/reason và facility.
+- [x] Thêm entity/table publication append-only hoặc versioned.
+- [x] Công bố phải tham chiếu rõ patient, visit/encounter, loại tài liệu/bản ghi, UUID nguồn và revision/version.
+- [x] Lưu trạng thái draft/published/revoked/superseded.
+- [x] Lưu publishedBy/publishedAt, revokedBy/revokedAt/reason và facility.
 - [ ] Quy định rõ các loại có thể công bố: lời dặn, đơn thuốc, kết quả CLS, lịch hẹn và tài liệu đã duyệt.
-- [ ] Không tự công bố toàn bộ clinical summary.
-- [ ] `consultation final` không tự đồng nghĩa `published`.
-- [ ] Correction sau công bố không tự thay nội dung đã xem; tạo publication revision mới hoặc supersede rõ ràng.
-- [ ] Không công bố draft, kết quả preliminary, đơn đã ngừng nếu policy không cho phép, hoặc attachment chưa scan.
-- [ ] Thêm API publish/revoke/list history cho bác sĩ/người có quyền.
+- [x] Không tự công bố toàn bộ clinical summary.
+- [x] `consultation final` không tự đồng nghĩa `published`.
+- [x] Correction sau công bố không tự thay nội dung đã xem; tạo publication revision mới hoặc supersede rõ ràng.
+- [x] Không công bố draft, kết quả preliminary, đơn đã ngừng nếu policy không cho phép, hoặc attachment chưa scan.
+- [x] Thêm API publish/revoke/list history cho bác sĩ/người có quyền.
 - [ ] Thêm privilege/resource/action mới vào permission matrix và configuration production.
-- [ ] Audit mọi lần publish/revoke/read của bệnh nhân.
+- [x] Audit mọi lần publish/revoke/read của bệnh nhân.
 
 ### 7.3. Projection bệnh nhân
 
-- [ ] Tạo DTO patient-safe riêng; không tái sử dụng nguyên DTO nhân viên.
-- [ ] Chỉ trả dữ liệu đã công bố và còn hiệu lực.
-- [ ] Loại CCCD, số điện thoại người liên hệ, ghi chú nội bộ, audit nhân viên, dữ liệu draft và metadata không cần thiết.
-- [ ] Trả source reference đủ để mở đúng phần đã công bố, nhưng không trả Core REST/FHIR URL có thể bị thay UUID.
-- [ ] Giữ đúng đơn vị, thời gian, trạng thái thuốc/kết quả và revision.
-- [ ] Thêm pagination cho danh sách lượt/tài liệu đã công bố.
+- [x] Tạo DTO patient-safe riêng; không tái sử dụng nguyên DTO nhân viên.
+- [x] Chỉ trả dữ liệu đã công bố và còn hiệu lực.
+- [x] Loại CCCD, số điện thoại người liên hệ, ghi chú nội bộ, audit nhân viên, dữ liệu draft và metadata không cần thiết.
+- [x] Trả source reference đủ để mở đúng phần đã công bố, nhưng không trả Core REST/FHIR URL có thể bị thay UUID.
+- [x] Giữ đúng đơn vị, thời gian, trạng thái thuốc/kết quả và revision.
+- [x] Thêm pagination cho danh sách lượt/tài liệu đã công bố.
 
 ### 7.4. Tiêu chí nghiệm thu P3
 
-- [ ] Chốt phiếu nhưng chưa publish thì bệnh nhân không đọc được.
-- [ ] Publish đúng một lời dặn/đơn thì bệnh nhân chỉ thấy phần đó.
-- [ ] Revoke chặn lần đọc tiếp theo nhưng lịch sử audit vẫn còn.
-- [ ] Patient A sửa URL/UUID sang Patient B luôn nhận 403/404 không rò rỉ sự tồn tại hoặc dữ liệu.
-- [ ] Admin/manager không tự có quyền công bố hoặc đọc chart nếu permission matrix không cấp.
+- [x] Chốt phiếu nhưng chưa publish thì bệnh nhân không đọc được.
+- [x] Publish đúng một lời dặn/đơn thì bệnh nhân chỉ thấy phần đó.
+- [x] Revoke chặn lần đọc tiếp theo nhưng lịch sử audit vẫn còn.
+- [x] Patient A sửa URL/UUID sang Patient B luôn nhận 403/404 không rò rỉ sự tồn tại hoặc dữ liệu.
+- [x] Admin/manager không tự có quyền công bố hoặc đọc chart nếu permission matrix không cấp.
 
 ---
 
