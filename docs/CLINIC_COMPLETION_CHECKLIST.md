@@ -163,20 +163,20 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 6.1. Đính chính/hủy cấp thuốc
 
-- [ ] Thiết kế dispense ledger append-only; không UPDATE số lượng/lô của bản đã xác nhận.
+- [x] Thiết kế dispense ledger append-only; không UPDATE số lượng/lô của bản đã xác nhận.
 - [ ] Thêm privilege `dispensing update` và `dispensing void` chỉ sau khi owner duyệt ma trận quyền.
-- [ ] Thêm endpoint correction/void với lý do bắt buộc, bản ghi gốc, actor và time.
-- [ ] Tính lại tổng đã cấp và số còn lại từ các ledger entry còn hiệu lực.
-- [ ] Chặn đính chính làm tổng cấp âm hoặc vượt số kê.
-- [ ] Chặn sửa đơn đã hết hiệu lực theo cách che mất lịch sử; correction phải tạo revision/compensating entry.
-- [ ] Thêm optimistic locking hoặc kiểm tra revision để tránh hai quầy cấp đồng thời vượt số lượng.
-- [ ] Thêm UI lịch sử cấp, đính chính/hủy theo quyền và cảnh báo ảnh hưởng số còn lại.
-- [ ] Test retry/idempotency, concurrent dispense, correction, void và restart.
+- [x] Thêm endpoint correction/void với lý do bắt buộc, bản ghi gốc, actor và time.
+- [x] Tính lại tổng đã cấp và số còn lại từ các ledger entry còn hiệu lực.
+- [x] Chặn đính chính làm tổng cấp âm hoặc vượt số kê.
+- [x] Chặn sửa đơn đã hết hiệu lực theo cách che mất lịch sử; correction phải tạo revision/compensating entry.
+- [x] Thêm optimistic locking hoặc kiểm tra revision để tránh hai quầy cấp đồng thời vượt số lượng.
+- [x] Thêm UI lịch sử cấp, đính chính/hủy theo quyền và cảnh báo ảnh hưởng số còn lại.
+- [x] Test retry/idempotency, concurrent dispense, correction, void và restart.
 
 ### 6.2. Tồn kho
 
-- [ ] Quyết định phạm vi: tiếp tục “ghi lô/hạn dùng không trừ kho” hay tích hợp Stock Management.
-- [ ] Nếu chưa tích hợp, UI và phiếu phải hiển thị rõ “không đối chiếu tồn kho”.
+- [x] Quyết định phạm vi: tiếp tục “ghi lô/hạn dùng không trừ kho” hay tích hợp Stock Management.
+- [x] Nếu chưa tích hợp, UI và phiếu phải hiển thị rõ “không đối chiếu tồn kho”.
 - [ ] Nếu tích hợp, ánh xạ drug/item/location/batch và dùng transaction hoặc outbox để không cấp thuốc mà trừ kho thất bại âm thầm.
 - [ ] Chặn cấp lô không tồn tại, hết hạn, không đủ tồn hoặc sai cơ sở.
 - [ ] Có ledger nhập–xuất–điều chỉnh và kiểm kê; không tính tồn chỉ từ đơn thuốc.
@@ -184,13 +184,13 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 6.3. Duyệt kết quả CLS
 
-- [ ] Không chỉ kiểm tra `reviewerProvider` tồn tại; xác minh reviewer là provider của user hoặc là người duyệt được ủy quyền tại đúng cơ sở.
-- [ ] Tách rõ author, performer và reviewer nếu workflow yêu cầu.
-- [ ] Không cho client ghi reviewer là người khác chỉ bằng UUID.
+- [x] Không chỉ kiểm tra `reviewerProvider` tồn tại; xác minh reviewer là provider của user hoặc là người duyệt được ủy quyền tại đúng cơ sở.
+- [x] Tách rõ author, performer và reviewer nếu workflow yêu cầu.
+- [x] Không cho client ghi reviewer là người khác chỉ bằng UUID.
 - [ ] Quy định reviewer có được duyệt kết quả do chính mình nhập hay không; mã hóa policy và test.
-- [ ] Kết quả `final`/`corrected` bắt buộc reviewer, reviewedAt hợp lệ và quyền duyệt.
+- [x] Kết quả `final`/`corrected` bắt buộc reviewer, reviewedAt hợp lệ và quyền duyệt.
 - [ ] Chặn `reviewedAt` vô lý so với recordedAt/thời điểm hiện tại theo policy đã chốt.
-- [ ] Hoàn tất order chỉ khi revision cuối hợp lệ là final/corrected.
+- [x] Hoàn tất order chỉ khi revision cuối hợp lệ là final/corrected.
 - [ ] Thêm audit cho phân công, bắt đầu, nhập kết quả, duyệt, sửa và hoàn tất.
 - [ ] Nếu cần chữ ký chính thức, thiết kế chữ ký số/tài liệu ký riêng; không coi tên reviewer là chữ ký pháp lý.
 
@@ -205,10 +205,10 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 6.5. Tiêu chí nghiệm thu P2
 
-- [ ] Phiếu cấp sai được đính chính có lịch sử, tổng đã cấp đúng sau restart.
-- [ ] KTV không thể tự khai reviewer tùy ý.
+- [x] Phiếu cấp sai được đính chính có lịch sử, tổng đã cấp đúng sau restart.
+- [x] KTV không thể tự khai reviewer tùy ý.
 - [ ] Bác sĩ/KTV chỉ xem/in/download kết quả trong đúng phạm vi quyền.
-- [ ] Attachment restore sang project mới vẫn đúng byte và SHA-256.
+- [x] Attachment restore sang project mới vẫn đúng byte và SHA-256.
 
 ---
 

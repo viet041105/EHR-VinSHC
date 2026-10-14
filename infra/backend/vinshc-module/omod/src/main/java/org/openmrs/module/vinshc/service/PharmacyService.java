@@ -70,8 +70,9 @@ public class PharmacyService {
 			        .append(" UNION SELECT l.location_id FROM location l JOIN tree t ON l.parent_location=t.location_id) ");
 			args.add(facility.getLocationId());
 		}
-		String dispensed = "(SELECT COALESCE(sum(x.quantity),0) FROM vinshc_dispense x WHERE x.order_id=o.order_id"
-		        + " AND x.status='completed')";
+		String dispensed = "(SELECT COALESCE(sum(COALESCE((SELECT r.effective_quantity FROM vinshc_dispense_revision r"
+		        + " WHERE r.dispense_id=x.dispense_id ORDER BY r.version_number DESC LIMIT 1),x.quantity)),0)"
+		        + " FROM vinshc_dispense x WHERE x.order_id=o.order_id AND x.status='completed')";
 		sql.append("SELECT o.order_id FROM orders o JOIN drug_order d ON d.order_id=o.order_id")
 		        .append(" JOIN encounter e ON e.encounter_id=o.encounter_id LEFT JOIN visit v ON v.visit_id=e.visit_id")
 		        .append(" WHERE o.voided=false AND e.voided=false AND o.order_action='NEW'");
@@ -192,6 +193,90 @@ public class PharmacyService {
 		return dispenseView(rows.get(0), order);
 	}
 
+public Map<String, Object> reviseDispense(String dispenseUuid, Map<String, Object> body, boolean voiding) {
+		AuthorizationService.requireOperation("dispensing", voiding ? "void" : "update");
+		if (body == null
+		        || body.keySet().stream()
+		                .anyMatch(key -> !("reason".equals(key) || "quantity".equals(key) || "batchNumber".equals(key)
+		                        || "expiryDate".equals(key) || "expectedVersion".equals(key)
+		                        || "idempotencyKey".equals(key))))
+			throw bad("unsupported dispense revision field");
+		String key = CareService.idempotency(body);
+		String reason = requiredString(body, "reason");
+		if (reason.trim().isEmpty())
+			throw bad("revision reason is required");
+		reason = reason.trim();
+		limit(reason, 1000, "reason");
+		if (!(body.get("expectedVersion") instanceof Number))
+			throw bad("expectedVersion is required");
+		int expected = ((Number) body.get("expectedVersion")).intValue();
+		if (expected < 0)
+			throw bad("expectedVersion cannot be negative");
+		List<Map<String, Object>> origins = jdbc.queryForList("SELECT * FROM vinshc_dispense WHERE dispense_uuid=?",
+		    canonicalUuid(dispenseUuid, "dispense"));
+		if (origins.isEmpty())
+			throw bad("dispense does not exist");
+		Map<String, Object> origin = origins.get(0);
+		DrugOrder order = (DrugOrder) Context.getOrderService().getOrder(((Number) origin.get("order_id")).intValue());
+		AuthorizationService.requireEncounterScopeStatic(order.getEncounter());
+		TransactionLocks.lock(sessionFactory, "dispense-order:" + order.getOrderId());
+		List<Map<String, Object>> existing = jdbc
+		        .queryForList("SELECT * FROM vinshc_dispense_revision WHERE idempotency_key=?", key);
+		if (!existing.isEmpty()) {
+			Map<String, Object> row = existing.get(0);
+			BigDecimal requested = voiding ? BigDecimal.ZERO : quantity(body.get("quantity"));
+			if (!row.get("dispense_id").equals(origin.get("dispense_id"))
+			        || ((Number) row.get("version_number")).intValue() != expected + 1
+			        || ((BigDecimal) row.get("effective_quantity")).compareTo(requested) != 0
+			        || !row.get("action").equals(voiding ? "voided" : "corrected") || !row.get("reason").equals(reason))
+				throw new OperationsService.OperationsConflictException("revision key reused with a different payload");
+			return dispenseRecord(dispenseUuid);
+		}
+		List<Map<String, Object>> revisions = jdbc.queryForList(
+		    "SELECT * FROM vinshc_dispense_revision WHERE dispense_id=? ORDER BY version_number DESC LIMIT 1",
+		    origin.get("dispense_id"));
+		int current = revisions.isEmpty() ? 0 : ((Number) revisions.get(0).get("version_number")).intValue();
+		if (current != expected)
+			throw new OperationsService.OperationsConflictException("dispense revision changed; reload the latest version");
+		BigDecimal old = revisions.isEmpty() ? (BigDecimal) origin.get("quantity")
+		        : (BigDecimal) revisions.get(0).get("effective_quantity");
+		BigDecimal replacement = voiding ? BigDecimal.ZERO : quantity(body.get("quantity"));
+		if (voiding && (body.containsKey("quantity") || body.containsKey("batchNumber") || body.containsKey("expiryDate")))
+			throw bad("void accepts only reason, version and idempotency key");
+		if (!voiding && !order.isActive() && replacement.compareTo(old) > 0)
+			throw new OperationsService.OperationsConflictException("cannot increase dispense on inactive order");
+		if (old.compareTo(BigDecimal.ZERO) == 0 && replacement.signum() > 0)
+			throw new OperationsService.OperationsConflictException("voided dispense cannot be reactivated");
+		BigDecimal revisedTotal = dispensed(order).subtract(old).add(replacement);
+		BigDecimal prescribed = BigDecimal.valueOf(order.getQuantity());
+		if (revisedTotal.signum() < 0 || revisedTotal.compareTo(prescribed) > 0)
+			throw new OperationsService.OperationsConflictException("corrected quantity is outside prescribed range");
+		String batch = revisions.isEmpty() ? (String) origin.get("batch_number")
+		        : (String) revisions.get(0).get("batch_number");
+		java.sql.Date expiry = revisions.isEmpty() ? (java.sql.Date) origin.get("expiry_date")
+		        : (java.sql.Date) revisions.get(0).get("expiry_date");
+		if (body.containsKey("batchNumber")) {
+			batch = optionalString(body, "batchNumber");
+			limit(batch, 64, "batchNumber");
+		}
+		if (body.containsKey("expiryDate")) {
+			String raw = optionalString(body, "expiryDate");
+			expiry = raw == null ? null : java.sql.Date.valueOf(day(raw));
+		}
+		String revisionUuid = UUID.randomUUID().toString();
+		jdbc.update(
+		    "INSERT INTO vinshc_dispense_revision"
+		            + "(revision_uuid,dispense_id,version_number,effective_quantity,batch_number,expiry_date,"
+		            + "reason,action,idempotency_key,creator,date_created)" + " VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+		    revisionUuid, origin.get("dispense_id"), current + 1, replacement, batch, expiry, reason,
+		    voiding ? "voided" : "corrected", key, Context.getAuthenticatedUser().getUserId(),
+		    Timestamp.from(Instant.now()));
+		ClinicalEvents.record(sessionFactory, voiding ? "medication_dispense_voided" : "medication_dispense_corrected",
+		    order.getPatient(), order.getEncounter(), revisionUuid, null,
+		    "original " + dispenseUuid + "; version " + (current + 1));
+		return dispenseRecord(dispenseUuid);
+	}
+
 	// ---------------------------------------------------------------- views
 
 	private Map<String, Object> prescriptionView(DrugOrder order, boolean withDispenses) {
@@ -257,8 +342,21 @@ public class PharmacyService {
 		Map<String, Object> out = new LinkedHashMap<>();
 		out.put("uuid", row.get("dispense_uuid"));
 		out.put("quantity", number((BigDecimal) row.get("quantity")));
-		out.put("batchNumber", row.get("batch_number"));
-		out.put("expiryDate", row.get("expiry_date") == null ? null : row.get("expiry_date").toString());
+		List<Map<String, Object>> revisions = jdbc
+		        .queryForList("SELECT r.revision_uuid,r.version_number,r.effective_quantity,r.batch_number,r.expiry_date,"
+		                + "r.reason,r.action,r.date_created,u.uuid AS actor_uuid"
+		                + " FROM vinshc_dispense_revision r JOIN users u ON u.user_id=r.creator"
+		                + " WHERE r.dispense_id=? ORDER BY r.version_number",
+		            row.get("dispense_id"));
+		Map<String, Object> last = revisions.isEmpty() ? null : revisions.get(revisions.size() - 1);
+		out.put("effectiveQuantity",
+		    number(last == null ? (BigDecimal) row.get("quantity") : (BigDecimal) last.get("effective_quantity")));
+		out.put("revisionVersion", last == null ? 0 : ((Number) last.get("version_number")).intValue());
+		out.put("effectiveStatus", last != null && "voided".equals(last.get("action")) ? "voided" : "completed");
+		out.put("batchNumber", last == null ? row.get("batch_number") : last.get("batch_number"));
+		Object expiry = last == null ? row.get("expiry_date") : last.get("expiry_date");
+		out.put("expiryDate", expiry == null ? null : expiry.toString());
+		out.put("revisions", revisions);
 		out.put("note", row.get("note"));
 		out.put("status", row.get("status"));
 		out.put("dispensedAt", CareService.iso((java.util.Date) row.get("date_created")));
@@ -271,8 +369,10 @@ public class PharmacyService {
 
 	private BigDecimal dispensed(Order order) {
 		BigDecimal value = jdbc.queryForObject(
-		    "SELECT COALESCE(sum(quantity),0) FROM vinshc_dispense WHERE order_id=? AND status='completed'", BigDecimal.class,
-		    order.getOrderId());
+		    "SELECT COALESCE(sum(COALESCE((SELECT r.effective_quantity FROM vinshc_dispense_revision r"
+		            + " WHERE r.dispense_id=x.dispense_id ORDER BY r.version_number DESC LIMIT 1),x.quantity)),0)"
+		            + " FROM vinshc_dispense x WHERE x.order_id=? AND x.status='completed'",
+		    BigDecimal.class, order.getOrderId());
 		return value == null ? BigDecimal.ZERO : value;
 	}
 

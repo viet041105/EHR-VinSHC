@@ -178,9 +178,11 @@ jobs:
       - name: Verify backend review regressions on the source stack
         # Runs last: it adds synthetic transactions, and B9 asserts that nothing changed since B8.
         run: python -m unittest -v tests.integration.test_b10_review_regressions
-      - name: Verify the staff workflow with real workspace accounts
-        # Registration, visits, vitals, worklists, dispensing and closure through the VinSHC adapter only.
+      - name: Verify the staff workflow and P2 correction/reviewer controls
+        # Synthetic lab reviewer scope, correction/void, idempotency and concurrent dispense revision are covered.
         run: python -m unittest -v tests.integration.test_b11_care_workflow
+      - name: Verify P2 original dispense rows and append-only revision evidence
+        run: python -m unittest -v tests.integration.test_p2_persistence
       - name: Build and start the clinic and agent MVP
         env:
           VINSHC_APP_PORT: '5184'

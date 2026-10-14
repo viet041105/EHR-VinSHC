@@ -456,4 +456,27 @@
     </sql>
     <rollback><sql>DROP TABLE vinshc_facility_workflow; DROP TABLE vinshc_form_definition;</sql></rollback>
   </changeSet>
+  <changeSet id="vinshc-p2-20261015-dispense-revisions" author="vinshc" dbms="postgresql">
+    <comment>Append-only correction events. Original dispense quantities and batches never change.</comment>
+    <sql>
+      CREATE TABLE vinshc_dispense_revision (
+        revision_id BIGSERIAL PRIMARY KEY,
+        revision_uuid VARCHAR(38) NOT NULL UNIQUE,
+        dispense_id BIGINT NOT NULL REFERENCES vinshc_dispense(dispense_id),
+        version_number INT NOT NULL CHECK (version_number &gt; 0),
+        effective_quantity NUMERIC(19,4) NOT NULL CHECK (effective_quantity &gt;= 0),
+        batch_number VARCHAR(64),
+        expiry_date DATE,
+        reason VARCHAR(1000) NOT NULL CHECK (length(trim(reason)) &gt; 0),
+        action VARCHAR(16) NOT NULL CHECK (action IN ('corrected','voided')),
+        idempotency_key VARCHAR(128) NOT NULL UNIQUE,
+        creator INT NOT NULL REFERENCES users(user_id),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL,
+        UNIQUE (dispense_id,version_number)
+      );
+      CREATE INDEX ix_vinshc_dispense_revision_latest
+          ON vinshc_dispense_revision(dispense_id,version_number DESC);
+    </sql>
+    <rollback><sql>DROP TABLE vinshc_dispense_revision;</sql></rollback>
+  </changeSet>
 </databaseChangeLog>
