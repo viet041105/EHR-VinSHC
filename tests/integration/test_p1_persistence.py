@@ -7,7 +7,7 @@ import unittest
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from api_client import Client
-from common import read_settings
+from common import read_settings, report_path
 
 class P1PersistenceTests(unittest.TestCase):
     @classmethod
@@ -15,7 +15,7 @@ class P1PersistenceTests(unittest.TestCase):
         settings = read_settings()
         cls.base = "http://127.0.0.1:" + settings.get("EHR_HTTP_PORT", "8080")
         cls.admin = Client(cls.base, settings["EHR_ADMIN_USERNAME"], settings["EHR_ADMIN_PASSWORD"])
-        cls.evidence = json.loads((ROOT / ".runtime/p1-local/reports/p1-acceptance.json").read_text(encoding="utf-8"))
+        cls.evidence = json.loads(report_path("p1-acceptance.json").read_text(encoding="utf-8"))
         if not cls.evidence.get("passed"): raise ValueError("P1 acceptance fixture not passed")
 
     def get(self, path):

@@ -102,8 +102,8 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 - [x] Thiết kế API ứng dụng dành riêng cho System Developer để tạo user OpenMRS.
 - [x] Payload tạo user không cho client gửi privilege trực tiếp; chỉ chọn role VinSHC trong allowlist.
 - [x] Hỗ trợ username, tên hiển thị, person, trạng thái active/retired và mật khẩu khởi tạo.
-- [ ] Không trả password/hash/salt trong response hoặc log.
-- [ ] Bắt buộc đổi mật khẩu lần đầu nếu OpenMRS baseline hỗ trợ; nếu không, ghi rõ cơ chế thay thế.
+- [x] Không trả password/hash/salt trong response hoặc log.
+- [x] Bắt buộc đổi mật khẩu lần đầu nếu OpenMRS baseline hỗ trợ; nếu không, ghi rõ cơ chế thay thế.
 - [x] Thêm API khóa/mở hoặc retire user có audit và chặn tự khóa tài khoản quản trị cuối cùng.
 - [x] Thêm API reset mật khẩu; không có API đọc lại mật khẩu cũ.
 - [x] Chặn username trùng, user đã retired, role không hợp lệ và thao tác ngoài quyền.
@@ -112,14 +112,14 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 5.2. Provider và liên kết user–provider
 
-- [ ] Tạo API tạo/sửa/retire provider.
+- [x] Tạo API tạo/sửa/retire provider.
 - [x] Tạo hoặc chọn Person hợp lệ cho provider; không tự dùng Patient làm provider.
 - [x] Tạo API liên kết/hủy liên kết user–provider.
-- [ ] Ràng buộc tài khoản lâm sàng có đúng một provider active tại thời điểm tạo encounter/kê đơn/ghi kết quả, trừ khi workflow hỗ trợ chọn rõ nhiều provider.
+- [x] Ràng buộc tài khoản lâm sàng có đúng một provider active tại thời điểm tạo encounter/kê đơn/ghi kết quả, trừ khi workflow hỗ trợ chọn rõ nhiều provider.
 - [x] Kiểm tra provider thuộc đúng cơ sở hoặc assignment chuyên môn trước khi sử dụng.
 - [x] Không cho reception/cashier/pharmacy tự nhận provider nếu không cần nghiệp vụ.
-- [ ] Ghi audit cho tạo, sửa, retire và liên kết provider.
-- [ ] Test provider bị retire, nhiều provider, provider khác cơ sở và giả mạo UUID.
+- [x] Ghi audit cho tạo, sửa, retire và liên kết provider.
+- [x] Test provider bị retire, nhiều provider, provider khác cơ sở và giả mạo UUID.
 
 ### 5.3. Cơ sở và location
 
@@ -133,7 +133,7 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 ### 5.4. Biểu mẫu và cấu hình workflow
 
 - [x] Chốt nguồn sự thật của form: O3 Form Engine schema hoặc schema VinSHC version hóa; không để `forms.json` chỉ là tài liệu mà UI hiểu như form production.
-- [ ] Tạo CRUD/versioning cho form template với draft/active/retired.
+- [x] Tạo CRUD/versioning cho form template với draft/active/retired.
 - [x] Không cho sửa đè phiên bản form đã dùng trong hồ sơ.
 - [ ] Cấu hình workflow `STANDARD_POSTPAY` và `COMPACT_PREPAY` theo cơ sở bằng metadata, không hardcode nhánh riêng.
 - [x] Thêm API đọc configuration projection cho FE; API ghi chỉ dành cho admin đúng cơ sở.

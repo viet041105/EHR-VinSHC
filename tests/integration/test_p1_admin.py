@@ -10,7 +10,7 @@ import uuid
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 from api_client import Client
-from common import read_settings
+from common import read_settings, report_path
 
 
 class P1AdminTests(unittest.TestCase):
@@ -33,7 +33,7 @@ class P1AdminTests(unittest.TestCase):
         cls.evidence["providerUuid"] = getattr(cls, "provider", {}).get("uuid")
         cls.evidence["facilityUuid"] = getattr(cls, "facility_id", None)
         cls.evidence["formUuid"] = getattr(cls, "form_id", None)
-        path = ROOT / ".runtime/p1-local/reports/p1-acceptance.json"
+        path = report_path("p1-acceptance.json")
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps(cls.evidence, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
@@ -59,10 +59,26 @@ class P1AdminTests(unittest.TestCase):
             self.assertEqual(user["roles"], [role])
             self.assertEqual(user["username"], username)
             self.assertFalse(user["retired"])
+            self.assertTrue(user["mustChangePassword"])
             self.assertFalse(any(k in user for k in ("password", "hashedPassword", "salt")))
             self.assertNotIn(password, json.dumps(user))
             self.users[role] = user
             self.passwords[role] = password
+        doctor = self.users["doctor"]
+        staff = Client(self.base, doctor["username"], self.passwords["doctor"])
+        code, _, _ = staff.request("/openmrs/ws/rest/v1/vinshc/providers/me")
+        self.assertEqual(code, 403)
+        replacement = "P1-changed-" + uuid.uuid4().hex
+        code, _, content = staff.request("/openmrs/ws/rest/v1/vinshc/staff/me/password", method="POST", payload={
+            "currentPassword": self.passwords["doctor"], "newPassword": replacement,
+        })
+        changed = json.loads(content)
+        self.assertEqual(code, 200, changed)
+        self.assertFalse(changed["mustChangePassword"])
+        self.assertNotIn(replacement, content)
+        self.passwords["doctor"] = replacement
+        staff = Client(self.base, doctor["username"], replacement)
+        self.assertEqual(staff.request("/openmrs/ws/rest/v1/vinshc/providers/me")[0], 200)
         status, listing = self.call("staff/users?limit=30&offset=0", method="GET")
         self.assertEqual(status, 200, listing)
         self.assertTrue(listing["results"])
@@ -83,8 +99,9 @@ class P1AdminTests(unittest.TestCase):
              "givenName": "Bad", "familyName": "Password", "gender": "U"},
         ]
         for payload in bad_cases:
-            code, _ = self.call("staff/users", payload)
+            code, response = self.call("staff/users", payload)
             self.assertIn(code, (400,409))
+            self.assertNotIn(payload["password"], json.dumps(response))
         staff = Client(self.base, self.users["doctor"]["username"], self.passwords["doctor"])
         code, _, _ = staff.request("/openmrs/ws/rest/v1/vinshc/staff/users", method="POST",
             payload={"username": "evil", "password": "StrongPass123456", "role": "admin"})
@@ -97,6 +114,7 @@ class P1AdminTests(unittest.TestCase):
         status, result = self.call(f"staff/users/{target['uuid']}/password", {"password": password})
         self.assertEqual(status, 200, result)
         self.assertNotIn(password, json.dumps(result))
+        self.assertTrue(result["mustChangePassword"])
         staff = Client(self.base, target["username"], password)
         self.assertTrue(staff.json("/openmrs/ws/rest/v1/session?v=full")["authenticated"])
         status, result = self.call(f"staff/users/{target['uuid']}/state", {
@@ -119,6 +137,14 @@ class P1AdminTests(unittest.TestCase):
         self.assertEqual(status, 201, provider)
         self.assertEqual(provider["userUuid"], doctor["uuid"])
         self.assertEqual(provider["facilityLocationUuid"], self.location)
+        corrected = "P1-UPD-" + uuid.uuid4().hex[:10]
+        status, updated = self.call(f"directory/providers/{provider['uuid']}", {"identifier": corrected})
+        self.assertEqual(status, 200, updated)
+        self.assertEqual(updated["identifier"], corrected)
+        self.assertEqual(self.call("directory/providers", {
+            "userUuid": doctor["uuid"], "facilityLocationUuid": self.location,
+            "identifier": "P1-DUP-" + uuid.uuid4().hex[:10],
+        })[0], 400)
         self.assertEqual(self.call("directory/providers/link", {
             "userUuid": self.users["cashier"]["uuid"],
             "providerUuid": provider["uuid"], "facilityLocationUuid": self.location
@@ -126,6 +152,21 @@ class P1AdminTests(unittest.TestCase):
         status, links = self.call(f"directory/users/{doctor['uuid']}/providers", method="GET")
         self.assertEqual(status, 200)
         self.assertEqual(links["links"][0]["providerUuid"], provider["uuid"])
+        nurse = self.users["nurse"]
+        status, temporary = self.call("directory/providers", {
+            "userUuid": nurse["uuid"], "facilityLocationUuid": self.location,
+            "identifier": "P1-NURSE-" + uuid.uuid4().hex[:8],
+        })
+        self.assertEqual(status, 201, temporary)
+        self.assertEqual(self.call("directory/providers/link", {
+            "userUuid": doctor["uuid"], "providerUuid": temporary["uuid"],
+            "facilityLocationUuid": self.location,
+        })[0], 400)
+        status, retired = self.call(f"directory/providers/{temporary['uuid']}/retire", {
+            "reason": "P1 synthetic retirement test",
+        })
+        self.assertEqual(status, 200, retired)
+        self.assertTrue(retired["retired"])
         type(self).provider = provider
         self.record("Clinical provider must belong to same user Person; cashier spoof denied")
 
@@ -140,6 +181,11 @@ class P1AdminTests(unittest.TestCase):
         self.assertNotEqual(created["facilityUuid"], created["locationUuid"])
         fid = created["facilityUuid"]
         self.assertEqual(self.call(f"directory/facilities/{fid}", method="GET")[0], 200)
+        status, linked = self.call("directory/providers/link", {
+            "userUuid": self.users["doctor"]["uuid"], "providerUuid": self.provider["uuid"],
+            "facilityLocationUuid": created["locationUuid"],
+        })
+        self.assertEqual(status, 200, linked)
         status, updated = self.call(f"directory/facilities/{fid}", {
             "legalName": "Updated synthetic clinic", "address": "124 Test street",
         })
@@ -150,6 +196,9 @@ class P1AdminTests(unittest.TestCase):
         })
         self.assertEqual(status, 200, retired)
         self.assertFalse(retired["active"])
+        status, links = self.call(f"directory/users/{self.users['doctor']['uuid']}/providers", method="GET")
+        self.assertEqual(status, 200, links)
+        self.assertFalse(any(link["facilityLocationUuid"] == created["locationUuid"] for link in links["links"]))
         self.assertEqual(self.call(f"directory/facilities/{fid}", method="GET")[0], 200)
         type(self).facility_id = fid
         self.record("Business facility separate from Location, update, retire and historical read")
@@ -173,6 +222,10 @@ class P1AdminTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertEqual(old["schemaJson"], '{"fields":[{"name":"note"}]}')
         self.assertEqual(old["state"], "retired")
+        status, versions = self.call(
+            f"admin-configuration/forms?facilityLocationUuid={self.location}&code={code}", method="GET")
+        self.assertEqual(status, 200, versions)
+        self.assertEqual([item["version"] for item in versions["results"]], [2, 1])
         type(self).form_id = v2["uuid"]
         status, current = self.call(f"admin-configuration/workflow/{self.location}", method="GET")
         self.assertEqual(status, 200, current)

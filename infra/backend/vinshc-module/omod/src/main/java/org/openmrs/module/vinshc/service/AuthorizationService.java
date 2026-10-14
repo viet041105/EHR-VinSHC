@@ -450,7 +450,10 @@ public class AuthorizationService {
 	private static User authenticatedUser() {
 		if (!Context.isAuthenticated() || Context.getAuthenticatedUser() == null)
 			throw new VinshcExceptions.NotAuthenticated();
-		return Context.getAuthenticatedUser();
+		User user = Context.getAuthenticatedUser();
+		if (Boolean.parseBoolean(user.getUserProperty(StaffAccountService.FORCE_PASSWORD_PROPERTY)))
+			throw new APIAuthenticationException("Password change required before using VinSHC APIs");
+		return user;
 	}
 
 	private static boolean isSystemAdministrator(User user) {

@@ -129,6 +129,8 @@ jobs:
           tests.integration.test_b4a_consultation tests.integration.test_b4b_clinical
           tests.integration.test_b5_authorization tests.integration.test_b7_fhir
           tests.integration.test_b8_operations
+      - name: Verify P1 staff, provider, facility, form and workflow administration
+        run: python -m unittest -v tests.integration.test_p1_admin
       - name: Recreate containers and retain named volumes
         run: |
           docker compose down
@@ -139,6 +141,7 @@ jobs:
           python tools/metadata.py --verify-url http://127.0.0.1:8080/openmrs --report .runtime/reports/metadata-ci-after-restart.json
           python scripts/smoke.py --require-fixture --report .runtime/reports/smoke-after.json
           VINSHC_ACCEPTANCE_PHASE=restart python -m unittest -v tests.integration.test_b9_persistence
+          python -m unittest -v tests.integration.test_p1_persistence
       - name: Back up the complete synthetic clinic
         run: >-
           python scripts/recovery.py backup
@@ -162,6 +165,7 @@ jobs:
         run: |
           python tools/metadata.py --verify-url http://127.0.0.1:18089/openmrs --report .runtime/reports/metadata-ci-after-restore.json
           EHR_HTTP_PORT=18089 VINSHC_ACCEPTANCE_PHASE=restore python -m unittest -v tests.integration.test_b9_persistence
+          EHR_HTTP_PORT=18089 python -m unittest -v tests.integration.test_p1_persistence
       - name: Build redacted backend handoff evidence
         run: |
           python scripts/b9_handoff.py \
