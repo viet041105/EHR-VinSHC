@@ -66,13 +66,17 @@ class CareWorkflowTests(unittest.TestCase):
         cls.staff, cls.providers = {}, {}
         location = cls.facility["locationUuid"]
         for role in ROLES:
-            username, password, person = cls.user_with_role(role, [location])
+            username, password, person, user_uuid = cls.user_with_role(role, [location])
             cls.staff[role] = cls.workspace(username, password, role, location)
             if role in ("nurse", "doctor", "lab"):
                 provider = cls.admin.json(f"{REST}/provider", method="POST", statuses=(200, 201), payload={
                     "person": person, "identifier": "B11-" + uuid.uuid4().hex[:10].upper()})
                 cls.created_providers.append(provider["uuid"])
                 cls.providers[role] = provider["uuid"]
+                cls.admin.json(f"{VINSHC}/directory/providers/link", method="POST", payload={
+                    "userUuid": user_uuid, "providerUuid": provider["uuid"],
+                    "facilityLocationUuid": location,
+                })
         cls.state = {"middle": letters(), "cccd": f"{random.randrange(10**11, 10**12)}"}
 
     @classmethod
@@ -103,7 +107,7 @@ class CareWorkflowTests(unittest.TestCase):
         for location in locations:
             cls.admin.json(f"{VINSHC}/authorization/assignment", method="POST", statuses=(201,),
                            payload={"user": user["uuid"], "role": role, "facility": location})
-        return username, password, person["uuid"]
+        return username, password, person["uuid"], user["uuid"]
 
     @classmethod
     def workspace(cls, username, password, role, location):
@@ -208,7 +212,7 @@ class CareWorkflowTests(unittest.TestCase):
         other = self.admin.json(f"{REST}/location", method="POST", statuses=(200, 201), payload={
             "name": "B11 Other Clinic " + uuid.uuid4().hex[:6], "description": "Synthetic second facility"})
         type(self).created_locations.append(other["uuid"])
-        username, password, _ = self.user_with_role("reception", [other["uuid"]])
+        username, password, _, _ = self.user_with_role("reception", [other["uuid"]])
         away = self.workspace(username, password, "reception", other["uuid"])
         away_status, _, _ = away.request(f"{VINSHC}/patients/{patient}")
         away_search = json.loads(away.request(f"{VINSHC}/patients?q={self.state['identifier']}")[2])

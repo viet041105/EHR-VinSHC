@@ -99,62 +99,62 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 5.1. Tài khoản nhân viên
 
-- [ ] Thiết kế API ứng dụng dành riêng cho System Developer để tạo user OpenMRS.
-- [ ] Payload tạo user không cho client gửi privilege trực tiếp; chỉ chọn role VinSHC trong allowlist.
-- [ ] Hỗ trợ username, tên hiển thị, person, trạng thái active/retired và mật khẩu khởi tạo.
+- [x] Thiết kế API ứng dụng dành riêng cho System Developer để tạo user OpenMRS.
+- [x] Payload tạo user không cho client gửi privilege trực tiếp; chỉ chọn role VinSHC trong allowlist.
+- [x] Hỗ trợ username, tên hiển thị, person, trạng thái active/retired và mật khẩu khởi tạo.
 - [ ] Không trả password/hash/salt trong response hoặc log.
 - [ ] Bắt buộc đổi mật khẩu lần đầu nếu OpenMRS baseline hỗ trợ; nếu không, ghi rõ cơ chế thay thế.
-- [ ] Thêm API khóa/mở hoặc retire user có audit và chặn tự khóa tài khoản quản trị cuối cùng.
-- [ ] Thêm API reset mật khẩu; không có API đọc lại mật khẩu cũ.
-- [ ] Chặn username trùng, user đã retired, role không hợp lệ và thao tác ngoài quyền.
-- [ ] Thêm tìm kiếm/phân trang user ở backend VinSHC thay vì mở rộng tùy ý Core API cho frontend.
+- [x] Thêm API khóa/mở hoặc retire user có audit và chặn tự khóa tài khoản quản trị cuối cùng.
+- [x] Thêm API reset mật khẩu; không có API đọc lại mật khẩu cũ.
+- [x] Chặn username trùng, user đã retired, role không hợp lệ và thao tác ngoài quyền.
+- [x] Thêm tìm kiếm/phân trang user ở backend VinSHC thay vì mở rộng tùy ý Core API cho frontend.
 - [ ] Thêm test không lộ credential trong response, exception, access log và CI report.
 
 ### 5.2. Provider và liên kết user–provider
 
 - [ ] Tạo API tạo/sửa/retire provider.
-- [ ] Tạo hoặc chọn Person hợp lệ cho provider; không tự dùng Patient làm provider.
-- [ ] Tạo API liên kết/hủy liên kết user–provider.
+- [x] Tạo hoặc chọn Person hợp lệ cho provider; không tự dùng Patient làm provider.
+- [x] Tạo API liên kết/hủy liên kết user–provider.
 - [ ] Ràng buộc tài khoản lâm sàng có đúng một provider active tại thời điểm tạo encounter/kê đơn/ghi kết quả, trừ khi workflow hỗ trợ chọn rõ nhiều provider.
-- [ ] Kiểm tra provider thuộc đúng cơ sở hoặc assignment chuyên môn trước khi sử dụng.
-- [ ] Không cho reception/cashier/pharmacy tự nhận provider nếu không cần nghiệp vụ.
+- [x] Kiểm tra provider thuộc đúng cơ sở hoặc assignment chuyên môn trước khi sử dụng.
+- [x] Không cho reception/cashier/pharmacy tự nhận provider nếu không cần nghiệp vụ.
 - [ ] Ghi audit cho tạo, sửa, retire và liên kết provider.
 - [ ] Test provider bị retire, nhiều provider, provider khác cơ sở và giả mạo UUID.
 
 ### 5.3. Cơ sở và location
 
-- [ ] Tạo API quản lý business facility và ánh xạ tới OpenMRS Location.
-- [ ] Phân biệt rõ business facility UUID với OpenMRS Location UUID trong DTO và database.
-- [ ] Hỗ trợ tên pháp lý, mã cơ sở, địa chỉ, điện thoại, timezone, active/effective dates và location hierarchy.
-- [ ] Không cho sửa UUID hoặc lịch sử snapshot đã được dùng trên chứng từ.
-- [ ] Khi retire cơ sở, chặn tạo mới nhưng vẫn đọc được dữ liệu lịch sử.
+- [x] Tạo API quản lý business facility và ánh xạ tới OpenMRS Location.
+- [x] Phân biệt rõ business facility UUID với OpenMRS Location UUID trong DTO và database.
+- [x] Hỗ trợ tên pháp lý, mã cơ sở, địa chỉ, điện thoại, timezone, active/effective dates và location hierarchy.
+- [x] Không cho sửa UUID hoặc lịch sử snapshot đã được dùng trên chứng từ.
+- [x] Khi retire cơ sở, chặn tạo mới nhưng vẫn đọc được dữ liệu lịch sử.
 - [ ] Test assignment, báo cáo, visit và dữ liệu ngoài cơ sở sau khi cấu hình nhiều location con.
 
 ### 5.4. Biểu mẫu và cấu hình workflow
 
-- [ ] Chốt nguồn sự thật của form: O3 Form Engine schema hoặc schema VinSHC version hóa; không để `forms.json` chỉ là tài liệu mà UI hiểu như form production.
+- [x] Chốt nguồn sự thật của form: O3 Form Engine schema hoặc schema VinSHC version hóa; không để `forms.json` chỉ là tài liệu mà UI hiểu như form production.
 - [ ] Tạo CRUD/versioning cho form template với draft/active/retired.
-- [ ] Không cho sửa đè phiên bản form đã dùng trong hồ sơ.
+- [x] Không cho sửa đè phiên bản form đã dùng trong hồ sơ.
 - [ ] Cấu hình workflow `STANDARD_POSTPAY` và `COMPACT_PREPAY` theo cơ sở bằng metadata, không hardcode nhánh riêng.
-- [ ] Thêm API đọc configuration projection cho FE; API ghi chỉ dành cho admin đúng cơ sở.
+- [x] Thêm API đọc configuration projection cho FE; API ghi chỉ dành cho admin đúng cơ sở.
 - [ ] Test rollback/cấu hình thiếu và migration từ version cũ.
 
 ### 5.5. Frontend quản trị
 
-- [ ] Thay các form “Chờ backend” trong `modules/admin` bằng thao tác thật.
-- [ ] Thêm màn hình tạo/khóa/reset tài khoản.
-- [ ] Thêm màn hình role và facility assignment.
-- [ ] Thêm màn hình tạo/liên kết/retire provider.
-- [ ] Thêm màn hình cấu hình cơ sở và version biểu mẫu.
-- [ ] Yêu cầu xác nhận trước thao tác nhạy cảm; hiển thị actor/time/kết quả audit.
-- [ ] Không lưu password hoặc credential trong localStorage/sessionStorage.
+- [x] Thay các form “Chờ backend” trong `modules/admin` bằng thao tác thật.
+- [x] Thêm màn hình tạo/khóa/reset tài khoản.
+- [x] Thêm màn hình role và facility assignment.
+- [x] Thêm màn hình tạo/liên kết/retire provider.
+- [x] Thêm màn hình cấu hình cơ sở và version biểu mẫu.
+- [x] Yêu cầu xác nhận trước thao tác nhạy cảm; hiển thị actor/time/kết quả audit.
+- [x] Không lưu password hoặc credential trong localStorage/sessionStorage.
 
 ### 5.6. Tiêu chí nghiệm thu P1
 
-- [ ] System Developer tạo được một tài khoản cho từng role mà không dùng SQL hoặc UI Legacy.
-- [ ] Bác sĩ/điều dưỡng/KTV sau khi liên kết provider tạo được encounter đúng provider của mình.
-- [ ] User không có quyền không thể tự cấp role/cơ sở/provider.
-- [ ] Admin ứng dụng không mặc nhiên đọc được hồ sơ lâm sàng.
+- [x] System Developer tạo được một tài khoản cho từng role mà không dùng SQL hoặc UI Legacy.
+- [x] Bác sĩ/điều dưỡng/KTV sau khi liên kết provider tạo được encounter đúng provider của mình.
+- [x] User không có quyền không thể tự cấp role/cơ sở/provider.
+- [x] Admin ứng dụng không mặc nhiên đọc được hồ sơ lâm sàng.
 - [ ] Restart/backup–restore giữ nguyên user, role, provider và assignment.
 
 ---

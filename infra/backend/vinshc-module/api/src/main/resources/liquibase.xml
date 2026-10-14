@@ -1,4 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+    This Source Code Form is subject to the terms of the Mozilla Public License,
+    v. 2.0. If a copy of the MPL was not distributed with this file, You can
+    obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+    the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+
+    Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+    graphic logo is a trademark of OpenMRS Inc.
+
+-->
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
@@ -370,5 +381,79 @@
       CREATE INDEX ix_vinshc_portal_account_patient ON vinshc_portal_account(patient_id);
     </sql>
     <rollback><sql>DROP TABLE vinshc_portal_publication; DROP TABLE vinshc_portal_account;</sql></rollback>
+  </changeSet>
+  <changeSet id="vinshc-p1-20261015-admin-audit" author="vinshc" dbms="postgresql">
+    <comment>Append-only audit for privileged staff administration (no credentials).</comment>
+    <sql>
+      CREATE TABLE vinshc_admin_event (
+        event_id BIGSERIAL PRIMARY KEY,
+        event_uuid VARCHAR(38) NOT NULL UNIQUE,
+        action VARCHAR(100) NOT NULL,
+        entity_uuid VARCHAR(38) NOT NULL,
+        detail VARCHAR(1000),
+        creator INT NOT NULL REFERENCES users(user_id),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL
+      );
+      CREATE INDEX ix_vinshc_admin_event_entity ON vinshc_admin_event(entity_uuid, date_created DESC);
+    </sql>
+    <rollback><sql>DROP TABLE vinshc_admin_event;</sql></rollback>
+  </changeSet>
+  <changeSet id="vinshc-p1-20261015-provider-facility" author="vinshc" dbms="postgresql">
+    <comment>Explicit scoped staff-provider linking and independent business facility identity.</comment>
+    <sql>
+      CREATE TABLE vinshc_provider_link (
+        link_uuid VARCHAR(38) PRIMARY KEY,
+        user_id INT NOT NULL REFERENCES users(user_id),
+        provider_id INT NOT NULL REFERENCES provider(provider_id),
+        facility_location_id INT NOT NULL REFERENCES location(location_id),
+        active BOOLEAN NOT NULL DEFAULT true,
+        creator INT NOT NULL REFERENCES users(user_id),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL
+      );
+      CREATE UNIQUE INDEX ux_vinshc_active_provider_link
+        ON vinshc_provider_link(user_id,facility_location_id) WHERE active=true;
+      CREATE TABLE vinshc_business_facility (
+        facility_uuid VARCHAR(38) PRIMARY KEY,
+        location_id INT NOT NULL UNIQUE REFERENCES location(location_id),
+        facility_code VARCHAR(40) NOT NULL UNIQUE,
+        legal_name VARCHAR(255) NOT NULL,
+        address_text VARCHAR(500) NOT NULL,
+        phone VARCHAR(32),
+        timezone VARCHAR(64) NOT NULL,
+        active BOOLEAN NOT NULL DEFAULT true,
+        effective_from DATE NOT NULL,
+        effective_to DATE,
+        creator INT NOT NULL REFERENCES users(user_id),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL
+      );
+    </sql>
+    <rollback><sql>DROP TABLE vinshc_business_facility; DROP TABLE vinshc_provider_link;</sql></rollback>
+  </changeSet>
+  <changeSet id="vinshc-p1-20261015-forms-workflow" author="vinshc" dbms="postgresql">
+    <comment>Immutable versioned VinSHC form definitions and per-facility workflow settings.</comment>
+    <sql>
+      CREATE TABLE vinshc_form_definition (
+        form_uuid VARCHAR(38) PRIMARY KEY,
+        form_code VARCHAR(80) NOT NULL,
+        facility_location_id INT NOT NULL REFERENCES location(location_id),
+        version_number INT NOT NULL CHECK(version_number > 0),
+        state VARCHAR(16) NOT NULL CHECK(state IN ('draft','active','retired')),
+        schema_json TEXT NOT NULL,
+        schema_hash VARCHAR(64) NOT NULL,
+        creator INT NOT NULL REFERENCES users(user_id),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL,
+        UNIQUE (form_code,facility_location_id,version_number)
+      );
+      CREATE UNIQUE INDEX ux_vinshc_form_active
+        ON vinshc_form_definition(form_code,facility_location_id) WHERE state='active';
+      CREATE TABLE vinshc_facility_workflow (
+        facility_location_id INT PRIMARY KEY REFERENCES location(location_id),
+        workflow_code VARCHAR(40) NOT NULL CHECK(workflow_code IN ('STANDARD_POSTPAY','COMPACT_PREPAY')),
+        version_number INT NOT NULL DEFAULT 1,
+        actor_id INT NOT NULL REFERENCES users(user_id),
+        date_changed TIMESTAMP WITH TIME ZONE NOT NULL
+      );
+    </sql>
+    <rollback><sql>DROP TABLE vinshc_facility_workflow; DROP TABLE vinshc_form_definition;</sql></rollback>
   </changeSet>
 </databaseChangeLog>

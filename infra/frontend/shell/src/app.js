@@ -683,6 +683,10 @@ async function login(e) {
   try {
     const session = await client.login(f.get("username"), f.get("password"));
     state.roles = assignedRoles(session.user);
+    // System Developer can manage staffing via a server-verified admin workspace,
+    // without granting the Core user a VinSHC clinical application role.
+    if (isSystemAdministrator(session.user) && !state.roles.includes("admin"))
+      state.roles.push("admin");
     state.role = state.roles[0] || null;
     state.facility = active(m.facilities.records)[0]?.locationUuid;
   } catch (error) {
@@ -791,6 +795,7 @@ async function submitAction(e) {
       data.facility = facility.uuid;
     }
     a.prepare?.(data, ctx);
+    if (a.confirm && !window.confirm(a.confirm)) return;
     const payload = a.build ? a.build(data) : undefined;
     let body = payload;
     if (a.upload) {
@@ -808,7 +813,8 @@ async function submitAction(e) {
     }
     a.finish?.(body, data, ctx);
     const path = (a.adminCore ? "" : "vinshc/") + a.path(data);
-    const fingerprint = JSON.stringify([
+    // Never include credentials in the retry fingerprint or retained UI state.
+    const fingerprint = a.sensitive ? null : JSON.stringify([
       client.workspace,
       state.action,
       path,
@@ -847,6 +853,7 @@ async function submitAction(e) {
         if (a.document)
           state.message =
             "Đã lấy chứng từ từ OpenMRS. Dùng nút In chứng từ để in nội dung đã nhận.";
+        if (a.sensitive) delete data.password;
         captureWorkspaceResponse(state.action, result, data);
         if (data.orderer) state.context.orderer = data.orderer;
         if (a.method !== "GET") {
@@ -857,6 +864,13 @@ async function submitAction(e) {
     );
   } catch (error) {
     showError(error);
+  } finally {
+    // Password inputs must not survive rerender or appear in session metadata.
+    if (a.sensitive) {
+      delete data.password;
+      const secret = e.target?.elements?.namedItem("password");
+      if (secret) secret.value = "";
+    }
   }
 }
 async function perform(task, message, onSuccess) {

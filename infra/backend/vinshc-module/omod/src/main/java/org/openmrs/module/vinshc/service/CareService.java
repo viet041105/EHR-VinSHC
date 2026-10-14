@@ -1,3 +1,12 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.vinshc.service;
 
 import static org.openmrs.module.vinshc.service.VinshcService.bad;
@@ -59,10 +68,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Staff-facing patient registration/search and visit/encounter lifecycle. Core REST/FHIR stay closed to
- * app roles; this adapter applies the VinSHC workspace policy (role privilege and facility scope),
- * registers patients at a facility, keeps at most one open visit per patient and records visit closure
- * as native administrative Obs (group.administrative).
+ * Staff-facing patient registration/search and visit/encounter lifecycle. Core REST/FHIR stay
+ * closed to app roles; this adapter applies the VinSHC workspace policy (role privilege and
+ * facility scope), registers patients at a facility, keeps at most one open visit per patient and
+ * records visit closure as native administrative Obs (group.administrative).
  */
 @Transactional
 public class CareService {
@@ -73,7 +82,9 @@ public class CareService {
 
 	private static final String IDGEN_SOURCE = "3bfdfcf4-987a-521d-8e5d-7d60e782b6fa";
 
-	/** Secondary identifier key → [type UUID, accepted syntax]. Syntax mirrors the Initializer metadata. */
+	/**
+	 * Secondary identifier key → [type UUID, accepted syntax]. Syntax mirrors the Initializer metadata.
+	 */
 	private static final Map<String, String[]> IDENTIFIER_TYPES = identifierTypes();
 
 	static final String PHONE_ATTRIBUTE = "1aeef034-d2a0-56b4-a4c8-d856f17dc261";
@@ -104,9 +115,9 @@ public class CareService {
 
 	private static final String CLOSE_NOTE = "b3ccfa9b-2d9e-5f86-8816-70a74f30e6cf";
 
-	static final Map<String, String> CLOSE_REASONS = map("completed", "ce25786a-650f-588e-b554-3d42ac81bc33",
-	    "left_early", "cf8f5dc1-e869-5990-ab3d-e704fccf0707", "cancelled", "8ad6ff22-bfca-5a8d-aa90-06a2bbd7de4e",
-	    "referred", "5af6b517-7dae-526e-92f2-afff2ed64a5c");
+	static final Map<String, String> CLOSE_REASONS = map("completed", "ce25786a-650f-588e-b554-3d42ac81bc33", "left_early",
+	    "cf8f5dc1-e869-5990-ab3d-e704fccf0707", "cancelled", "8ad6ff22-bfca-5a8d-aa90-06a2bbd7de4e", "referred",
+	    "5af6b517-7dae-526e-92f2-afff2ed64a5c");
 
 	/** Roles that may see the administrative projection of a patient; others get minimal identity. */
 	private static final Set<String> FULL_IDENTITY_ROLES = VinshcService.set("reception", "doctor");
@@ -213,11 +224,11 @@ public class CareService {
 	}
 
 	/**
-	 * Registers a new patient at the workspace facility with an idgen-issued internal record number.
-	 * A secondary identifier (CCCD/BHXH/BHYT) that already belongs to a patient is rejected; a same
+	 * Registers a new patient at the workspace facility with an idgen-issued internal record number. A
+	 * secondary identifier (CCCD/BHXH/BHYT) that already belongs to a patient is rejected; a same
 	 * name/gender/birth-year match in the facility is rejected until the caller confirms with
-	 * allowPossibleDuplicate=true. A retried request with the same idempotency key returns the
-	 * patient it created.
+	 * allowPossibleDuplicate=true. A retried request with the same idempotency key returns the patient
+	 * it created.
 	 */
 	public Map<String, Object> registerPatient(Map<String, Object> body) {
 		AuthorizationService.requireOperation("patient_identity", "create");
@@ -226,8 +237,8 @@ public class CareService {
 			throw bad("an active facility workspace is required to register a patient");
 		String key = idempotency(body);
 		lock("patient-registration:" + key);
-		List<Map<String, Object>> replay = jdbc
-		        .queryForList("SELECT patient_id, facility_location_id FROM vinshc_patient_registration WHERE idempotency_key=?", key);
+		List<Map<String, Object>> replay = jdbc.queryForList(
+		    "SELECT patient_id, facility_location_id FROM vinshc_patient_registration WHERE idempotency_key=?", key);
 		Names names = names(body, null);
 		String gender = gender(body, null);
 		if (!replay.isEmpty()) {
@@ -252,7 +263,8 @@ public class CareService {
 			List<Map<String, Object>> similar = possibleDuplicates(names, gender, birth, facility);
 			if (!similar.isEmpty())
 				throw conflict("possible duplicate patient in this facility; review the matches or confirm with "
-				        + "allowPossibleDuplicate=true", similar);
+				        + "allowPossibleDuplicate=true",
+				    similar);
 		}
 		Patient patient = new Patient();
 		PersonName name = new PersonName(names.given, names.middle, names.family);
@@ -265,16 +277,17 @@ public class CareService {
 		internal.setPreferred(true);
 		patient.addIdentifier(internal);
 		for (Map.Entry<String, String> id : identifiers.entrySet())
-			patient.addIdentifier(new PatientIdentifier(id.getValue(), identifierType(IDENTIFIER_TYPES.get(id.getKey())[0]),
-			        null));
+			patient.addIdentifier(
+			    new PatientIdentifier(id.getValue(), identifierType(IDENTIFIER_TYPES.get(id.getKey())[0]), null));
 		for (Map.Entry<String, String> attribute : attributes.entrySet())
 			if (attribute.getValue() != null)
 				patient.addAttribute(new PersonAttribute(attributeType(attribute.getKey()), attribute.getValue()));
 		Context.getPatientService().savePatient(patient);
 		Context.flushSession();
 		String registration = UUID.randomUUID().toString();
-		jdbc.update("INSERT INTO vinshc_patient_registration(registration_uuid,patient_id,facility_location_id,"
-		        + "idempotency_key,creator,date_created) VALUES (?,?,?,?,?,?)",
+		jdbc.update(
+		    "INSERT INTO vinshc_patient_registration(registration_uuid,patient_id,facility_location_id,"
+		            + "idempotency_key,creator,date_created) VALUES (?,?,?,?,?,?)",
 		    registration, patient.getPatientId(), facility.getLocationId(), key, actorId(), now());
 		ClinicalEvents.record(sessionFactory, "patient_registered", patient, null, patient.getUuid(), null,
 		    "facility " + facility.getUuid() + (allowDuplicate ? "; possible duplicate confirmed" : ""));
@@ -307,7 +320,8 @@ public class CareService {
 		if (body.containsKey("familyName") || body.containsKey("givenName") || body.containsKey("middleName")) {
 			PersonName current = patient.getPersonName();
 			Names names = names(body, current);
-			if (current == null || !names.family.equals(current.getFamilyName()) || !names.given.equals(current.getGivenName())
+			if (current == null || !names.family.equals(current.getFamilyName())
+			        || !names.given.equals(current.getGivenName())
 			        || !java.util.Objects.equals(names.middle, current.getMiddleName())) {
 				PersonName replacement = new PersonName(names.given, names.middle, names.family);
 				replacement.setPreferred(true);
@@ -505,9 +519,11 @@ public class CareService {
 			if (encounter.getEncounterDatetime().after(stop))
 				throw bad("stopDatetime cannot be before an encounter of the visit");
 		Number openOrders = jdbc.queryForObject("SELECT count(*) FROM vinshc_service_order WHERE visit_id=?"
-		        + " AND state IN ('requested','assigned','in_progress')", Number.class, visit.getVisitId());
-		Number unpaidBills = jdbc.queryForObject("SELECT count(*) FROM vinshc_bill WHERE visit_id=?"
-		        + " AND status IN ('unpaid','partially_paid')", Number.class, visit.getVisitId());
+		        + " AND state IN ('requested','assigned','in_progress')",
+		    Number.class, visit.getVisitId());
+		Number unpaidBills = jdbc.queryForObject(
+		    "SELECT count(*) FROM vinshc_bill WHERE visit_id=?" + " AND status IN ('unpaid','partially_paid')", Number.class,
+		    visit.getVisitId());
 		List<String> warnings = new ArrayList<>();
 		if (openOrders.longValue() > 0)
 			warnings.add(openOrders + " service order(s) not completed");
@@ -517,7 +533,8 @@ public class CareService {
 			throw conflict("visit cannot be completed: " + String.join("; ", warnings), null);
 		String queueState = "completed".equals(reason) ? "completed" : "cancelled".equals(reason) ? "cancelled" : "left";
 		String exitReason = "completed".equals(reason) ? null
-		        : "referred".equals(reason) ? "referred_elsewhere" : "left_early".equals(reason) ? "patient_requested" : "other";
+		        : "referred".equals(reason) ? "referred_elsewhere"
+		                : "left_early".equals(reason) ? "patient_requested" : "other";
 		int closedTickets = jdbc.update(
 		    "UPDATE vinshc_queue_item SET state=?,exit_reason=?,changed_by=?,date_changed=? WHERE visit_id=?"
 		            + " AND state IN ('waiting','called','in_service')",
@@ -542,8 +559,9 @@ public class CareService {
 		visit.addEncounter(closure);
 		Context.getEncounterService().saveEncounter(closure);
 		Context.getVisitService().endVisit(visit, stop);
-		ClinicalEvents.record(sessionFactory, "visit_closed", patient, closure, visit.getUuid(), note == null ? null : note.trim(),
-		    reason + (warnings.isEmpty() ? "" : "; " + String.join("; ", warnings)) + "; queue tickets closed=" + closedTickets);
+		ClinicalEvents.record(sessionFactory, "visit_closed", patient, closure, visit.getUuid(),
+		    note == null ? null : note.trim(), reason + (warnings.isEmpty() ? "" : "; " + String.join("; ", warnings))
+		            + "; queue tickets closed=" + closedTickets);
 		Map<String, Object> view = visitView(visit, true);
 		view.put("warnings", warnings);
 		return view;
@@ -578,7 +596,7 @@ public class CareService {
 		if (visit.getStopDatetime() != null)
 			throw conflict("visit is closed", null);
 		EncounterType type = encounterType(typeKey);
-		Provider provider = roleKey == null ? null : actingProvider(optionalString(body, "provider"));
+		Provider provider = roleKey == null ? null : actingProvider(optionalString(body, "provider"), visit.getLocation());
 		EncounterRole role = roleKey == null ? null : encounterRole(roleKey);
 		for (Encounter existing : visit.getNonVoidedEncounters())
 			if (existing.getEncounterType().equals(type)
@@ -620,17 +638,39 @@ public class CareService {
 		return out;
 	}
 
-	private Provider actingProvider(String requested) {
+	private Provider actingProvider(String requested, Location encounterLocation) {
 		User user = Context.getAuthenticatedUser();
 		List<Provider> own = user.getPerson() == null ? Collections.<Provider> emptyList()
 		        : new ArrayList<>(Context.getProviderService().getProvidersByPerson(user.getPerson(), false));
 		boolean unscoped = AuthorizationService.activeRoleStatic() == null;
+		if (!unscoped) {
+			// Only administrators can create links. A header or client-supplied UUID cannot grant one.
+			List<Integer> linked = new ArrayList<>();
+			for (Location location = encounterLocation; location != null; location = location.getParentLocation()) {
+				@SuppressWarnings("unchecked")
+				List<Number> matches = sessionFactory.getCurrentSession()
+				        .createSQLQuery("SELECT p.provider_id FROM vinshc_provider_link x JOIN provider p"
+				                + " ON p.provider_id=x.provider_id"
+				                + " WHERE x.active=true AND p.retired=false AND x.user_id=:user"
+				                + " AND x.facility_location_id=:facility")
+				        .setParameter("user", user.getUserId()).setParameter("facility", location.getLocationId()).list();
+				for (Number number : matches)
+					if (!linked.contains(number.intValue()))
+						linked.add(number.intValue());
+			}
+			if (linked.size() != 1)
+				throw new APIAuthenticationException("Privileges required: one active provider assigned at facility");
+			Provider provider = Context.getProviderService().getProvider(linked.get(0));
+			if (provider == null || provider.getRetired() || !own.contains(provider))
+				throw new APIAuthenticationException("Privileges required: own active provider");
+			if (requested != null && !provider.getUuid().equalsIgnoreCase(canonicalUuid(requested, "provider")))
+				throw new APIAuthenticationException("Privileges required: assigned provider");
+			return provider;
+		}
 		if (requested != null) {
 			Provider provider = Context.getProviderService().getProviderByUuid(canonicalUuid(requested, "provider"));
 			if (provider == null || provider.getRetired())
 				throw bad("provider does not exist");
-			if (!unscoped && !own.contains(provider))
-				throw new APIAuthenticationException("Privileges required: own_provider");
 			return provider;
 		}
 		if (own.size() == 1)
@@ -790,9 +830,10 @@ public class CareService {
 		Map<String, Object> out = new LinkedHashMap<>();
 		out.put("uuid", provider.getUuid());
 		out.put("identifier", provider.getIdentifier());
-		out.put("name", provider.getPerson() != null && provider.getPerson().getPersonName() != null
-		        ? fullName(provider.getPerson().getPersonName())
-		        : provider.getName());
+		out.put("name",
+		    provider.getPerson() != null && provider.getPerson().getPersonName() != null
+		            ? fullName(provider.getPerson().getPersonName())
+		            : provider.getName());
 		if (role != null)
 			out.put("role", key(ENCOUNTER_ROLES, role.getUuid()));
 		return out;
@@ -896,8 +937,7 @@ public class CareService {
 			if (!body.containsKey(key))
 				continue;
 			String value = optionalString(body, key);
-			value = value == null || value.trim().isEmpty() ? null
-			        : Normalizer.normalize(value.trim(), Normalizer.Form.NFC);
+			value = value == null || value.trim().isEmpty() ? null : Normalizer.normalize(value.trim(), Normalizer.Form.NFC);
 			limit(value, 50, key);
 			if ("phone".equals(key) && value != null && !value.matches("\\+?[0-9 .()\\-]{6,20}"))
 				throw bad("phone must contain 6-20 digits and may start with +");
@@ -974,9 +1014,9 @@ public class CareService {
 	private boolean inScope(int patientId, Location facility) {
 		if (facility == null)
 			return AuthorizationService.activeRoleStatic() == null;
-		Number count = jdbc.queryForObject(TREE_CTE + "SELECT count(*) FROM patient p WHERE p.patient_id=?"
-		        + IN_FACILITY_SCOPE,
-		    Number.class, facility.getLocationId(), patientId);
+		Number count = jdbc.queryForObject(
+		    TREE_CTE + "SELECT count(*) FROM patient p WHERE p.patient_id=?" + IN_FACILITY_SCOPE, Number.class,
+		    facility.getLocationId(), patientId);
 		return count.longValue() > 0;
 	}
 
@@ -1012,7 +1052,8 @@ public class CareService {
 				throw VinshcService.misconfigured("internal patient identifier source is not provisioned: " + IDGEN_SOURCE);
 			for (Method method : serviceClass.getMethods())
 				if ("generateIdentifier".equals(method.getName()) && method.getParameterCount() == 2
-				        && method.getParameterTypes()[0].isInstance(source) && method.getParameterTypes()[1] == String.class) {
+				        && method.getParameterTypes()[0].isInstance(source)
+				        && method.getParameterTypes()[1] == String.class) {
 					Object value = method.invoke(service, source, "VinSHC patient registration");
 					if (value == null || value.toString().trim().isEmpty())
 						throw VinshcService.misconfigured("idgen returned an empty identifier");
