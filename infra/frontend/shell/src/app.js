@@ -31,6 +31,7 @@ import {
   resultHighlights,
 } from "./screens.js";
 import { displayResult, resultLabels } from "./result-view.js";
+import { AgentChat } from "./agent-chat.js";
 
 let registry = createRegistry([]),
   labels = resultLabels(registry),
@@ -38,6 +39,7 @@ let registry = createRegistry([]),
   modulesLoaded = Promise.resolve();
 const client = new BackendClient();
 const memory = new WorkspaceMemory();
+const agentChat = new AgentChat(client);
 const state = {
   roles: [],
   role: null,
@@ -149,6 +151,10 @@ function field(f, values = {}) {
 function shell(content) {
   document.querySelector("#app").innerHTML =
     `<a class="skip-link" href="#main-content">Đến nội dung chính</a><header class="site-header clinic-header"><a class="site-brand" href="/"><span class="logo-plus">✚</span><span><strong>VinSHC</strong><small>KHÔNG GIAN OPENMRS</small></span></a><div class="header-controls">${state.workspace ? `<div class="session-identity" aria-label="Thông tin phiên đăng nhập"><dl><div><dt>Tài khoản:</dt><dd>${esc(client.user?.display)}</dd></div><div><dt>Vai trò hiện tại:</dt><dd>${esc(m.permissions.roles[state.role].label)}</dd></div></dl><span class="session-connection">Đã kết nối</span></div><div class="session-actions"><button id="switchWorkspace" ${state.busy ? "disabled" : ""}>Đổi vai trò/cơ sở</button><button id="logout" ${state.busy ? "disabled" : ""}>Đăng xuất</button></div>` : '<a href="/">Về trang chủ</a>'}</div></header>${content}`;
+  if(state.workspace && state.role === "doctor") {
+    const host=document.createElement("div");host.id="agentPanel";document.querySelector("#main-content")?.append(host);
+    agentChat.mount(host,"doctor",memory.context);
+  } else agentChat.clear();
   document.querySelector("#logout")?.addEventListener("click", logout);
   document.querySelector("#switchWorkspace")?.addEventListener("click", () => {
     memory.clear();

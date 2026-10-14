@@ -1,0 +1,9 @@
+*
+!infra/agent/pyproject.toml
+!infra/agent/constraints.txt
+!infra/agent/src/
+!infra/agent/src/**
+!metadata/vinshc/fields.csv
+!infra/agent/fixtures/
+!infra/agent/fixtures/**
+**/__pycache__

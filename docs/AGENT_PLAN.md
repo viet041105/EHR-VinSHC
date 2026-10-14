@@ -1,12 +1,12 @@
 # Kế hoạch tổng quan Agent cho EHR-VinSHC
 
-**Ngày:** 13/10/2026
+**Ngày:** 13/10/2026 · cập nhật MVP 14/10/2026
 
-**Trạng thái:** Đề xuất để nhóm review; chưa có agent được triển khai.
+**Trạng thái:** Đã bổ sung tích hợp MVP trong nhánh agent-mvp-integration: A đọc API nhân viên, P đọc cổng bệnh nhân đã công bố; có FE, Compose và CI. Xem [bàn giao](AGENT_MVP_HANDOFF.md). Đánh giá chất lượng/model thật và nâng cấp B/C được để lại theo phạm vi đã chốt.
 
 **Người phụ trách đề xuất:** Người 3 — metadata, dữ liệu và agent.
 
-**Nguồn đối chiếu:** `main@d9d5b95`, `fe@b5bd148`; chức năng/API dưới đây được phân biệt rõ giữa đã có và dự kiến.
+**Nguồn đối chiếu:** plan ban đầu dùng main@d9d5b95 và fe@b5bd148; cập nhật MVP dựa trên main@33f21f5 và agent@ef9ec3d. Các contract triển khai mới được ghi trong AGENT_MVP_HANDOFF.md và api/patient-portal.md.
 
 ## 1. Agent này giúp giải quyết việc gì?
 
@@ -35,7 +35,7 @@ Thông tin trả lời phải lấy từ bản ghi. Agent không tự bổ sung 
 
 Bác sĩ chọn đúng bệnh nhân/lần khám trước khi yêu cầu agent. Với bệnh nhân, BE xác định hồ sơ từ tài khoản; không cho chọn tùy ý người khác bằng cách nhập UUID.
 
-**Hiện tại BE/FE có 8 workspace nhân viên, chưa có cổng bệnh nhân hoặc contract ủy quyền cho bệnh nhân.** Luồng P là phần cần xây thêm, không phải đổi nhãn role `doctor` thành `patient`. Có thể cùng dùng một service agent với hai policy/tool allowlist, nhưng loại người dùng phải được xác nhận từ session phía server.
+**BE/FE giữ 8 workspace nhân viên; MVP bổ sung cổng bệnh nhân với role và liên kết account–patient riêng.** Luồng P dùng API công bố hồ sơ, không đổi nhãn role `doctor` thành `patient`. Có thể cùng dùng một service agent với hai policy/tool allowlist, nhưng loại người dùng phải được xác nhận từ session phía server.
 
 Các vai trò khác được mở ở giai đoạn sau, sau khi chốt dữ liệu và quyền cho từng nhiệm vụ. Ví dụ điều dưỡng có thể cần tóm tắt thông tin phục vụ ghi sinh hiệu; phạm vi đọc vẫn phải được BE kiểm tra.
 
@@ -82,7 +82,7 @@ Phải phân biệt:
 - API chưa cung cấp loại dữ liệu đó.
 - Request bị từ chối quyền, lỗi hoặc timeout.
 
-Ví dụ hiện tại: `clinical-summary` chưa trả sinh hiệu. Agent phải nói “chưa có dữ liệu sinh hiệu trong nguồn đang đọc”, không được nói “bệnh nhân chưa được đo sinh hiệu”. Các nhận xét mâu thuẫn dữ liệu chỉ thực hiện khi có quy tắc rõ ràng; không tự đặt ngưỡng chuyên môn.
+Ví dụ khi một nguồn chưa cung cấp sinh hiệu, agent phải nói “chưa có dữ liệu sinh hiệu trong nguồn đang đọc”, không được nói “bệnh nhân chưa được đo sinh hiệu”. Các nhận xét mâu thuẫn dữ liệu chỉ thực hiện khi có quy tắc rõ ràng; không tự đặt ngưỡng chuyên môn.
 
 ### 4.4. Trợ lý bệnh nhân (P)
 
@@ -101,11 +101,12 @@ Base API ứng dụng hiện tại: `/openmrs/ws/rest/v1/vinshc`.
 
 | Nguồn | Hiện có gì? | Dùng trong agent |
 | --- | --- | --- |
-| `GET /encounter/{encounterUuid}/clinical-summary` | Patient/visit/encounter UUID, thời điểm, draft/final, phiếu khám, chẩn đoán, drug orders, dị ứng và events | Nguồn chính cho MVP. Chỉ một encounter; chưa có sinh hiệu và kết quả CLS |
+| `GET /encounter/{encounterUuid}/clinical-summary` | Patient/visit/encounter UUID, thời điểm, draft/final, phiếu khám, chẩn đoán, drug orders, dị ứng và events | Nguồn chính cho MVP. Một encounter và sinh hiệu của visit; kết quả CLS đọc qua tool riêng |
 | `GET /allergy?patient={patientUuid}` | Danh sách dị ứng active có kiểm tra quyền/phạm vi | Tool bổ sung khi cần đọc riêng; summary hiện đã có dữ liệu dị ứng, tránh gọi trùng không cần thiết |
 | `GET /identity/{patientUuid}` | Contact, address snapshot và field states | Chỉ đọc khi có nhu cầu cụ thể. Đây chưa phải DTO đầy đủ tên/ngày sinh/định danh của Person/Patient |
 | `GET /authorization/workspace` | Xác nhận workspace role/cơ sở của tài khoản | Kiểm tra context và quyền phía server; headers lựa chọn workspace không tự cấp quyền |
-| API operations đọc theo UUID | Chỉ định, kết quả, attachment và một số bản ghi vận hành | Có thể dùng khi đã biết UUID và đủ quyền; chưa đủ để tự tìm mọi kết quả của một bệnh nhân |
+| API operations đọc danh sách/UUID | Chỉ định, kết quả, appointment, attachment | Tool tìm danh sách theo bệnh nhân rồi đọc kết quả bằng mã tham chiếu do tool cấp |
+| API portal | Session account–patient, visits/instructions/prescriptions đã công bố và appointments của chính mình | Nguồn riêng của luồng P; không đọc DTO nhân viên |
 
 MVP có thể thử bằng encounter UUID của fixture được chọn trước, ngay cả khi màn hình tìm bệnh nhân chưa hoàn thiện. Đây là cách thử kỹ thuật; trải nghiệm người dùng hoàn chỉnh vẫn cần FE/BE nối luồng chọn hồ sơ.
 
@@ -151,7 +152,7 @@ Luồng xử lý:
 - **OpenMRS/VinSHC API:** nguồn dữ liệu bệnh án. MVP đọc dữ liệu theo request, chưa cần sao chép toàn bộ bệnh án vào vector database.
 - **RAG/pgvector:** bổ sung ở giai đoạn C cho tài liệu được duyệt, sau khi chốt scope, phiên bản và nguồn.
 
-Code agent nằm **trong cùng repo**, đề xuất thư mục `services/agent/`. Dockerfile của agent nằm cùng service; cấu hình chạy được bổ sung theo quy ước repo sau khi nhóm chốt. Đây là vị trí dự kiến, chưa tạo service trong lần viết plan.
+Code agent nằm **trong cùng repo**, thư mục [`infra/agent/`](../infra/agent/README.md), cạnh `infra/backend/` và `infra/frontend/`. Dockerfile của agent nằm cùng thư mục và build từ gốc repo. Chatbot (FastAPI + LangGraph, tool theo vai trò, prompt/guardrail, fake model và adapter Claude) đã có; FE và Compose/CI đã được nối cho MVP.
 
 Agent được triển khai độc lập nhưng đi qua cùng cơ chế xác thực/phân quyền. Contract ủy quyền cụ thể cần BE review; không dùng tài khoản admin chung để đọc thay tất cả người dùng.
 
@@ -235,3 +236,7 @@ Có thể làm service và fixtures A/P song song với FE hoàn thiện/ghép n
 - [Ánh xạ UI/API và chức năng còn chờ ở FE](https://github.com/viet041105/EHR-VinSHC/blob/b5bd148cb3033990d07966590f5dc8ac3767422a/infra/frontend/UI_BACKEND_MAP.md).
 
 Khi BE/FE đổi contract hoặc bổ sung endpoint, cập nhật bảng API và bộ fixture trước khi mở rộng phạm vi agent.
+
+## 14. Phạm vi hoàn thiện MVP đã chốt
+
+MVP A/P, FE, patient portal, phân quyền/công bố, Docker và CI được thực hiện trong lần này. Test code/phân quyền/tích hợp vẫn bắt buộc; bộ đánh giá chất lượng với đáp án chuẩn và model thật, timeline nâng cao và RAG được để lại. Các mô tả API ở bản plan ban đầu là snapshot cũ; contract mới xem [patient portal](api/patient-portal.md) và [bàn giao MVP](AGENT_MVP_HANDOFF.md).

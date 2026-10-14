@@ -1,0 +1,152 @@
+{
+  "_comment": "Dữ liệu synthetic theo đúng dạng các API nhân viên của adapter VinSHC (CareService, VinshcService, OperationsService). Không phải hồ sơ thật.",
+  "patient": {
+    "uuid": "a1000000-0000-4000-8000-000000000001",
+    "patientUuid": "a1000000-0000-4000-8000-000000000001",
+    "identifier": "VSHC-000123",
+    "fullName": "Nguyễn Thị Bình",
+    "gender": "F",
+    "birthdate": "1990-01-01",
+    "birthdateEstimated": true,
+    "age": 36,
+    "familyName": "Nguyễn",
+    "middleName": "Thị",
+    "givenName": "Bình",
+    "birthPrecision": "year",
+    "birthYear": "1990",
+    "projection": "administrative",
+    "phone": "0912345678",
+    "identifiers": [{"type": "cccd", "typeName": "CCCD", "identifier": "001090000001"}],
+    "address": "12 Hoa",
+    "openVisit": null
+  },
+  "visits": {
+    "results": [
+      {
+        "uuid": "b1000000-0000-4000-8000-000000000001",
+        "visitUuid": "b1000000-0000-4000-8000-000000000001",
+        "visitType": {"uuid": "f2000000-0000-4000-8000-000000000001", "key": "outpatient", "name": "Khám ngoại trú"},
+        "startDatetime": "2026-10-13T08:40:00+07:00",
+        "status": "open",
+        "patient": {"uuid": "a1000000-0000-4000-8000-000000000001", "fullName": "Nguyễn Thị Bình"},
+        "patientUuid": "a1000000-0000-4000-8000-000000000001",
+        "stopDatetime": null,
+        "closeReason": null,
+        "closeNote": null,
+        "encounters": [
+          {"uuid": "c2000000-0000-4000-8000-000000000002", "encounterUuid": "c2000000-0000-4000-8000-000000000002", "encounterType": {"key": "vitals", "name": "Vitals"}, "encounterDatetime": "2026-10-13T08:50:00+07:00", "patientUuid": "a1000000-0000-4000-8000-000000000001"},
+          {"uuid": "c1000000-0000-4000-8000-000000000001", "encounterUuid": "c1000000-0000-4000-8000-000000000001", "encounterType": {"key": "consultation", "name": "Consultation"}, "encounterDatetime": "2026-10-13T09:15:00+07:00", "patientUuid": "a1000000-0000-4000-8000-000000000001"}
+        ]
+      },
+      {
+        "uuid": "b0000000-0000-4000-8000-000000000009",
+        "visitUuid": "b0000000-0000-4000-8000-000000000009",
+        "visitType": {"uuid": "f2000000-0000-4000-8000-000000000001", "key": "outpatient", "name": "Khám ngoại trú"},
+        "startDatetime": "2026-08-02T14:00:00+07:00",
+        "status": "closed",
+        "patientUuid": "a1000000-0000-4000-8000-000000000001",
+        "stopDatetime": "2026-08-02T15:10:00+07:00",
+        "closeReason": "completed",
+        "closeNote": null,
+        "encounters": [
+          {"uuid": "c0000000-0000-4000-8000-000000000009", "encounterUuid": "c0000000-0000-4000-8000-000000000009", "encounterType": {"key": "consultation", "name": "Consultation"}, "encounterDatetime": "2026-08-02T14:20:00+07:00", "patientUuid": "a1000000-0000-4000-8000-000000000001"}
+        ]
+      }
+    ],
+    "limit": 20,
+    "offset": 0,
+    "hasMore": false
+  },
+  "vitals": {
+    "patientUuid": "a1000000-0000-4000-8000-000000000001",
+    "results": [
+      {
+        "uuid": "d2000000-0000-4000-8000-000000000001",
+        "patientUuid": "a1000000-0000-4000-8000-000000000001",
+        "encounterUuid": "c2000000-0000-4000-8000-000000000002",
+        "visitUuid": "b1000000-0000-4000-8000-000000000001",
+        "measuredAt": "2026-10-13T08:50:00+07:00",
+        "values": {"vitals.mach": 92.0, "vitals.nhiet_do": 38.5},
+        "states": {"vitals.spo2": "not_recorded"},
+        "needsVerification": false,
+        "voided": false
+      },
+      {
+        "uuid": "d2000000-0000-4000-8000-000000000000",
+        "patientUuid": "a1000000-0000-4000-8000-000000000001",
+        "encounterUuid": "c0000000-0000-4000-8000-000000000008",
+        "visitUuid": "b0000000-0000-4000-8000-000000000009",
+        "measuredAt": "2026-08-02T14:05:00+07:00",
+        "values": {"vitals.mach": 78.0, "vitals.nhiet_do": 36.8},
+        "states": {},
+        "needsVerification": false,
+        "voided": false
+      }
+    ]
+  },
+  "service_orders": {
+    "results": [
+      {
+        "uuid": "e5000000-0000-4000-8000-000000000001",
+        "patientUuid": "a1000000-0000-4000-8000-000000000001",
+        "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+        "visitUuid": "b1000000-0000-4000-8000-000000000001",
+        "serviceCode": "LAB-GLU",
+        "serviceName": "Glucose máu",
+        "state": "completed",
+        "stateReason": null,
+        "createdAt": "2026-10-13T09:25:00+07:00",
+        "results": [
+          {"result_uuid": "e6000000-0000-4000-8000-000000000001", "version_number": 1, "state": "final", "recorded_at": 1791860400000, "reviewed_at": 1791861000000}
+        ],
+        "patientName": "Nguyễn Thị Bình",
+        "patientIdentifier": "VSHC-000123"
+      }
+    ],
+    "limit": 100,
+    "offset": 0,
+    "hasMore": false
+  },
+  "results": {
+    "e6000000-0000-4000-8000-000000000001": {
+      "uuid": "e6000000-0000-4000-8000-000000000001",
+      "createdAt": "2026-10-13T10:00:00+07:00",
+      "orderUuid": "e5000000-0000-4000-8000-000000000001",
+      "patientUuid": "a1000000-0000-4000-8000-000000000001",
+      "visitUuid": "b1000000-0000-4000-8000-000000000001",
+      "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+      "version": 1,
+      "state": "final",
+      "numericValue": 5.6,
+      "textValue": null,
+      "unit": "mmol/L",
+      "previousResultUuid": null,
+      "correctionReason": null,
+      "recordedAt": "2026-10-13T10:00:00+07:00",
+      "reviewedAt": "2026-10-13T10:10:00+07:00",
+      "attachments": []
+    }
+  },
+  "appointments": {
+    "results": [
+      {
+        "uuid": "d3000000-0000-4000-8000-000000000001",
+        "createdAt": "2026-10-13T09:44:00+07:00",
+        "patientUuid": "a1000000-0000-4000-8000-000000000001",
+        "visitUuid": null,
+        "appointmentType": "followup",
+        "startAt": "2026-10-20T08:30:00+07:00",
+        "endAt": "2026-10-20T08:45:00+07:00",
+        "status": "booked",
+        "note": null,
+        "patientName": "Nguyễn Thị Bình",
+        "patientIdentifier": "VSHC-000123",
+        "providerName": "Bác sĩ Synthetic",
+        "serviceName": "Tái khám nội tổng quát"
+      }
+    ],
+    "limit": 100,
+    "offset": 0,
+    "hasMore": false
+  }
+}

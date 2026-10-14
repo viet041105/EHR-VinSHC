@@ -138,6 +138,16 @@ jobs:
       - name: Verify the staff workflow with real workspace accounts
         # Registration, visits, vitals, worklists, dispensing and closure through the VinSHC adapter only.
         run: python -m unittest -v tests.integration.test_b11_care_workflow
+      - name: Build and start the clinic and agent MVP
+        env:
+          VINSHC_APP_PORT: '5184'
+        run: |
+          docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml build agent clinic
+          timeout 240s docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml up -d --wait --wait-timeout 240
+      - name: Verify patient publication, isolation and real-backend agent integration
+        env:
+          VINSHC_APP_PORT: '5184'
+        run: python -m unittest -v tests.integration.test_b12_agent_portal
       - name: Collect redacted diagnostics
         if: always()
         run: python scripts/collect_diagnostics.py
@@ -153,4 +163,4 @@ jobs:
         if: always()
         run: |
           docker compose -p "$B9_RESTORE_PROJECT" down --volumes --remove-orphans
-          docker compose -p "$COMPOSE_PROJECT_NAME" down --volumes --remove-orphans
+          docker compose -p "$COMPOSE_PROJECT_NAME" -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml down --volumes --remove-orphans

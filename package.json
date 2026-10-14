@@ -2,6 +2,13 @@
   "name": "ehr-vinshc",
   "private": true,
   "scripts": {
-    "dev": "npm --prefix infra/frontend run dev --"
+    "dev": "npm --prefix infra/frontend run dev --",
+    "mvp:up": "python scripts/mvp.py up",
+    "mvp:build": "python scripts/mvp.py build",
+    "mvp:agent-build": "python scripts/mvp.py agent-build",
+    "mvp:model-check": "python scripts/mvp.py model-check",
+    "mvp:status": "python scripts/mvp.py status",
+    "mvp:stop": "python scripts/mvp.py stop",
+    "mvp:down": "python scripts/mvp.py down"
   }
 }

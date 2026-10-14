@@ -17,6 +17,8 @@ if (
     "VINSHC_BACKEND_ORIGIN phải là HTTP origin loopback, không kèm đường dẫn.",
   );
 }
+const agentUrl = new URL(process.env.VINSHC_AGENT_ORIGIN || "http://127.0.0.1:8000");
+if (agentUrl.protocol !== "http:" || !["localhost", "127.0.0.1", "[::1]"].includes(agentUrl.hostname) || agentUrl.username || agentUrl.password || agentUrl.pathname !== "/" || agentUrl.search || agentUrl.hash) throw new Error("VINSHC_AGENT_ORIGIN phải là HTTP origin loopback.");
 // Dev serves every package from source; the import map (vinshcImportMap) tells the browser where
 // each module lives. The build keeps @vinshc/* external: scripts/build.mjs bundles them separately.
 export default defineConfig(({ command }) => ({
@@ -37,6 +39,12 @@ export default defineConfig(({ command }) => ({
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/.runtime/**"],
     },
     proxy: {
+      "/agent": {
+        target: agentUrl.origin,
+        rewrite: path => path.replace(/^\/agent/, ""),
+        timeout: 100000,
+        proxyTimeout: 100000,
+      },
       "/openmrs": {
         target: url.origin,
         changeOrigin: true,
@@ -50,6 +58,7 @@ export default defineConfig(({ command }) => ({
       input: {
         index: join(ROOT, "index.html"),
         connected: join(ROOT, "connected.html"),
+        portal: join(ROOT, "portal.html"),
       },
       external: (id) => id.startsWith("@vinshc/"),
     },
