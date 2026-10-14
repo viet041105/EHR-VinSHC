@@ -720,3 +720,16 @@ textarea:focus-visible {
 .worklist .workspace-table td:last-child {
   min-width: 200px;
 }
+
+.agent-chat { margin-top: 1.5rem; }
+.agent-chat form { display: grid; gap: .75rem; margin-top: 1rem; }
+.agent-turns article { border-bottom: 1px solid #dce6e9; padding: 1rem 0; }
+.agent-question { font-weight: 600; }
+.agent-answer { white-space: pre-line; }
+.agent-sources { display: flex; flex-wrap: wrap; gap: .4rem; margin-bottom: .75rem; }
+.agent-sources button { font-size: .85rem; }
+.agent-source-record { max-height: 22rem; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.portal-page { max-width: 960px; margin: auto; padding: 1.5rem; }
+.portal-page header { display: flex; flex-wrap: wrap; gap: 1rem; align-items: center; }
+.portal-page form { max-width: 420px; display: grid; gap: 1rem; }
+.portal-page .panel { margin-top: 1.5rem; }

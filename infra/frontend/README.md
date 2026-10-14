@@ -253,3 +253,7 @@ cách không tương thích thì phải build lại các module dùng phần đ�
 Ảnh Pexels được lưu local; xem `assets/ASSET_SOURCES.md`. Font Be Vietnam Pro dùng
 fallback khi offline. Ngày/giờ hiển thị theo Asia/Ho_Chi_Minh; nhập datetime theo
 múi giờ thiết bị, nên đặt thiết bị đúng múi giờ khi sử dụng.
+
+## Agent và cổng bệnh nhân MVP
+
+Khung trợ lý hồ sơ xuất hiện trong workspace bác sĩ khi đã chọn bệnh nhân/lần khám. Trang portal.html dành cho bệnh nhân, dùng tài khoản được BE liên kết với đúng Person/Patient và chỉ đọc bản công bố. Vite proxy /agent đến loopback 8000; đổi cổng bằng VINSHC_AGENT_ORIGIN. Docker chạy web/proxy và agent qua npm run mvp:up từ gốc repo. Xem ../../docs/AGENT_MVP_HANDOFF.md và ../../docs/api/patient-portal.md.

@@ -289,6 +289,7 @@ public class AuthorizationService {
 	 * through the VinSHC adapter, or has a non-voided visit there.
 	 */
 	public void requirePatientScope(Patient patient) {
+        requireAgentAssignment(patient);
 		if (bypassWorkspace())
 			return;
 		Location facility = assignedFacility();
@@ -315,6 +316,7 @@ public class AuthorizationService {
 	}
 	
 	public void requireEncounterScope(Encounter encounter) {
+        requireAgentAssignment(encounter.getPatient());
 		if (bypassWorkspace())
 			return;
 		Location location = encounter.getLocation();
@@ -347,7 +349,7 @@ public class AuthorizationService {
 				statement.setObject(3, patientId);
 				statement.setObject(4, encounterId);
 				statement.setString(5, entityUuid);
-				statement.setString(6, truncate(detail));
+				statement.setString(6, truncate(("agent".equals(header("X-VinSHC-Request-Origin")) ? "agent:" : "") + (detail == null ? "" : detail)));
 				statement.setInt(7, user.getUserId());
 				statement.setTimestamp(8, Timestamp.from(Instant.now()));
 				statement.executeUpdate();
@@ -388,7 +390,18 @@ public class AuthorizationService {
 		return assignment(user, role, facility);
 	}
 	
-	private Location assignedFacility() {
+	private void requireAgentAssignment(Patient patient) {
+        if (!"agent".equals(header("X-VinSHC-Request-Origin")) || !"doctor".equals(workspaceRole(false))) return;
+        activeWorkspace(true);
+        Number count=(Number)sessionFactory.getCurrentSession().createSQLQuery(
+            "SELECT count(*) FROM encounter e JOIN encounter_provider ep ON ep.encounter_id=e.encounter_id "
+            + "JOIN provider p ON p.provider_id=ep.provider_id JOIN users u ON u.person_id=p.person_id "
+            + "WHERE e.patient_id=:patient AND u.user_id=:user AND e.voided=false AND ep.voided=false AND p.retired=false")
+            .setParameter("patient",patient.getPatientId()).setParameter("user",authenticatedUser().getUserId()).uniqueResult();
+        if(count.longValue()==0) throw forbidden("assigned_patient");
+    }
+
+    private Location assignedFacility() {
 		return Context.getLocationService().getLocationByUuid(activeWorkspace(true).get("facilityUuid").toString());
 	}
 	

@@ -52,7 +52,7 @@ export function vinshcImportMap() {
     transformIndexHtml: {
       order: "pre",
       handler(html, { path }) {
-        if (!path.endsWith("/connected.html")) return html;
+        if (!["/connected.html", "/portal.html"].some(page => path.endsWith(page))) return html;
         const map = command === "serve" ? devImportMap() : builtImportMap();
         return {
           html,

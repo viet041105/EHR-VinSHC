@@ -56,6 +56,12 @@ callers.push(
 );
 callers.push(
   ...calls.map((c) => ({ name: c.module + ":" + c.name, method: c.method, path: "/vinshc/" + c.path })),
+  // Patient portal calls use its own authenticated self-service API.
+  { name: "portal:session", method: "GET", path: "/vinshc/portal/session" },
+  { name: "portal:visits", method: "GET", path: "/vinshc/portal/visits" },
+  { name: "portal:instructions", method: "GET", path: "/vinshc/portal/visits/" + id + "/instructions" },
+  { name: "portal:prescriptions", method: "GET", path: "/vinshc/portal/prescriptions" },
+  { name: "portal:appointments", method: "GET", path: "/vinshc/portal/appointments" },
   // Calls made by the shell itself.
   { name: "shell:login", method: "GET", path: "/session" },
   { name: "shell:loadProviders", method: "GET", path: "/vinshc/providers/me" },

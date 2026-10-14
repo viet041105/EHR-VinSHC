@@ -26,7 +26,8 @@
     "backend:status": "node docker-local.mjs status",
     "backend:down": "node docker-local.mjs down",
     "backend:metadata": "python3 configure-metadata.py",
-    "backend:admin": "python3 configure-admin.py"
+    "backend:admin": "python3 configure-admin.py",
+    "test:agent-browser": "node tests/browser/agent-check.cjs"
   },
   "devDependencies": {
     "playwright": "1.64.0",

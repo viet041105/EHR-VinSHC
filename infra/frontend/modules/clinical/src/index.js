@@ -138,6 +138,8 @@ const diagnosis = action(
   () => "diagnosis",
 );
 const actions = {
+  publishPortal: action("Công bố lời dặn/đơn cho bệnh nhân", "clinical_chart", "finalize", [id("visit", "Mã lượt khám"), id("encounter", "Mã lần khám")], d => "portal/visits/" + uuid(d.visit) + "/publication", d => ({encounterUuid: uuid(d.encounter)}), {onlyRoles:["doctor"]}),
+  revokePortal: action("Thu hồi hồ sơ đã công bố", "clinical_chart", "finalize", [id("visit", "Mã lượt khám")], d => "portal/visits/" + uuid(d.visit) + "/publication", () => undefined, {method:"DELETE",onlyRoles:["doctor"]}),
   summary: action(
     "Đọc hồ sơ lần khám",
     "clinical_chart",
@@ -383,6 +385,8 @@ export default defineModule({
       order: 50,
       actions: [
         "summary",
+        "publishPortal",
+        "revokePortal",
         "startConsultation",
         "clinicalConfiguration",
         "consultation",

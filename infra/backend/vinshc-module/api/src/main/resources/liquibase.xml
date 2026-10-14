@@ -361,4 +361,14 @@
     <createIndex tableName="vinshc_service_order" indexName="ix_vinshc_service_order_visit"><column name="visit_id"/></createIndex>
     <createIndex tableName="vinshc_queue_item" indexName="ix_vinshc_queue_visit"><column name="visit_id"/><column name="state"/></createIndex>
   </changeSet>
+  <changeSet id="vinshc-0.4.1-patient-portal" author="vinshc" dbms="postgresql">
+    <sql>
+      CREATE TABLE vinshc_portal_account (user_id INT PRIMARY KEY REFERENCES users(user_id), patient_id INT NOT NULL REFERENCES patient(patient_id), active BOOLEAN NOT NULL DEFAULT true, creator INT NOT NULL REFERENCES users(user_id), date_created TIMESTAMP WITH TIME ZONE NOT NULL);
+      CREATE TABLE vinshc_portal_publication (publication_id BIGSERIAL PRIMARY KEY, publication_uuid VARCHAR(38) NOT NULL UNIQUE, patient_id INT NOT NULL REFERENCES patient(patient_id), visit_id INT NOT NULL REFERENCES visit(visit_id), encounter_id INT NOT NULL REFERENCES encounter(encounter_id), version INT NOT NULL, source_revision BIGINT NOT NULL, payload_json TEXT NOT NULL, active BOOLEAN NOT NULL DEFAULT true, creator INT NOT NULL REFERENCES users(user_id), date_created TIMESTAMP WITH TIME ZONE NOT NULL, UNIQUE(visit_id,version));
+      CREATE UNIQUE INDEX ux_vinshc_portal_active_visit ON vinshc_portal_publication(visit_id) WHERE active=true;
+      CREATE INDEX ix_vinshc_portal_patient ON vinshc_portal_publication(patient_id,active);
+      CREATE INDEX ix_vinshc_portal_account_patient ON vinshc_portal_account(patient_id);
+    </sql>
+    <rollback><sql>DROP TABLE vinshc_portal_publication; DROP TABLE vinshc_portal_account;</sql></rollback>
+  </changeSet>
 </databaseChangeLog>
