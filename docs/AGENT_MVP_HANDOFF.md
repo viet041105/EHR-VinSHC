@@ -18,7 +18,9 @@ Dừng bằng `npm run mvp:stop`; lệnh này giữ container và dữ liệu đ
 
 - Nhân viên: http://127.0.0.1:5173/connected.html
 - Bệnh nhân: http://127.0.0.1:5173/portal.html
-- Model mặc định là fake, để kiểm tra tích hợp không gọi dịch vụ LLM bên ngoài.
+- Khi không có cấu hình agent riêng, model mặc định là fake. Docker đọc `infra/agent/.env` nếu có; file chứa key chỉ lưu local, không commit.
+
+Để thử Gemini thật, sao chép `infra/agent/gemini.env.example` thành `infra/agent/.env`, điền `GEMINI_API_KEY`, rồi chạy `npm run mvp:agent-build`, `npm run mvp:model-check`, `npm run mvp:up`. Model là `gemini-3.8-flash`, thinking `low`. Chỉ thử hồ sơ synthetic với free tier theo [điều khoản Google](https://ai.google.dev/gemini-api/terms). Kiểm tra key/model không gửi hồ sơ; chat thật sẽ gửi câu hỏi và dữ kiện tool đã lọc ra Gemini. Đánh giá chất lượng và RAG vẫn là đầu việc riêng.
 
 Khi phát triển FE bằng npm run dev, Vite proxy /openmrs và /agent. Chạy agent riêng bằng Python theo infra/agent/README.md; đặt VINSHC_AGENT_PATIENT_PORTAL=http để nối cổng bệnh nhân thật.
 

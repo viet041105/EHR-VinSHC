@@ -6,14 +6,15 @@ services:
       context: .
       dockerfile: infra/agent/Dockerfile
     restart: unless-stopped
+    env_file:
+      - path: ./infra/agent/.env
+        required: false
     depends_on:
       backend:
         condition: service_healthy
     environment:
       VINSHC_AGENT_BACKEND_URL: http://backend:8080/openmrs/ws/rest/v1
       VINSHC_AGENT_PATIENT_PORTAL: http
-      VINSHC_AGENT_MODEL_PROVIDER: fake
-      VINSHC_AGENT_ALLOW_EXTERNAL_MODEL: "false"
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=3)"]
       interval: 10s

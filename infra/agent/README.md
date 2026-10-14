@@ -180,12 +180,29 @@ Guardrail bằng luật là lớp bổ sung, không bắt được mọi cách d
 
 ## Model
 
+- `gemini`: Gemini Developer API, mặc định `gemini-3.8-flash`, thinking `low`. Dùng tool calling và JSON schema trong cùng vòng agent; giữ nguyên thought signature giữa các vòng. Free tier chỉ thử dữ liệu synthetic: Google không cho gửi thông tin nhạy cảm/cá nhân vào unpaid services ([điều khoản](https://ai.google.dev/gemini-api/terms)).
 - `fake` (mặc định): chọn tool theo từ khóa và trả mỗi dữ kiện liên quan thành một câu. Dùng cho test, contract
   và demo; không phản ánh chất lượng ngôn ngữ của model thật.
 - `anthropic`: Claude (`claude-opus-5-5`, effort `high`), tool `strict`, câu trả lời theo JSON schema, cache
   system prompt + tool, bật server-side fallback khi bộ lọc an toàn từ chối. **Chỉ dùng với dữ liệu synthetic**
   cho đến khi đánh giá tác động xử lý dữ liệu cá nhân ([VIETNAM_COMPLIANCE.md](../../docs/VIETNAM_COMPLIANCE.md))
   được duyệt.
+
+### Test Gemini 3.8 Flash bằng Docker
+
+Từ gốc repo, sao chép `infra/agent/gemini.env.example` thành `infra/agent/.env` và điền `GEMINI_API_KEY` lấy từ [Google AI Studio](https://aistudio.google.com/apikey). Giữ `VINSHC_AGENT_MODEL_PROVIDER=gemini` và `VINSHC_AGENT_ALLOW_EXTERNAL_MODEL=true`. Docker đọc file này lúc chạy, không đóng gói key trong image.
+
+```powershell
+npm run mvp:agent-build
+npm run mvp:model-check
+npm run mvp:up
+```
+
+`agent-build` chỉ build agent, không build backend/frontend. `model-check` gọi Models API để xác nhận key/model, không gửi hồ sơ hoặc sinh câu trả lời. Sau lần build đầu, chạy lại bằng `mvp:up`; dừng bằng `mvp:stop`. Muốn trở về giả lập, đổi provider thành `fake` và `ALLOW_EXTERNAL_MODEL=false` trong file `.env` của agent rồi chạy lại `mvp:up`.
+
+Mở `/connected.html` bằng tài khoản bác sĩ có workspace/provider và chọn hồ sơ synthetic/lần khám; hoặc `/portal.html` bằng tài khoản bệnh nhân được liên kết và có bản công bố. Hỏi tự nhiên để model chọn tool/dữ kiện. Nội dung lâm sàng hiển thị vẫn được dựng từ dữ kiện nguồn như contract MVP; bật model thật chưa bật suy luận chẩn đoán hay tư vấn điều trị tự do.
+
+Mỗi lượt chat có thể gọi Gemini nhiều lần. HTTP 429 nghĩa là hết quota/giới hạn của project Google; không tự đổi sang model trả phí hoặc giả lập. Template Gemini tắt retry để hạn chế gọi lại khi test free tier. Model ID/thinking level đã đối chiếu [Google](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash): `gemini-3.8-flash`, thinking `low` (không hỗ trợ `minimal`).
 
 ### Gắn API key cho Claude
 

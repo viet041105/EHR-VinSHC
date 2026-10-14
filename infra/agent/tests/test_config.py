@@ -67,3 +67,35 @@ def test_patient_portal_modes():
 def test_credentials_repr_hides_authorization():
     creds = Credentials("Basic c2VjcmV0", "doctor", "f1000000-0000-4000-8000-000000000001")
     assert "c2VjcmV0" not in repr(creds)
+
+
+GEMINI = {"VINSHC_AGENT_MODEL_PROVIDER": "gemini", "VINSHC_AGENT_ALLOW_EXTERNAL_MODEL": "true"}
+
+
+def test_gemini_needs_external_flag_and_key_without_exposing_key():
+    with pytest.raises(ConfigError):
+        load_settings({"VINSHC_AGENT_MODEL_PROVIDER": "gemini", "GEMINI_API_KEY": "test-key"})
+    with pytest.raises(ConfigError, match="GEMINI_API_KEY"):
+        load_settings(GEMINI)
+    settings = load_settings({**GEMINI, "GEMINI_API_KEY": "test-key"})
+    assert settings.gemini_model == "gemini-3.8-flash"
+    assert settings.gemini_credential == "GEMINI_API_KEY"
+    assert "test-key" not in repr(settings)
+
+
+def test_gemini_key_file_and_invalid_model_config(tmp_path):
+    key = tmp_path / "key"
+    key.write_text("test-key\n", encoding="utf-8")
+    settings = load_settings({**GEMINI, "VINSHC_AGENT_GEMINI_API_KEY_FILE": str(key)})
+    assert settings.gemini_credential == f"file {key}"
+    for name, value in [("VINSHC_AGENT_GEMINI_MODEL", "../../leak"),
+                        ("VINSHC_AGENT_GEMINI_THINKING_LEVEL", "minimal")]:
+        with pytest.raises(ConfigError):
+            load_settings({**GEMINI, "GEMINI_API_KEY": "test-key", name: value})
+
+
+def test_factory_selects_gemini(monkeypatch):
+    from vinshc_agent.app import make_model
+    monkeypatch.setenv("GEMINI_API_KEY", "test-key")
+    settings = load_settings({**GEMINI, "GEMINI_API_KEY": "test-key"})
+    assert make_model(settings).provider == "gemini"

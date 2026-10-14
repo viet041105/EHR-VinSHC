@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import re
 import time
 import uuid
@@ -45,6 +46,11 @@ GRAPH = build_graph()
 
 
 def make_model(settings: Settings) -> ChatModel:
+    if settings.model_provider == "gemini":
+        from .llm.gemini import GeminiChatModel
+        api_key = read_api_key(settings.gemini_api_key_file) if settings.gemini_api_key_file else os.environ["GEMINI_API_KEY"].strip()
+        return GeminiChatModel(settings.gemini_model, settings.gemini_thinking_level,
+            settings.model_timeout, settings.model_max_retries, api_key, settings.model_max_tokens)
     if settings.model_provider == "anthropic":
         from .llm.claude import ClaudeChatModel
 

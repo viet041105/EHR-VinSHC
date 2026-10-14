@@ -90,9 +90,9 @@ def build_parser() -> argparse.ArgumentParser:
 KEY_HINTS = {
     "auth_invalid": "API key không hợp lệ hoặc đã bị thu hồi.",
     "permission_denied": "API key không có quyền dùng model này.",
-    "model_not_found": "Không tìm thấy model; kiểm tra VINSHC_AGENT_ANTHROPIC_MODEL.",
+    "model_not_found": "Không tìm thấy model; kiểm tra model ID của provider đang dùng.",
     "rate_limited": "Bị giới hạn tần suất; thử lại sau.",
-    "connection": "Không kết nối được Anthropic API (mạng/proxy/tường lửa).",
+    "connection": "Không kết nối được API model (mạng/proxy/tường lửa).",
 }
 
 
@@ -109,7 +109,7 @@ def check_model(settings) -> int:
     except ModelUnavailable as ex:
         code = str(ex)
         sys.stdout.flush()
-        print(f"Không dùng được model ({code}): {KEY_HINTS.get(code, 'Anthropic API trả lỗi.')}", file=sys.stderr)
+        print(f"Không dùng được model ({code}): {KEY_HINTS.get(code, 'API model trả lỗi.')}", file=sys.stderr)
         return 3
     print(f"API key hợp lệ; model khả dụng: {display}")
     return 0
@@ -137,11 +137,15 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     model = settings.model_provider + (f" ({settings.anthropic_model}, effort {settings.anthropic_effort})"
                                        if settings.model_provider == "anthropic" else "")
+    if settings.model_provider == "gemini":
+        model += f" ({settings.gemini_model}, thinking {settings.gemini_thinking_level})"
     print(f"Env file: {known.env_file} ({len(loaded)} biến)" if loaded else f"Env file: không dùng ({known.env_file})")
     print(f"Backend: {settings.backend_url}")
     print(f"Model: {model}")
     if settings.anthropic_credential:
         print(f"Credential: {settings.anthropic_credential}")
+    if settings.gemini_credential:
+        print(f"Credential: {settings.gemini_credential}")
     print(f"Cổng bệnh nhân: {settings.patient_portal}")
     if args.check_model:
         return check_model(settings)

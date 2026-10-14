@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import os
 import math
+import re
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Mapping
@@ -39,6 +40,10 @@ class Settings:
     anthropic_api_key_file: Path | None = None
     # Mô tả nguồn credential đã tìm thấy (không bao giờ là giá trị khóa), để hiển thị khi khởi động.
     anthropic_credential: str | None = None
+    gemini_model: str = "gemini-3.8-flash"
+    gemini_thinking_level: str = "low"
+    gemini_api_key_file: Path | None = None
+    gemini_credential: str | None = None
     model_timeout: float = 45.0
     request_timeout: float = 90.0
     model_max_tokens: int = 4096
@@ -65,6 +70,10 @@ def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
         allow_external_model=_flag(env.get("VINSHC_AGENT_ALLOW_EXTERNAL_MODEL")),
         anthropic_model=env.get("VINSHC_AGENT_ANTHROPIC_MODEL", d.anthropic_model),
         anthropic_effort=env.get("VINSHC_AGENT_ANTHROPIC_EFFORT", d.anthropic_effort),
+        gemini_model=env.get("VINSHC_AGENT_GEMINI_MODEL", d.gemini_model).strip(),
+        gemini_thinking_level=env.get("VINSHC_AGENT_GEMINI_THINKING_LEVEL", d.gemini_thinking_level).strip().lower(),
+        gemini_api_key_file=Path(env["VINSHC_AGENT_GEMINI_API_KEY_FILE"])
+        if (env.get("VINSHC_AGENT_GEMINI_API_KEY_FILE") or "").strip() else None,
         anthropic_api_key_file=Path(env["VINSHC_AGENT_ANTHROPIC_API_KEY_FILE"])
         if (env.get("VINSHC_AGENT_ANTHROPIC_API_KEY_FILE") or "").strip()
         else None,
@@ -82,6 +91,15 @@ def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
     validate(settings)
     if settings.model_provider == "anthropic":
         settings = replace(settings, anthropic_credential=anthropic_credential_source(settings, env))
+    elif settings.model_provider == "gemini":
+        if settings.gemini_api_key_file:
+            read_api_key(settings.gemini_api_key_file)
+            source = f"file {settings.gemini_api_key_file}"
+        elif (env.get("GEMINI_API_KEY") or "").strip():
+            source = "GEMINI_API_KEY"
+        else:
+            raise ConfigError("Chưa có Gemini API key: đặt GEMINI_API_KEY trong infra/agent/.env.")
+        settings = replace(settings, gemini_credential=source)
     return settings
 
 
@@ -123,8 +141,8 @@ def validate(settings: Settings) -> None:
         raise ConfigError("VINSHC_AGENT_BACKEND_URL không được chứa credential, query hoặc fragment.")
     if not settings.fields_csv.is_file():
         raise ConfigError(f"Không tìm thấy metadata trường: {settings.fields_csv}")
-    if settings.model_provider not in ("fake", "anthropic"):
-        raise ConfigError("VINSHC_AGENT_MODEL_PROVIDER chỉ nhận 'fake' hoặc 'anthropic'.")
+    if settings.model_provider not in ("fake", "anthropic", "gemini"):
+        raise ConfigError("VINSHC_AGENT_MODEL_PROVIDER chỉ nhận 'fake', 'anthropic' hoặc 'gemini'.")
     if settings.model_provider != "fake" and not settings.allow_external_model:
         # Dữ liệu sức khỏe là dữ liệu nhạy cảm (docs/VIETNAM_COMPLIANCE.md): chỉ gửi ra dịch vụ ngoài
         # khi môi trường chỉ có dữ liệu synthetic hoặc đã có đánh giá tác động được duyệt.
@@ -134,6 +152,10 @@ def validate(settings: Settings) -> None:
         )
     if settings.anthropic_effort not in EFFORTS:
         raise ConfigError(f"VINSHC_AGENT_ANTHROPIC_EFFORT phải thuộc {', '.join(EFFORTS)}.")
+    if not re.fullmatch(r"gemini-[a-zA-Z0-9._-]+", settings.gemini_model):
+        raise ConfigError("VINSHC_AGENT_GEMINI_MODEL phải là model ID Gemini, không chứa URL hoặc đường dẫn.")
+    if settings.gemini_thinking_level not in ("low", "medium", "high"):
+        raise ConfigError("Gemini 3.8 Flash chỉ nhận thinking level low, medium hoặc high.")
     if settings.patient_portal not in ("disabled", "fixture", "http"):
         # "http" được thêm khi backend có API cổng bệnh nhân (xem README, mục Luồng bệnh nhân).
         raise ConfigError("VINSHC_AGENT_PATIENT_PORTAL chỉ nhận 'disabled', 'fixture' hoặc 'http'.")
