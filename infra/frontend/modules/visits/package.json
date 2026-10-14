@@ -1,0 +1,16 @@
+{
+  "name": "@vinshc/visits",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VinSHC microfrontend: Mở, xem và kết thúc lượt khám.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@vinshc/core": "0.1.0"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build.mjs --only=visits"
+  }
+}

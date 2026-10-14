@@ -1,0 +1,16 @@
+{
+  "name": "@vinshc/billing",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VinSHC microfrontend: Phiếu phí, thu/hoàn/hủy, phiếu thu.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@vinshc/core": "0.1.0"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build.mjs --only=billing"
+  }
+}

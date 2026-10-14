@@ -1,0 +1,16 @@
+{
+  "name": "@vinshc/reports",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VinSHC microfrontend: Báo cáo tổng hợp ngày và nhiều ngày.",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "dependencies": {
+    "@vinshc/core": "0.1.0"
+  },
+  "scripts": {
+    "build": "node ../../scripts/build.mjs --only=reports"
+  }
+}

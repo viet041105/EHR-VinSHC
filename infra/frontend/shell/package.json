@@ -1,0 +1,13 @@
+{
+  "name": "@vinshc/shell",
+  "version": "0.1.0",
+  "private": true,
+  "description": "VinSHC host app: login, workspace, layout and the module loader (connected.html).",
+  "type": "module",
+  "exports": {
+    ".": "./src/main.js"
+  },
+  "dependencies": {
+    "@vinshc/core": "0.1.0"
+  }
+}

@@ -346,7 +346,7 @@ Mỗi vùng file có một người chủ. Người khác cần sửa file trong
 | Người 1 | `compose.yaml`, `.env.example`, `config/baseline.json`, `infra/backend/Dockerfile`, `infra/backend/postgresql/`, `infra/postgres/`, `modules/`, `scripts/bootstrap.py`, `scripts/check_config.py`, `scripts/check_database.py`, `scripts/common.py`, `docs/DEVELOPMENT.md` |
 | Người 2 | `infra/frontend/` trừ các file adapter của người 4; `package.json` ở gốc; `docs/FRONTEND.md`, `docs/FRONTEND_SCOPE.md`, `docs/ROLE_WORKFLOWS.md` |
 | Người 3 | `infra/backend/configuration/` (gói metadata) trừ thư mục cấu hình appointments/queue của người 4, `docs/DATA_DICTIONARY.md`, dữ liệu giả của DATA-05 |
-| Người 4 | `infra/frontend/api.js`, `infra/frontend/backend-mapping.js` và file adapter OpenMRS mới; thư mục cấu hình appointments/queue trong `infra/backend/configuration/`; `tests/` (API, integration, E2E, fixture); `scripts/smoke.py`, script backup/restore; `.github/workflows/`; `docs/api/`, `docs/CI.md`, `docs/VALIDATION.md`, runbook vận hành; `integrations/` |
+| Người 4 | `infra/frontend/api.js`, `infra/frontend/packages/core/src/backend-mapping.js` và file adapter OpenMRS mới; thư mục cấu hình appointments/queue trong `infra/backend/configuration/`; `tests/` (API, integration, E2E, fixture); `scripts/smoke.py`, script backup/restore; `.github/workflows/`; `docs/api/`, `docs/CI.md`, `docs/VALIDATION.md`, runbook vận hành; `integrations/` |
 
 Test FE hiện có (`verify.mjs`, `browser-check.cjs`, `design-check.cjs`) thuộc người 2; người 4 chỉ gọi chúng trong CI. Tài liệu chung (`PROJECT_PLAN.md`, `docs/BACKEND.md`, `README.md`) sửa bằng PR nhỏ, chỉ đụng mục liên quan. Khi một việc cần thay đổi ở hai vùng, tách thành hai PR theo chủ vùng và ghi liên kết giữa chúng.
 

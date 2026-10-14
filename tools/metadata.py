@@ -144,7 +144,7 @@ def validate_pack(pack, root=ROOT):
             for group in role["grants"]:
                 if group not in permissions["fieldGroups"]:
                     errors.append("Unknown access group: " + group)
-    frontend = root / "infra/frontend/backend-mapping.js"
+    frontend = root / "infra/frontend/packages/core/src/backend-mapping.js"
     if frontend.exists():
         by_code = {f["code"]: f for f in fields}
         for code, unit in re.findall(r"code:'(vitals\.[^']+)'.*?unit:'([^']+)'", frontend.read_text(encoding="utf-8")):
