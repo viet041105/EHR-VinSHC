@@ -12,7 +12,9 @@
 
 ## Chạy ngắn gọn
 
-Từ gốc repo, cài Docker Desktop rồi chạy npm run mvp:up. Xem trạng thái bằng npm run mvp:status; dừng bằng npm run mvp:down. Các volume dữ liệu được giữ lại.
+Từ gốc repo, mở Docker Desktop. Chạy `npm run mvp:build` lần đầu hoặc khi cần cập nhật code trong image; lệnh này build rồi khởi động hệ thống. Sau đó dùng `npm run mvp:up` để chạy bằng image đã có, không build hoặc tải image lại. Nếu image chưa có, cần chạy `mvp:build` trước.
+
+Dừng bằng `npm run mvp:stop`; lệnh này giữ container và dữ liệu để lần sau chạy lại bằng `mvp:up`. Xem trạng thái bằng `npm run mvp:status`. `npm run mvp:down` gỡ container/network nhưng vẫn giữ volume dữ liệu. `Ctrl+C` không dừng các container vì chúng chạy nền.
 
 - Nhân viên: http://127.0.0.1:5173/connected.html
 - Bệnh nhân: http://127.0.0.1:5173/portal.html

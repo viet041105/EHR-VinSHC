@@ -4,7 +4,9 @@
   "scripts": {
     "dev": "npm --prefix infra/frontend run dev --",
     "mvp:up": "python scripts/mvp.py up",
+    "mvp:build": "python scripts/mvp.py build",
     "mvp:status": "python scripts/mvp.py status",
+    "mvp:stop": "python scripts/mvp.py stop",
     "mvp:down": "python scripts/mvp.py down"
   }
 }
