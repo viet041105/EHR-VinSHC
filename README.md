@@ -1,6 +1,6 @@
 # EHR-VinSHC
 
-Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại Việt Nam, thiết kế theo gói và adapter để mở rộng lên chuỗi phòng khám, bệnh viện, liên thông hồ sơ và AI tra cứu/tóm tắt có dẫn nguồn.
+Bản phân phối OpenMRS 3 mã nguồn mở cho phòng khám tư nhân tại Việt Nam, có trợ lý AI chỉ đọc giúp bác sĩ tóm tắt hồ sơ và giúp bệnh nhân hiểu lời dặn, đơn thuốc của mình, luôn kèm dẫn nguồn. Thiết kế theo gói và adapter để mở rộng lên chuỗi phòng khám, bệnh viện và liên thông hồ sơ.
 
 > Dự án đang phát triển và chỉ được kiểm chứng với dữ liệu giả. Chưa dùng cho dữ liệu bệnh nhân thật.
 

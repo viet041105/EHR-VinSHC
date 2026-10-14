@@ -17,7 +17,7 @@ Mục tiêu là làm tốt cho **một phòng khám tư** trước. Đồng th�
 
 | Tầng | Đối tượng | Thành phần |
 | --- | --- | --- |
-| **1. Phòng khám** (trọng tâm hiện tại) | Một phòng khám tư | OpenMRS 3 (Core, REST, FHIR2, Initializer), các app O3: đăng ký, patient chart, form, appointments, service queues, billing, dispensing, stock; gói Việt Nam |
+| **1. Phòng khám** (trọng tâm hiện tại) | Một phòng khám tư | OpenMRS 3 (Core, REST, FHIR2, Initializer), các app O3: đăng ký, patient chart, form, appointments, service queues, billing, dispensing, stock; gói Việt Nam; cổng bệnh nhân tối thiểu; trợ lý AI chỉ đọc cho bác sĩ và bệnh nhân (`infra/agent/`) |
 | **2. Phòng khám đa khoa / chuỗi** | Nhiều phòng, nhiều cơ sở | Tầng 1 + LIS (OpenELIS hoặc HL7 với máy xét nghiệm), PACS (Orthanc), adapter BHYT / HĐĐT / đơn thuốc quốc gia, ERP (Odoo hoặc ERPNext) cho kế toán và kho chuyên sâu, báo cáo tập trung |
 | **3. Bệnh viện / liên thông** | Bệnh viện, mạng lưới cơ sở | Tầng 2 + nội trú/giường, MPI (OpenCR), interoperability layer (OpenHIM), terminology server (OCL), kho dữ liệu lâm sàng openEHR (EHRbase), data warehouse, HA và giám sát |
 
@@ -26,7 +26,7 @@ Mô hình tham khảo cho tầng 2–3 là **Bahmni** (OpenMRS + Odoo + OpenELIS
 ```text
                     ┌──────────────── Tầng 3 ─────────────────┐
                     │ OpenHIM · OpenCR (MPI) · OCL · EHRbase  │
-                    │ Data warehouse · AI tra cứu có dẫn nguồn│
+                    │ Data warehouse · AI trên dữ liệu dài hạn│
                     └───────────────▲─────────────────────────┘
                                     │ FHIR R4 / openEHR
 ┌────────────── Tầng 2 ─────────────┴──────────────────────────┐
@@ -37,6 +37,7 @@ Mô hình tham khảo cho tầng 2–3 là **Bahmni** (OpenMRS + Odoo + OpenELIS
 │ O3 frontend ── OpenMRS Core + REST + FHIR2 + Initializer     │
 │ Gói VN: metadata, ICD-10, thuốc, dịch vụ, địa chỉ, mẫu in,   │
 │ bản dịch, role                                               │
+│ Cổng bệnh nhân · Trợ lý AI chỉ đọc (bác sĩ, bệnh nhân)       │
 │ PostgreSQL (hồ sơ gốc của cơ sở)                             │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -50,6 +51,7 @@ Mô hình tham khảo cho tầng 2–3 là **Bahmni** (OpenMRS + Odoo + OpenELIS
 | Cấu hình của từng cơ sở | Location, bảng giá, tài khoản, logo, thông tin in | Ngoài Git công khai hoặc dùng file mẫu; không chứa bí mật |
 | Module mở rộng | Phần nghiệp vụ còn thiếu sau khi đã đánh giá cấu hình | `modules/`, mỗi module có lý do và kiểm thử |
 | Adapter tích hợp | BHYT XML, HĐĐT, đơn thuốc quốc gia, LIS, PACS, openEHR | `integrations/`, bật/tắt độc lập |
+| Trợ lý AI | Agent tóm tắt/hỏi đáp cho bác sĩ, giải thích hồ sơ đã công bố cho bệnh nhân | `infra/agent/`, service riêng, bật/tắt theo cơ sở; không giữ dữ liệu bệnh án, đọc qua backend bằng phiên của người hỏi ([AGENT_PLAN.md](AGENT_PLAN.md)) |
 
 Bản dịch tiếng Việt cho app O3 nên đóng góp ngược về upstream (OpenMRS dùng Transifex). Repo chỉ giữ phần bổ sung chưa được nhận, để giảm chi phí khi nâng phiên bản.
 
