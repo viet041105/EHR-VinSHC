@@ -28,8 +28,10 @@ public class PortalIsolationInterceptor implements HandlerInterceptor {
 			return true;
 		String uri = request.getRequestURI();
 		response.setHeader("Cache-Control", "no-store");
-		boolean allowed = uri.matches(".*/rest/v1/session/?") || ("GET".equals(request.getMethod()) && uri.matches(
-		    ".*/rest/v1/vinshc/portal/(session|visits|visits/[0-9a-fA-F-]{36}/instructions|prescriptions|results|appointments)/?"));
+		boolean allowed = uri.matches(".*/rest/v1/session/?")
+		        || ("POST".equals(request.getMethod()) && uri.matches(".*/rest/v1/vinshc/portal/password/?"))
+		        || ("GET".equals(request.getMethod()) && uri.matches(
+		            ".*/rest/v1/vinshc/portal/(session|me|visits|visits/[0-9a-fA-F-]{36}|visits/[0-9a-fA-F-]{36}/instructions|prescriptions|prescriptions/[0-9a-fA-F-]{36}|results|results/[0-9a-fA-F-]{36}|attachments/[0-9a-fA-F-]{36}/content|appointments)/?"));
 		if (!allowed) {
 			response.setStatus(403);
 			response.setContentType("application/json");

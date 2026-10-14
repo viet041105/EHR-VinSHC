@@ -189,7 +189,14 @@ jobs:
         run: |
           docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml build agent clinic
           timeout 240s docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml up -d --wait --wait-timeout 240
-      - name: Verify patient publication, isolation and real-backend agent integration
+      - name: Install P4 browser acceptance dependencies
+        # B12 includes real desktop/mobile Playwright tests against the synthetic Docker clinic.
+        run: |
+          node --version
+          npm ci --prefix infra/frontend
+          cd infra/frontend
+          npx playwright install --with-deps chromium
+      - name: Verify patient publication, portal security, mobile UI and agent integration
         env:
           VINSHC_APP_PORT: '5184'
         run: python -m unittest -v tests.integration.test_b12_agent_portal

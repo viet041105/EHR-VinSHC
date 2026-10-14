@@ -214,6 +214,63 @@ public class PortalService {
 		return map("persona", "patient", "patientUuid", p.getUuid());
 	}
 
+	/** Do not expose identity documents, demographic contacts or staff chart metadata. */
+	public Map<String, Object> me() {
+		Patient p = self();
+		User user = actor();
+		return map("persona", "patient", "userUuid", user.getUuid(), "patientUuid", p.getUuid(), "linkStatus", "active",
+		    "verified", true);
+	}
+
+	/** Read only one explicit, currently active publication belonging to the authenticated patient. */
+	private Map<String, Object> publication(String uuid) {
+		Patient p = self();
+		List<Map<String, Object>> rows = query(
+		    "SELECT x.payload_json FROM vinshc_portal_publication x"
+		            + " JOIN visit v ON v.visit_id=x.visit_id JOIN encounter e ON e.encounter_id=x.encounter_id"
+		            + " WHERE x.publication_uuid=? AND x.patient_id=? AND x.active=true"
+		            + " AND v.voided=false AND e.voided=false" + " AND x.source_revision=(SELECT coalesce(max(event_id),0)"
+		            + " FROM vinshc_clinical_event WHERE encounter_id=x.encounter_id)",
+		    VinshcService.canonicalUuid(uuid, "publication"), p.getPatientId());
+		if (rows.size() != 1)
+			throw new APIAuthenticationException("published resource unavailable");
+		try {
+			return json.readValue(rows.get(0).get("payload_json").toString(), new TypeReference<Map<String, Object>>() {});
+		}
+		catch (java.io.IOException ex) {
+			throw new VinshcExceptions.Configuration("publication cannot be read", ex);
+		}
+	}
+
+	public Map<String, Object> publicationVisit(String visitUuid) {
+		Patient p = self();
+		List<Map<String, Object>> rows = publications(p, visitUuid, 1, 0);
+		if (rows.size() != 1)
+			throw new APIAuthenticationException("published resource unavailable");
+		audit(p, "published_visit");
+		Map<String, Object> row = rows.get(0);
+		return map("visitUuid", row.get("visitUuid"), "publishedAt", row.get("publishedAt"), "facilityName",
+		    row.get("facilityName"), "version", row.get("version"), "items", row.get("items"), "prescriptions",
+		    row.get("prescriptions"), "results", row.get("results"));
+	}
+
+	@SuppressWarnings("unchecked")
+	public Map<String, Object> publicationItems(String uuid, String category) {
+		Map<String, Object> snapshot = publication(uuid);
+		Patient p = self();
+		if (!"prescriptions".equals(category) && !"results".equals(category))
+			throw VinshcService.bad("unapproved publication category");
+		audit(p, category + ":publication");
+		return map("visitUuid", snapshot.get("visitUuid"), "version", snapshot.get("version"), "publishedAt",
+		    snapshot.get("publishedAt"), "results", snapshot.get(category));
+	}
+
+	/** No patient file download until the P2 malware scan and document approval gates pass. */
+	public void denyUnscannedAttachment(String uuid) {
+		self();
+		throw new APIAuthenticationException("attachment publication unavailable");
+	}
+
 	private Visit visit(String uuid) {
 		Visit v = Context.getVisitService().getVisitByUuid(VinshcService.canonicalUuid(uuid, "visit"));
 		if (v == null || v.getVoided())

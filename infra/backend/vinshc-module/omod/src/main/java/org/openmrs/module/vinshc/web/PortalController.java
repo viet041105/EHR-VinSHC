@@ -11,6 +11,7 @@ package org.openmrs.module.vinshc.web;
 
 import java.util.Map;
 import org.openmrs.module.vinshc.service.PortalService;
+import org.openmrs.module.vinshc.service.StaffAccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -22,14 +23,49 @@ public class PortalController extends BaseVinshcController {
 
 	private final PortalService service;
 
+	private final StaffAccountService staff;
+
 	@Autowired
-	public PortalController(PortalService service) {
+	public PortalController(PortalService service, StaffAccountService staff) {
 		this.service = service;
+		this.staff = staff;
 	}
 
 	@GetMapping("/session")
 	public Map<String, Object> session() {
 		return service.session();
+	}
+
+	@PostMapping("/password")
+	public Map<String, Object> password(@RequestBody Map<String, Object> body) {
+		// Verify the patient link before allowing patient self-service password changes.
+		service.me();
+		return staff.changeOwnPassword(body);
+	}
+
+	@GetMapping("/me")
+	public Map<String, Object> me() {
+		return service.me();
+	}
+
+	@GetMapping("/visits/{uuid}")
+	public Map<String, Object> visit(@PathVariable String uuid) {
+		return service.publicationVisit(uuid);
+	}
+
+	@GetMapping("/prescriptions/{uuid}")
+	public Map<String, Object> prescriptionPublication(@PathVariable String uuid) {
+		return service.publicationItems(uuid, "prescriptions");
+	}
+
+	@GetMapping("/results/{uuid}")
+	public Map<String, Object> resultPublication(@PathVariable String uuid) {
+		return service.publicationItems(uuid, "results");
+	}
+
+	@GetMapping("/attachments/{uuid}/content")
+	public void attachmentContent(@PathVariable String uuid) {
+		service.denyUnscannedAttachment(uuid);
 	}
 
 	@GetMapping("/visits")

@@ -266,9 +266,9 @@ P3 là điều kiện bắt buộc trước portal và chatbot bệnh nhân.
 
 ### 8.1. Xác thực và phiên
 
-- [ ] Tạo loại tài khoản/role bệnh nhân riêng, không dùng một trong 8 workspace nhân viên.
-- [ ] Portal không yêu cầu header role/facility do client tự chọn; backend suy patient từ session và active account–patient link.
-- [ ] Thêm endpoint `GET /vinshc/portal/me` trả identity tối thiểu và trạng thái liên kết.
+- [x] Tạo loại tài khoản/role bệnh nhân riêng, không dùng một trong 8 workspace nhân viên.
+- [x] Portal không yêu cầu header role/facility do client tự chọn; backend suy patient từ session và active account–patient link.
+- [x] Thêm endpoint `GET /vinshc/portal/me` trả identity tối thiểu và trạng thái liên kết.
 - [ ] Thiết kế đổi/reset mật khẩu và khóa tài khoản; không trả password cũ.
 - [ ] Có rate limit, lockout/throttling và audit login thất bại theo chính sách triển khai.
 - [ ] Chống session fixation, CSRF (nếu dùng cookie) và open redirect.
@@ -277,44 +277,44 @@ P3 là điều kiện bắt buộc trước portal và chatbot bệnh nhân.
 
 Tên endpoint có thể điều chỉnh trong bước chốt contract, nhưng phải giữ nguyên nguyên tắc không nhận patient UUID tùy ý.
 
-- [ ] `GET /vinshc/portal/me` — tài khoản và patient projection.
-- [ ] `GET /vinshc/portal/visits?limit=&offset=` — các lần khám có nội dung được công bố.
-- [ ] `GET /vinshc/portal/visits/{visitUuid}` — nội dung được công bố của chính account.
+- [x] `GET /vinshc/portal/me` — tài khoản và patient projection.
+- [x] `GET /vinshc/portal/visits?limit=&offset=` — các lần khám có nội dung được công bố.
+- [x] `GET /vinshc/portal/visits/{visitUuid}` — nội dung được công bố của chính account.
 - [ ] `GET /vinshc/portal/appointments` — lịch hẹn của chính patient.
-- [ ] `GET /vinshc/portal/prescriptions/{publicationUuid}` — đơn đã công bố.
-- [ ] `GET /vinshc/portal/results/{publicationUuid}` — kết quả đã công bố.
+- [x] `GET /vinshc/portal/prescriptions/{publicationUuid}` — đơn đã công bố.
+- [x] `GET /vinshc/portal/results/{publicationUuid}` — kết quả đã công bố.
 - [ ] `GET /vinshc/portal/attachments/{publicationUuid}/content` — download có quyền, scan và audit.
-- [ ] Không có API portal nhận `?patient=<uuid>` từ client.
-- [ ] Mọi endpoint đọc lại active link và publication ở thời điểm request, không chỉ lúc login.
+- [x] Không có API portal nhận `?patient=<uuid>` từ client.
+- [x] Mọi endpoint đọc lại active link và publication ở thời điểm request, không chỉ lúc login.
 
 ### 8.3. Frontend portal
 
-- [ ] Tạo `/portal.html` hoặc một entrypoint/package portal riêng.
-- [ ] Màn hình đăng nhập/đăng xuất và trạng thái khóa/liên kết chưa xác minh.
-- [ ] Danh sách lần khám đã công bố.
+- [x] Tạo `/portal.html` hoặc một entrypoint/package portal riêng.
+- [x] Màn hình đăng nhập/đăng xuất và trạng thái khóa/liên kết chưa xác minh.
+- [x] Danh sách lần khám đã công bố.
 - [ ] Trang lời dặn, đơn thuốc, kết quả và lịch hẹn.
 - [ ] Hiển thị rõ ngày, cơ sở, người công bố, phiên bản và trạng thái thu hồi/sửa đổi khi áp dụng.
-- [ ] Không có ô nhập patient UUID, encounter UUID hoặc URL Core.
-- [ ] Đổi account/logout phải xóa toàn bộ context và response cũ khỏi bộ nhớ trình duyệt.
-- [ ] Không lưu hồ sơ/credential trong localStorage/sessionStorage.
+- [x] Không có ô nhập patient UUID, encounter UUID hoặc URL Core.
+- [x] Đổi account/logout phải xóa toàn bộ context và response cũ khỏi bộ nhớ trình duyệt.
+- [x] Không lưu hồ sơ/credential trong localStorage/sessionStorage.
 - [ ] Responsive, keyboard accessible và có trạng thái loading/error/empty rõ ràng.
 
 ### 8.4. Kiểm thử portal
 
-- [ ] Patient A không xem được Patient B bằng cách sửa mọi UUID/path/query/header.
+- [x] Patient A không xem được Patient B bằng cách sửa mọi UUID/path/query/header.
 - [ ] Account chưa link, link pending/revoked/expired bị từ chối.
-- [ ] Draft/final chưa publish không xuất hiện.
-- [ ] Publication revoked biến mất hoặc trả trạng thái phù hợp ngay sau revoke.
-- [ ] Attachment ngoài publication bị từ chối.
+- [x] Draft/final chưa publish không xuất hiện.
+- [x] Publication revoked biến mất hoặc trả trạng thái phù hợp ngay sau revoke.
+- [x] Attachment ngoài publication bị từ chối.
 - [ ] Không rò rỉ dữ liệu qua cache, log, error detail hoặc browser history.
-- [ ] Test hai tab/hai account không trộn context.
-- [ ] Test desktop/mobile bằng Playwright trên backend thật, không chỉ route mock.
+- [x] Test hai tab/hai account không trộn context.
+- [x] Test desktop/mobile bằng Playwright trên backend thật, không chỉ route mock.
 
 ### 8.5. Tiêu chí nghiệm thu P4
 
 - [ ] Một bệnh nhân synthetic đăng nhập, xem đúng lời dặn/đơn/kết quả/lịch hẹn đã công bố.
-- [ ] Ít nhất 10 ca tấn công quyền chéo đều bị chặn ở backend.
-- [ ] Thu hồi link hoặc publication có hiệu lực ngay mà không cần rebuild frontend.
+- [x] Ít nhất 10 ca tấn công quyền chéo đều bị chặn ở backend.
+- [x] Thu hồi link hoặc publication có hiệu lực ngay mà không cần rebuild frontend.
 
 ---
 
