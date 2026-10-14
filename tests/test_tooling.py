@@ -80,6 +80,26 @@ class SmokeRegressionTests(unittest.TestCase):
             with self.assertRaises(SmokeError):
                 client.json("/openmrs/ws/rest/v1/session")
 
+    def test_json_client_accepts_objects_and_workspace_arrays(self):
+        client = Client("http://localhost:8080", "admin", "local-only")
+        workspaces = [{"role": "doctor", "facilityUuid": "synthetic-facility",
+                       "facilityName": "Synthetic clinic"}]
+        for payload in ({"authenticated": True}, {}, workspaces, []):
+            with self.subTest(payload=payload), patch.object(
+                client, "request", return_value=(
+                    200, {"Content-Type": "application/json"}, json.dumps(payload).encode()
+                )
+            ):
+                self.assertEqual(client.json("/openmrs/ws/rest/v1/vinshc/authorization/workspaces"), payload)
+
+    def test_json_client_rejects_scalar_and_malformed_responses(self):
+        client = Client("http://localhost:8080", "admin", "local-only")
+        for body in (b"null", b"true", b"42", b'"login"', b"invalid-json"):
+            with self.subTest(body=body), patch.object(
+                client, "request", return_value=(200, {"Content-Type": "application/json"}, body)
+            ), self.assertRaises(SmokeError):
+                client.json("/openmrs/ws/rest/v1/vinshc/authorization/workspaces")
+
     def test_frontend_javascript_rejects_html_fallback_and_external_assets(self):
         client = Client("http://localhost:8080", "admin", "local-only")
         with patch.object(client, "request", return_value=(200, {"Content-Type": "text/html"}, b"<html>Fallback</html>")):
