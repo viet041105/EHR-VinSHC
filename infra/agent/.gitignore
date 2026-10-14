@@ -1,0 +1,3 @@
+# Sinh ra khi chạy pip install -e / pytest; .venv, __pycache__ và .env đã được .gitignore ở gốc repo bỏ qua.
+*.egg-info/
+.pytest_cache/

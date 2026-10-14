@@ -1,0 +1,37 @@
+{
+  "_comment": "Dữ liệu synthetic cho chế độ VINSHC_AGENT_PATIENT_PORTAL=fixture, theo hợp đồng cổng bệnh nhân ĐỀ XUẤT (chưa có trên backend). Không phải hồ sơ thật, không dùng ngoài môi trường phát triển.",
+  "tokens": {
+    "Bearer demo-patient-binh": "a1000000-0000-4000-8000-000000000001",
+    "Bearer demo-patient-an": "a2000000-0000-4000-8000-000000000002"
+  },
+  "patients": {
+    "a1000000-0000-4000-8000-000000000001": {
+      "visits": [
+        {"uuid": "b1000000-0000-4000-8000-000000000001", "startDatetime": "2026-10-13T08:40:00+07:00", "facilityName": "Phòng khám VinSHC (synthetic)", "serviceName": "Khám nội tổng quát"}
+      ],
+      "instructions": {
+        "b1000000-0000-4000-8000-000000000001": {
+          "visitUuid": "b1000000-0000-4000-8000-000000000001",
+          "publishedAt": "2026-10-13T09:45:00+07:00",
+          "items": [
+            {"field": "exam.loi_dan", "label": "Lời dặn", "text": "Uống nhiều nước, theo dõi nhiệt độ"},
+            {"field": "followup.ngay_tai_kham", "label": "Ngày tái khám", "text": "2026-10-20"},
+            {"field": "followup.loi_dan", "label": "Điều kiện tái khám sớm", "text": "Tái khám sớm nếu sốt trên 3 ngày"}
+          ]
+        }
+      },
+      "prescriptions": [
+        {"uuid": "c8000000-0000-4000-8000-000000000001", "visitUuid": "b1000000-0000-4000-8000-000000000001", "drugName": "Paracetamol", "strength": "500 mg", "dose": "1 viên", "frequency": "3 lần/ngày", "route": "uống", "duration": "3 ngày", "instructions": "Uống sau ăn", "status": "active", "confirmedAt": "2026-10-13T09:42:00+07:00"}
+      ],
+      "appointments": [
+        {"uuid": "d3000000-0000-4000-8000-000000000001", "startAt": "2026-10-20T08:30:00+07:00", "serviceName": "Tái khám nội tổng quát", "status": "booked"}
+      ]
+    },
+    "a2000000-0000-4000-8000-000000000002": {
+      "visits": [],
+      "instructions": {},
+      "prescriptions": [],
+      "appointments": []
+    }
+  }
+}

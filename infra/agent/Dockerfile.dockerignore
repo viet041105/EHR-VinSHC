@@ -1,0 +1,6 @@
+*
+!infra/agent/pyproject.toml
+!infra/agent/src/
+!infra/agent/src/**
+!metadata/vinshc/fields.csv
+**/__pycache__

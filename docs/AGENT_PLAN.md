@@ -2,7 +2,7 @@
 
 **Ngày:** 13/10/2026
 
-**Trạng thái:** Đề xuất để nhóm review; chưa có agent được triển khai.
+**Trạng thái:** Đề xuất để nhóm review. Đã có chatbot trong `infra/agent/`: luồng A đọc API nhân viên; luồng P chạy trên hợp đồng cổng bệnh nhân đề xuất với dữ liệu synthetic. Chưa nối FE, Compose, CI và chưa có API cổng bệnh nhân trên backend.
 
 **Người phụ trách đề xuất:** Người 3 — metadata, dữ liệu và agent.
 
@@ -151,7 +151,7 @@ Luồng xử lý:
 - **OpenMRS/VinSHC API:** nguồn dữ liệu bệnh án. MVP đọc dữ liệu theo request, chưa cần sao chép toàn bộ bệnh án vào vector database.
 - **RAG/pgvector:** bổ sung ở giai đoạn C cho tài liệu được duyệt, sau khi chốt scope, phiên bản và nguồn.
 
-Code agent nằm **trong cùng repo**, đề xuất thư mục `services/agent/`. Dockerfile của agent nằm cùng service; cấu hình chạy được bổ sung theo quy ước repo sau khi nhóm chốt. Đây là vị trí dự kiến, chưa tạo service trong lần viết plan.
+Code agent nằm **trong cùng repo**, thư mục [`infra/agent/`](../infra/agent/README.md), cạnh `infra/backend/` và `infra/frontend/`. Dockerfile của agent nằm cùng thư mục và build từ gốc repo. Chatbot (FastAPI + LangGraph, vòng gọi tool theo vai trò, system prompt, guardrail đầu vào/đầu ra, fake model và adapter Claude, test với backend giả) đã có; cách nối vào Compose và CI được bổ sung theo quy ước repo sau khi nhóm chốt.
 
 Agent được triển khai độc lập nhưng đi qua cùng cơ chế xác thực/phân quyền. Contract ủy quyền cụ thể cần BE review; không dùng tài khoản admin chung để đọc thay tất cả người dùng.
 

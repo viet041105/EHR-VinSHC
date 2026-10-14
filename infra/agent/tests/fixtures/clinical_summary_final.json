@@ -1,0 +1,158 @@
+{
+  "_comment": "Dữ liệu synthetic theo đúng dạng GET /vinshc/encounter/{uuid}/clinical-summary (ClinicalService.summary). Không phải hồ sơ thật.",
+  "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+  "patientUuid": "a1000000-0000-4000-8000-000000000001",
+  "visitUuid": "b1000000-0000-4000-8000-000000000001",
+  "encounterDatetime": "2026-10-13T09:15:00+07:00",
+  "status": "final",
+  "finalization": {
+    "uuid": "e1000000-0000-4000-8000-000000000006",
+    "type": "consultation_finalized",
+    "entityUuid": "c3000000-0000-4000-8000-000000000001",
+    "reason": null,
+    "detail": null,
+    "at": "2026-10-13T09:42:00+07:00",
+    "byUserUuid": "d1000000-0000-4000-8000-000000000001"
+  },
+  "consultation": {
+    "groupUuid": "c3000000-0000-4000-8000-000000000001",
+    "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+    "patientUuid": "a1000000-0000-4000-8000-000000000001",
+    "values": {
+      "visit.ly_do_kham": "Sốt và đau họng hai ngày",
+      "history.benh_su": "Sốt 38.5 độ từ hai ngày trước, đau họng, không ho.",
+      "history.tien_su_ban_than_trang_thai": "present",
+      "history.tien_su_ban_than": "Hen phế quản thời thơ ấu",
+      "history.tien_su_gia_dinh_trang_thai": "not_asked",
+      "allergy.trang_thai": "present",
+      "exam.tom_tat": "Họng đỏ, amidan sưng nhẹ",
+      "exam.huong_dieu_tri": "Điều trị ngoại trú, hạ sốt",
+      "exam.loi_dan": "Uống nhiều nước, theo dõi nhiệt độ",
+      "followup.ngay_tai_kham": "2026-10-20",
+      "followup.loi_dan": "Tái khám sớm nếu sốt trên 3 ngày"
+    },
+    "memberUuids": {
+      "visit.ly_do_kham": "c4000000-0000-4000-8000-000000000001",
+      "history.benh_su": "c4000000-0000-4000-8000-000000000002",
+      "history.tien_su_ban_than_trang_thai": "c4000000-0000-4000-8000-000000000003",
+      "history.tien_su_ban_than": "c4000000-0000-4000-8000-000000000004",
+      "history.tien_su_gia_dinh_trang_thai": "c4000000-0000-4000-8000-000000000005",
+      "allergy.trang_thai": "c4000000-0000-4000-8000-000000000006",
+      "exam.tom_tat": "c4000000-0000-4000-8000-000000000007",
+      "exam.huong_dieu_tri": "c4000000-0000-4000-8000-000000000008",
+      "exam.loi_dan": "c4000000-0000-4000-8000-000000000009",
+      "followup.ngay_tai_kham": "c4000000-0000-4000-8000-000000000010",
+      "followup.loi_dan": "c4000000-0000-4000-8000-000000000011"
+    }
+  },
+  "diagnoses": [
+    {
+      "uuid": "c5000000-0000-4000-8000-000000000001",
+      "patientUuid": "a1000000-0000-4000-8000-000000000001",
+      "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+      "concept": {"uuid": "c6000000-0000-4000-8000-000000000001", "display": "Viêm họng cấp, không đặc hiệu"},
+      "code": "J02.9",
+      "system": {"uuid": "c7000000-0000-4000-8000-000000000001", "name": "ICD-10 synthetic", "uri": "urn:synthetic:icd10", "version": "synthetic"},
+      "rank": "primary",
+      "certainty": "confirmed",
+      "voided": false,
+      "voidReason": null,
+      "dateCreated": "2026-10-13T09:30:00+07:00"
+    }
+  ],
+  "drugOrders": [
+    {
+      "uuid": "c8000000-0000-4000-8000-000000000001",
+      "orderNumber": "ORD-1",
+      "patientUuid": "a1000000-0000-4000-8000-000000000001",
+      "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+      "drug": {"uuid": "c9000000-0000-4000-8000-000000000001", "name": "Paracetamol", "strength": "500 mg", "concept": {"uuid": "c9100000-0000-4000-8000-000000000001", "display": "Paracetamol"}},
+      "dose": 1.0,
+      "doseUnits": {"uuid": "ca000000-0000-4000-8000-000000000001", "display": "viên"},
+      "route": {"uuid": "ca000000-0000-4000-8000-000000000002", "display": "Uống"},
+      "frequency": {"uuid": "ca000000-0000-4000-8000-000000000003", "display": "3 lần/ngày", "frequencyPerDay": 3.0},
+      "duration": 3,
+      "durationUnits": {"uuid": "ca000000-0000-4000-8000-000000000004", "display": "ngày"},
+      "quantity": 9.0,
+      "quantityUnits": {"uuid": "ca000000-0000-4000-8000-000000000001", "display": "viên"},
+      "numRefills": 0,
+      "asNeeded": false,
+      "asNeededCondition": null,
+      "dosingInstructions": "Uống sau ăn",
+      "orderer": {"uuid": "cb000000-0000-4000-8000-000000000001", "identifier": "PRV-1", "display": "Bác sĩ Synthetic"},
+      "dateActivated": "2026-10-13T09:35:00+07:00",
+      "autoExpireDate": "2026-10-16T23:59:59+07:00",
+      "dateStopped": null,
+      "status": "active"
+    },
+    {
+      "uuid": "c8000000-0000-4000-8000-000000000002",
+      "orderNumber": "ORD-2",
+      "patientUuid": "a1000000-0000-4000-8000-000000000001",
+      "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+      "drug": {"uuid": "c9000000-0000-4000-8000-000000000002", "name": "Ibuprofen", "strength": "400 mg", "concept": {"uuid": "c9100000-0000-4000-8000-000000000002", "display": "Ibuprofen"}},
+      "dose": 1.0,
+      "doseUnits": {"uuid": "ca000000-0000-4000-8000-000000000001", "display": "viên"},
+      "route": {"uuid": "ca000000-0000-4000-8000-000000000002", "display": "Uống"},
+      "frequency": {"uuid": "ca000000-0000-4000-8000-000000000005", "display": "2 lần/ngày", "frequencyPerDay": 2.0},
+      "duration": 3,
+      "durationUnits": {"uuid": "ca000000-0000-4000-8000-000000000004", "display": "ngày"},
+      "quantity": 6.0,
+      "quantityUnits": {"uuid": "ca000000-0000-4000-8000-000000000001", "display": "viên"},
+      "numRefills": 0,
+      "asNeeded": false,
+      "asNeededCondition": null,
+      "dosingInstructions": null,
+      "orderer": {"uuid": "cb000000-0000-4000-8000-000000000001", "identifier": "PRV-1", "display": "Bác sĩ Synthetic"},
+      "dateActivated": "2026-10-13T09:36:00+07:00",
+      "autoExpireDate": null,
+      "dateStopped": "2026-10-13T09:40:00+07:00",
+      "status": "discontinued"
+    }
+  ],
+  "allergies": [
+    {
+      "uuid": "cc000000-0000-4000-8000-000000000001",
+      "patientUuid": "a1000000-0000-4000-8000-000000000001",
+      "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+      "allergenType": "DRUG",
+      "allergen": {"concept": {"uuid": "cd000000-0000-4000-8000-000000000001", "display": "Penicillin"}},
+      "severity": {"uuid": "ce000000-0000-4000-8000-000000000001", "display": "Trung bình"},
+      "reactions": [{"concept": {"uuid": "cf000000-0000-4000-8000-000000000001", "display": "Mày đay"}}],
+      "comment": null,
+      "voided": false,
+      "voidReason": null
+    }
+  ],
+  "vitals": [
+    {
+      "uuid": "d2000000-0000-4000-8000-000000000001",
+      "patientUuid": "a1000000-0000-4000-8000-000000000001",
+      "encounterUuid": "c2000000-0000-4000-8000-000000000002",
+      "visitUuid": "b1000000-0000-4000-8000-000000000001",
+      "measuredAt": "2026-10-13T08:50:00+07:00",
+      "values": {
+        "vitals.mach": 92.0,
+        "vitals.ha_tam_thu": 120.0,
+        "vitals.ha_tam_truong": 80.0,
+        "vitals.nhiet_do": 38.5,
+        "vitals.nhip_tho": 18.0,
+        "vitals.can_nang": 60.5
+      },
+      "states": {"vitals.spo2": "not_recorded", "vitals.chieu_cao": "not_asked"},
+      "needsVerification": false,
+      "voided": false,
+      "voidReason": null,
+      "recordedAt": "2026-10-13T08:52:00+07:00",
+      "recordedByUserUuid": "d1000000-0000-4000-8000-000000000002"
+    }
+  ],
+  "events": [
+    {"uuid": "e1000000-0000-4000-8000-000000000001", "type": "consultation_created", "entityUuid": "c3000000-0000-4000-8000-000000000001", "reason": null, "detail": null, "at": "2026-10-13T09:20:00+07:00", "byUserUuid": "d1000000-0000-4000-8000-000000000001"},
+    {"uuid": "e1000000-0000-4000-8000-000000000002", "type": "diagnosis_recorded", "entityUuid": "c5000000-0000-4000-8000-000000000001", "reason": null, "detail": null, "at": "2026-10-13T09:30:00+07:00", "byUserUuid": "d1000000-0000-4000-8000-000000000001"},
+    {"uuid": "e1000000-0000-4000-8000-000000000003", "type": "drug_order_created", "entityUuid": "c8000000-0000-4000-8000-000000000001", "reason": null, "detail": null, "at": "2026-10-13T09:35:00+07:00", "byUserUuid": "d1000000-0000-4000-8000-000000000001"},
+    {"uuid": "e1000000-0000-4000-8000-000000000004", "type": "drug_order_created", "entityUuid": "c8000000-0000-4000-8000-000000000002", "reason": null, "detail": null, "at": "2026-10-13T09:36:00+07:00", "byUserUuid": "d1000000-0000-4000-8000-000000000001"},
+    {"uuid": "e1000000-0000-4000-8000-000000000005", "type": "drug_order_discontinued", "entityUuid": "c8000000-0000-4000-8000-000000000002", "reason": "Đổi sang paracetamol", "detail": null, "at": "2026-10-13T09:40:00+07:00", "byUserUuid": "d1000000-0000-4000-8000-000000000001"},
+    {"uuid": "e1000000-0000-4000-8000-000000000006", "type": "consultation_finalized", "entityUuid": "c3000000-0000-4000-8000-000000000001", "reason": null, "detail": null, "at": "2026-10-13T09:42:00+07:00", "byUserUuid": "d1000000-0000-4000-8000-000000000001"}
+  ]
+}
