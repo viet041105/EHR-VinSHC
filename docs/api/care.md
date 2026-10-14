@@ -52,7 +52,8 @@ Projection: tiếp đón và bác sĩ nhận `projection=administrative` (điệ
 - `gender`: `M`, `F`, `O`, `U`. `birthPrecision`: `day` (cần `birthdate`), `month` (`birthYear` + `birthMonth`),
   `year` (`birthYear`), `unknown` (không có ngày sinh). Tháng/năm lưu ngày đại diện và `birthdateEstimated=true`.
 - Họ/tên ≤ 50 ký tự; thuộc tính (điện thoại, nghề nghiệp, ngày sinh nguyên văn) ≤ 50 ký tự theo cột Core.
-- `identifiers[].type`: `cccd` (12 số), `bhxh`, `bhyt` (chữ, số, `-`, ≤ 32).
+- Khi `POST /patients`, bắt buộc có đúng một `identifiers` phần tử loại `cccd`, đủ 12 chữ số. BHXH/BHYT tùy chọn;
+  hồ sơ cũ chưa có CCCD vẫn đọc/cập nhật được theo quy tắc trạng thái thiếu.
 - `address` tùy chọn, chuyển cho `POST /address` trong cùng transaction.
 - 409 khi định danh phụ đã thuộc hồ sơ khác (toàn hệ thống; `matches` chỉ gồm hồ sơ cùng cơ sở) hoặc có hồ sơ cùng họ
   tên không dấu, giới tính và năm sinh tại cơ sở. Gửi lại với `"allowPossibleDuplicate": true` sau khi đã kiểm tra.
@@ -74,6 +75,7 @@ kèm `reason`. `phone: null` xóa điện thoại. Không thay đổi gì → 40
 
 - Mỗi bệnh nhân chỉ có một lượt đang mở; lượt thứ hai → 409 kèm lượt đang mở trong `matches`. Lượt mở ở cơ sở khác
   → 409 không kèm chi tiết.
+- Mỗi lượt trả `visitCode` dạng `VSHC-LK-########`, tạo xác định từ ID duy nhất do OpenMRS/PostgreSQL cấp.
 - `appointment` (tùy chọn) phải cùng bệnh nhân/cơ sở, trạng thái `booked|confirmed|arrived` và chưa gắn lượt; lịch
   hẹn chuyển `arrived` và lưu `visit_id`.
 - `closeReason`: `completed`, `left_early`, `cancelled`, `referred`. `note` bắt buộc trừ `completed`. Lý do và ghi chú

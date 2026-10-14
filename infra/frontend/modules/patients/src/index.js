@@ -56,7 +56,10 @@ const identifiers = (d) =>
     .filter((k) => d[k])
     .map((k) => ({ type: k, identifier: d[k] }));
 export function registrationPayload(d) {
-  if (d.cccd && !/^[0-9]{12}$/.test(d.cccd))
+  const cccd = String(d.cccd || "").trim();
+  if (!cccd)
+    throw new BackendError("Cần nhập số CCCD để đăng ký bệnh nhân mới.");
+  if (!/^[0-9]{12}$/.test(cccd))
     throw new BackendError("CCCD phải gồm đúng 12 chữ số.");
   const out = {
     familyName: d.familyName,
@@ -66,7 +69,7 @@ export function registrationPayload(d) {
   };
   for (const k of ["middleName", "phone", "occupation"])
     if (d[k]) out[k] = d[k];
-  const ids = identifiers(d);
+  const ids = identifiers({ ...d, cccd });
   if (ids.length) out.identifiers = ids;
   if (d.allowPossibleDuplicate === "true") out.allowPossibleDuplicate = true;
   return out;
@@ -302,7 +305,7 @@ const birthFields = (required) => [
   }),
 ];
 const identifierFields = [
-  optional("cccd", "Số CCCD (12 số)", "text", { max: 12 }),
+  F("cccd", "Số CCCD (12 số)", "text", { max: 12, inputmode: "numeric" }),
   optional("bhxh", "Mã BHXH", "text", { max: 32 }),
   optional("bhyt", "Số thẻ BHYT", "text", { max: 32 }),
 ];
@@ -360,7 +363,7 @@ const actions = {
     contactPatch,
     {
       notice:
-        "Chỉ nhập trường muốn thay đổi. Bỏ trống giữ nguyên; chọn Xóa để gửi null. Backend lưu phiên bản mới.",
+        "Chỉ nhập thông tin muốn đổi. Bỏ trống để giữ nguyên; chọn Xóa để bỏ thông tin cũ.",
     },
   ),
   voidContact: action(
@@ -485,7 +488,7 @@ const actions = {
       idempotent: true,
       captures: "patient",
       notice:
-        "Backend cấp mã hồ sơ nội bộ, chặn CCCD/BHXH/BHYT đã thuộc hồ sơ khác và cảnh báo hồ sơ cùng họ tên, giới tính, năm sinh tại cơ sở. Kiểm tra danh sách tương tự trước khi xác nhận đăng ký mới.",
+        "Mã hồ sơ được cấp khi đăng ký. Kiểm tra hồ sơ tương tự nếu có cảnh báo trùng trước khi tạo mới.",
     },
   ),
   patientProfile: action(
@@ -519,7 +522,7 @@ const actions = {
     {
       captures: "patient",
       notice:
-        "Chỉ nhập trường muốn đổi. Giá trị cũ được giữ trong lịch sử OpenMRS (voided) cùng lý do.",
+        "Chỉ nhập thông tin muốn đổi và ghi lý do. Thông tin cũ được giữ trong lịch sử.",
     },
   ),
 };
@@ -572,8 +575,7 @@ export default defineModule({
       icon: "◎",
       records: ["patient"],
       visible: ({ permitted }) => permitted("patient_identity", "read"),
-      header: () =>
-        `<section class="panel workspace-heading"><div><h2>Hồ sơ bệnh nhân</h2><p>Tìm hồ sơ trước khi đăng ký mới để tránh trùng. Chọn một dòng để dùng cho các thao tác tiếp theo.</p></div>${openButton("identity", "identity", "Người liên hệ / địa chỉ")}</section>`,
+
     },
     {
       id: "identity",

@@ -9,7 +9,6 @@ import {
   metadata as m,
   assignedRoles,
   permitted,
-  active,
   facilityForLocation,
   F,
   choice,
@@ -32,6 +31,7 @@ import {
 } from "./screens.js";
 import { displayResult, resultLabels } from "./result-view.js";
 import { AgentChat } from "./agent-chat.js";
+import { SECTION_COPY, PRIMARY_ACTIONS, actionTitle, submitLabel, plainText, sectionIcon } from "./presentation.js";
 
 let registry = createRegistry([]),
   labels = resultLabels(registry),
@@ -41,7 +41,6 @@ const client = new BackendClient();
 const memory = new WorkspaceMemory();
 const agentChat = new AgentChat(client);
 const state = {
-  roles: [],
   role: null,
   facility: null,
   section: null,
@@ -146,79 +145,48 @@ function field(f, values = {}) {
     control = `<textarea ${common} rows="3">${esc(value)}</textarea>`;
   else
     control = `<input ${common} type="${f.type === "uuid" ? "text" : f.type}" ${f.type === "file" ? 'accept="application/pdf,image/jpeg,image/png"' : 'value="' + esc(value) + '"'} ${f.type === "uuid" ? 'pattern="[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}" spellcheck="false"' : ""} ${f.min !== undefined ? 'min="' + f.min + '"' : ""} ${f.type === "number" && f.max !== undefined ? 'max="' + f.max + '"' : ""} ${f.step ? 'step="' + f.step + '"' : ""}>`;
-  return `<label>${esc(f.label)}${f.required ? " *" : ""}${control}</label>`;
+  const label = plainText(f.label);
+  if (f.type === "uuid" && !f.name.startsWith("care_")) {
+    const selected = Boolean(value);
+    const person = memory.contextLabel?.split(" · ")[0];
+    const caption = f.name === "patient" ? person : f.name === "user" ? state.context.userName : f.name === "orderer" || f.name === "authorProvider" ? client.user?.display : null;
+    return `<div class="reference-field"><span class="field-label">${esc(label)}${f.required ? ' *' : ''}</span><div class="reference-value ${selected ? '' : 'unselected'}"><strong>${esc(selected ? caption || label.replace(/^Mã /, '') + ' đã chọn' : 'Chưa chọn')}</strong><small>${selected ? 'Được điền từ hồ sơ đang làm việc' : 'Chọn trong danh sách để điền thông tin'}</small></div><details class="reference-details"><summary>${selected ? 'Đổi lựa chọn bằng mã' : 'Nhập mã hồ sơ nếu đã biết'}</summary><label>${esc(label)}${control}</label></details></div>`;
+  }
+  return `<label>${esc(label)}${f.required ? " *" : ""}${control}</label>`;
 }
 function shell(content) {
   document.querySelector("#app").innerHTML =
-    `<a class="skip-link" href="#main-content">Đến nội dung chính</a><header class="site-header clinic-header"><a class="site-brand" href="/"><span class="logo-plus">✚</span><span><strong>VinSHC</strong><small>KHÔNG GIAN OPENMRS</small></span></a><div class="header-controls">${state.workspace ? `<div class="session-identity" aria-label="Thông tin phiên đăng nhập"><dl><div><dt>Tài khoản:</dt><dd>${esc(client.user?.display)}</dd></div><div><dt>Vai trò hiện tại:</dt><dd>${esc(m.permissions.roles[state.role].label)}</dd></div></dl><span class="session-connection">Đã kết nối</span></div><div class="session-actions"><button id="switchWorkspace" ${state.busy ? "disabled" : ""}>Đổi vai trò/cơ sở</button><button id="logout" ${state.busy ? "disabled" : ""}>Đăng xuất</button></div>` : '<a href="/">Về trang chủ</a>'}</div></header>${content}`;
-  if(state.workspace && state.role === "doctor") {
+    `<a class="skip-link" href="#main-content">Đến nội dung chính</a><header class="site-header clinic-header"><a class="site-brand" href="/"><span class="logo-plus">✚</span><span><strong>VinSHC</strong><small>QUẢN LÝ PHÒNG KHÁM</small></span></a><div class="header-controls">${state.workspace ? `<div class="session-identity" aria-label="Thông tin phiên đăng nhập"><dl><div><dt>Tài khoản:</dt><dd>${esc(client.user?.display)}</dd></div><div><dt>Vai trò:</dt><dd>${esc(m.permissions.roles[state.role].label)}</dd></div></dl></div><div class="session-actions"><button id="logout" ${state.busy ? "disabled" : ""}>Đăng xuất</button></div>` : '<a class="back-home" href="/">Về trang chủ</a>'}</div></header>${content}`;
+  if(state.workspace && state.role === "doctor" && state.section === "clinical") {
     const host=document.createElement("div");host.id="agentPanel";document.querySelector("#main-content")?.append(host);
     agentChat.mount(host,"doctor",memory.context);
   } else agentChat.clear();
   document.querySelector("#logout")?.addEventListener("click", logout);
-  document.querySelector("#switchWorkspace")?.addEventListener("click", () => {
-    memory.clear();
-    state.workspace = false;
-    state.result = null;
-    state.context = {};
-    resetWorkspaceState();
-    retries.clear();
-    state.error = "";
-    state.message = "";
-    state.busy = false;
-    client.generation++;
-    client.workspace = null;
-    render();
-  });
 }
 const moduleNotice = () =>
   moduleFailures.length
     ? note(
-        "Không tải được module giao diện: " +
-          moduleFailures.map((f) => f.specifier).join(", ") +
-          ". Các chức năng của module này tạm ẩn; liên hệ quản trị triển khai.",
+        "Một số chức năng tạm thời chưa mở được: " +
+          moduleFailures.map(f => SECTION_COPY[f.specifier.replace("@vinshc/", "")]?.[0] || (f.specifier.endsWith("scheduling") ? "Lịch hẹn và hàng đợi" : "Chức năng bổ sung")).join(", ") +
+          ". Hãy tải lại trang hoặc liên hệ quản trị phòng khám.",
       )
     : "";
 function render() {
   if (!client.user) {
     shell(
-      `<main id="main-content" class="connection-login"><section class="panel form-card"><span class="eyebrow">VINSHC / OPENMRS LOCAL</span><h1>Đăng nhập phòng khám</h1><p>Dùng tài khoản OpenMRS đã được phân công vai trò và cơ sở.</p>${note("Môi trường kiểm thử · danh mục hiện chưa được duyệt cho sử dụng lâm sàng. Hồ sơ và thao tác chỉ được đọc/ghi qua backend.")}<form id="loginForm">${field(F("username", "Tên đăng nhập"))}<label>Mật khẩu *<input name="password" type="password" autocomplete="current-password" required></label><p class="error" role="alert">${esc(state.error)}</p><button class="primary" ${state.busy ? "disabled" : ""}>${state.busy ? "Đang kết nối…" : "Đăng nhập OpenMRS"}</button></form></section></main>`,
+      `<main id="main-content" class="connection-login"><div class="login-intro"><span class="eyebrow">DÀNH CHO NHÂN VIÊN</span><h1>Phòng khám VinSHC</h1><p>Đăng nhập để sử dụng các chức năng được phân công tại cơ sở của bạn.</p><ol><li>Tìm đúng hồ sơ bệnh nhân</li><li>Tiếp tục công việc được phân công</li><li>Theo dõi và cập nhật kết quả</li></ol></div><section class="panel form-card login-card"><h2>Đăng nhập</h2><p>Dùng tài khoản được phòng khám cấp.</p><form id="loginForm">${field(F("username", "Tên đăng nhập"))}<label>Mật khẩu *<input name="password" type="password" autocomplete="current-password" required></label><p class="error" role="alert">${esc(plainText(state.error))}</p><button class="primary" ${state.busy ? "disabled" : ""}>${state.busy ? "Đang đăng nhập…" : "Đăng nhập"}</button></form><p class="login-support">Chưa có tài khoản hoặc cần đổi mật khẩu?<br>Liên hệ quản trị của phòng khám.</p></section></main>`,
     );
     document.querySelector("#loginForm").onsubmit = login;
     return;
   }
   if (!state.workspace) {
     shell(
-      `<main id="main-content" class="connection-login"><section class="panel form-card"><h1>Chọn không gian làm việc</h1><p>${esc(client.user.display)} · Vai trò được lấy từ tài khoản, cơ sở được server kiểm tra khi mở.</p>${
-        state.roles.length
-          ? `<form id="workspaceForm">${field(
-              choice(
-                "role",
-                "Vai trò",
-                state.roles.map((r) => [r, m.permissions.roles[r].label]),
-              ),
-              { role: state.role },
-            )}${field(
-              choice(
-                "facility",
-                "Cơ sở",
-                active(m.facilities.records).map((f) => [
-                  f.locationUuid,
-                  f.name,
-                ]),
-              ),
-              { facility: state.facility },
-            )}<button class="primary" ${state.busy ? "disabled" : ""}>${state.busy ? "Đang xác nhận…" : "Mở không gian làm việc"}</button></form>`
-          : note(
-              "Tài khoản chưa có vai trò VinSHC App. Cần quản trị backend gán role và workspace; FE không tự cấp quyền.",
-            )
-      }<p class="error" role="alert">${esc(state.error)}</p><button id="systemSetup" ${state.busy ? "disabled" : ""}>Kiểm tra kết nối và cấu hình backend</button><section id="setupResult" aria-live="polite">${state.result ? displayResult(state.result, labels) : ""}</section><button id="logout">Đăng xuất</button></section></main>`,
+      `<main id="main-content" class="connection-login"><section class="panel form-card"><h1>Chưa thể mở công việc</h1><p>Xin chào ${esc(client.user.display)}.</p>${note(
+        "Mỗi tài khoản chỉ được cấp một vai trò VinSHC và một cơ sở làm việc.",
+      )}<p class="error" role="alert">${esc(state.error || "Tài khoản chưa được phân công vai trò và cơ sở. Liên hệ quản trị phòng khám để được cấp quyền.")}</p>${isSystemAdministrator(client.user) ? `<details class="support-details"><summary>Hỗ trợ kết nối</summary><button id="systemSetup" ${state.busy ? "disabled" : ""}>Kiểm tra dịch vụ</button><section id="setupResult" aria-live="polite">${state.result ? displayResult(state.result, labels) : ""}</section></details>` : ""}<button id="logout">Đăng xuất</button></section></main>`,
     );
     document.querySelector("#logout").onclick = logout;
-    document.querySelector("#systemSetup").onclick = inspectSetup;
-    document
-      .querySelector("#workspaceForm")
-      ?.addEventListener("submit", openWorkspace);
+    document.querySelector("#systemSetup")?.addEventListener("click", inspectSetup);
     return;
   }
   const available = visibleSections();
@@ -226,7 +194,7 @@ function render() {
     state.section = available[0]?.id;
   const current = available.find((s) => s.id === state.section);
   shell(
-    `<main class="clinic-main"><aside class="clinic-sidebar">${available.map((s) => `<button data-section="${s.id}" class="${state.section === s.id ? "active" : ""}" ${state.busy ? "disabled" : ""}>${esc(s.title)}</button>`).join("")}<div class="sidebar-note"><span class="dot"></span> OpenMRS local<small>${esc(facilityForLocation(state.facility)?.name)}<br>Metadata ${esc(m.map.version)} · Dữ liệu kiểm thử</small></div></aside><div id="main-content" class="content connected-content"><div class="page-heading"><span class="eyebrow">VINSHC / KHÔNG GIAN KẾT NỐI</span><h1>${esc(current?.title || "Không có chức năng được cấp")}</h1></div>${note("Môi trường kiểm thử. Thao tác ghi sẽ lưu lên OpenMRS và được kiểm tra theo vai trò, cơ sở hiện tại.")}${moduleNotice()}${current?.note ? note(current.note) : ""}<p id="connectionError" class="error" role="alert">${esc(state.error)}</p><div id="conflictMatches">${matchesPanel()}</div><p id="connectionMessage" class="connection-success" role="status">${esc(state.message)}</p>${current?.id !== OVERVIEW.id ? contextPanel({ role: state.role, memory, field }) : ""}${current ? sectionContent(current) : ""}<section id="backendResult" class="panel result-panel" aria-live="polite">${state.result ? `<h2>Kết quả từ OpenMRS</h2>${registry.actions[state.action]?.document ? '<button id="printDocument">In chứng từ</button>' : ""}${resultHighlights(state.result)}${displayResult(state.result, labels)}` : '<p class="readonly">Chọn thao tác để đọc hoặc ghi dữ liệu backend.</p>'}</section></div></main>`,
+    `<main class="clinic-main"><aside class="clinic-sidebar" aria-label="Chức năng phòng khám"><nav>${available.map((s) => `<button data-section="${s.id}" class="${state.section === s.id ? "active" : ""}" ${state.section === s.id ? 'aria-current="page"' : ''} ${state.busy ? "disabled" : ""}>${sectionIcon(s.id)}<span>${esc(SECTION_COPY[s.id]?.[0] || s.title)}</span></button>`).join("")}</nav><div class="sidebar-note"><span class="sidebar-caption">Cơ sở đang làm việc</span><strong>${esc(facilityForLocation(state.facility)?.name || 'Chưa chọn cơ sở')}</strong></div></aside><div id="main-content" class="content connected-content"><div class="page-heading"><div><span class="eyebrow">PHÒNG KHÁM</span><h1>${esc(SECTION_COPY[current?.id]?.[0] || current?.title || "Chưa có chức năng")}</h1><p>${esc(SECTION_COPY[current?.id]?.[1] || '')}</p></div><time>${esc(new Intl.DateTimeFormat('vi-VN', {timeZone:'Asia/Ho_Chi_Minh',weekday:'long',day:'2-digit',month:'2-digit',year:'numeric'}).format(new Date()))}</time></div>${moduleNotice()}<p id="connectionError" class="error" role="alert">${esc(plainText(state.error))}</p><div id="conflictMatches">${matchesPanel()}</div><p id="connectionMessage" class="connection-success" role="status">${esc(plainText(state.message))}</p>${current?.id !== OVERVIEW.id ? contextPanel({ role: state.role, memory, field }) : ""}${current ? sectionContent(current) : ""}${state.result ? `<section id="backendResult" class="panel result-panel" aria-live="polite"><div class="workspace-heading"><h2>${registry.actions[state.action]?.document ? 'Bản in' : 'Thông tin chi tiết'}</h2>${registry.actions[state.action]?.document ? '<button id="printDocument">In chứng từ</button>' : ''}</div>${resultHighlights(state.result)}${state.action === "systemUsers" ? accountResults(state.result) : displayResult(state.result, labels)}</section>` : '<div id="backendResult" aria-live="polite"></div>'}</div></main>`,
   );
   document.querySelectorAll("[data-section]").forEach(
     (b) =>
@@ -253,6 +221,8 @@ function render() {
   document
     .querySelector("#actionForm")
     ?.addEventListener("submit", submitAction);
+  document.querySelector('#closeTaskForm')?.addEventListener('click', () => {state.action = null; state.prefill = {}; render();});
+  document.querySelectorAll('input[pattern]').forEach(input => input.addEventListener('invalid', () => {let ancestor=input.parentElement; while(ancestor){if(ancestor.tagName==='DETAILS')ancestor.open=true;ancestor=ancestor.parentElement;}}));
   current?.bind?.(moduleContext());
   document
     .querySelector("#printDocument")
@@ -270,39 +240,44 @@ function sectionContent(section) {
       renderWorklist(registry.worklists, key, worklistContext(key)),
   });
   const screen = workspaceScreen(section, ctx);
-  const before = (section.intro ? section.intro(ctx) : "") + providerNote(section);
+  const before = providerNote(section);
   const choices = section.actions.filter(canAction);
-  if (!choices.length) return before + screen;
-  if (!choices.includes(state.action)) state.action = choices[0];
+  if (!choices.length) return before + screen + (section.intro?.(ctx) || "");
+  if (!choices.includes(state.action)) state.action = null;
   const a = registry.actions[state.action];
-  return (
-    before +
-    `<section class="panel form-card"><div class="workspace-heading"><h2>Thao tác ${esc(section.title.toLowerCase())}</h2><span class="capability-badge connected">Đã nối API</span></div><div class="action-shortcuts">${choices
-      .slice(0, 6)
-      .map(
-        (k) =>
-          `<button type="button" data-go-section="${section.id}" data-go-action="${k}" ${state.action === k ? 'aria-current="true"' : ""}>${esc(registry.actions[k].title)}</button>`,
-      )
-      .join("")}</div>${field(
-      choice(
-        "actionPicker",
-        "Thao tác",
-        choices.map((k) => [k, registry.actions[k].title]),
-      ),
-      { actionPicker: state.action },
-    ).replace(
-      'name="actionPicker"',
-      'id="actionPicker"',
-    )}<h2>${esc(a.title)}</h2>${a.notice ? note(a.notice) : ""}${knownRecordPicker(a)}<form id="actionForm"><div class="form-grid">${a.fields.map((f) => field(f, formValues())).join("")}</div>${a.formNote ? note(a.formNote) : ""}<div class="form-actions"><button class="primary" ${state.busy ? "disabled" : ""}>${state.busy ? "Đang xử lý…" : a.method === "GET" ? "Đọc từ OpenMRS" : "Xác nhận gửi OpenMRS"}</button></div></form></section>${screen}`
-  );
+  const primary = (PRIMARY_ACTIONS[section.id] || choices.slice(0, 3)).filter(k => choices.includes(k));
+  const toolbar = `<section class="task-actions" aria-label="Công việc ${esc(SECTION_COPY[section.id]?.[0] || section.title)}"><div class="action-shortcuts">${primary.map(k => `<button type="button" data-go-section="${section.id}" data-go-action="${k}" ${state.action === k ? 'aria-current="true"' : ''}>${esc(actionTitle(k, registry.actions[k]))}</button>`).join('')}</div><label class="action-menu">Chọn công việc<select id="actionPicker"><option value="">Chọn thao tác…</option>${choices.map(k => `<option value="${k}" ${state.action === k ? 'selected' : ''}>${esc(actionTitle(k, registry.actions[k]))}</option>`).join('')}</select></label></section>`;
+  const form = a ? `<section class="panel form-card task-form"><div class="workspace-heading"><h2>${esc(actionTitle(state.action, a))}</h2><button type="button" id="closeTaskForm" aria-label="Đóng biểu mẫu">Đóng</button></div>${a.notice ? note(plainText(a.notice)) : ''}${knownRecordPicker(a)}<form id="actionForm"><div class="form-grid">${actionFields(a)}</div>${a.formNote ? note(plainText(a.formNote)) : ''}<div class="form-actions"><button class="primary" ${state.busy ? 'disabled' : ''}>${state.busy ? 'Đang xử lý…' : esc(submitLabel(state.action, a))}</button></div></form></section>` : '';
+  return before + toolbar + screen + (section.intro?.(ctx) || '') + form;
 }
+function actionFields(action) {
+  if (!['consultation', 'correction'].includes(state.action)) return action.fields.map(f => field(f, formValues())).join('');
+  const groups = [
+    ['Hồ sơ và lý do khám', f => f.type === 'uuid' || f.name === 'visit.ly_do_kham'],
+    ['Bệnh sử và tiền sử', f => f.name.startsWith('history.')],
+    ['Khám và hướng điều trị', f => f.name.startsWith('exam.')],
+    ['Dị ứng', f => f.name.startsWith('allergy.')],
+    ['Hẹn tái khám', f => f.name.startsWith('followup.')],
+    ['Lý do đính chính', f => f.name === 'reason'],
+  ];
+  return groups.map(([title, matches]) => {
+    const fields = action.fields.filter(matches);
+    return fields.length ? `<fieldset class="clinical-field-group"><legend>${title}</legend><div class="form-grid">${fields.map(f => field(f, formValues())).join('')}</div></fieldset>` : '';
+  }).join('');
+}
+function accountResults(result) {
+  const users = result?.results || [];
+  if (!users.length) return '<div class="workspace-empty"><strong>Chưa tìm thấy tài khoản</strong><p>Thử tìm bằng tên đăng nhập hoặc tên nhân viên.</p></div>';
+  return `<div class="workspace-table-wrap"><table class="workspace-table"><thead><tr><th>Nhân viên</th><th>Vai trò</th><th>Trạng thái</th><th>Phân công</th></tr></thead><tbody>${users.map((user, i) => `<tr><td><strong>${esc(user.display || user.username || user.systemId)}</strong><small>${esc(user.username || user.systemId || '')}</small></td><td>${esc((user.roles || []).map(r => {const name=r.name || r.display; return Object.values(m.permissions.roles).find(role => role.openmrs.name === name)?.label || plainText(name);}).join(', '))}</td><td>${user.retired ? 'Ngừng hoạt động' : 'Đang hoạt động'}</td><td><button type="button" data-pick-account="${i}" ${user.retired ? 'disabled' : ''}>Chọn nhân viên</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+
 function knownRecordPicker(action) {
   if (!action.fields.some((f) => f.name === "record")) return "";
   const type = registry.actionRecordTypes[state.action],
     rows = type ? memory.list([type]) : [];
   if (!rows.length) return "";
   const label = registry.records[type]?.label || type;
-  return `<label class="known-record-picker">Chọn ${esc(label.toLowerCase())} đã mở<select id="knownRecordPicker"><option value="">Hoặc nhập mã bên dưới…</option>${rows.map((row) => `<option value="${row.id}" ${memory.selected[type] === row.id ? "selected" : ""}>${esc(row.data.serviceName || stateText(row.data.status || row.data.state || label))} · ${row.id}</option>`).join("")}</select></label>`;
+  return `<label class="known-record-picker">Chọn ${esc(label.toLowerCase())} đã mở<select id="knownRecordPicker"><option value="">Chọn hồ sơ đã xem…</option>${rows.map((row) => `<option value="${row.id}" ${memory.selected[type] === row.id ? "selected" : ""}>${esc(row.data.fullName || row.data.patientName || row.data.serviceName || label)} · ${esc(stateText(row.data.status || row.data.state || "Đã xem"))}</option>`).join("")}</select></label>`;
 }
 function navigate(section, action, prefill = {}) {
   if (state.busy || !visibleSections().some((s) => s.id === section)) return;
@@ -315,7 +290,7 @@ function navigate(section, action, prefill = {}) {
   state.prefill = prefill;
   state.matches = [];
   render();
-  document.querySelector("#main-content")?.scrollIntoView({ block: "start" });
+  document.querySelector(action ? ".task-form" : "#main-content")?.scrollIntoView({ block: "start", behavior: "instant" });
 }
 function resetCareContext() {
   state.context = { catalogueVersion: state.context.catalogueVersion };
@@ -352,12 +327,12 @@ function providerNote(section) {
   )
     return "";
   return note(
-    "Tài khoản chưa gắn đúng một hồ sơ người hành nghề (provider). Backend sẽ từ chối tạo encounter hoặc ghi nhận cần người thực hiện; liên hệ quản trị để liên kết hồ sơ.",
+    "Tài khoản chưa được liên kết với hồ sơ người hành nghề. Liên hệ quản trị phòng khám trước khi ghi nhận chuyên môn.",
   );
 }
 function matchesPanel() {
   if (!state.matches.length) return "";
-  return `<section class="panel workspace-records"><h2>Bản ghi liên quan từ backend</h2><p class="readonly">Backend từ chối vì đã có bản ghi phù hợp. Chọn để tiếp tục với bản ghi có sẵn.</p><div class="workspace-table-wrap"><table class="workspace-table"><tbody>${state.matches
+  return `<section class="panel workspace-records"><h2>Hồ sơ tương tự đã có</h2><p class="readonly">Đã tìm thấy hồ sơ hoặc lượt khám có sẵn. Kiểm tra thông tin và chọn để tiếp tục, tránh tạo trùng.</p><div class="workspace-table-wrap"><table class="workspace-table"><tbody>${state.matches
     .map((row, index) => {
       const visit = Boolean(row.visitType),
         p = visit ? row.patient || {} : row;
@@ -540,6 +515,13 @@ function refreshWorklists() {
   }
 }
 function bindWorkspaceScreens() {
+  document.querySelectorAll('[data-pick-account]').forEach(button => button.onclick = () => {
+    const user = state.result?.results?.[Number(button.dataset.pickAccount)];
+    if (!user || state.busy || user.retired) return;
+    state.context.user = uuid(user.uuid);
+    state.context.userName = user.display || user.username || user.systemId;
+    navigate('admin', 'assignWorkspace');
+  });
   bindWorklists();
   bindMatches();
   document
@@ -567,13 +549,13 @@ function bindWorkspaceScreens() {
           );
         if ((context.visit || context.encounter) && !context.patient)
           throw new BackendError(
-            "Chọn bệnh nhân trước khi áp dụng mã lượt hoặc encounter.",
+            "Chọn bệnh nhân trước khi chọn lượt hoặc lần khám.",
           );
         memory.setContext(context);
         memory.selected = {};
         resetCareContext();
         state.message =
-          "Đã áp dụng mã hồ sơ cho các biểu mẫu. Backend sẽ kiểm tra khi gửi.";
+          "Đã chọn hồ sơ cho công việc hiện tại.";
         state.error = "";
         render();
       } catch (error) {
@@ -619,7 +601,7 @@ function bindWorkspaceScreens() {
           state.section = definition.readSection || definition.section;
           await perform(
             () => client.request("vinshc/" + a.path(data)),
-            "Đã đọc lại bản ghi từ OpenMRS.",
+            "Đã cập nhật thông tin.",
             (result) => captureWorkspaceResponse(key, result, data),
           );
         } else {
@@ -668,7 +650,7 @@ async function inspectSetup() {
       scoped: false,
     });
   } catch (error) {
-    state.error = error.message;
+    state.error = plainText(error.message);
   } finally {
     state.busy = false;
     render();
@@ -682,15 +664,25 @@ async function login(e) {
   render();
   try {
     const session = await client.login(f.get("username"), f.get("password"));
-    state.roles = assignedRoles(session.user);
-    // System Developer can manage staffing via a server-verified admin workspace,
-    // without granting the Core user a VinSHC clinical application role.
-    if (isSystemAdministrator(session.user) && !state.roles.includes("admin"))
-      state.roles.push("admin");
-    state.role = state.roles[0] || null;
-    state.facility = active(m.facilities.records)[0]?.locationUuid;
+    const roles = new Set(assignedRoles(session.user));
+    const assigned = await client.request("vinshc/authorization/workspaces", { scoped: false });
+    const workspaces = (Array.isArray(assigned) ? assigned : []).filter(
+      (workspace) => roles.has(workspace.role) &&
+        m.permissions.roles[workspace.role] &&
+        facilityForLocation(workspace.facilityUuid) &&
+        typeof workspace.facilityName === "string",
+    );
+    if (workspaces.length > 1)
+      throw new BackendError("Tài khoản có nhiều phân công đang hoạt động. Quản trị viên cần gán lại một vai trò và một cơ sở.", 409);
+    state.role = workspaces[0]?.role || null;
+    state.facility = workspaces[0]?.facilityUuid || null;
+    if (workspaces.length === 1) {
+      await activateWorkspace(state.role, state.facility);
+    } else {
+      state.error = "Tài khoản chưa được phân công vai trò và cơ sở. Liên hệ quản trị phòng khám để được cấp quyền.";
+    }
   } catch (error) {
-    state.error = error.message;
+    state.error = plainText(error.message);
   } finally {
     f.delete("password");
     state.busy = false;
@@ -706,35 +698,19 @@ async function modulesReady() {
     );
   }
 }
-async function openWorkspace(e) {
-  e.preventDefault();
-  const f = new FormData(e.target);
-  state.busy = true;
-  state.error = "";
-  render();
-  try {
-    const role = f.get("role"),
-      facility = uuid(f.get("facility"));
-    if (!state.roles.includes(role))
-      throw new BackendError("Vai trò không thuộc tài khoản.");
-    await modulesReady();
-    await client.selectWorkspace(role, facility);
-    memory.clear();
-    resetWorkspaceState();
-    state.role = role;
-    state.facility = facility;
-    state.workspace = true;
-    state.section = null;
-    state.action = null;
-    state.result = null;
-    state.context = {};
-    loadProviders();
-  } catch (error) {
-    state.error = error.message;
-  } finally {
-    state.busy = false;
-    render();
-  }
+async function activateWorkspace(role, facility) {
+  await modulesReady();
+  await client.selectWorkspace(role, facility);
+  memory.clear();
+  resetWorkspaceState();
+  state.role = role;
+  state.facility = facility;
+  state.workspace = true;
+  state.section = null;
+  state.action = null;
+  state.result = null;
+  state.context = {};
+  loadProviders();
 }
 function logout() {
   client.clear();
@@ -742,7 +718,6 @@ function logout() {
   retries.clear();
   resetWorkspaceState();
   Object.assign(state, {
-    roles: [],
     role: null,
     facility: null,
     section: null,
@@ -836,8 +811,8 @@ async function submitAction(e) {
               adminCore: a.adminCore,
             }),
       a.method === "GET"
-        ? "Đã đọc dữ liệu từ OpenMRS."
-        : "OpenMRS đã xác nhận thao tác.",
+        ? "Đã tải thông tin."
+        : "Thông tin đã được lưu.",
       (result) => {
         result = result || {};
         if (a.idempotent) retries.delete(fingerprint);
@@ -848,7 +823,7 @@ async function submitAction(e) {
           link.download = "vinshc-report-" + data.record;
           link.click();
           setTimeout(() => URL.revokeObjectURL(href), 1000);
-          state.result = { message: "Đã tải tệp từ OpenMRS." };
+          state.result = { message: "Đã tải tệp." };
         }
         if (a.document)
           state.message =
@@ -902,7 +877,7 @@ async function perform(task, message, onSuccess) {
   }
 }
 function showError(error) {
-  state.error = error.message;
+  state.error = plainText(error.message);
   state.matches = Array.isArray(error.details?.matches)
     ? error.details.matches
     : [];
@@ -916,7 +891,6 @@ function showError(error) {
     state.workspace = false;
     state.result = null;
     state.context = {};
-    state.roles = [];
     retries.clear();
     render();
     return;

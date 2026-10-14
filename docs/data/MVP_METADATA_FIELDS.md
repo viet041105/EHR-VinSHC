@@ -12,7 +12,7 @@ Nguồn S01 là nhãn/cấu trúc liên quan, không chứng minh field hệ th�
 | --- | --- | --- | --- | --- | --- |
 | `patient.uuid`<br>UUID bệnh nhân | uuid | server_generated / 1 | native: Patient.uuid | —<br>R_UUID, R_LINK | MVP / hệ thống bổ sung |
 | `patient.ma_noi_bo`<br>Mã bệnh nhân nội bộ | text | on_create / 1 | identifier: Patient.identifiers[]<br>`ca12ea64-d279-5cce-a2a9-e2c46446ac34` | —<br>R_ID | K01 (tr. 1, 5) |
-| `patient.cccd`<br>Số CCCD | text | optional / 0..1 | identifier: Patient.identifiers[]<br>`4e5406dc-8ff9-5486-98fa-5d95c6fe8233` | —<br>R_ID | K21 (tr. 1, 183) |
+| `patient.cccd`<br>Số CCCD | text | on_create / 1..1 | identifier: Patient.identifiers[]<br>`4e5406dc-8ff9-5486-98fa-5d95c6fe8233` | —<br>R_ID | K21 (tr. 1, 183) |
 | Ghi chú | Chỉ loại CCCD 12 số; CMND/hộ chiếu là identifier type khác nếu nhóm mở rộng. | | | | |
 | `patient.ma_bhxh`<br>Mã BHXH | text | optional / 0..1 | identifier: Patient.identifiers[]<br>`d7902062-a695-5bf3-8764-acf7f43e3238` | —<br>R_ID | MVP / hệ thống bổ sung |
 | Ghi chú | Tách riêng BHXH và số thẻ BHYT; chưa hardcode quy tắc nghiệp vụ khi chưa có danh mục phiên bản. | | | | |

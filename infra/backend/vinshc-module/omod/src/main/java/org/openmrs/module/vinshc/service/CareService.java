@@ -252,6 +252,8 @@ public class CareService {
 		}
 		Birth birth = birth(body);
 		Map<String, String> identifiers = secondaryIdentifiers(body.get("identifiers"));
+		if (!identifiers.containsKey("cccd"))
+			throw bad("cccd identifier is required when registering a patient");
 		Map<String, String> attributes = attributes(body);
 		boolean allowDuplicate = Boolean.TRUE.equals(body.get("allowPossibleDuplicate"));
 		lock("patient-name:" + facility.getLocationId() + ":" + fold(names.display()));
@@ -797,6 +799,7 @@ public class CareService {
 	private static Map<String, Object> visitBrief(Visit visit) {
 		Map<String, Object> out = new LinkedHashMap<>();
 		out.put("uuid", visit.getUuid());
+		out.put("visitCode", String.format(Locale.ROOT, "VSHC-LK-%08d", visit.getVisitId()));
 		Map<String, Object> type = new LinkedHashMap<>();
 		type.put("uuid", visit.getVisitType().getUuid());
 		type.put("key", typeKeyOf(visit));

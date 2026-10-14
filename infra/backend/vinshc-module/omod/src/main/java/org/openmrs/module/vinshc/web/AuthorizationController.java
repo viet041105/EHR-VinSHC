@@ -43,6 +43,11 @@ public class AuthorizationController extends BaseVinshcController {
 		return service.workspace();
 	}
 
+	@GetMapping("/workspaces")
+	public List<Map<String, Object>> workspaces() {
+		return service.workspaces();
+	}
+
 	@GetMapping("/evaluate")
 	public Map<String, Object> evaluate(@RequestParam String resource, @RequestParam String action) {
 		return service.evaluate(resource, action);

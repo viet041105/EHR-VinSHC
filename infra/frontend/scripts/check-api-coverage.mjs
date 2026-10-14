@@ -64,6 +64,7 @@ callers.push(
   { name: "portal:appointments", method: "GET", path: "/vinshc/portal/appointments" },
   // Calls made by the shell itself.
   { name: "shell:login", method: "GET", path: "/session" },
+  { name: "shell:loadWorkspaces", method: "GET", path: "/vinshc/authorization/workspaces" },
   { name: "shell:loadProviders", method: "GET", path: "/vinshc/providers/me" },
   { name: "shell:inspectSetup", method: "GET", path: "/vinshc/operations/configuration" },
 );

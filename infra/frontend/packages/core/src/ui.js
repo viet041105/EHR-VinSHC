@@ -64,9 +64,9 @@ export const statusFilter = (name, label, values, first) =>
   );
 export const note = (text) => `<p class="connection-note">${esc(text)}</p>`;
 export const pendingBadge = (text) =>
-  `<span class="capability-badge pending">${esc(text || "Chờ backend")}</span>`;
+  `<span class="capability-badge pending">${esc(text || "Chưa khả dụng")}</span>`;
 export const CONNECTED_BADGE =
-  '<span class="capability-badge connected">Đã nối API</span>';
+  '<span class="capability-badge connected">Sẵn sàng</span>';
 export const openButton = (section, action, label) =>
   `<button type="button" data-go-section="${section}" ${action ? `data-go-action="${action}"` : ""}>${esc(label)}</button>`;
 export const emptyState = (title, text) =>
@@ -79,5 +79,5 @@ export function preparationPanel(
   field,
   button = "Lưu lên hệ thống",
 ) {
-  return `<details class="panel preparation-panel"><summary><span>${esc(title)}</span>${pendingBadge()}</summary><p class="readonly">${esc(description)} Các trường chỉ để xem trước và nhập thử, chưa lưu lên hệ thống.</p><form data-pending-form><div class="form-grid">${fields.map((f) => field({ ...f, name: "preview_" + f.name }, {})).join("")}</div><div class="form-actions"><button type="submit" disabled data-unavailable>${esc(button)} · Chờ backend</button></div></form></details>`;
+  return `<details class="panel preparation-panel"><summary><span>${esc(title)}</span>${pendingBadge()}</summary><p class="readonly">${esc(description)} Các trường chỉ để xem trước và nhập thử, chưa lưu lên hệ thống.</p><form data-pending-form><div class="form-grid">${fields.map((f) => field({ ...f, name: "preview_" + f.name }, {})).join("")}</div><div class="form-actions"><button type="submit" disabled data-unavailable>${esc(button)} · Chưa khả dụng</button></div></form></details>`;
 }

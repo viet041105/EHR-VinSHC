@@ -118,7 +118,7 @@ const actions = {
     {
       method: "GET",
       notice:
-        "Backend trả 403 nếu workspace hiện tại không được phép thực hiện thao tác đã chọn.",
+        "Kiểm tra xem vai trò đang dùng có được phép thực hiện công việc đã chọn hay không.",
     },
   ),
   assignWorkspace: action(
@@ -130,7 +130,7 @@ const actions = {
     (d) => ({ ...d }),
     {
       notice:
-        "User phải có role ứng dụng tương ứng. Chọn cơ sở cấp cho user, có thể khác cơ sở đang mở.",
+        "Tài khoản cần có vai trò tương ứng. Chọn cơ sở mà nhân viên sẽ làm việc.",
     },
   ),
   revokeWorkspace: action(
@@ -142,7 +142,7 @@ const actions = {
     (d) => ({ ...d }),
     {
       method: "DELETE",
-      notice: "Thu hồi phân công đã chọn. Không xóa tài khoản hoặc role.",
+      notice: "Thu hồi quyền làm việc tại cơ sở đã chọn. Tài khoản và vai trò vẫn được giữ.",
       prepare(data, ctx) {
         if (
           data.user === ctx.client.user.uuid &&

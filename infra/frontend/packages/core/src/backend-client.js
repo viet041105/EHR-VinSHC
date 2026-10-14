@@ -6,14 +6,15 @@ export class BackendError extends Error {
     this.details = details;
   }
 }
-const ROOT = "/openmrs/ws/rest/v1/";
+// Public service entry point; upstream routing is configured outside the product UI.
+const ROOT = "/api/";
 const messages = {
   400: "Thông tin chưa hợp lệ. Kiểm tra các trường đã nhập.",
   401: "Phiên đăng nhập không hợp lệ hoặc đã hết hạn.",
   403: "Tài khoản không có quyền trong vai trò/cơ sở đã chọn.",
-  404: "Không tìm thấy bản ghi hoặc API chưa được cài đặt.",
+  404: "Không tìm thấy thông tin hoặc chức năng chưa sẵn sàng.",
   409: "Dữ liệu đã thay đổi hoặc thao tác không phù hợp trạng thái hiện tại.",
-  503: "Backend chưa có đủ cấu hình hoặc metadata cho chức năng này.",
+  503: "Dịch vụ chưa sẵn sàng cho chức năng này. Vui lòng thử lại sau.",
 };
 export const isSystemAdministrator = (user) =>
   (user?.roles || []).some(
@@ -45,7 +46,7 @@ export class BackendClient {
         !["GET", "POST"].includes(method)
       )
         throw new BackendError(
-          "Chỉ quản trị hệ thống được dùng API tài khoản Core.",
+          "Công việc này cần quyền quản trị hệ thống.",
           403,
         );
       if (
@@ -57,11 +58,11 @@ export class BackendClient {
           body.roles.some((r) => !UUID_PATTERN.test(r)))
       )
         throw new BackendError(
-          "Chỉ hỗ trợ cập nhật danh sách role của user hiện có.",
+          "Chỉ có thể phân công vai trò cho tài khoản đã có.",
         );
       scoped = false;
     } else if (!/^(session(?:\?|$)|vinshc\/)/.test(path) || path.includes(".."))
-      throw new BackendError("Đường dẫn API không được hỗ trợ.");
+      throw new BackendError("Chức năng này chưa được hỗ trợ.");
     const generation = this.generation,
       headers = { Accept: binary ? "*/*" : "application/json" };
     if (this.#token) headers.Authorization = "Basic " + this.#token;
@@ -91,7 +92,7 @@ export class BackendClient {
       });
     } catch {
       throw new BackendError(
-        "Không kết nối được OpenMRS. Kiểm tra backend và cổng proxy trong hướng dẫn FE.",
+        "Chưa kết nối được dịch vụ phòng khám. Vui lòng thử lại hoặc liên hệ quản trị.",
       );
     }
     if (generation !== this.generation)
@@ -102,7 +103,7 @@ export class BackendClient {
     if (!response.headers.get("content-type")?.includes("json"))
       throw new BackendError(
         messages[response.status] ||
-          "Backend không trả JSON. Kiểm tra gateway/module VinSHC.",
+          "Dịch vụ chưa phản hồi hợp lệ. Vui lòng thử lại hoặc liên hệ quản trị.",
         response.status,
       );
     let data;
@@ -110,7 +111,7 @@ export class BackendClient {
       data = await response.json();
     } catch {
       throw new BackendError(
-        "Không đọc được phản hồi backend.",
+        "Chưa đọc được thông tin từ dịch vụ. Vui lòng thử lại.",
         response.status,
       );
     }
@@ -123,7 +124,7 @@ export class BackendClient {
           : "";
       throw new BackendError(
         (messages[response.status] ||
-          "Backend trả lỗi HTTP " + response.status + ".") + detail,
+          "Dịch vụ trả lỗi " + response.status + ".") + detail,
         response.status,
         data,
       );
@@ -134,7 +135,7 @@ export class BackendClient {
     if (!["doctor", "patient"].includes(persona) || !this.#token)
       throw new BackendError("Cần đăng nhập đúng tài khoản để dùng trợ lý.", 401);
     if (persona === "doctor" && this.workspace?.role !== "doctor")
-      throw new BackendError("Chọn workspace bác sĩ trước khi hỏi.", 403);
+      throw new BackendError("Chọn vai trò bác sĩ trước khi dùng trợ lý.", 403);
     const generation = this.generation;
     const headers = { Authorization: "Basic " + this.#token, Accept: "application/json", "Content-Type": "application/json" };
     if (persona === "doctor") {
@@ -184,7 +185,7 @@ export class BackendClient {
     try {
       const workspace = await this.request("vinshc/authorization/workspace");
       if (workspace.role !== role || workspace.facilityUuid !== facility)
-        throw new BackendError("Backend trả không gian làm việc không khớp.");
+        throw new BackendError("Chưa xác nhận được vai trò và cơ sở đã chọn.");
       return workspace;
     } catch (error) {
       this.workspace = null;
@@ -206,7 +207,7 @@ export const uuid = (value) => {
       value || "",
     )
   )
-    throw new BackendError("Cần mã UUID hợp lệ từ backend.");
+    throw new BackendError("Chọn hồ sơ hợp lệ trong danh sách trước khi tiếp tục.");
   return value.toLowerCase();
 };
 export const instant = (value) => {

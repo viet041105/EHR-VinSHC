@@ -93,7 +93,7 @@ class ReviewRegressionTests(unittest.TestCase):
             "idempotencyKey": key("bill"),
         })
 
-    def user_with_role(self, role, locations):
+    def user_with_role(self, role, location):
         person = self.ok(f"{REST}/person", {"names": [{"givenName": "B10", "familyName": role}], "gender": "U"})
         username, password = f"b10-{role}-{uuid.uuid4().hex[:8]}", "B10-local-" + uuid.uuid4().hex
         user = self.ok(f"{REST}/user", {
@@ -101,9 +101,8 @@ class ReviewRegressionTests(unittest.TestCase):
             "roles": [self.permissions["roles"][role]["openmrs"]["uuid"]],
         })
         type(self).created_users.append((user["uuid"], person["uuid"]))
-        for location in locations:
-            self.ok(f"{VINSHC}/authorization/assignment",
-                    {"user": user["uuid"], "role": role, "facility": location})
+        self.ok(f"{VINSHC}/authorization/assignment",
+                {"user": user["uuid"], "role": role, "facility": location})
         return username, password
 
     def workspace(self, username, password, role, location):
@@ -218,9 +217,22 @@ class ReviewRegressionTests(unittest.TestCase):
         other = self.ok(f"{REST}/location", {"name": "B10 Other Clinic " + uuid.uuid4().hex[:6],
                                              "description": "Synthetic second facility"})
         type(self).created_locations.append(other["uuid"])
-        username, password = self.user_with_role("cashier", [self.facility["locationUuid"], other["uuid"]])
-        home = self.workspace(username, password, "cashier", self.facility["locationUuid"])
-        away = self.workspace(username, password, "cashier", other["uuid"])
+        # A VinSHC account has one active role/facility workspace. Use separate
+        # accounts for the two facilities so this test exercises facility scope
+        # instead of intentionally replacing the first assignment with the second.
+        home_username, home_password = self.user_with_role("cashier", self.facility["locationUuid"])
+        away_username, away_password = self.user_with_role("cashier", other["uuid"])
+        home = self.workspace(home_username, home_password, "cashier", self.facility["locationUuid"])
+        away = self.workspace(away_username, away_password, "cashier", other["uuid"])
+        for client, location, name in (
+            (home, self.facility["locationUuid"], self.facility["name"]),
+            (away, other["uuid"], other["name"]),
+        ):
+            workspace = self.get(f"{VINSHC}/authorization/workspace", client=client)
+            self.assertEqual(workspace["role"], "cashier")
+            self.assertEqual(workspace["facilityUuid"], location)
+            self.assertEqual(self.get(f"{VINSHC}/authorization/workspaces", client=client),
+                             [{"role": "cashier", "facilityUuid": location, "facilityName": name}])
         bill = self.bill()
         self.get(f"{OPS}/bills/{bill['uuid']}", client=home)
         receipt = self.ok(f"{OPS}/bills/{bill['uuid']}/receipts", {
@@ -237,7 +249,24 @@ class ReviewRegressionTests(unittest.TestCase):
                                          "idempotencyKey": key("away")})[0],
         }
         self.assertEqual(away_statuses, {name: 403 for name in away_statuses})
-        self.record("H-1/T-2/T-3", awayStatuses=away_statuses)
+        # Reassignment replaces the old workspace immediately and does not let
+        # cached headers keep access to the previous facility's records.
+        user = self.get(f"{REST}/session", client=home)["user"]["uuid"]
+        for _ in range(2):
+            self.ok(f"{VINSHC}/authorization/assignment",
+                    {"user": user, "role": "cashier", "facility": other["uuid"]})
+        self.assertEqual(self.call(f"{OPS}/bills/{bill['uuid']}", client=home)[0], 403)
+        reassigned = self.workspace(home_username, home_password, "cashier", other["uuid"])
+        self.assertEqual(self.get(f"{VINSHC}/authorization/workspaces", client=reassigned),
+                         [{"role": "cashier", "facilityUuid": other["uuid"], "facilityName": other["name"]}])
+        self.get(f"{VINSHC}/authorization/workspace", client=reassigned)
+        self.assertEqual(self.call(f"{OPS}/bills/{bill['uuid']}", client=reassigned)[0], 403)
+        self.ok(f"{VINSHC}/authorization/assignment",
+                {"user": user, "role": "cashier", "facility": self.facility["locationUuid"]})
+        self.assertEqual(self.call(f"{VINSHC}/authorization/workspace", client=reassigned)[0], 403)
+        self.get(f"{OPS}/bills/{bill['uuid']}", client=home)
+        self.assertEqual(len(self.get(f"{VINSHC}/authorization/workspaces", client=home)), 1)
+        self.record("H-1/T-2/T-3", awayStatuses=away_statuses, singleWorkspaceReassignment=True)
 
     def test_08_parallel_settle_and_cash_payment_cannot_overpay(self):
         rounds = []
@@ -289,7 +318,7 @@ class ReviewRegressionTests(unittest.TestCase):
         self.record("M-4", statuses=statuses)
 
     def test_10_proxy_privileges_do_not_leak_into_parallel_core_requests(self):
-        username, password = self.user_with_role("nurse", [self.facility["locationUuid"]])
+        username, password = self.user_with_role("nurse", self.facility["locationUuid"])
         login_status, headers, _ = Client(self.base, username, password).request(f"{REST}/session")
         self.assertEqual(login_status, 200)
         session = next(item.split(";", 1)[0] for item in headers.get_all("Set-Cookie") or []

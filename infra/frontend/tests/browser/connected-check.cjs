@@ -1,3 +1,4 @@
+const { fillReference } = require("./reference-helper.cjs");
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
 const fs = require("node:fs");
@@ -28,7 +29,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
       page.on("requestfailed", (r) =>
         console.log("FAILED", r.url(), r.failure()),
       );
-      await page.route("**/openmrs/**", async (route) => {
+      await page.route("**/api/**", async (route) => {
         const request = route.request(),
           url = new URL(request.url()),
           headers = request.headers();
@@ -47,18 +48,17 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
             user: {
               uuid: patient,
               display: "Nhân viên kiểm thử",
-              roles: [
-                "doctor",
-                "nurse",
-                "cashier",
-                "manager",
-                "admin",
-                "lab",
-                "reception",
-                "pharmacy",
-              ].map((r) => ({ name: "VinSHC App: " + r })),
+              roles: [{ name: "VinSHC App: " + role }],
             },
           });
+        if (url.pathname.endsWith("/authorization/workspaces"))
+          return respond([
+            {
+              role,
+              facilityUuid: location,
+              facilityName: "VinSHC Development Clinic",
+            },
+          ]);
         assert.equal(headers["x-vinshc-workspace-role"], role);
         assert.equal(headers["x-vinshc-workspace-facility"], location);
         if (url.pathname.endsWith("/authorization/workspace"))
@@ -120,26 +120,29 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
         return respond({ uuid: patient, status: "draft" });
       });
       await page.goto(base + "/connected.html");
-      await page.locator("[name=username]").fill("qa-user");
-      await page.locator("[name=password]").fill("qa-password");
-      await page.locator("#loginForm button").click();
-      await page.waitForFunction(
-        () =>
-          !!document.querySelector("#workspaceForm") ||
-          !!document.querySelector(".error")?.textContent,
-      );
-      if (!(await page.locator("#workspaceForm").count()))
-        throw new Error(await page.locator("body").innerText());
+      let loggedIn = false;
       async function workspace(next) {
+        if (loggedIn && role === next) return;
+        if (loggedIn) {
+          await page.locator("#logout").click();
+          await page.locator("#loginForm").waitFor();
+          loggedIn = false;
+        }
         role = next;
-        await page.locator("[name=role]").selectOption(next);
-        await page.locator("[name=facility]").selectOption(location);
-        await page.locator("#workspaceForm button").click();
-        await page.locator("#switchWorkspace").waitFor();
+        await page.locator("[name=username]").fill("qa-user");
+        await page.locator("[name=password]").fill("qa-password");
+        await page.locator("#loginForm button").click();
+        if (denyWorkspace) {
+          await page.getByText(/Tài khoản không có quyền/).waitFor();
+        } else {
+          await page.locator("[data-section=overview]").waitFor();
+        }
+        loggedIn = true;
       }
       await workspace("doctor");
       await page.locator("[data-section=clinical]").click();
-      await page.locator("[name=encounter]").fill(encounter);
+      await page.locator("#actionPicker").selectOption("summary");
+      await fillReference(page, "[name=encounter]", encounter);
       await page.locator("#actionForm button").click();
       await page.getByText("Phiếu kiểm thử", { exact: true }).waitFor();
       await page.locator("#actionPicker").selectOption("correction");
@@ -162,22 +165,20 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
             .length,
       );
       assert.equal(await page.locator("[data-section=billing]").count(), 0);
-      await page.locator("#switchWorkspace").click();
       await workspace("nurse");
       await page.locator("[data-section=vitals]").click();
-      await page.locator("[name=patient]").fill(patient);
-      await page.locator("[name=encounter]").fill(encounter);
+      await fillReference(page, "[name=patient]", patient);
+      await fillReference(page, "[name=encounter]", encounter);
       await page.locator("[name=systolic]").fill("70");
       await page.locator("[name=diastolic]").fill("80");
       await page.locator("#vitalsForm button").click();
-      await page.getByText(/Backend đánh dấu cần đối chiếu/).waitFor();
+      await page.getByText(/Cần đối chiếu huyết áp/).waitFor();
       assert.equal(writes.at(-1).body.values["vitals.ha_tam_thu"], 70);
-      await page.locator("#switchWorkspace").click();
       await workspace("cashier");
       await page.locator("[data-section=billing]").click();
       await page.locator("#actionPicker").selectOption("bill");
-      await page.locator("[name=patient]").fill(patient);
-      await page.locator("[name=visit]").fill(encounter);
+      await fillReference(page, "[name=patient]", patient);
+      await fillReference(page, "[name=visit]", encounter);
       await page.locator("[name=service]").selectOption({ index: 1 });
       await page.locator("[name=quantity]").fill("1");
       await page.locator("[name=paymentTiming]").selectOption("postpay");
@@ -187,7 +188,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
       assert.ok(writes.at(-1).body.idempotencyKey);
       assert.equal(writes.at(-1).body.lines[0].unitPriceVnd, undefined);
       await page.locator("#actionPicker").selectOption("receipt");
-      await page.locator("[name=record]").fill(patient);
+      await fillReference(page, "[name=record]", patient);
       await page.locator("[name=amountVnd]").fill("10000");
       await page.locator("[name=method]").selectOption("cash");
       failReceipt = true;
@@ -208,10 +209,10 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
         .getByText("Đã thanh toán", { exact: true })
         .waitFor();
       assert.equal(writes.at(-1).body.idempotencyKey, key);
-      await page.locator("#switchWorkspace").click();
       await workspace("manager");
       assert.equal(await page.locator("[data-section=identity]").count(), 0);
       await page.locator("[data-section=reports]").click();
+      await page.locator("#actionPicker").selectOption("report");
       await page.locator("#actionForm button").click();
       await page.getByText("Thu ròng (VND)", { exact: true }).waitFor();
       const overflow = await page.evaluate(
@@ -226,7 +227,6 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
         fullPage: true,
       });
       for (const next of ["reception", "lab", "pharmacy", "admin"]) {
-        await page.locator("#switchWorkspace").click();
         await workspace(next);
         const sections = await page
           .locator("[data-section]")
@@ -249,11 +249,11 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
           }
         }
       }
-      await page.locator("#switchWorkspace").click();
+      await page.locator("#logout").click();
+      await page.locator("#loginForm").waitFor();
+      loggedIn = false;
       denyWorkspace = true;
-      role = "admin";
-      await page.locator("[name=role]").selectOption(role);
-      await page.locator("#workspaceForm button").click();
+      await workspace("admin");
       await page.getByText(/Tài khoản không có quyền/).waitFor();
       assert.equal(await page.locator("[data-section]").count(), 0);
       await page.locator("#logout").click();

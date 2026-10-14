@@ -8,7 +8,7 @@
 
 Thiết kế bàn giao đầy đủ theo backend nằm tại [FRONTEND.md](FRONTEND.md): trang/DTO/dịch vụ → OpenMRS/module → B1–B9, mapping sinh hiệu, trạng thái, lỗi và tiêu chí nghiệm thu. Giao diện dùng ảnh chụp thật, menu bên trái cho nhân viên và scroll reveal ở trang công khai.
 
-Trang chủ công khai chỉ giới thiệu sản phẩm. “Vào phòng khám” mở bộ chọn tài khoản và không gian làm việc, không mặc định đăng nhập bác sĩ. Mỗi không gian có trang tổng quan, menu, danh sách công việc và thao tác riêng.
+Trang chủ công khai chỉ giới thiệu sản phẩm. Nhân viên đăng nhập trực tiếp; hệ thống xác định role VinSHC và workspace đã phân công từ backend rồi mở đúng không gian, không có bước chọn role/cơ sở sau đăng nhập. Mỗi tài khoản chỉ có một role VinSHC và một workspace hoạt động; nhân sự kiêm nhiệm dùng tài khoản riêng cho từng role. Mỗi không gian có trang tổng quan, menu, danh sách công việc và thao tác riêng.
 
 | Vai trò | Không gian / màn hình | Quyền ghi trong demo | Phạm vi đọc và giới hạn |
 | --- | --- | --- | --- |
@@ -19,9 +19,9 @@ Trang chủ công khai chỉ giới thiệu sản phẩm. “Vào phòng khám�
 | KTV CLS (`lab`) | Tổng quan, chỉ định chờ xử lý được giao, trang kết quả hoàn tất riêng | Kết quả sơ bộ/hoàn tất, báo cáo PDF/ảnh gắn chỉ định | Chỉ định có `assignedTo` khớp tài khoản và định danh cần đối chiếu; không mở toàn bộ chart. Kết quả hoàn tất/lượt đóng chỉ đọc |
 | Dược/quầy thuốc (`pharmacy`) | Tổng quan, đơn chờ cấp, lịch sử cấp thuốc riêng | Đối chiếu rồi ghi cấp theo bản chụp đơn đã xác nhận; chặn cấp ở lượt hủy | Định danh, thuốc/cách dùng/số lượng/người kê; không sửa đơn hoặc xem toàn bộ bệnh án. Kho/lô/hạn dùng còn thuộc mở rộng |
 | Quản lý phòng khám (`manager`) | Tổng quan, báo cáo ngày | Không ghi bệnh án hoặc giao dịch; xem/in báo cáo | Chỉ số tổng hợp lượt, thu/hoàn/ròng, lượt/bác sĩ. Không hiện tên người bệnh hoặc bệnh án chi tiết |
-| Quản trị hệ thống (`admin`) | Tổng quan, tài khoản/quyền, định nghĩa biểu mẫu, cấu hình, bảng giá, nhật ký, bàn giao FE–BE, kết nối | Thêm/phân nhiều role/khóa tài khoản, form nháp, bảng giá mẫu, cấu hình hiển thị và biến thể | Không tự có menu hồ sơ hoặc quyền ghi lâm sàng; muốn khám phải được giao thêm role bác sĩ và chuyển không gian |
+| Quản trị hệ thống (`admin`) | Tổng quan, tài khoản/quyền, định nghĩa biểu mẫu, cấu hình, bảng giá, nhật ký, bàn giao FE–BE, kết nối | Đổi một role VinSHC/khóa tài khoản, form nháp, bảng giá mẫu, cấu hình hiển thị và biến thể | Không tự có menu hồ sơ hoặc quyền ghi lâm sàng; chức năng lâm sàng cần tài khoản riêng có role bác sĩ |
 
-Tài khoản chứa `roles[]`; privilege là hợp của các role được giao. Người kiêm nhiệm chọn không gian tương ứng mà giữ nguyên ID tài khoản. `ROLE_DEFINITIONS`, `ROLE_PERMISSIONS`, `accountPermitted`, `workspacePermitted` và các guard route/tab/form nằm tại [workflow.js](../infra/frontend/workflow.js). Menu và thao tác theo ngữ cảnh công việc; admin kiêm bác sĩ không ghi phiếu khám khi còn ở không gian admin. Bác sĩ kiêm điều dưỡng có thể ghi sinh hiệu. Tài khoản khóa bị loại khỏi bộ chọn. Dữ liệu cũ có trường `role` được chuyển sang `roles[]`; 4 tài khoản mẫu bổ sung được tạo khi mở dữ liệu FE cũ. Form cũ chưa có người điền được chuyển về bác sĩ, tránh tự cấp quyền rộng hơn.
+Theo chính sách hiện tại, mỗi tài khoản chỉ có một role VinSHC và một workspace hoạt động. Nhân sự kiêm nhiệm dùng tài khoản riêng cho mỗi role; role ứng dụng đổi qua chức năng quản trị, các role Core như `System Developer` được giữ nguyên. Các mô tả bộ chọn và dữ liệu demo trong tài liệu snapshot cũ không còn là hợp đồng của FE kết nối.
 
 Nội dung ghi và nhật ký lưu tên, ID tài khoản, role đang làm việc, thời điểm và lượt liên quan. Bản chụp đơn giữ nguyên thuốc, liều/đường dùng/tần suất/số ngày và lời dặn khi phiếu khám được sửa hoặc khi đã cấp. Phiếu phí giữ giá khi lập; giao dịch hoàn là dòng âm, không xóa giao dịch thu. Không thu quá số còn phải thu hoặc dùng VND có phần thập phân. Kết quả CLS hoàn tất cần xác nhận đối chiếu và được khóa trên UI; quy trình đính chính chưa triển khai.
 
@@ -42,7 +42,7 @@ Ma trận trong repo hiện là bản nháp nghiệp vụ theo tài liệu. DATA
 
 | Nhóm FE | Hợp đồng cần BE / metadata |
 | --- | --- |
-| Session/roles | User UUID, nhiều role/privilege, location, trạng thái khóa, lỗi 401/403, timeout/thu hồi phiên |
+| Session/roles | User UUID, đúng một role VinSHC và một workspace hoạt động, privilege, location, trạng thái khóa, lỗi 401/403, timeout/thu hồi phiên |
 | Tiếp nhận/chart | Identifier type, patient/person/address, visit, encounter, obs, allergy, diagnosis, drug order; UUID ổn định và phân trang |
 | Lịch/queue | Provider/location/service/slot, danh sách theo người khám, state transitions, tranh chấp khi điều phối |
 | Billing | Danh mục/bảng giá, line item, payment/refund/cancel, trạng thái, concurrency và số phiếu do server cấp |

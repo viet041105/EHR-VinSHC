@@ -2269,8 +2269,8 @@
       "label": "Số CCCD",
       "dataType": "text",
       "mvp": "MVP-1",
-      "cardinality": "0..1",
-      "required": "optional",
+      "cardinality": "1..1",
+      "required": "on_create",
       "storage": {
         "kind": "identifier",
         "ref": "identifier.cccd",
@@ -2307,7 +2307,7 @@
         "context": "patient",
         "rowKeyRequired": false,
         "sourceRequired": true,
-        "conditionalRequired": "optional"
+        "conditionalRequired": "on_create"
       }
     },
     {

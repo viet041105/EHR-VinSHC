@@ -189,7 +189,7 @@ const actions = {
       ...doctorOnly,
       captures: "encounter",
       notice:
-        "Tạo encounter khám với bác sĩ đang đăng nhập là người điều trị; dùng lại encounter đã có trong lượt.",
+        "Bắt đầu phiếu khám cho lượt đang chọn. Nếu đã có phiếu của bạn, tiếp tục phiếu đó.",
     },
   ),
   clinicalConfiguration: action(
@@ -328,7 +328,7 @@ const actions = {
     {
       captures: "prescription",
       notice:
-        "Gửi sẽ tạo đơn đã xác nhận trên OpenMRS. Không có trạng thái nháp phía backend; server kiểm tra đơn trùng và dị ứng.",
+        "Kiểm tra thuốc, liều dùng và dị ứng trước khi xác nhận kê đơn.",
     },
   ),
   finalize: action(
@@ -341,7 +341,7 @@ const actions = {
     {
       ...doctorOnly,
       notice:
-        "Backend chỉ chốt khi phiếu có lý do khám, trạng thái dị ứng và đúng một chẩn đoán chính. Chốt phiếu không kết thúc lượt khám.",
+        "Phiếu cần có lý do khám, trạng thái dị ứng và một chẩn đoán chính. Chốt phiếu không kết thúc lượt khám.",
     },
   ),
   discontinue: action(

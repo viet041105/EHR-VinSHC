@@ -15,7 +15,7 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     browser=await chromium.launch({headless:true,...(process.env.PLAYWRIGHT_CHANNEL ? {channel:process.env.PLAYWRIGHT_CHANNEL} : {})});
     const page=await browser.newPage(), errors=[];
     page.on('pageerror',error=>errors.push(error.message));
-    await page.route('**/openmrs/**',route=>{
+    await page.route('**/api/**',route=>{
       const url=new URL(route.request().url());
       if(url.pathname.endsWith('/session')&&!url.pathname.includes('/portal/')) return json(route,{authenticated:true,user:{uuid:patient,display:'Bệnh nhân mẫu',roles:[{name:'VinSHC Portal: patient'}]}});
       if(url.pathname.endsWith('/portal/session')||url.pathname.endsWith('/portal/me'))return json(route,{persona:'patient',patientUuid:patient,userUuid:patient,linkStatus:'active'});

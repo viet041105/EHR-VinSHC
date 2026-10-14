@@ -6,14 +6,13 @@ const assert = require("node:assert/strict");
 const base = process.env.QA_BASE_URL || "http://127.0.0.1:5173";
 const location = "feae71be-957c-4f94-b100-d84bc6915574";
 const user = "11111111-1111-4111-8111-111111111111";
-const ROLES = ["reception", "cashier", "pharmacy"];
-
 async function session(browser, { breakModule } = {}) {
   const context = await browser.newContext({ timezoneId: "Asia/Ho_Chi_Minh" }),
     page = await context.newPage(),
     errors = [],
     moduleRequests = [];
-  let role = null;
+  let role = "reception";
+  let loggedIn = false;
   page.on("pageerror", (e) => errors.push(e.message));
   page.on("request", (r) => {
     const path = new URL(r.url()).pathname;
@@ -23,15 +22,17 @@ async function session(browser, { breakModule } = {}) {
     await page.route(`**/modules/${breakModule}/**`, (route) =>
       route.fulfill({ status: 404, body: "not deployed" }),
     );
-  await page.route("**/openmrs/**", (route) => {
+  await page.route("**/api/**", (route) => {
     const url = new URL(route.request().url());
     const respond = (data) =>
       route.fulfill({ contentType: "application/json", body: JSON.stringify(data) });
     if (url.pathname.endsWith("/session"))
       return respond({
         authenticated: true,
-        user: { uuid: user, display: "QA", roles: ROLES.map((r) => ({ name: "VinSHC App: " + r })) },
+        user: { uuid: user, display: "QA", roles: [{ name: "VinSHC App: " + role }] },
       });
+    if (url.pathname.endsWith("/authorization/workspaces"))
+      return respond([{ role, facilityUuid: location, facilityName: "QA Clinic" }]);
     if (url.pathname.endsWith("/authorization/workspace"))
       return respond({ role, facilityUuid: location });
     return respond({ results: [], hasMore: false });
@@ -40,17 +41,22 @@ async function session(browser, { breakModule } = {}) {
   await page.locator("[name=username]").fill("qa");
   await page.locator("[name=password]").fill("qa");
   await page.locator("#loginForm button").click();
-  await page.locator("#workspaceForm").waitFor();
+  await page.locator("[data-section=overview]").waitFor();
+  loggedIn = true;
   const open = async (next) => {
-    role = next;
-    if (await page.locator("#switchWorkspace").count()) {
-      await page.locator("#switchWorkspace").click();
-      await page.locator("#workspaceForm").waitFor();
+    if (loggedIn && role !== next) {
+      await page.locator("#logout").click();
+      await page.locator("#loginForm").waitFor();
+      loggedIn = false;
     }
-    await page.locator("[name=role]").selectOption(next);
-    await page.locator("[name=facility]").selectOption(location);
-    await page.locator("#workspaceForm button").click();
-    await page.locator("#switchWorkspace").waitFor();
+    role = next;
+    if (!loggedIn) {
+      await page.locator("[name=username]").fill("qa");
+      await page.locator("[name=password]").fill("qa");
+      await page.locator("#loginForm button").click();
+      await page.locator("[data-section=overview]").waitFor();
+      loggedIn = true;
+    }
     return page.locator("[data-section]").evaluateAll((els) => els.map((e) => e.dataset.section));
   };
   return { context, page, errors, moduleRequests, open };
@@ -77,7 +83,7 @@ async function session(browser, { breakModule } = {}) {
     const broken = await session(browser, { breakModule: "pharmacy" });
     const withoutPharmacy = await broken.open("pharmacy");
     assert.ok(!withoutPharmacy.includes("pharmacy"), withoutPharmacy.join());
-    await broken.page.getByText(/Không tải được module giao diện: @vinshc\/pharmacy/).waitFor();
+    await broken.page.getByText(/Một số chức năng tạm thời chưa mở được: Quầy thuốc/).waitFor();
     const cashier = await broken.open("cashier");
     assert.ok(cashier.includes("billing"), cashier.join());
     await broken.page.locator("[data-section=billing]").click();

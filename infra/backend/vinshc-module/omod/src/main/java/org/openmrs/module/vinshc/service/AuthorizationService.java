@@ -158,13 +158,19 @@ public class AuthorizationService {
 			throw VinshcService.bad("facility does not exist");
 		if (openmrsRole == null || !target.hasRole(openmrsRole.getRole()))
 			throw VinshcService.bad("user does not hold the requested role");
+		if (target.getRoles().stream().filter(r -> r.getName().startsWith(ROLE_PREFIX))
+		        .anyMatch(r -> !r.getRole().equals(openmrsRole.getRole())))
+			throw VinshcService.bad("user must have exactly one VinSHC application role");
 		int actor = authenticatedUser().getUserId();
 		sessionFactory.getCurrentSession().doWork(connection -> {
+			try (PreparedStatement lock = connection.prepareStatement(
+			    "SELECT user_id FROM users WHERE user_id=? FOR UPDATE")) {
+				lock.setInt(1, target.getUserId());
+				lock.executeQuery().close();
+			}
 			try (PreparedStatement close = connection.prepareStatement("UPDATE vinshc_workspace_assignment SET active=false"
-			        + " WHERE user_id=? AND role_name=? AND facility_location_id=? AND active=true")) {
+			        + " WHERE user_id=? AND active=true")) {
 				close.setInt(1, target.getUserId());
-				close.setString(2, role);
-				close.setInt(3, facility.getLocationId());
 				close.executeUpdate();
 			}
 			try (PreparedStatement insert = connection.prepareStatement(
@@ -203,6 +209,44 @@ public class AuthorizationService {
 
 	public Map<String, Object> workspace() {
 		return activeWorkspace(true);
+	}
+
+	/** The authenticated account's sole active role/facility assignment, if it has one. */
+	public List<Map<String, Object>> workspaces() {
+		User user = authenticatedUser();
+		long applicationRoleCount = user.getRoles().stream()
+		        .filter(role -> role.getName().startsWith(ROLE_PREFIX)).count();
+		if (applicationRoleCount > 1)
+			throw new VinshcExceptions.Conflict("account has multiple VinSHC application roles; an administrator must replace them with one role", null);
+		List<Object[]> assignments = new ArrayList<>();
+		sessionFactory.getCurrentSession().doWork(connection -> {
+			try (PreparedStatement statement = connection.prepareStatement(
+			    "SELECT a.role_name,l.uuid,l.name FROM vinshc_workspace_assignment a"
+			            + " JOIN location l ON l.location_id=a.facility_location_id"
+			            + " WHERE a.user_id=? AND a.active=true AND l.retired=false"
+			            + " ORDER BY a.role_name,l.name,l.uuid")) {
+				statement.setInt(1, user.getUserId());
+				try (ResultSet rows = statement.executeQuery()) {
+					while (rows.next())
+						assignments.add(new Object[] { rows.getString(1), rows.getString(2), rows.getString(3) });
+				}
+			}
+		});
+		List<Map<String, Object>> out = new ArrayList<>();
+		for (Object[] row : assignments) {
+			String role = (String) row[0];
+			Role openmrsRole = Context.getUserService().getRole(ROLE_PREFIX + role);
+			if (openmrsRole == null || !user.hasRole(openmrsRole.getRole()))
+				continue;
+			Map<String, Object> assignment = new LinkedHashMap<>();
+			assignment.put("role", role);
+			assignment.put("facilityUuid", row[1]);
+			assignment.put("facilityName", row[2]);
+			out.add(assignment);
+		}
+		if (out.size() > 1)
+			throw new VinshcExceptions.Conflict("account has multiple active workspaces; an administrator must reassign it", null);
+		return out;
 	}
 
 	public Map<String, Object> evaluate(String resource, String action) {

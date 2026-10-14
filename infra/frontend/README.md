@@ -7,6 +7,16 @@ lượt khám, sinh hiệu hoặc giao dịch demo trên ứng dụng. Không c�
 trên trình duyệt; mọi thao tác nghiệp vụ dùng backend. Mock fixtures chỉ nằm trong
 test tự động, không được nạp vào ứng dụng hay database.
 
+## Giao diện VinSHC và nền tảng backend
+
+Phần ứng dụng đã được thiết kế lại với tên chức năng theo công việc, danh sách trước
+biểu mẫu và mã hồ sơ kỹ thuật ở mục mở rộng. Landing page giữ nguyên.
+FE gọi qua `/api/` cùng origin; proxy chuyển đến `/openmrs/ws/rest/v1/` của backend.
+OpenMRS vẫn là nền tảng xác thực và dữ liệu; module VinSHC cung cấp nghiệp vụ riêng.
+Người dùng đăng nhập ngay trên FE VinSHC, không cần mở giao diện OpenMRS/O3.
+Tài khoản admin hiện có tiếp tục được dùng; không tạo lại tài khoản hay chuyển DB.
+Xem [APPLICATION_REDESIGN.md](docs/APPLICATION_REDESIGN.md) về kết nối và kiểm chứng.
+
 ## Chạy FE
 
 ```sh
@@ -58,19 +68,21 @@ PostgreSQL mở tại `127.0.0.1:15432` cho DBeaver trên máy Mac; trong Docker
 Lần build/khởi tạo schema đầu cần nhiều thời gian; `up` đợi healthcheck tối đa 40 phút.
 
 Vị trí mã nguồn, dữ liệu, volume Docker và cách mở API/database của môi trường này:
-[LOCAL_BACKEND.md](LOCAL_BACKEND.md).
+[LOCAL_BACKEND.md](docs/LOCAL_BACKEND.md).
 
 Đăng nhập bằng `EHR_ADMIN_USERNAME` / `EHR_ADMIN_PASSWORD` trong
 `.env` ở gốc repo (đọc bằng editor trên máy, không chia sẻ file này).
-`backend:admin` cấu hình tài khoản quản trị hiện có: thêm `VinSHC App: admin`,
-giữ nguyên các role Core và gán cơ sở phát triển bằng API sẵn có. Lệnh chạy lại không
-thêm assignment trùng, không tạo tài khoản/bệnh nhân demo. Không tự chạy lệnh này khi login.
+`backend:admin` cấu hình tài khoản quản trị hiện có: thay các role VinSHC cũ bằng
+duy nhất `VinSHC App: admin`, giữ nguyên các role Core và gán cơ sở phát triển bằng API.
+Lệnh không tạo tài khoản/bệnh nhân demo. Nếu thấy thông báo chưa được phân công như ảnh,
+hãy chạy `npm run backend:admin` một lần rồi đăng xuất/đăng nhập lại.
 
-Sau khi cấu hình, đăng xuất/đăng nhập lại, chọn **Quản trị** và **VinSHC Development Clinic**,
-bấm **Mở không gian làm việc**. Mật khẩu hiện có được giữ nguyên.
+Sau khi cấu hình, đăng xuất/đăng nhập lại; tài khoản sẽ vào thẳng workspace **Quản trị**.
+Mật khẩu hiện có được giữ nguyên.
 Trong mục Quản trị có đọc cấu hình, audit phân trang, kiểm tra quyền, gán/thu hồi workspace.
-System Developer có thêm tìm user Core và thêm role ứng dụng (giữ các role cũ).
-Sau khi thêm role, dùng Gán vai trò và cơ sở; tài khoản đích cần đăng nhập lại.
+System Developer có thêm tìm user Core và đổi role VinSHC. Mỗi tài khoản chỉ có một role
+VinSHC; các role Core như System Developer vẫn được giữ. Sau khi đổi role, phân công cơ sở
+cho tài khoản đích; tài khoản đó cần đăng nhập lại.
 API Core chỉ mở cho System Developer và chỉ cho đọc user/cập nhật role, không dùng
 để né giới hạn dữ liệu bệnh nhân. Tài khoản app-admin không được mở các thao tác Core.
 FE không tự tạo tài khoản hay cấp quyền khi người dùng đăng nhập.
@@ -91,8 +103,8 @@ thành danh mục lâm sàng đã được duyệt.
 ## Giao diện công việc
 
 Sau khi mở workspace, **Tổng quan công việc** hiển thị các chức năng đúng vai trò.
-Đầu trang hiển thị **Tài khoản**, **Vai trò hiện tại** và trạng thái kết nối, tách khỏi
-hai nút **Đổi vai trò/cơ sở**, **Đăng xuất**.
+Đầu trang hiển thị **Tài khoản**, **Vai trò** và nút **Đăng xuất**. Role/cơ sở do backend
+xác định ngay sau khi đăng nhập; không có bộ chọn role trong phiên làm việc.
 
 Mỗi mục nghiệp vụ có **danh sách tải từ backend** (phân trang, bộ lọc ngày/trạng thái):
 bệnh nhân, lượt khám, lần đo sinh hiệu, lịch hẹn, hàng đợi, phiếu phí, giao dịch chờ
@@ -116,7 +128,7 @@ hồi đã nhận trong workspace; đổi workspace/đăng xuất sẽ xóa bộ
 Admin chỉ thấy quản trị/báo cáo và tổng quan. Tạo tài khoản và thiết lập cơ sở/biểu mẫu vẫn
 là màn hình chuẩn bị (**Chờ backend**), không gửi dữ liệu.
 
-Xem [UI_BACKEND_MAP.md](UI_BACKEND_MAP.md) để đối chiếu từng màn hình với API.
+Xem [UI_BACKEND_MAP.md](docs/UI_BACKEND_MAP.md) để đối chiếu từng màn hình với API.
 
 ## Các API đã nối
 
@@ -141,7 +153,7 @@ Key giao dịch chỉ giữ trong bộ nhớ cho retry cùng payload sau lỗi; 
 
 ## Phần còn lại
 
-Đánh giá cập nhật: [COMPLETION_REVIEW.md](COMPLETION_REVIEW.md).
+Đánh giá cập nhật: [COMPLETION_REVIEW.md](docs/COMPLETION_REVIEW.md).
 
 - Tạo/sửa tài khoản, liên kết provider, cấu hình cơ sở/biểu mẫu chưa có API ứng dụng.
   Nhân viên lâm sàng cần quản trị liên kết provider với tài khoản trước khi ghi encounter.
@@ -175,9 +187,13 @@ runtime; luồng ghi thật với tài khoản 7 role nằm ở `tests/integrati
 
 ```text
 infra/frontend/
-├─ index.html, app.js, landing.js   trang giới thiệu (host)
-├─ connected.html, connected.css    host của shell; import map được chèn lúc dev/build
-├─ shell/            @vinshc/shell  đăng nhập, chọn workspace, layout, form, worklist, nạp module
+├─ index.html, connected.html, portal.html   các HTML entrypoint
+├─ landing/          boot, app và nội dung trang giới thiệu
+├─ styles/           base.css, connected.css, workspace.css
+├─ docs/             tài liệu FE, backend cục bộ và đánh giá
+├─ assets/           ảnh và thông tin nguồn ảnh
+├─ package.json, vite.config.mjs, Dockerfile, compose.local.yaml   cấu hình/chạy ứng dụng
+├─ shell/            @vinshc/shell  đăng nhập, tự mở workspace đã phân công, layout, form, worklist, nạp module
 ├─ packages/core/    @vinshc/core   thư viện dùng chung: BackendClient, metadata (packages/core/metadata/),
 │                                   builder form/action, UI helper, WorkspaceMemory, hợp đồng registry
 ├─ modules/          mỗi thư mục là một microfrontend: package riêng, build/deploy riêng
@@ -192,7 +208,7 @@ infra/frontend/
 │  ├─ reports/       Báo cáo
 │  ├─ admin/         Quản trị
 │  └─ documents/     Mục Chứng từ & mẫu in (liệt kê mẫu in của các module khác)
-├─ scripts/          build.mjs, importmap.mjs, check-api-coverage.mjs
+├─ scripts/          build, import map, kiểm tra API và cấu hình backend
 └─ tests/            unit/ (node --test), browser/ (Playwright), registry.mjs
 ```
 
@@ -244,10 +260,12 @@ cách không tương thích thì phải build lại các module dùng phần đ�
 
 ## Mã nguồn khác
 
-- `app.js`, `landing.js`, `styles.css`: trang giới thiệu và đường vào phòng khám.
+- `landing/`: boot, app và nội dung trang giới thiệu.
+- `styles/`: CSS nền, phòng khám và workspace.
+- `docs/`: tài liệu giao diện, backend cục bộ, ánh xạ API và đánh giá hoàn thiện.
 - `packages/core/metadata/`: bản sao danh mục từ `metadata/vinshc` (xem `source.json`); `ui-options.json` là code
   list giới tính, độ đầy đủ ngày sinh, lý do kết thúc; `field-policies.json` là policy field-state của pack đã khóa.
-- `configure-admin.py`: cấu hình role/assignment cho admin hiện có qua API.
+- `scripts/configure-admin.py`: cấu hình role/assignment cho admin hiện có qua API.
 - `docker-local.mjs`, `compose.local.yaml`: build và chạy backend của working tree trong project Docker riêng.
 
 Ảnh Pexels được lưu local; xem `assets/ASSET_SOURCES.md`. Font Be Vietnam Pro dùng

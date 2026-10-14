@@ -1,5 +1,6 @@
 // Generic rendering of a backend response in the result panel.
 import { RESULT_LABELS, esc, stateText } from "@vinshc/core";
+import { plainText } from "./presentation.js";
 
 const HIDDEN = ["memberUuids", "packSha256", "upstreamBoundaries", "adapterStrategy"];
 
@@ -24,10 +25,10 @@ export function displayResult(value, labels, depth = 0) {
       ? `<div class="result-list">${value.map((v) => `<article>${displayResult(v, labels, depth + 1)}</article>`).join("")}</div>`
       : '<p class="readonly">Chưa có bản ghi.</p>';
   return `<dl class="result-fields">${Object.entries(value)
-    .filter(([k]) => !HIDDEN.includes(k))
+    .filter(([k]) => !HIDDEN.includes(k) && !/(uuid|Uuid|_uuid)$/.test(k) && !["links", "projection", "resourceVersion", "privilegeName", "privilegeUuid"].includes(k))
     .map(
       ([k, v]) =>
-        `<div><dt>${esc(labels[k] || k)}</dt><dd>${typeof v === "number" && /(Vnd|_vnd)$/.test(k) ? esc(new Intl.NumberFormat("vi-VN").format(v)) : displayResult(v, labels, depth + 1)}</dd></div>`,
+        `<div><dt>${esc(plainText(labels[k] || k))}</dt><dd>${typeof v === "number" && /(Vnd|_vnd)$/.test(k) ? esc(new Intl.NumberFormat("vi-VN").format(v)) : displayResult(v, labels, depth + 1)}</dd></div>`,
     )
     .join("")}</dl>`;
 }
