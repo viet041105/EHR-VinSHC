@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 
 
 REST = "/openmrs/ws/rest/v1"
@@ -29,7 +29,7 @@ class B8OperationsTests(unittest.TestCase):
         cls.base = f"http://127.0.0.1:{settings.get('EHR_HTTP_PORT', '8080')}"
         cls.client = Client(cls.base, settings["EHR_ADMIN_USERNAME"], settings["EHR_ADMIN_PASSWORD"])
         cls.ctx = json.loads(
-            (ROOT / ".runtime/fixtures/b4b-clinical.json").read_text(encoding="utf-8")
+            (fixture_path("b4b-clinical.json")).read_text(encoding="utf-8")
         )
         cls.facilities = json.loads(
             (ROOT / "metadata/vinshc/catalogues/facilities.json").read_text(encoding="utf-8")
@@ -57,7 +57,7 @@ class B8OperationsTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.evidence["passed"] = len(cls.evidence["checks"]) == EXPECTED_CHECKS
         cls.evidence["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        target = ROOT / ".runtime/reports/b8-operations.json"
+        target = report_path("b8-operations.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.evidence, ensure_ascii=False, indent=2) + "\n",
                           encoding="utf-8")

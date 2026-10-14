@@ -19,7 +19,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 import b4_catalogue
 import b4_metadata_catalogue
 
@@ -48,7 +48,7 @@ class B4ClinicalTests(unittest.TestCase):
                 cls.catalogue = b4_catalogue.ensure(cls.client)
             except b4_catalogue.RealCatalogueConfigured as error:
                 raise unittest.SkipTest(f"Real catalogue configured; synthetic B4 suite skipped: {error}")
-        cls.fixture_path = ROOT / ".runtime/fixtures/b4b-clinical.json"
+        cls.fixture_path = fixture_path("b4b-clinical.json")
         cls.previous = (json.loads(cls.fixture_path.read_text(encoding="utf-8"))
                         if cls.fixture_path.is_file() else None)
         cls.ctx = cls._create_context()
@@ -65,7 +65,7 @@ class B4ClinicalTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.evidence["passed"] = len(cls.evidence["checks"]) == EXPECTED_CHECKS
         cls.evidence["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        target = ROOT / ".runtime/reports/b4b-clinical.json"
+        target = report_path("b4b-clinical.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.evidence, ensure_ascii=False, indent=2) + "\n",
                           encoding="utf-8")

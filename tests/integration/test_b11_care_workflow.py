@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, report_path
 import b4_catalogue
 import b4_metadata_catalogue
 
@@ -79,7 +79,7 @@ class CareWorkflowTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.report["finishedAt"] = datetime.now(timezone.utc).isoformat()
         cls.report["passed"] = len(cls.report["checks"]) == 12
-        target = ROOT / ".runtime/reports/b11-care-workflow.json"
+        target = report_path("b11-care-workflow.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         for provider in cls.created_providers:

@@ -29,6 +29,8 @@ jobs:
         run: python scripts/bootstrap.py
       - name: Validate Compose and pinned baseline
         run: python scripts/check_config.py
+      - name: Verify release and production authorization metadata (P0)
+        run: python scripts/check_p0.py
       - name: Test bootstrap and smoke failure handling
         run: python -m unittest discover -s tests -v
       - name: Validate GitHub Actions workflow
@@ -40,6 +42,41 @@ jobs:
           echo "8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8  /tmp/actionlint.tar.gz" | sha256sum --check
           tar -xzf /tmp/actionlint.tar.gz -C /tmp actionlint
           /tmp/actionlint -color
+
+  p0_clean:
+    name: P0 clean database without test metadata overlay
+    needs: configuration
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      COMPOSE_PROJECT_NAME: ehr-p0-${{ github.run_id }}-${{ github.run_attempt }}
+      EHR_HTTP_PORT: '18083'
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+        with:
+          python-version: '3.11'
+      - name: Bootstrap test-only credentials
+        run: python scripts/bootstrap.py
+      - name: Validate release/roles against permission matrix
+        run: python scripts/check_p0.py
+      - name: Build backend containing production roles and privileges
+        run: |
+          docker compose pull --quiet --ignore-buildable
+          docker compose build --pull backend
+      - name: Boot clean database (no metadata test overlay)
+        run: timeout 2400s docker compose -f compose.yaml up -d --wait --wait-timeout 2400
+      - name: Verify eight imported roles, privileges and 30 started modules
+        run: python scripts/check_p0.py --runtime --report .runtime/reports/p0-clean.json
+      - name: Verify database and REST/FHIR smoke on clean database
+        run: |
+          python scripts/check_database.py
+          python scripts/smoke.py --report .runtime/reports/p0-clean-smoke.json
+      - name: Cleanup isolated P0 volumes
+        if: always()
+        run: docker compose -f compose.yaml down --volumes --remove-orphans
 
   smoke:
     name: B1-B9 PostgreSQL, API, FHIR, restart and restore
@@ -79,6 +116,8 @@ jobs:
         run: >-
           python tools/metadata.py --verify-url http://127.0.0.1:8080/openmrs
           --report .runtime/reports/metadata-ci-before.json
+      - name: Verify production role/privilege import and module inventory (P0)
+        run: python scripts/check_p0.py --runtime --report .runtime/reports/p0-ci.json
       - name: Verify APIs and create synthetic patient and clinical data
         run: python scripts/smoke.py --create-fixture --report .runtime/reports/smoke-before.json
       - name: Verify ordered B1-B8 API, authorization, FHIR and MVP-2 contracts

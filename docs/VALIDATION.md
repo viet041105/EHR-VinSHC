@@ -16,7 +16,7 @@ Docker baseline đã được chạy thật trên máy phát triển và trên m
 | Reference Application / Core | 3.7.1 / 2.8.8 |
 | PostgreSQL | 16.15-bookworm; image khóa digest |
 | REST / FHIR2 / Initializer | 3.5.0.69fa31 / 4.2.0 / 2.12.0 |
-| Module | Đủ 29 module started, phiên bản khớp `config/baseline.json` |
+| Module | Run lịch sử 08/10: 29 module upstream started; baseline P0 hiện tại: 29 upstream cộng `vinshc` = 30 module started, phiên bản khớp `config/baseline.json` |
 
 Backend được build từ release upstream đã khóa digest, bỏ demo lớn, giữ metadata nền và thêm location giả. Phiên bản component gốc được giữ; bản sửa tương thích được lưu cùng nguồn trong [postgresql/README.md](../infra/backend/postgresql/README.md).
 
@@ -37,7 +37,7 @@ Bản cuối dựng từ hai volume trống đến cả bốn service healthy tr
 | Workflow qua actionlint 1.7.12 | Đạt |
 | PostgreSQL thật: 16.15, UTF8, fuzzystrmatch, uuid-ossp, schema 239 bảng | Đạt |
 | Migration nhị phân: giữ nguyên bytes có giá trị 00/ff và NULL trong kiểm thử SQL có rollback | Đạt; chưa phải nghiệm thu upload file nghiệp vụ |
-| Bốn service healthy và đủ 29 module started | Đạt |
+| Bốn service healthy và đủ module started | Đạt 29/29 upstream trong run 08/10; P0 ngày 14/10 đạt 30/30 sau khi thêm `vinshc` |
 | O3 HTML/import map và JavaScript app shell/login qua gateway | Đạt |
 | REST authentication và chọn VinSHC Development Clinic | Đạt |
 | Từ chối mật khẩu sai và truy cập Patient REST/FHIR không đăng nhập | Đạt |
@@ -55,7 +55,7 @@ Báo cáo REST/FHIR local nằm trong `.runtime/reports/`: `postgres-before.json
 ## Giới hạn
 
 - Các kết quả trên là kiểm chứng local. Workflow GitHub dựng database mới từ đầu; xem run tương ứng trong Actions để biết kết quả runner.
-- Chưa nghiệm thu E2E trên trình duyệt, toàn bộ nghiệp vụ của 29 module, biểu mẫu Việt Nam, phân quyền nghiệp vụ, đầy đủ mapping FHIR hoặc agent/pgvector.
+- Chưa nghiệm thu E2E trên trình duyệt, toàn bộ nghiệp vụ của 29 module upstream và module VinSHC, biểu mẫu Việt Nam, phân quyền nghiệp vụ, đầy đủ mapping FHIR hoặc agent/pgvector.
 - Kiểm tra TEXT đã chạy qua API thật. Luồng tải file/complex observation và dữ liệu BLOB nghiệp vụ chưa được nghiệm thu.
 - Upstream vẫn có thông báo cấu hình Address Hierarchy/XML module và cảnh báo của Tomcat/FHIR. Module đã started và các API nêu trên đạt; chức năng phụ thuộc các cấu hình này cần được nhóm kiểm chứng riêng.
 

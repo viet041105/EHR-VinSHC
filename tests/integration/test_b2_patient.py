@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 
 
 IDGEN_SOURCE_UUID = "3bfdfcf4-987a-521d-8e5d-7d60e782b6fa"
@@ -35,7 +35,7 @@ class B2PatientTests(unittest.TestCase):
         cls.entities = json.loads(
             (ROOT / "metadata/vinshc/frontend-map.json").read_text(encoding="utf-8")
         )["entities"]
-        cls.fixture_path = ROOT / ".runtime/fixtures/b2-patients.json"
+        cls.fixture_path = fixture_path("b2-patients.json")
         cls.fixture = cls._load_or_create_fixture()
         cls.evidence = {
             "startedAt": datetime.now(timezone.utc).isoformat(),
@@ -48,7 +48,7 @@ class B2PatientTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.evidence["passed"] = len(cls.evidence["checks"]) == 5
         cls.evidence["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        destination = ROOT / ".runtime/reports/b2-integration.json"
+        destination = report_path("b2-integration.json")
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(json.dumps(cls.evidence, ensure_ascii=False, indent=2) + "\n",
                                encoding="utf-8")

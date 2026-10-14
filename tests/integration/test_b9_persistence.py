@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 
 
 REST = "/openmrs/ws/rest/v1"
@@ -33,10 +33,10 @@ class B9PersistenceTests(unittest.TestCase):
             settings["EHR_ADMIN_USERNAME"], settings["EHR_ADMIN_PASSWORD"],
         )
         cls.clinical = json.loads(
-            (ROOT / ".runtime/fixtures/b4b-clinical.json").read_text(encoding="utf-8")
+            (fixture_path("b4b-clinical.json")).read_text(encoding="utf-8")
         )
         cls.b8 = json.loads(
-            (ROOT / ".runtime/reports/b8-operations.json").read_text(encoding="utf-8")
+            (report_path("b8-operations.json")).read_text(encoding="utf-8")
         )
         if not cls.b8.get("passed"):
             raise AssertionError("B8 source evidence did not pass")
@@ -53,7 +53,7 @@ class B9PersistenceTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.evidence["passed"] = len(cls.evidence["checks"]) == 4
         cls.evidence["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        destination = ROOT / f".runtime/reports/b9-{cls.phase}.json"
+        destination = report_path(f"b9-{cls.phase}.json")
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(
             json.dumps(cls.evidence, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"

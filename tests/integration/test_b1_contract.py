@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 from fixtures import create_and_end_visit, load_or_create_patient
 
 
@@ -23,7 +23,7 @@ class B1ContractTests(unittest.TestCase):
         cls.client = Client(f"http://127.0.0.1:{settings.get('EHR_HTTP_PORT', '8080')}",
                             settings["EHR_ADMIN_USERNAME"], settings["EHR_ADMIN_PASSWORD"])
         baseline = json.loads((ROOT / "config/baseline.json").read_text(encoding="utf-8"))
-        cls.fixture_path = ROOT / ".runtime/fixtures/b1-patient.json"
+        cls.fixture_path = fixture_path("b1-patient.json")
         cls.fixture = load_or_create_patient(
             cls.client, cls.fixture_path, baseline["developmentLocation"]["uuid"])
         cls.evidence = {"startedAt": datetime.now(timezone.utc).isoformat(), "passed": False,
@@ -33,7 +33,7 @@ class B1ContractTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.evidence["passed"] = len(cls.evidence["checks"]) == 4
         cls.evidence["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        destination = ROOT / ".runtime/reports/b1-integration.json"
+        destination = report_path("b1-integration.json")
         destination.parent.mkdir(parents=True, exist_ok=True)
         destination.write_text(json.dumps(cls.evidence, indent=2) + "\n", encoding="utf-8")
 

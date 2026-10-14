@@ -26,7 +26,7 @@ Kết quả kiểm chứng local hiện có trong [VALIDATION.md](VALIDATION.md)
 1. Pull image đã khóa và build backend từ image release cố định, bỏ demo lớn và áp dụng bản sửa PostgreSQL đã lưu trong repo.
 2. Dựng stack PostgreSQL trên runner mới và chờ các service khỏe; xác nhận version, UTF8, extension, schema OpenMRS, đủ 118 khóa ngoại Stock Management và hai cột nhị phân của module dùng BYTEA. Lệnh khởi tạo có giới hạn tổng 2.400 giây; dựng lại dùng 600 giây, để khi lỗi vẫn còn thời gian lấy diagnostics và dọn project.
 3. Kiểm tra HTML/import map O3 và tải JavaScript app shell/login qua gateway.
-4. Xác thực REST; xác nhận phiên bản Core và đủ 29 module của baseline; kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
+4. Xác thực REST; xác nhận phiên bản Core và đủ 30 module của baseline (29 upstream cộng `vinshc`); kiểm tra location do Initializer nạp và chọn location trong session. Mật khẩu sai và truy cập bệnh nhân qua REST/FHIR không đăng nhập phải bị từ chối.
 5. Kiểm tra REST patient search, FHIR R4 CapabilityStatement và FHIR Patient search. Báo cáo smoke ghi toàn bộ resource/interaction được server công bố và trạng thái `started`/version của từng module baseline để làm bằng chứng B0; việc được công bố không đồng nghĩa luồng nghiệp vụ đã được nghiệm thu.
 6. Tạo bệnh nhân giả, visit, encounter, observation số và văn bản tiếng Việt dài; đối chiếu mã bệnh nhân, quan hệ, giá trị, đơn vị, thời gian và văn bản qua REST/FHIR.
 7. Chạy có thứ tự toàn bộ contract B1–B8: hành chính, sinh hiệu, khám/đơn thuốc, quyền, FHIR và MVP-2. Unit test Java của module chạy trong bước build image (Dockerfile không còn `-DskipTests`).

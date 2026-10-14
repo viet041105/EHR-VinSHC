@@ -85,7 +85,7 @@ Tài khoản fixture trong CI cũng không được chuyển vào database local
 | Docker | Cả db/backend/frontend/gateway healthy sau restart, giữ nguyên volume |
 | Database verifier | PostgreSQL 16.15, UTF8, 253 bảng, đủ extension, 118 FK Stock Management, 2 cột BYTEA đúng |
 | Smoke không tạo fixture | 8 check đạt: readiness, O3/gateway, authentication, module/version, location, từ chối credential sai/ẩn danh, REST search/FHIR capabilities, FHIR search |
-| Module runtime | 29 module baseline started và đúng version; thêm `vinshc` 0.3.0 started |
+| Module runtime | 29 module upstream started và đúng version; thêm `vinshc` 0.3.0 thành tổng 30 module started |
 | Migration VinSHC | Có workspace/operations và cả `vinshc-0.3.1-review-fixes`, `vinshc-0.3.1-timestamptz`; version OMOD vẫn là 0.3.0 |
 | Metadata runtime chỉ đọc | 78/78 identity nền đúng UUID, kiểu dữ liệu, unit và concept set; test-only catalogue có phạm vi kiểm chứng riêng |
 | Metadata structural | 205 field, 234 identity, 22 output đồng bộ; PASS |

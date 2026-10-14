@@ -39,11 +39,11 @@ Các chức năng sau đã có trong source hiện tại. Agent không cần vi�
 
 Regression bắt buộc:
 
-- [ ] Unit test Java hiện có tiếp tục đạt.
-- [ ] `npm --prefix infra/frontend test` tiếp tục đạt.
-- [ ] Test tích hợp B1–B11 tiếp tục đạt trên database sạch.
-- [ ] Restart container giữ nguyên dữ liệu và đọc lại đúng fixture.
-- [ ] Backup–restore sang Compose project mới đọc lại đúng database và attachment.
+- [x] Unit test Java hiện có tiếp tục đạt.
+- [x] `npm --prefix infra/frontend test` tiếp tục đạt.
+- [x] Test tích hợp B1–B11 tiếp tục đạt trên database sạch.
+- [x] Restart container giữ nguyên dữ liệu và đọc lại đúng fixture.
+- [x] Backup–restore sang Compose project mới đọc lại đúng database và attachment.
 
 ## 3. Thứ tự triển khai
 
@@ -66,30 +66,32 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 4.1. Đồng bộ version
 
-- [ ] Chọn một version release VinSHC thống nhất cho backend module, metadata pack, frontend và print template.
-- [ ] Giải quyết chênh lệch hiện tại: module Maven `0.3.0`, metadata `0.3.0`, frontend `0.2.0`, trong khi Liquibase có changeset tên `0.4.0`.
-- [ ] Cập nhật `config/baseline.json` để phản ánh đúng metadata/module/frontend hiện tại.
-- [ ] Cập nhật số module runtime kỳ vọng: upstream bỏ demo cộng module `vinshc`; xác nhận bằng API module sau khi Docker chạy.
-- [ ] Sửa các mô tả lỗi thời trong README và tài liệu agent, ví dụ clinical summary hiện đã chứa sinh hiệu.
-- [ ] Thêm kiểm tra CI phát hiện version drift giữa POM, pack, frontend và image artifact.
+- [x] Chọn một version release VinSHC thống nhất cho backend module, metadata pack, frontend và print template.
+- [x] Giải quyết chênh lệch hiện tại: module Maven `0.3.0`, metadata `0.3.0`, frontend `0.2.0`, trong khi Liquibase có changeset tên `0.4.0`.
+- [x] Cập nhật `config/baseline.json` để phản ánh đúng metadata/module/frontend hiện tại.
+- [x] Cập nhật số module runtime kỳ vọng: upstream bỏ demo cộng module `vinshc`; xác nhận bằng API module sau khi Docker chạy.
+- [x] Sửa các mô tả lỗi thời trong README và tài liệu agent, ví dụ clinical summary hiện đã chứa sinh hiệu.
+- [x] Thêm kiểm tra CI phát hiện version drift giữa POM, pack, frontend và image artifact.
+
+> **Ghi chú P0 (14/10/2026):** Chọn release VinSHC `0.3.0` cho POM, metadata, frontend và hợp đồng mẫu in. ID Liquibase `vinshc-0.4.0-*` là lịch sử migration bất biến, **không đổi tên** để tránh chạy lại migration. `printing-reporting.json` vẫn đánh dấu `testOnly: true`, do đó đồng bộ version **không đồng nghĩa** mẫu in được phê duyệt cho dữ liệu thật.
 
 ### 4.2. Chuyển role/privilege khỏi metadata test
 
-- [ ] Không dùng `metadata/vinshc/initializer-test/roles` và `privileges` làm nguồn production.
-- [ ] Tạo cấu hình production version hóa dưới `infra/backend/configuration/privileges/vinshc/` và `roles/vinshc/`, hoặc một content package VinSHC riêng.
-- [ ] Provision đủ 8 role nhân viên: reception, nurse, doctor, lab, cashier, pharmacy, manager, admin.
-- [ ] Provision tất cả privilege trong `metadata/vinshc/permission-matrix.csv`.
-- [ ] Đối chiếu role CSV, ma trận quyền và privilege thực tế trong database; thất bại nếu thiếu hoặc dư quyền rộng.
-- [ ] Kiểm tra mỗi role không thể gọi trực tiếp Core REST/FHIR để vượt projection/scoping của VinSHC.
-- [ ] Test database sạch không cần overlay `tests/integration/compose.b4-metadata.yaml` vẫn tạo đủ role/privilege production.
-- [ ] Giữ tài khoản fixture/test ngoài cấu hình production.
+- [x] Không dùng `metadata/vinshc/initializer-test/roles` và `privileges` làm nguồn production.
+- [x] Tạo cấu hình production version hóa dưới `infra/backend/configuration/privileges/vinshc/` và `roles/vinshc/`, hoặc một content package VinSHC riêng.
+- [x] Provision đủ 8 role nhân viên: reception, nurse, doctor, lab, cashier, pharmacy, manager, admin.
+- [x] Provision tất cả privilege trong `metadata/vinshc/permission-matrix.csv`.
+- [x] Đối chiếu role CSV, ma trận quyền và privilege thực tế trong database; thất bại nếu thiếu hoặc dư quyền rộng.
+- [x] Kiểm tra mỗi role không thể gọi trực tiếp Core REST/FHIR để vượt projection/scoping của VinSHC.
+- [x] Test database sạch không cần overlay `tests/integration/compose.b4-metadata.yaml` vẫn tạo đủ role/privilege production.
+- [x] Giữ tài khoản fixture/test ngoài cấu hình production.
 
 ### 4.3. Tiêu chí nghiệm thu P0
 
-- [ ] Database sạch khởi động thành công, đủ metadata bắt buộc và không có role test giả.
-- [ ] Bảng kiểm 8 role × resource × action khớp hoàn toàn permission matrix.
-- [ ] `scripts/check_config.py`, metadata validation, smoke và B1–B11 đạt.
-- [ ] Báo cáo ghi commit, image digest, module version, metadata version và số module started.
+- [x] Database sạch khởi động thành công, đủ metadata bắt buộc và không có role test giả.
+- [x] Bảng kiểm 8 role × resource × action khớp hoàn toàn permission matrix.
+- [x] `scripts/check_config.py`, metadata validation, smoke và B1–B11 đạt.
+- [x] Báo cáo ghi commit, image digest, module version, metadata version và số module started.
 
 ---
 

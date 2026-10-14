@@ -6,6 +6,32 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _test_output_path(filename: str, kind: str, override: str) -> Path:
+    """Keep synthetic test artifacts in a project-specific folder when requested.
+
+    Default paths remain unchanged for CI. Explicit overrides must be inside
+    the ignored .runtime directory so fixtures cannot leak into tracked files.
+    """
+    base = ROOT / ".runtime"
+    directory = Path(os.environ.get(override, "")) if os.environ.get(override) else base / kind
+    if not directory.is_absolute():
+        directory = ROOT / directory
+    directory = directory.resolve()
+    if not directory.is_relative_to(base.resolve()):
+        raise ValueError(f"{override} must be inside .runtime")
+    if Path(filename).name != filename:
+        raise ValueError("A test output name must not contain directories")
+    return directory / filename
+
+
+def fixture_path(filename: str) -> Path:
+    return _test_output_path(filename, "fixtures", "VINSHC_TEST_FIXTURE_DIR")
+
+
+def report_path(filename: str) -> Path:
+    return _test_output_path(filename, "reports", "VINSHC_TEST_REPORT_DIR")
+
+
 def read_settings(root=ROOT):
     settings = {}
     source = root / ".env"
