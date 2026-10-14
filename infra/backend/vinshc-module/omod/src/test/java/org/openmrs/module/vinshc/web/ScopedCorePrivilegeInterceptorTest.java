@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -25,10 +26,14 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.openmrs.Role;
+import org.openmrs.User;
 import org.openmrs.api.context.AuthenticationScheme;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.api.context.UserContext;
+import org.openmrs.module.vinshc.service.PortalService;
+import org.vinshc.security.PortalFhirGuardFilter;
 
 /**
  * OpenMRS keeps one UserContext per HTTP session and shares it between concurrent requests. The
@@ -86,6 +91,19 @@ class ScopedCorePrivilegeInterceptorTest {
 		assertEquals(Integer.valueOf(42), session.getLocationId());
 		assertNull(scoped.getAuthenticatedUser());
 		assertEquals(session.isAuthenticated(), scoped.isAuthenticated());
+	}
+
+	@Test
+	void inheritedPortalRoleIsolatedFromCoreAndFhir() {
+		Role portal = new Role(PortalService.ROLE, "Patient portal");
+		Role wrapper = new Role("Portal wrapper", "Role inheriting portal access");
+		wrapper.setInheritedRoles(new HashSet<>(java.util.Collections.singletonList(portal)));
+		User user = new User();
+		user.addRole(wrapper);
+
+		assertTrue(user.hasRole(PortalService.ROLE));
+		assertTrue(PortalIsolationInterceptor.isPortalAccount(user));
+		assertTrue(PortalFhirGuardFilter.isPortalAccount(user));
 	}
 
 	@SuppressWarnings("unchecked")

@@ -410,12 +410,18 @@ class CareWorkflowTests(unittest.TestCase):
             **patch, "quantity": 11, "idempotencyKey": key("over-correction")})[0], 409)
         self.assertEqual(self.call("admin", path, method="POST", payload={
             **patch, "quantity": 3, "idempotencyKey": key("stale-version")})[0], 409)
+        void_key = key("void")
         voided = self.ok("admin", f"{VINSHC}/pharmacy/dispenses/{second['uuid']}/void",
                          {"reason": "B11 synthetic void", "expectedVersion": 0,
-                          "idempotencyKey": key("void")}, statuses=(200,))
+                          "idempotencyKey": void_key}, statuses=(200,))
         self.assertEqual(voided["quantity"], 6)  # immutable original
         self.assertEqual(voided["effectiveQuantity"], 0)
         self.assertEqual(voided["effectiveStatus"], "voided")
+        self.assertEqual(self.call("admin", f"{VINSHC}/pharmacy/dispenses/{second['uuid']}/void",
+                                   method="POST", payload={
+                                       "reason": "B11 synthetic void", "expectedVersion": 0,
+                                       "idempotencyKey": void_key,
+                                       "quantity": 1})[0], 400)
         final = self.get("admin", f"{VINSHC}/pharmacy/prescriptions/{order}")
         self.assertEqual(final["dispensedQuantity"], 2)
         self.assertEqual(final["remainingQuantity"], 8)
@@ -498,12 +504,20 @@ class CareWorkflowTests(unittest.TestCase):
             "route": self.catalogue["route"], "frequency": self.catalogue["frequency"], "duration": 3,
             "durationUnits": self.catalogue["days"], "quantity": 3,
             "quantityUnits": self.catalogue["quantityUnit"], "numRefills": 0}, statuses=(201,))
+        dispensed = self.ok("pharmacy", f"{VINSHC}/pharmacy/dispenses", {
+            "order": order["uuid"], "quantity": 1, "idempotencyKey": key("before-cancel")}, statuses=(201,))
         self.assertEqual(self.call("doctor", f"{VINSHC}/visits/{visit['uuid']}/close", method="POST",
                                    payload={"closeReason": "cancelled", "note": "B11"})[0], 403)
         self.ok("reception", f"{VINSHC}/visits/{visit['uuid']}/close",
                 {"closeReason": "cancelled", "note": "B11 tiếp nhận nhầm"})
         status, body = self.call("pharmacy", f"{VINSHC}/pharmacy/dispenses", method="POST", payload={
             "order": order["uuid"], "quantity": 1, "idempotencyKey": key("cancelled")})
+        self.assertEqual(status, 409, body)
+        self.assertIn("cancelled", body["error"])
+        status, body = self.call("admin", f"{VINSHC}/pharmacy/dispenses/{dispensed['uuid']}/corrections",
+                                 method="POST", payload={
+                                     "quantity": 2, "reason": "must not increase after cancellation",
+                                     "expectedVersion": 0, "idempotencyKey": key("cancelled-correction")})
         self.assertEqual(status, 409, body)
         self.assertIn("cancelled", body["error"])
         self.record("cancelled visit (reception only) blocks dispensing", visit=visit["uuid"])

@@ -193,7 +193,7 @@ public class PharmacyService {
 		return dispenseView(rows.get(0), order);
 	}
 
-public Map<String, Object> reviseDispense(String dispenseUuid, Map<String, Object> body, boolean voiding) {
+	public Map<String, Object> reviseDispense(String dispenseUuid, Map<String, Object> body, boolean voiding) {
 		AuthorizationService.requireOperation("dispensing", voiding ? "void" : "update");
 		if (body == null
 		        || body.keySet().stream()
@@ -212,6 +212,8 @@ public Map<String, Object> reviseDispense(String dispenseUuid, Map<String, Objec
 		int expected = ((Number) body.get("expectedVersion")).intValue();
 		if (expected < 0)
 			throw bad("expectedVersion cannot be negative");
+		if (voiding && (body.containsKey("quantity") || body.containsKey("batchNumber") || body.containsKey("expiryDate")))
+			throw bad("void accepts only reason, version and idempotency key");
 		List<Map<String, Object>> origins = jdbc.queryForList("SELECT * FROM vinshc_dispense WHERE dispense_uuid=?",
 		    canonicalUuid(dispenseUuid, "dispense"));
 		if (origins.isEmpty())
@@ -241,10 +243,9 @@ public Map<String, Object> reviseDispense(String dispenseUuid, Map<String, Objec
 		BigDecimal old = revisions.isEmpty() ? (BigDecimal) origin.get("quantity")
 		        : (BigDecimal) revisions.get(0).get("effective_quantity");
 		BigDecimal replacement = voiding ? BigDecimal.ZERO : quantity(body.get("quantity"));
-		if (voiding && (body.containsKey("quantity") || body.containsKey("batchNumber") || body.containsKey("expiryDate")))
-			throw bad("void accepts only reason, version and idempotency key");
-		if (!voiding && !order.isActive() && replacement.compareTo(old) > 0)
-			throw new OperationsService.OperationsConflictException("cannot increase dispense on inactive order");
+		if (!voiding && replacement.compareTo(old) > 0 && (!order.isActive() || visitCancelled(order.getEncounter().getVisit())))
+			throw new OperationsService.OperationsConflictException(
+			        "cannot increase dispense on an inactive prescription or cancelled visit");
 		if (old.compareTo(BigDecimal.ZERO) == 0 && replacement.signum() > 0)
 			throw new OperationsService.OperationsConflictException("voided dispense cannot be reactivated");
 		BigDecimal revisedTotal = dispensed(order).subtract(old).add(replacement);
@@ -257,11 +258,14 @@ public Map<String, Object> reviseDispense(String dispenseUuid, Map<String, Objec
 		        : (java.sql.Date) revisions.get(0).get("expiry_date");
 		if (body.containsKey("batchNumber")) {
 			batch = optionalString(body, "batchNumber");
+			batch = batch == null || batch.trim().isEmpty() ? null : batch.trim();
 			limit(batch, 64, "batchNumber");
 		}
 		if (body.containsKey("expiryDate")) {
 			String raw = optionalString(body, "expiryDate");
-			expiry = raw == null ? null : java.sql.Date.valueOf(day(raw));
+			expiry = raw == null || raw.trim().isEmpty() ? null : java.sql.Date.valueOf(day(raw.trim()));
+			if (expiry != null && expiry.toLocalDate().isBefore(LocalDate.now(CareService.CLINIC_ZONE)))
+				throw bad("batch is already expired");
 		}
 		String revisionUuid = UUID.randomUUID().toString();
 		jdbc.update(

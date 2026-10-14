@@ -11,6 +11,7 @@ package org.openmrs.module.vinshc.web;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.vinshc.service.PortalService;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -21,10 +22,13 @@ import org.springframework.web.servlet.HandlerInterceptor;
  */
 public class PortalIsolationInterceptor implements HandlerInterceptor {
 
+	static boolean isPortalAccount(User user) {
+		return user != null && user.hasRole(PortalService.ROLE);
+	}
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-		if (!Context.isAuthenticated() || Context.getAuthenticatedUser().getRoles().stream()
-		        .noneMatch(role -> PortalService.ROLE.equals(role.getRole())))
+		if (!Context.isAuthenticated() || !isPortalAccount(Context.getAuthenticatedUser()))
 			return true;
 		String uri = request.getRequestURI();
 		response.setHeader("Cache-Control", "no-store");
