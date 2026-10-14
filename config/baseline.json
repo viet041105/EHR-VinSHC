@@ -36,7 +36,7 @@
     "Versions come from the fixed 3.7.1 images; REST reports the full artifact version 3.5.0.69fa31 at runtime, while the distro manifest says 3.5.0. Smoke tests check the exact runtime versions.",
     "PostgreSQL uses a pinned official 16.15 image with dedicated PostgreSQL and application volumes; compatibility is checked by fresh startup, module, API and persistence tests.",
     "Backend is derived from the fixed 3.7.1 release: large demo content and its generator are removed, base reference metadata is kept, and one synthetic login/facility/visit location is loaded with Initializer.",
-    "Upstream moving no-demo tags were not used because inspection showed snapshot components. VinSHC metadata 0.2.0 and the Java extension module are built from checked-in sources.",
+    "Upstream moving no-demo tags were not used because inspection showed snapshot components. VinSHC metadata 0.3.0 and the Java extension module are built from checked-in sources.",
     "The pinned backend includes checked-in PostgreSQL patches for Appointments Liquibase, TEXT/BYTEA Hibernate binding, two module OID-to-BYTEA columns, Core seed sequences and scoped Stock Management preconditions; see infra/backend/postgresql/README.md. Upstream component version numbers remain unchanged."
   ],
   "database": {
@@ -80,6 +80,15 @@
     "stockmanagement": "3.0.0",
     "tasks": "2.1.0",
     "teleconsultation": "2.0.0",
-    "webservices.rest": "3.5.0.69fa31"
+    "webservices.rest": "3.5.0.69fa31",
+    "vinshc": "0.3.0"
+  },
+  "vinshcRelease": {
+    "version": "0.3.0",
+    "backendModule": "0.3.0",
+    "metadataPack": "0.3.0",
+    "frontend": "0.3.0",
+    "printTemplates": "0.3.0",
+    "expectedStartedModules": 30
   }
 }

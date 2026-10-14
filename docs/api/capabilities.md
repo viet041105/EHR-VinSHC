@@ -12,7 +12,7 @@ Tài liệu này là đầu ra B0: đối chiếu nhu cầu phòng khám với m
 | `Chưa thử nghiệp vụ` | Chưa có bằng chứng cho state transition, quyền, validation hoặc luồng end-to-end. |
 | `Chờ metadata` | Có thể khảo sát kỹ thuật, nhưng chưa thể nghiệm thu bằng UUID/danh mục chính thức. |
 
-Báo cáo `.runtime/reports/smoke.json` ghi phiên bản Reference Application/Core, trạng thái `started` và phiên bản của 29 module, cùng toàn bộ resource/interaction từ FHIR `CapabilityStatement`. Báo cáo `.runtime/reports/database.json` ghi phiên bản PostgreSQL, UTF8, extension và tình trạng schema. Hai báo cáo không chứa credential và được tạo lại bằng các lệnh ở cuối tài liệu.
+Báo cáo smoke hiện hành ghi phiên bản Reference Application/Core, trạng thái `started` và phiên bản của 30 module (29 upstream cộng `vinshc`), cùng toàn bộ resource/interaction từ FHIR `CapabilityStatement`. Báo cáo `.runtime/reports/database.json` ghi phiên bản PostgreSQL, UTF8, extension và tình trạng schema. Hai báo cáo không chứa credential và được tạo lại bằng các lệnh ở cuối tài liệu. Báo cáo `.runtime/reports/smoke.json` cũ có thể chỉ ghi 29 module upstream nếu được tạo trước khi VinSHC được đưa vào baseline P0.
 
 ## MVP-1 — lõi lâm sàng
 

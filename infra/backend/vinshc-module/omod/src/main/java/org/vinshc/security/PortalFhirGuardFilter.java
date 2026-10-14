@@ -8,10 +8,15 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletResponse;
+import org.openmrs.User;
 import org.openmrs.api.context.Context;
 
 /** Runs on the authenticated forward to HAPI, which bypasses Spring MVC interceptors. */
 public class PortalFhirGuardFilter implements Filter {
+	public static boolean isPortalAccount(User user) {
+		return user != null && user.hasRole("VinSHC Portal: patient");
+	}
+
 	
 	@Override
 	public void init(FilterConfig config) {
@@ -24,8 +29,7 @@ public class PortalFhirGuardFilter implements Filter {
 	@Override
 	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
 	        throws IOException, ServletException {
-		if (Context.isAuthenticated() && Context.getAuthenticatedUser().getRoles().stream()
-		        .anyMatch(role -> "VinSHC Portal: patient".equals(role.getRole()))) {
+		if (Context.isAuthenticated() && isPortalAccount(Context.getAuthenticatedUser())) {
 			HttpServletResponse http = (HttpServletResponse) response;
 			http.setStatus(403);
 			http.setContentType("application/json");

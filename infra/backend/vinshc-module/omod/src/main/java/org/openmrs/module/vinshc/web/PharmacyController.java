@@ -46,6 +46,16 @@ public class PharmacyController extends BaseVinshcController {
 		return service.dispense(body);
 	}
 
+	@PostMapping("/dispenses/{uuid}/corrections")
+	public Map<String, Object> correct(@PathVariable String uuid, @RequestBody Map<String, Object> body) {
+		return service.reviseDispense(uuid, body, false);
+	}
+
+	@PostMapping("/dispenses/{uuid}/void")
+	public Map<String, Object> voidDispense(@PathVariable String uuid, @RequestBody Map<String, Object> body) {
+		return service.reviseDispense(uuid, body, true);
+	}
+
 	@GetMapping("/dispenses/{uuid}")
 	public Map<String, Object> dispenseRecord(@PathVariable String uuid) {
 		return service.dispenseRecord(uuid);

@@ -1,3 +1,12 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.vinshc.web;
 
 import java.util.Arrays;
@@ -17,9 +26,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
  * concurrent requests of the same HTTP session share.
  */
 public class ScopedCorePrivilegeInterceptor implements HandlerInterceptor {
-	
+
 	static final String SESSION_CONTEXT_ATTRIBUTE = ScopedCorePrivilegeInterceptor.class.getName() + ".sessionContext";
-	
+
 	static final List<String> PRIVILEGES = Arrays.asList("Get Patients", "Get Visits", "Get Encounters", "Get Observations",
 	    "Get Diagnoses", "Get Allergies", "Get Orders", "Get Concepts", "Get Providers", "Get Concept Sources",
 	    "Get Concept Reference Terms", "Get Concept Map Types", "Get Concept Classes", "Get Concept Datatypes",
@@ -36,17 +45,22 @@ public class ScopedCorePrivilegeInterceptor implements HandlerInterceptor {
 	    "Get Beds", "Get Admission Locations", "Assign Beds", "Edit Admission Locations",
 	    // queue's Visit SaveHandler/validator look up native queue entries of the visit (VinSHC keeps its own).
 	    "Get Queue Entries", "Get Users", "Get Roles", "Manage Roles", "Edit Users");
-	
+
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
 		UserContext session = Context.getUserContext();
 		RequestUserContext scoped = new RequestUserContext(session, Context.getAuthenticationScheme());
 		scoped.addProxyPrivilege(PRIVILEGES.toArray(new String[0]));
+		// Password privilege is request-local and only for the authenticated
+		// self-service endpoint. Never grant it for arbitrary staff/Core APIs.
+		if ("POST".equals(request.getMethod())
+		        && request.getRequestURI().matches(".*/rest/v1/vinshc/(portal/password|staff/me/password)/?"))
+			scoped.addProxyPrivilege("Edit User Passwords");
 		request.setAttribute(SESSION_CONTEXT_ATTRIBUTE, session);
 		Context.setUserContext(scoped);
 		return true;
 	}
-	
+
 	@Override
 	public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception error) {
 		Object session = request.getAttribute(SESSION_CONTEXT_ATTRIBUTE);

@@ -18,10 +18,10 @@ const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
     await page.route('**/api/**',route=>{
       const url=new URL(route.request().url());
       if(url.pathname.endsWith('/session')&&!url.pathname.includes('/portal/')) return json(route,{authenticated:true,user:{uuid:patient,display:'Bệnh nhân mẫu',roles:[{name:'VinSHC Portal: patient'}]}});
-      if(url.pathname.endsWith('/portal/session'))return json(route,{persona:'patient',patientUuid:patient});
+      if(url.pathname.endsWith('/portal/session')||url.pathname.endsWith('/portal/me'))return json(route,{persona:'patient',patientUuid:patient,userUuid:patient,linkStatus:'active'});
       if(url.pathname.endsWith('/portal/visits'))return json(route,{patientUuid:patient,results:[visit1,visit2].map((uuid,i)=>({uuid,startDatetime:`2026-10-${13-i}T09:00:00+07:00`,facilityName:'Phòng khám mẫu'}))});
       if(url.pathname.endsWith('/instructions'))return json(route,{patientUuid:patient,visitUuid:url.pathname.includes(visit2)?visit2:visit1,items:[{label:'Lời dặn',text:'Lời dặn đã công bố từ hồ sơ.'}]});
-      if(url.pathname.endsWith('/prescriptions'))return json(route,{patientUuid:patient,results:[]});
+      if(url.pathname.endsWith('/prescriptions')||url.pathname.endsWith('/results'))return json(route,{patientUuid:patient,results:[]});
       return json(route,{patientUuid:patient,results:[]});
     });
     const calls=[];

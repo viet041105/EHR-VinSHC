@@ -12,7 +12,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 
 
 class B5AuthorizationTests(unittest.TestCase):
@@ -29,8 +29,8 @@ class B5AuthorizationTests(unittest.TestCase):
         )["records"][0]
         cls.facility = facility["locationUuid"]
         cls.facility_name = facility["name"]
-        b2 = json.loads((ROOT / ".runtime/fixtures/b2-patients.json").read_text(encoding="utf-8"))
-        b4 = json.loads((ROOT / ".runtime/fixtures/b4a-consultations.json").read_text(encoding="utf-8"))
+        b2 = json.loads((fixture_path("b2-patients.json")).read_text(encoding="utf-8"))
+        b4 = json.loads((fixture_path("b4a-consultations.json")).read_text(encoding="utf-8"))
         cls.patient = b2["patients"][0]["patientUuid"]
         cls.encounter = b4["encounterUuids"][0]
         cls.clients = {}
@@ -68,7 +68,7 @@ class B5AuthorizationTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.report["passed"] = all(check["passed"] for check in cls.report["checks"])
         cls.report["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        target = ROOT / ".runtime/reports/b5-authorization.json"
+        target = report_path("b5-authorization.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         for user, person in cls.created:
@@ -147,7 +147,7 @@ class B5AuthorizationTests(unittest.TestCase):
         diagnosis_status, _, diagnosis_body = self.clients["doctor"].request(
             "/openmrs/ws/rest/v1/vinshc/diagnosis", method="POST",
             payload={"patient": json.loads(
-                (ROOT / ".runtime/fixtures/b4a-consultations.json").read_text(encoding="utf-8")
+                (fixture_path("b4a-consultations.json")).read_text(encoding="utf-8")
             )["patientUuid"], "encounter": self.encounter, "concept": diagnosis_concept,
                      "rank": "primary", "certainty": "confirmed"},
         )

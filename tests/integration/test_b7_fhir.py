@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 
 
 FHIR = "/openmrs/ws/fhir2/R4"
@@ -41,11 +41,10 @@ class B7FhirMappingTests(unittest.TestCase):
             f"http://127.0.0.1:{settings.get('EHR_HTTP_PORT', '8080')}",
             settings["EHR_ADMIN_USERNAME"], settings["EHR_ADMIN_PASSWORD"],
         )
-        fixture_root = ROOT / ".runtime/fixtures"
-        cls.b2 = json.loads((fixture_root / "b2-patients.json").read_text(encoding="utf-8"))
-        cls.b3 = json.loads((fixture_root / "b3-vitals.json").read_text(encoding="utf-8"))
-        cls.b4a = json.loads((fixture_root / "b4a-consultations.json").read_text(encoding="utf-8"))
-        cls.b4b = json.loads((fixture_root / "b4b-clinical.json").read_text(encoding="utf-8"))
+        cls.b2 = json.loads(fixture_path("b2-patients.json").read_text(encoding="utf-8"))
+        cls.b3 = json.loads(fixture_path("b3-vitals.json").read_text(encoding="utf-8"))
+        cls.b4a = json.loads(fixture_path("b4a-consultations.json").read_text(encoding="utf-8"))
+        cls.b4b = json.loads(fixture_path("b4b-clinical.json").read_text(encoding="utf-8"))
         cls.entities = json.loads(
             (ROOT / "metadata/vinshc/frontend-map.json").read_text(encoding="utf-8")
         )["entities"]
@@ -67,7 +66,7 @@ class B7FhirMappingTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.evidence["passed"] = len(cls.evidence["checks"]) == EXPECTED_CHECKS
         cls.evidence["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        target = ROOT / ".runtime/reports/b7-fhir.json"
+        target = report_path("b7-fhir.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.evidence, ensure_ascii=False, indent=2) + "\n",
                           encoding="utf-8")
@@ -217,13 +216,20 @@ class B7FhirMappingTests(unittest.TestCase):
     def test_06_service_request_and_exchange_boundaries_are_explicit(self):
         bundle = self.client.json(f"{FHIR}/ServiceRequest?patient={self.b4b['patientUuid']}")
         self.assertEqual(bundle["resourceType"], "Bundle")
-        self.assertEqual(bundle.get("total", 0), 0)
-        self.gap("B7-SERVICE-REQUEST-FIXTURE",
-                 "B2-B5 create no test/service order; ServiceRequest read/search is advertised but has no round-trip fixture until B8.")
+        # B8 may have run previously on the same retained database. Do not
+        # assert the absence of valid orders merely because this is a B7 test.
+        for entry in bundle.get("entry", []):
+            resource = entry["resource"]
+            self.assertEqual(resource["resourceType"], "ServiceRequest")
+            self.assertEqual(resource["subject"]["reference"],
+                             "Patient/" + self.b4b["patientUuid"])
+        if not bundle.get("entry"):
+            self.gap("B7-SERVICE-REQUEST-FIXTURE",
+                     "No ServiceRequest fixture yet; B8 exercises its native order round-trip.")
         self.assertTrue(self.contract["deferred"]["MPI"])
         self.assertTrue(self.contract["deferred"]["crossFacilitySharing"])
         self.assertFalse(any(item["enabledForProduction"] for item in self.contract["mappings"]))
-        self.record("ServiceRequest absence, no FHIR writes, MPI/consent and cross-facility deferral are explicit",
+        self.record("ServiceRequest search is patient-scoped; MPI/consent and cross-facility are deferred",
                     sourceOfTruth="OpenMRS", openEhrAdapter="deferred one-way projection")
 
 

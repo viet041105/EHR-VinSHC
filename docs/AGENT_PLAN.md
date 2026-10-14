@@ -97,7 +97,7 @@ Sau MVP P có thể thêm **nhắc lịch tự động** và **gửi câu hỏi/
 
 ## 5. Dữ liệu và API hiện có
 
-Base API ứng dụng hiện tại: `/openmrs/ws/rest/v1/vinshc`.
+Base API ứng dụng hiện tại: `/openmrs/ws/rest/v1/vinshc`. **Lưu ý P0 (14/10/2026):** `clinical-summary` hiện đã chứa sinh hiệu trong phạm vi visit; không coi sinh hiệu là dữ liệu chưa có khi xây tool agent. Nếu lần khám không có bản ghi sinh hiệu hoặc tool không tải được, cần thể hiện đúng trạng thái tương ứng.
 
 | Nguồn | Hiện có gì? | Dùng trong agent |
 | --- | --- | --- |

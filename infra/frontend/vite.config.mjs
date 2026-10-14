@@ -19,7 +19,14 @@ if (
 }
 // VinSHC extends OpenMRS. The product keeps a neutral /api entry point on the same origin.
 const servicePrefix = process.env.VINSHC_API_UPSTREAM_PATH || "/openmrs/ws/rest/v1";
-if (!/^\/(?:[a-zA-Z0-9_-]+\/?)*$/.test(servicePrefix) || servicePrefix.includes(".."))
+const segments = servicePrefix.split("/");
+const validServicePrefix =
+  servicePrefix.startsWith("/") &&
+  !servicePrefix.includes("..") &&
+  segments.every((segment, index) =>
+    index === 0 || segment === "" || /^[a-zA-Z0-9_-]+$/.test(segment),
+  );
+if (!validServicePrefix)
   throw new Error("VINSHC_API_UPSTREAM_PATH phải là đường dẫn tuyệt đối trong dịch vụ.");
 const agentUrl = new URL(process.env.VINSHC_AGENT_ORIGIN || "http://127.0.0.1:8000");
 if (agentUrl.protocol !== "http:" || !["localhost", "127.0.0.1", "[::1]"].includes(agentUrl.hostname) || agentUrl.username || agentUrl.password || agentUrl.pathname !== "/" || agentUrl.search || agentUrl.hash) throw new Error("VINSHC_AGENT_ORIGIN phải là HTTP origin loopback.");
