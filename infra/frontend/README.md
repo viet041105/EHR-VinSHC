@@ -1,6 +1,8 @@
 # VinSHC frontend — kết nối OpenMRS
 
-HTML/CSS/JavaScript modules, Vite, Node.js ≥22.12. Không còn bệnh nhân, tài khoản,
+HTML/CSS/JavaScript modules, Vite, Node.js ≥22.12. Giao diện chia thành **microfrontend theo
+nghiệp vụ**, nạp lúc chạy qua import map (xem [Kiến trúc microfrontend](#kiến-trúc-microfrontend)).
+Không còn bệnh nhân, tài khoản,
 lượt khám, sinh hiệu hoặc giao dịch demo trên ứng dụng. Không có fallback lưu hồ sơ
 trên trình duyệt; mọi thao tác nghiệp vụ dùng backend. Mock fixtures chỉ nằm trong
 test tự động, không được nạp vào ứng dụng hay database.
@@ -154,6 +156,13 @@ npm run test:api
 npm run test:live
 ```
 
+`npm test` gồm test hợp đồng module (`tests/unit/registry.test.mjs`): mọi module export định nghĩa hợp lệ,
+không tham chiếu treo, id trùng giữa hai module bị từ chối, module lỗi được cô lập.
+`microfrontend-check` trong `test:browser` kiểm tra mỗi module được tải thành file riêng theo import map, và khi
+một module không tải được (404) thì chỉ mục của nó bị ẩn, có thông báo, các workspace khác vẫn chạy.
+Test trình duyệt mặc định gọi http://127.0.0.1:5173 (`npm run dev`); đổi bằng `QA_BASE_URL`, ví dụ chạy trên
+bản build: `npm run build && npm run preview`, rồi `QA_BASE_URL=http://127.0.0.1:4173 npm run test:browser`.
+
 `test:browser` dùng Playwright route mock, context độc lập, desktop/mobile và các vai trò,
 không ghi DB: danh sách và thao tác trên dòng, 409 hồ sơ trùng, encounter sinh hiệu → form
 sinh hiệu, tự điền provider, quyền theo vai trò, in, không lưu dữ liệu trên trình duyệt.
@@ -162,20 +171,83 @@ VinSHC trong `infra/backend` của repo (79/79). Độ phủ route không chứn
 runtime; luồng ghi thật với tài khoản 7 role nằm ở `tests/integration/test_b11_care_workflow.py`.
 `test:live` cần backend và FE đang chạy; chỉ đọc API thật.
 
-## Source
+## Kiến trúc microfrontend
 
-- `app.js`, `landing.js`: trang giới thiệu và đường vào phòng khám.
-- `connected.js`, `connected-actions.js`, `connected.css`: không gian kết nối.
-- `backend-client.js`: HTTP client, lỗi, generation guard, validation payload.
-- `metadata.js`, `metadata/`, `backend-mapping.js`: danh mục và hợp đồng backend.
-- `additional-actions.js`: bổ sung CRUD phần mở rộng, policy thông tin thiếu và quản trị workspace.
-- `care-actions.js`: bệnh nhân, lượt khám, encounter, sinh hiệu, cấp thuốc, báo cáo nhiều ngày.
-- `worklists.js`: danh sách tải từ backend và thao tác trên dòng.
-- `workspace-screens.js`, `workspace-model.js`: tổng quan, màn hình theo mục và bộ nhớ bản ghi/context của workspace.
-- `metadata/ui-options.json`: code list giới tính, độ đầy đủ ngày sinh và lý do kết thúc từ pack main.
-- `metadata/field-policies.json`: trích nguyên policy field-state từ pack của main đã khóa.
+```text
+infra/frontend/
+├─ index.html, app.js, landing.js   trang giới thiệu (host)
+├─ connected.html, connected.css    host của shell; import map được chèn lúc dev/build
+├─ shell/            @vinshc/shell  đăng nhập, chọn workspace, layout, form, worklist, nạp module
+├─ packages/core/    @vinshc/core   thư viện dùng chung: BackendClient, metadata (packages/core/metadata/),
+│                                   builder form/action, UI helper, WorkspaceMemory, hợp đồng registry
+├─ modules/          mỗi thư mục là một microfrontend: package riêng, build/deploy riêng
+│  ├─ patients/      Bệnh nhân + Hành chính (liên hệ, địa chỉ, thông tin thiếu)
+│  ├─ visits/        Lượt khám
+│  ├─ vitals/        Sinh hiệu (form đo, lịch sử, đính chính/hủy)
+│  ├─ clinical/      Khám & điều trị (phiếu khám, chẩn đoán, dị ứng, đơn thuốc)
+│  ├─ scheduling/    Lịch hẹn, Hàng đợi
+│  ├─ billing/       Thu ngân, phiếu thu/hoàn
+│  ├─ orders/        Chỉ định & kết quả CLS, tệp, phiếu in
+│  ├─ pharmacy/      Quầy thuốc, in đơn
+│  ├─ reports/       Báo cáo
+│  ├─ admin/         Quản trị
+│  └─ documents/     Mục Chứng từ & mẫu in (liệt kê mẫu in của các module khác)
+├─ scripts/          build.mjs, importmap.mjs, check-api-coverage.mjs
+└─ tests/            unit/ (node --test), browser/ (Playwright), registry.mjs
+```
+
+**Cách nạp:** `connected.html` có một import map. Shell đọc import map, nạp **mọi** mục `@vinshc/<tên>` (trừ
+`core`/`shell`) bằng `import()` rồi ghép thành một registry. Shell không có danh sách module viết cứng: thêm
+hoặc bớt module chỉ là thêm hoặc bớt một dòng import map. `@vinshc/core` cũng nằm trong import map nên trình
+duyệt chỉ tải **một** bản dùng chung cho shell và mọi module. Lúc dev, import map trỏ vào mã nguồn
+(`/modules/<tên>/src/index.js`); bản build trỏ vào bundle có hash nội dung (`/modules/<tên>/index.js?v=…`).
+
+**Hợp đồng module** (`packages/core/src/registry.js`): mỗi module `export default defineModule({...})` gồm
+`name`, `order` và các phần nó sở hữu:
+
+| Phần | Ý nghĩa |
+| --- | --- |
+| `sections` | Mục trên thanh bên: `id`, `title`, `resource`, `order`, `actions` (id thao tác), `note`, `description`/`icon` cho Tổng quan, `records` (bảng bản ghi đã mở), `needsProvider`, `visible(ctx)`; hook `intro`/`header`/`footer`/`bind` cho phần giao diện riêng (ví dụ form đo sinh hiệu). |
+| `actions` | Thao tác gọi backend, dựng bằng `action(...)` của core: field, `path`, `build`, cờ `idempotent`/`facility`/`upload`/`binary`/`document`, `onlyRoles`; hook `prepare`/`finish`/`send`/`bind`/`formValues`. |
+| `worklists` | Danh sách tải từ backend của một mục: bộ lọc, `path`, `row` (nút trên dòng trỏ tới mục/thao tác bất kỳ). |
+| `records`, `links`, `captures` | Loại bản ghi mà `WorkspaceMemory` ghi nhớ, liên kết cha (`billUuid` → phiếu phí) và bản ghi nhúng trong phản hồi. |
+| `providerFields` | Vai trò đóng vai người hành nghề và field được tự điền provider của tài khoản. |
+| `calls`, `onCapture`, `labels` | Lời gọi API ngoài action (cho `test:api`), hook sau mỗi phản hồi, nhãn hiển thị. |
+
+Quy tắc:
+
+- Module chỉ `import` từ `@vinshc/core`, **không import module khác**. Liên kết chéo (mục Chứng từ liệt kê
+  `printReceipt` của billing, nút *Thu tiền* trên danh sách lượt) dùng id; shell tự ẩn liên kết khi module đích
+  không được triển khai hoặc vai trò không có quyền.
+- Id mục/thao tác/worklist/loại bản ghi là toàn cục; trùng giữa hai module là lỗi triển khai (registry từ chối).
+- Trạng thái phiên (client, bộ nhớ workspace, ngữ cảnh) do shell giữ và truyền cho hook qua `ctx`; module không
+  giữ singleton.
+- Quyền vẫn do backend quyết định; FE chỉ ẩn thao tác theo ma trận quyền trong metadata.
+
+**Thêm một module:** tạo `modules/<tên>/package.json` (`"name": "@vinshc/<tên>"`, phụ thuộc `@vinshc/core`) và
+`src/index.js` export `defineModule(...)`, rồi chạy `npm install` để liên kết workspace. Dev server và bản build tự
+đưa module vào import map; `npm test` kiểm tra hợp đồng.
+
+**Build và triển khai:**
+
+```sh
+npm run build                       # core + mọi module + trang host → dist/, kèm dist/importmap.json
+npm run preview                     # phục vụ dist/ ở http://127.0.0.1:4173 (proxy /openmrs như dev)
+npm run build -w @vinshc/pharmacy   # build lại riêng một module trên dist/ có sẵn
+npm run build:package -- core       # tương tự cho thư viện dùng chung
+```
+
+Mỗi package là một bundle ES riêng, `@vinshc/*` để external. Build lại một module chỉ ghi `dist/modules/<tên>/`
+và cập nhật đúng dòng của nó trong `dist/importmap.json` và import map của `dist/connected.html`; module khác giữ
+nguyên file và hash. Hash lấy từ nội dung nên build lại mã không đổi cho cùng URL. Đổi `@vinshc/core` theo
+cách không tương thích thì phải build lại các module dùng phần đã đổi.
+
+## Mã nguồn khác
+
+- `app.js`, `landing.js`, `styles.css`: trang giới thiệu và đường vào phòng khám.
+- `packages/core/metadata/`: bản sao danh mục từ `metadata/vinshc` (xem `source.json`); `ui-options.json` là code
+  list giới tính, độ đầy đủ ngày sinh, lý do kết thúc; `field-policies.json` là policy field-state của pack đã khóa.
 - `configure-admin.py`: cấu hình role/assignment cho admin hiện có qua API.
-- `clear-demo.js`: xóa đúng hai khóa demo cũ.
 - `docker-local.mjs`, `compose.local.yaml`: build và chạy backend của working tree trong project Docker riêng.
 
 Ảnh Pexels được lưu local; xem `assets/ASSET_SOURCES.md`. Font Be Vietnam Pro dùng

@@ -7,7 +7,7 @@
 
 - Source backend trong repo: `infra/backend/`, module Java tại
   `infra/backend/vinshc-module/`. Backend dùng OpenMRS Core 2.8.8 và module VinSHC.
-- Metadata nguồn: `metadata/vinshc/`; bản FE dùng nằm ở `infra/frontend/metadata/`.
+- Metadata nguồn: `metadata/vinshc/`; bản FE dùng nằm ở `infra/frontend/packages/core/metadata/`.
 - Từ khi BE đã merge vào `main`, `npm run backend:build` build trực tiếp từ working tree
   (`compose.yaml` ở gốc repo + overlay `infra/frontend/compose.local.yaml`), image
   `vinshc-fe-local-backend:dev`. Sửa source BE cần chạy lại `backend:build` rồi `backend:up`.
