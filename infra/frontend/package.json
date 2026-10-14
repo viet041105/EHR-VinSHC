@@ -1,24 +1,32 @@
 {
   "name": "vinshc-frontend",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "engines": {
     "node": ">=22.12.0"
   },
+  "workspaces": [
+    "packages/*",
+    "shell",
+    "modules/*"
+  ],
   "scripts": {
     "dev": "node dev.mjs --host 127.0.0.1 --port 5173 --strictPort",
-    "test": "node --test backend-client.test.mjs workspace-model.test.mjs",
-    "test:browser": "node connected-check.cjs && node additional-check.cjs && node workspace-check.cjs",
-    "test:connected": "node connected-check.cjs",
+    "build": "node scripts/build.mjs",
+    "build:package": "node scripts/build.mjs --only",
+    "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
+    "test": "node --test tests/unit/*.test.mjs",
+    "test:browser": "node tests/browser/connected-check.cjs && node tests/browser/additional-check.cjs && node tests/browser/workspace-check.cjs && node tests/browser/microfrontend-check.cjs",
+    "test:connected": "node tests/browser/connected-check.cjs",
+    "test:live": "node tests/browser/live-check.cjs",
+    "test:api": "node scripts/check-api-coverage.mjs",
     "backend:prepare": "node docker-local.mjs prepare",
     "backend:build": "node docker-local.mjs build",
     "backend:up": "node docker-local.mjs up",
     "backend:status": "node docker-local.mjs status",
     "backend:down": "node docker-local.mjs down",
-    "test:live": "node live-check.cjs",
     "backend:metadata": "python3 configure-metadata.py",
-    "backend:admin": "python3 configure-admin.py",
-    "test:api": "node check-api-coverage.mjs"
+    "backend:admin": "python3 configure-admin.py"
   },
   "devDependencies": {
     "playwright": "1.64.0",

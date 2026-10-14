@@ -1,4 +1,4 @@
-import "./clear-demo.js";
+import "./packages/core/src/clear-demo.js";
 import { landingPage, landingFooter } from "./landing.js";
 const paths = {
   users:

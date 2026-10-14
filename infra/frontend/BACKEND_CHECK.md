@@ -25,8 +25,8 @@ Không thiếu package npm, schema hoặc module phân quyền trên stack đang
 - DB đã nạp đủ 8 `VinSHC App: <role>` và 69 scoped privileges.
 - Cơ sở `VinSHC Development Clinic` tồn tại, không retired.
 - `vinshc_workspace_assignment` có **0 assignment active**; không có tài khoản nghiệp vụ.
-- FE `metadata.js::assignedRoles` chỉ cho chọn các role `VinSHC App` có tên trong session.
-  `connected.js` vì vậy không hiện lựa chọn workspace cho root admin hiện tại.
+- FE `packages/core/src/metadata.js::assignedRoles` chỉ cho chọn các role `VinSHC App` có tên trong session.
+  `shell/src/app.js` (trước là `connected.js`) vì vậy không hiện lựa chọn workspace cho root admin hiện tại.
 - Gọi thật `GET /vinshc/authorization/workspace` không header: HTTP 403,
   `Privileges required: active role workspace`.
 - Gọi cùng endpoint bằng admin với header role `admin` và cơ sở đúng: HTTP 403,
