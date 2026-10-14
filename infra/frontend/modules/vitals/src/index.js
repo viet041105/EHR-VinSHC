@@ -79,7 +79,7 @@ function vitalsForm(ctx) {
     );
   const missing = [["", "Chưa ghi"], ...missingStates];
   const { field } = ctx;
-  return `<section class="panel form-card"><h2>Ghi lần đo sinh hiệu</h2>${note("Chọn lượt khám trong danh sách Lượt khám, rồi dùng “Bắt đầu / tiếp tục đo sinh hiệu” để có mã encounter. Để trống chỉ số chưa ghi. Khi thiếu một vế huyết áp, chọn trạng thái thiếu tương ứng. Tâm thu ≤ tâm trương vẫn gửi để backend lưu cờ cần đối chiếu.")}<form id="vitalsForm"><div class="form-grid">${field(id("patient", "Mã bệnh nhân (UUID)"))}${field(id("encounter", "Mã encounter sinh hiệu (UUID)"))}${field(F("measuredAt", "Thời điểm đo", "datetime-local"))}${VITAL_FIELD_MAP.map((f) => `${field(F(f.key, f.label + " (" + f.unit + ")", "number", { required: false, min: VITAL_LIMITS[f.key][0], max: VITAL_LIMITS[f.key][1], step: "any" }))}${field(choice(f.key + "State", "Trạng thái thiếu · " + f.label, missing, { required: false }))}`).join("")}</div><div class="form-actions"><button class="primary" ${ctx.busy ? "disabled" : ""}>${ctx.busy ? "Đang lưu…" : "Lưu sinh hiệu lên OpenMRS"}</button></div></form></section>`;
+  return `<section class="panel form-card"><h2>Ghi lần đo sinh hiệu</h2>${note("Chọn lượt khám trước khi ghi lần đo. Nhập số đo hoặc chọn lý do chưa có số đo; kiểm tra kỹ hai giá trị huyết áp.")}<form id="vitalsForm"><details class="form-reference-block"><summary>Hồ sơ được chọn</summary><div class="form-grid">${field(id("patient", "Bệnh nhân"))}${field(id("encounter", "Lần khám sinh hiệu"))}</div></details><div class="form-grid vital-inputs">${field(F("measuredAt", "Thời điểm đo", "datetime-local"))}${VITAL_FIELD_MAP.map(f => field(F(f.key, f.label + " (" + f.unit + ")", "number", {required:false,min:VITAL_LIMITS[f.key][0],max:VITAL_LIMITS[f.key][1],step:"any"}))).join('')}</div><details class="missing-measurements"><summary>Lý do chưa có số đo (nếu cần)</summary><p>Chọn lý do cho chỉ số chưa đo được. Không chọn lý do khi đã nhập số đo.</p><div class="form-grid">${VITAL_FIELD_MAP.map(f => field(choice(f.key + 'State', f.label, missing, {required:false}))).join('')}</div></details><div class="form-actions"><button class="primary" ${ctx.busy ? 'disabled' : ''}>${ctx.busy ? 'Đang lưu…' : 'Lưu sinh hiệu'}</button></div></form></section>`;
 }
 function bindVitalsForm(ctx) {
   document
@@ -101,12 +101,12 @@ function bindVitalsForm(ctx) {
               method: "POST",
               body: payload,
             }),
-          "OpenMRS đã lưu lần đo sinh hiệu.",
+          "Đã lưu lần đo sinh hiệu.",
           (result) => {
             ctx.capture("vitals", result, data);
             if (result.needsVerification)
               ctx.setMessage(
-                "Đã lưu sinh hiệu. Backend đánh dấu cần đối chiếu huyết áp; kiểm tra lại số đo.",
+                "Đã lưu sinh hiệu. Cần đối chiếu huyết áp; kiểm tra lại số đo.",
               );
             ctx.refreshWorklistsSoon();
           },
@@ -128,7 +128,7 @@ const actions = {
     {
       captures: "encounter",
       notice:
-        "Dùng lại encounter sinh hiệu của bạn trong lượt nếu đã có; người thực hiện là hồ sơ người hành nghề gắn với tài khoản.",
+        "Bắt đầu lần đo trong lượt đang chọn. Nếu đã có lần khám sinh hiệu của bạn, tiếp tục lần khám đó.",
     },
   ),
   vitalsHistory: action(
@@ -176,7 +176,7 @@ const actions = {
       record: "vitals",
       captures: "vitals",
       notice:
-        "Lần đo cũ được hủy kèm lý do và thay bằng lần đo mới trong cùng encounter. Chỉ thực hiện khi lượt còn mở.",
+        "Đính chính tạo lần đo mới và lưu lý do thay đổi. Chỉ thực hiện khi lượt khám còn mở.",
     },
   ),
   voidVitals: action(

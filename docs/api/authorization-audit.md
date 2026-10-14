@@ -1,6 +1,6 @@
 # Authorization and audit (B5)
 
-The VinSHC 0.3.0 module enforces the versioned eight-role matrix from `metadata/vinshc/permissions.json`. OpenMRS roles and the 69 scoped privileges are loaded by Initializer, while the backend binds each account to one or more server-side role/facility workspaces.
+The VinSHC module enforces the versioned eight-role matrix from `metadata/vinshc/permissions.json`. OpenMRS roles and the 69 scoped privileges are loaded by Initializer. Each staff account may hold exactly one `VinSHC App:` role and one active server-side role/facility workspace; a new assignment replaces the previous workspace.
 
 ## Active workspace
 
@@ -18,7 +18,7 @@ The headers select a workspace; they do not grant one. The backend verifies all 
 - the exact role—not the union of all roles on the account—contains the requested matrix privilege;
 - patient/encounter data belongs to the assigned facility or one of its child locations.
 
-Missing, forged or inactive workspace values return HTTP 403. This prevents a multi-role account operating in the admin workspace from inheriting its doctor workspace actions.
+Missing, forged or inactive workspace values return HTTP 403. Accounts with multiple VinSHC roles or active workspace assignments are rejected until an administrator replaces the old role/assignment with one current grant.
 
 ## Endpoints
 
@@ -26,6 +26,7 @@ Missing, forged or inactive workspace values return HTTP 403. This prevents a mu
 | --- | --- |
 | `POST /vinshc/authorization/assignment` | Add or replace a user/role/facility assignment; protected by system administration or `metadata_admin update` |
 | `DELETE /vinshc/authorization/assignment` | Revoke an assignment; protected by system administration or `metadata_admin void` |
+| `GET /vinshc/authorization/workspaces` | Return only the authenticated account's active role/facility assignment; login opens it directly. More than one VinSHC role or active assignment is rejected and requires administrator correction |
 | `GET /vinshc/authorization/workspace` | Validate and return the active workspace selected by the two headers |
 | `GET /vinshc/authorization/evaluate?resource=...&action=...` | Evaluate one cell of the role matrix; allowed returns 200, denied returns 403 |
 | `GET /vinshc/authorization/audit?patient=...&encounter=...&limit=200&offset=0` | Read append-only VinSHC access-audit rows, newest first; `limit` 1–1000 (default 200); an unknown patient/encounter UUID returns 400 instead of an unfiltered log |

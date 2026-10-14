@@ -56,7 +56,7 @@ Các sản phẩm nhóm cần bàn giao gồm:
 
 Phòng khám mục tiêu: một địa điểm, 1–5 bác sĩ, 20–150 lượt khám/ngày, có thể có cận lâm sàng cơ bản và quầy thuốc. Chi tiết trong [CLINIC_WORKFLOW.md](docs/CLINIC_WORKFLOW.md).
 
-Các role: **tiếp đón, thu ngân, điều dưỡng, bác sĩ, kỹ thuật viên CLS, dược/quầy thuốc, quản lý phòng khám, quản trị hệ thống**. Role được ghép từ privilege; một người có thể giữ nhiều role, vì phòng khám nhỏ thường kiêm nhiệm.
+Các role: **tiếp đón, thu ngân, điều dưỡng, bác sĩ, kỹ thuật viên CLS, dược/quầy thuốc, quản lý phòng khám, quản trị hệ thống**. Mỗi tài khoản nhân viên chỉ có một role VinSHC và một workspace hoạt động; nhân sự kiêm nhiệm dùng tài khoản riêng cho từng role. Các role Core cần cho quản trị hệ thống, như `System Developer`, không tính là role VinSHC và được giữ độc lập.
 
 **Bệnh nhân** là người dùng của cổng bệnh nhân (MVP-3), không phải một role nhân viên. Bệnh nhân chỉ đọc phần hồ sơ **của chính mình đã được công bố**. Tài khoản bệnh nhân chỉ được liên kết với hồ sơ sau khi tiếp đón đối chiếu giấy tờ.
 

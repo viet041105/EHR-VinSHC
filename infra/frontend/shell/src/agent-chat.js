@@ -1,3 +1,5 @@
+import { displayResult } from "./result-view.js";
+import { RESULT_LABELS } from "@vinshc/core";
 import { esc } from "@vinshc/core";
 
 export function chatContextKey(client, persona, context) {
@@ -27,7 +29,7 @@ export class AgentChat {
       <form data-chat><label>Câu hỏi<textarea name="message" rows="2" maxlength="1000" required ${!ready||this.pending ? "disabled" : ""}></textarea></label>
       <button class="primary" ${!ready||this.pending ? "disabled" : ""}>${this.pending ? "Đang đọc hồ sơ…" : "Gửi câu hỏi"}</button><button type="button" data-clear>Xóa hội thoại</button></form>
       <p class="error" role="alert">${esc(this.error||"")}</p>
-      <details ${this.source ? "open" : ""}><summary>Nguồn hồ sơ</summary><pre class="agent-source-record">${esc(this.source ? JSON.stringify(this.source,null,2) : "Chọn một nguồn để đối chiếu.")}</pre></details>
+      <details ${this.source ? "open" : ""}><summary>Nguồn hồ sơ</summary><div class="agent-source-record">${this.source ? displayResult(this.source, RESULT_LABELS) : "Chọn một nguồn để đối chiếu."}</div></details>
       </section>`;
     this.root.querySelector('[data-chat]').onsubmit=e=>{e.preventDefault();this.ask(new FormData(e.target).get('message'));};
     this.root.querySelector('[data-summary]')?.addEventListener('click',()=>this.ask('Tóm tắt lần khám này giúp tôi'));

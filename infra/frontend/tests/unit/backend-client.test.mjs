@@ -42,7 +42,7 @@ test("session and workspace use role/location headers, credentials stay private"
   assert.deepEqual(assignedRoles(session.user), ["doctor"]);
   await client.selectWorkspace("doctor", encounter);
   await client.request("vinshc/clinical-configuration");
-  assert.equal(calls[0].path, "/openmrs/ws/rest/v1/session?v=full");
+  assert.equal(calls[0].path, "/api/session?v=full");
   assert.equal(calls[0].init.credentials, "omit");
   assert.equal(calls[0].init.redirect, "error");
   assert.equal(calls[2].init.headers["X-VinSHC-Workspace-Role"], "doctor");
@@ -67,7 +67,7 @@ test("errors fail without demo fallback and unsupported Core paths are blocked",
     async () =>
       new Response("<html/>", { headers: { "content-type": "text/html" } }),
   );
-  await assert.rejects(client.request("vinshc/configuration-status"), /JSON/);
+  await assert.rejects(client.request("vinshc/configuration-status"), /phản hồi hợp lệ/);
   await assert.rejects(client.request("patient/" + patient));
 });
 test("responses from an old workspace are discarded", async () => {

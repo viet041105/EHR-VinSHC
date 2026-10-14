@@ -73,7 +73,7 @@ const actions = {
       facility: true,
       captures: "bill",
       notice:
-        "Giá do backend chụp từ danh mục hiện hành, FE không gửi đơn giá. Có thể lập nhiều phiếu theo dịch vụ.",
+        "Giá được lấy từ danh mục dịch vụ hiện hành. Kiểm tra số lượng và giảm giá trước khi lập phiếu.",
     },
   ),
   receipt: action(

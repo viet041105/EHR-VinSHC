@@ -2,7 +2,7 @@
 from pathlib import Path
 import sys
 
-runtime = Path(__file__).resolve().parents[2]
+runtime = Path(__file__).resolve().parents[3]
 sys.path[:0] = [str(runtime / "scripts"), str(runtime / "tests" / "integration")]
 from api_client import Client
 from b4_metadata_catalogue import ensure

@@ -48,9 +48,9 @@ Không import package O3 vào FE này. Các tên esm trong báo cáo xác địn
 
 ## Vai trò theo kế hoạch main hiện tại
 
-Kế hoạch mới xác định **8 role**, không phải 4: tiếp đón, thu ngân, điều dưỡng, bác sĩ, KTV CLS, dược/quầy thuốc, quản lý phòng khám, quản trị hệ thống. Một tài khoản có thể kiêm nhiều role. Xem [thiết kế từng role, phạm vi dữ liệu và hợp đồng cần BE](ROLE_WORKFLOWS.md).
+Kế hoạch mới xác định **8 role**, không phải 4: tiếp đón, thu ngân, điều dưỡng, bác sĩ, KTV CLS, dược/quầy thuốc, quản lý phòng khám, quản trị hệ thống. Mỗi tài khoản chỉ có một role VinSHC và một workspace hoạt động. Xem [thiết kế từng role, phạm vi dữ liệu và hợp đồng cần BE](ROLE_WORKFLOWS.md).
 
-FE đã có không gian riêng cho cả 8 role, thao tác theo nhiệm vụ và privilege ghép, các màn hình operational bổ sung tại `infra/frontend/operations.js`: thu/hoàn/hủy/phiếu thu/bảng giá, worklist CLS theo tài khoản được giao, kết quả/tệp, cấp theo bản chụp đơn mẫu, báo cáo tổng hợp. Quản trị không mặc định được đọc/ghi chart; tiếp đón không thấy tài liệu lâm sàng. Bộ chọn phiên hiển thị role được giao của tài khoản đang hoạt động.
+FE có không gian riêng cho cả 8 role, thao tác theo nhiệm vụ và privilege; mỗi tài khoản chỉ được cấp một role VinSHC. Quản trị không mặc định được đọc/ghi chart; tiếp đón không thấy tài liệu lâm sàng. Role được lấy từ phân công backend và mở ngay sau đăng nhập.
 
 Các màn hình này dùng dữ liệu giả. Billing/dispensing/reporting là phần FE chuẩn bị cho MVP-2/module tùy chọn, chưa chứng minh module backend hay toàn bộ nghiệp vụ hoạt động. Baseline mới dùng PostgreSQL 16.15. Danh sách 13 thành phần trong báo cáo ban đầu không bao trùm backlog backend hiện tại; tham chiếu `docs/BACKEND.md` B8 cho billing/stock và các adapter cần khảo sát.
 

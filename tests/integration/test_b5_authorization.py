@@ -24,9 +24,11 @@ class B5AuthorizationTests(unittest.TestCase):
         cls.permissions = json.loads(
             (ROOT / "metadata/vinshc/permissions.json").read_text(encoding="utf-8")
         )
-        cls.facility = json.loads(
+        facility = json.loads(
             (ROOT / "metadata/vinshc/catalogues/facilities.json").read_text(encoding="utf-8")
-        )["records"][0]["locationUuid"]
+        )["records"][0]
+        cls.facility = facility["locationUuid"]
+        cls.facility_name = facility["name"]
         b2 = json.loads((ROOT / ".runtime/fixtures/b2-patients.json").read_text(encoding="utf-8"))
         b4 = json.loads((ROOT / ".runtime/fixtures/b4a-consultations.json").read_text(encoding="utf-8"))
         cls.patient = b2["patients"][0]["patientUuid"]
@@ -80,6 +82,9 @@ class B5AuthorizationTests(unittest.TestCase):
         for role, client in self.clients.items():
             session = client.json("/openmrs/ws/rest/v1/session")
             self.assertTrue(session["authenticated"])
+            workspaces = client.json("/openmrs/ws/rest/v1/vinshc/authorization/workspaces")
+            self.assertEqual([{"role": role, "facilityUuid": self.facility,
+                              "facilityName": self.facility_name}], workspaces)
             workspace = client.json("/openmrs/ws/rest/v1/vinshc/authorization/workspace")
             self.assertEqual(role, workspace["role"])
             self.assertEqual(self.facility, workspace["facilityUuid"])

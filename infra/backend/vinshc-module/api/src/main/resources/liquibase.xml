@@ -371,4 +371,22 @@
     </sql>
     <rollback><sql>DROP TABLE vinshc_portal_publication; DROP TABLE vinshc_portal_account;</sql></rollback>
   </changeSet>
+  <changeSet id="vinshc-0.4.2-single-user-workspace" author="vinshc" dbms="postgresql">
+    <comment>Keep only the newest active role/facility workspace per staff account.</comment>
+    <sql>
+      WITH ranked AS (
+        SELECT assignment_id, ROW_NUMBER() OVER (
+          PARTITION BY user_id ORDER BY date_created DESC, assignment_id DESC
+        ) AS position
+        FROM vinshc_workspace_assignment
+        WHERE active=true
+      )
+      UPDATE vinshc_workspace_assignment a
+      SET active=false
+      FROM ranked r
+      WHERE a.assignment_id=r.assignment_id AND r.position&gt;1;
+    </sql>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_workspace_one_per_user ON vinshc_workspace_assignment(user_id) WHERE active=true</sql>
+    <rollback><sql>DROP INDEX ux_vinshc_workspace_one_per_user;</sql></rollback>
+  </changeSet>
 </databaseChangeLog>

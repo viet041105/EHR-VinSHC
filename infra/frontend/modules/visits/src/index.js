@@ -147,6 +147,7 @@ const visits = {
       id: v.uuid,
       title: v.patient?.fullName,
       detail: [
+        v.visitCode,
         patientIdentity(v.patient || {}),
         v.visitType?.name,
         "Bắt đầu " + formatTime(v.startDatetime),

@@ -160,6 +160,9 @@ class CareWorkflowTests(unittest.TestCase):
         status, invalid = self.call("reception", f"{VINSHC}/patients", method="POST",
                                     payload=self.registration(identifiers=[{"type": "cccd", "identifier": "12"}]))
         self.assertEqual(status, 400, invalid)
+        status, missing_cccd = self.call("reception", f"{VINSHC}/patients", method="POST",
+                                         payload=self.registration(identifiers=[]))
+        self.assertEqual(status, 400, missing_cccd)
         status, _ = self.call("cashier", f"{VINSHC}/patients", method="POST", payload=self.registration())
         self.assertEqual(status, 403)
         type(self).state["patient"] = patient["uuid"]
@@ -197,6 +200,7 @@ class CareWorkflowTests(unittest.TestCase):
         visit = self.ok("reception", f"{VINSHC}/visits", {"patient": patient, "visitType": "outpatient"},
                         statuses=(201,))
         self.assertEqual(visit["status"], "open")
+        self.assertRegex(visit["visitCode"], r"^VSHC-LK-[0-9]{8}$")
         status, again = self.call("reception", f"{VINSHC}/visits", method="POST",
                                   payload={"patient": patient, "visitType": "outpatient"})
         self.assertEqual(status, 409, again)
@@ -215,6 +219,7 @@ class CareWorkflowTests(unittest.TestCase):
         self.assertEqual(away_status, 403)
         self.assertEqual(away_search["results"], [])
         type(self).state["visit"] = visit["uuid"]
+        type(self).state["visitCode"] = visit["visitCode"]
         self.record("one open visit per patient; other facility gets 403 and an empty search",
                     visit=visit["uuid"], awayStatus=away_status)
 
@@ -396,10 +401,12 @@ class CareWorkflowTests(unittest.TestCase):
 
     def test_11_cancelled_visit_blocks_dispensing(self):
         patient = self.ok("reception", f"{VINSHC}/patients", self.registration(
-            middleName=letters(), identifiers=[], birthPrecision="unknown", birthYear=None),
+            middleName=letters(), identifiers=[{"type": "cccd", "identifier": f"{random.randrange(10**11, 10**12)}"}],
+            birthPrecision="unknown", birthYear=None),
             statuses=(201,))
         visit = self.ok("reception", f"{VINSHC}/visits", {"patient": patient["uuid"], "visitType": "followup"},
                         statuses=(201,))
+        self.assertNotEqual(visit["visitCode"], self.state["visitCode"])
         encounter = self.ok("doctor", f"{VINSHC}/visits/{visit['uuid']}/encounters",
                             {"encounterType": "consultation"}, statuses=(201,))["uuid"]
         order = self.ok("doctor", f"{VINSHC}/drug-order", {

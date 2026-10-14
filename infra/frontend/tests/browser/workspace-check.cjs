@@ -3,7 +3,6 @@ const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
 const os = require("node:os");
 const path = require("node:path");
-const permissions = require("../../packages/core/metadata/permissions.json");
 const map = require("../../packages/core/metadata/frontend-map.json");
 const base = process.env.QA_BASE_URL || "http://127.0.0.1:5173";
 const patient = "11111111-1111-4111-8111-111111111111",
@@ -30,6 +29,7 @@ const person = {
 const visitRow = {
   uuid: visit,
   visitUuid: visit,
+  visitCode: "VSHC-LK-00000042",
   patientUuid: patient,
   patient: person,
   visitType: { key: "outpatient", name: "VinSHC Outpatient" },
@@ -50,7 +50,7 @@ const visitRow = {
         errors = [];
       let role = "reception";
       page.on("pageerror", (error) => errors.push(error.message));
-      await page.route("**/openmrs/**", async (route) => {
+      await page.route("**/api/**", async (route) => {
         const request = route.request(),
           url = new URL(request.url()),
           p = url.pathname,
@@ -76,11 +76,17 @@ const visitRow = {
             user: {
               uuid: other,
               display: "QA workspace",
-              roles: Object.keys(permissions.roles).map((key) => ({
-                name: "VinSHC App: " + key,
-              })),
+              roles: [{ name: "VinSHC App: " + role }],
             },
           });
+        if (p.endsWith("/authorization/workspaces"))
+          return send([
+            {
+              role,
+              facilityUuid: location,
+              facilityName: "VinSHC Development Clinic",
+            },
+          ]);
         assert.equal(request.headers()["x-vinshc-workspace-role"], role);
         assert.equal(
           request.headers()["x-vinshc-workspace-facility"],
@@ -224,14 +230,20 @@ const visitRow = {
       await page.goto(base + "/connected.html", {
         waitUntil: "domcontentloaded",
       });
-      await page.locator("[name=username]").fill("qa");
-      await page.locator("[name=password]").fill("qa-only");
-      await page.locator("#loginForm button").click();
+      let loggedIn = false;
       async function workspace(next) {
+        if (loggedIn && role === next) return;
+        if (loggedIn) {
+          await page.locator("#logout").click();
+          await page.locator("#loginForm").waitFor();
+          loggedIn = false;
+        }
         role = next;
-        await page.locator("[name=role]").selectOption(next);
-        await page.locator("#workspaceForm button").click();
+        await page.locator("[name=username]").fill("qa");
+        await page.locator("[name=password]").fill("qa-only");
+        await page.locator("#loginForm button").click();
         await page.locator("[data-section=overview]").waitFor();
+        loggedIn = true;
       }
       async function section(id) {
         await page.locator("[data-section=" + id + "]").click();
@@ -252,7 +264,7 @@ const visitRow = {
 
       await workspace("reception");
       await page
-        .getByRole("heading", { name: "Quy trình phòng khám" })
+        .getByRole("heading", { name: "Các bước trong lượt khám" })
         .waitFor();
       assert.equal(await page.locator("[data-pending-form]").count(), 0);
       await section("patients");
@@ -278,7 +290,7 @@ const visitRow = {
         patient,
       );
       assert.match(
-        await page.locator(".context-panel summary").innerText(),
+        await page.locator(".care-summary strong").innerText(),
         /Nguyễn Thị Bình/,
       );
       await page
@@ -287,7 +299,7 @@ const visitRow = {
       await page.locator("#actionForm button").click();
       await page
         .locator("#connectionMessage")
-        .filter({ hasText: "đã xác nhận" })
+        .filter({ hasText: "đã được lưu" })
         .waitFor();
       assert.deepEqual(lastPost("/vinshc/visits").body, {
         patient,
@@ -302,10 +314,14 @@ const visitRow = {
         .locator("#actionForm [name=birthPrecision]")
         .selectOption("year");
       await page.locator("#actionForm [name=birthYear]").fill("1990");
+      await page.locator("#actionForm [name=cccd]").fill("001090000001");
       await page.locator("#actionForm button").click();
       await page.locator("[data-match-index]").waitFor();
       const registration = lastPost("/vinshc/patients").body;
       assert.equal(registration.birthYear, 1990);
+      assert.deepEqual(registration.identifiers, [
+        { type: "cccd", identifier: "001090000001" },
+      ]);
       assert.ok(registration.idempotencyKey);
       assert.equal(registration.allowPossibleDuplicate, undefined);
       assert.equal(
@@ -327,10 +343,10 @@ const visitRow = {
         fullPage: true,
       });
 
-      await page.locator("#switchWorkspace").click();
       await workspace("nurse");
       await section("visits");
       await row("visits").waitFor();
+      assert.match(await row("visits").innerText(), /VSHC-LK-00000042/);
       await row("visits")
         .getByRole("button", { name: "Ghi sinh hiệu" })
         .click();
@@ -341,7 +357,7 @@ const visitRow = {
       await page.locator("#actionForm button").click();
       await page
         .locator("#connectionMessage")
-        .filter({ hasText: "đã xác nhận" })
+        .filter({ hasText: "đã được lưu" })
         .waitFor();
       assert.deepEqual(lastPost("/encounters").body, {
         encounterType: "vitals",
@@ -372,7 +388,6 @@ const visitRow = {
         ),
       );
 
-      await page.locator("#switchWorkspace").click();
       await workspace("cashier");
       await section("billing");
       await row("bills").waitFor();
@@ -389,7 +404,7 @@ const visitRow = {
       await page.locator("#actionForm button").click();
       await page
         .locator("#connectionMessage")
-        .filter({ hasText: "đã xác nhận" })
+        .filter({ hasText: "đã được lưu" })
         .waitFor();
       assert.equal(lastPost("/receipts").body.amountVnd, 150000);
       await page.emulateMedia({ media: "print" });
@@ -403,7 +418,6 @@ const visitRow = {
       await page.emulateMedia({ media: "screen" });
       await noOverflow();
 
-      await page.locator("#switchWorkspace").click();
       await workspace("pharmacy");
       await section("pharmacy");
       await row("prescriptions").waitFor();
@@ -422,7 +436,7 @@ const visitRow = {
       await page.locator("#actionForm button").click();
       await page
         .locator("#connectionMessage")
-        .filter({ hasText: "đã xác nhận" })
+        .filter({ hasText: "đã được lưu" })
         .waitFor();
       const dispense = lastPost("/pharmacy/dispenses").body;
       assert.equal(dispense.order, order);
@@ -430,7 +444,6 @@ const visitRow = {
       assert.ok(dispense.idempotencyKey);
       await noOverflow();
 
-      await page.locator("#switchWorkspace").click();
       await workspace("doctor");
       await section("clinical");
       await page.waitForFunction(() =>
@@ -444,7 +457,6 @@ const visitRow = {
           document.querySelector("#actionForm [name=orderer]")?.value === value,
         provider,
       );
-      await page.locator("#switchWorkspace").click();
       await workspace("admin");
       assert.equal(await page.locator("[data-section=patients]").count(), 0);
       assert.equal(await page.locator("[data-section=visits]").count(), 0);
@@ -461,8 +473,64 @@ const visitRow = {
       assert.deepEqual(errors, []);
       await context.close();
     }
+    const singleContext = await browser.newContext({
+      viewport: { width: 1440, height: 960 },
+      timezoneId: "Asia/Ho_Chi_Minh",
+    });
+    const singlePage = await singleContext.newPage();
+    const singleErrors = [];
+    singlePage.on("pageerror", (error) => singleErrors.push(error.message));
+    await singlePage.route("**/api/**", async (route) => {
+      const request = route.request();
+      const url = new URL(request.url());
+      const send = (body, status = 200) =>
+        route.fulfill({
+          status,
+          contentType: "application/json",
+          body: JSON.stringify(body),
+        });
+      if (url.pathname.endsWith("/session"))
+        return send({
+          authenticated: true,
+          user: {
+            uuid: other,
+            display: "QA single workspace",
+            roles: [{ name: "VinSHC App: reception" }],
+          },
+        });
+      if (url.pathname.endsWith("/authorization/workspaces"))
+        return send([
+          {
+            role: "reception",
+            facilityUuid: location,
+            facilityName: "VinSHC Development Clinic",
+          },
+        ]);
+      if (url.pathname.endsWith("/authorization/workspace")) {
+        assert.equal(request.headers()["x-vinshc-workspace-role"], "reception");
+        assert.equal(request.headers()["x-vinshc-workspace-facility"], location);
+        return send({ role: "reception", facilityUuid: location });
+      }
+      if (url.pathname.endsWith("/providers/me"))
+        return send({ userUuid: other, providers: [] });
+      return send({ results: [], hasMore: false });
+    });
+    await singlePage.goto(base + "/connected.html", {
+      waitUntil: "domcontentloaded",
+    });
+    await singlePage.locator("[name=username]").fill("qa");
+    await singlePage.locator("[name=password]").fill("qa-only");
+    await singlePage.locator("#loginForm button").click();
+    await singlePage.locator(".session-identity").waitFor();
+    assert.equal(await singlePage.locator("#workspaceForm").count(), 0);
+    await singlePage
+      .locator(".session-identity")
+      .getByText("Tiếp đón", { exact: true })
+      .waitFor();
+    assert.deepEqual(singleErrors, []);
+    await singleContext.close();
     console.log(
-      "PASS: live worklists (patients, visits, bills, prescriptions), row actions prefill context and forms, duplicate 409 matches, vitals encounter → vitals form, own provider prefill, print CSS, mobile overflow and no persistence. Mocked only; no DB writes.",
+      "PASS: one assigned role opens directly without role switching; live worklists, row actions, duplicate handling, vitals, provider prefill, print CSS, mobile overflow and no persistence. Mocked only; no DB writes.",
     );
   } finally {
     await browser.close();

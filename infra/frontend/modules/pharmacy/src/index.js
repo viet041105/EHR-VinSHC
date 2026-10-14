@@ -44,7 +44,7 @@ const actions = {
       record: "prescription",
       captures: "dispense",
       notice:
-        "Backend chặn cấp vượt số lượng kê, đơn đã ngừng/hết hiệu lực, lượt đã hủy và lô hết hạn. Chưa trừ tồn kho.",
+        "Kiểm tra số lượng còn lại và hạn dùng. Không cấp đơn đã ngừng hoặc lượt đã hủy; hiện chưa theo dõi tồn kho.",
     },
   ),
   prescriptionDetail: action(

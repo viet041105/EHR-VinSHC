@@ -1,3 +1,4 @@
+const { fillReference } = require("./reference-helper.cjs");
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
 const metadata = require("../../packages/core/metadata/permissions.json");
@@ -17,7 +18,7 @@ const user = "11111111-1111-4111-8111-111111111111",
         errors = [];
       const role = kind === "system" ? "admin" : kind;
       page.on("pageerror", (e) => errors.push(e.message));
-      await page.route("**/openmrs/**", async (route) => {
+      await page.route("**/api/**", async (route) => {
         const r = route.request(),
           url = new URL(r.url()),
           path = url.pathname,
@@ -40,6 +41,13 @@ const user = "11111111-1111-4111-8111-111111111111",
               ],
             },
           });
+        if (path.endsWith("/authorization/workspaces"))
+          return send([{ role, facilityUuid: location, facilityName: "QA Clinic" }]);
+        if (path.endsWith('/user')) {
+          assert.equal(kind, 'system');
+          assert.equal(headers['x-vinshc-workspace-role'], undefined);
+          return send({results:[{uuid:record,username:'qa-nhanvien',display:'Nguyễn An',retired:false,roles:[{name:'VinSHC App: reception'}]}]});
+        }
         if (path.includes("/user/")) {
           assert.equal(kind, "system");
           assert.equal(headers["x-vinshc-workspace-role"], undefined);
@@ -51,6 +59,7 @@ const user = "11111111-1111-4111-8111-111111111111",
                   uuid: metadata.roles.reception.openmrs.uuid,
                   name: "VinSHC App: reception",
                 },
+                { uuid: "99999999-9999-4999-8999-999999999999", name: "System Developer" },
               ],
               retired: false,
             });
@@ -84,35 +93,44 @@ const user = "11111111-1111-4111-8111-111111111111",
       await page.locator("[name=username]").fill("qa");
       await page.locator("[name=password]").fill("qa");
       await page.locator("#loginForm button").click();
-      await page.locator("[name=role]").selectOption(role);
-      await page.locator("#workspaceForm button").click();
-      await page.locator("#switchWorkspace").waitFor();
+      await page.locator("[data-section=overview]").waitFor();
+      assert.equal(await page.locator("#workspaceForm").count(), 0);
+      await page.locator(".session-identity").waitFor();
       if (role === "admin") {
         await page.locator("[data-section=admin]").click();
         const option = page.locator("#actionPicker option[value=systemUsers]");
         assert.equal(await option.count(), kind === "system" ? 1 : 0);
         if (kind === "system") {
+          await page.locator('#actionPicker').selectOption('systemUsers');
+          await page.locator('[name=query]').fill('qa-nhanvien');
+          await page.locator('#actionForm button').click();
+          await page.locator('[data-pick-account]').waitFor();
+          assert.doesNotMatch(await page.locator('#backendResult').innerText(), /22222222-2222|UUID|OpenMRS/);
+          await page.locator('[data-pick-account]').click();
+          assert.equal(await page.locator('#actionPicker').inputValue(), 'assignWorkspace');
+          assert.equal(await page.locator('[name=user]').inputValue(), record);
+          assert.match(await page.locator('#actionForm .reference-value').first().innerText(), /Nguyễn An/);
           await page.locator("#actionPicker").selectOption("grantAppRole");
-          await page.locator("[name=user]").fill(record);
+          await fillReference(page, "[name=user]", record);
           await page.locator("[name=role]").selectOption("nurse");
           await page.locator("#actionForm button").click();
           await page
             .locator("#connectionMessage")
-            .filter({ hasText: "đã xác nhận" })
+            .filter({ hasText: "đã được lưu" })
             .waitFor();
           assert.deepEqual(writes.at(-1).body.roles, [
-            metadata.roles.reception.openmrs.uuid,
+            "99999999-9999-4999-8999-999999999999",
             metadata.roles.nurse.openmrs.uuid,
           ]);
         }
         await page.locator("#actionPicker").selectOption("assignWorkspace");
-        await page.locator("[name=user]").fill(record);
+        await fillReference(page, "[name=user]", record);
         await page.locator("[name=role]").selectOption("nurse");
         await page.locator("[name=facility]").selectOption(location);
         await page.locator("#actionForm button").click();
         await page
           .locator("#connectionMessage")
-          .filter({ hasText: "đã xác nhận" })
+          .filter({ hasText: "đã được lưu" })
           .waitFor();
         assert.deepEqual(writes.at(-1).body, {
           user: record,
@@ -120,24 +138,24 @@ const user = "11111111-1111-4111-8111-111111111111",
           facility: location,
         });
         await page.locator("#actionPicker").selectOption("revokeWorkspace");
-        await page.locator("[name=user]").fill(record);
+        await fillReference(page, "[name=user]", record);
         await page.locator("[name=role]").selectOption("nurse");
         await page.locator("[name=facility]").selectOption(location);
         await page.locator("#actionForm button").click();
         await page
           .locator("#connectionMessage")
-          .filter({ hasText: "đã xác nhận" })
+          .filter({ hasText: "đã được lưu" })
           .waitFor();
         assert.equal(writes.at(-1).method, "DELETE");
       } else {
         await page.locator("[data-section=identity]").click();
         await page.locator("#actionPicker").selectOption("updateContact");
-        await page.locator("[name=record]").fill(record);
+        await fillReference(page, "[name=record]", record);
         await page.locator("[name=clearPhone]").selectOption("true");
         await page.locator("#actionForm button").click();
         await page
           .locator("#connectionMessage")
-          .filter({ hasText: "đã xác nhận" })
+          .filter({ hasText: "đã được lưu" })
           .waitFor();
         assert.deepEqual(writes.at(-1).body, { phone: null });
         await page.locator("#actionPicker").selectOption("updateAddress");
@@ -146,15 +164,15 @@ const user = "11111111-1111-4111-8111-111111111111",
           "",
         );
         await page.locator("#actionPicker").selectOption("clearFieldState");
-        await page.locator("[name=patient]").fill(user);
+        await fillReference(page, "[name=patient]", user);
         await page
           .locator("[name=fieldCode]")
           .selectOption("contact.dien_thoai");
-        await page.locator("[name=rowKey]").fill(record);
+        await fillReference(page, "[name=rowKey]", record);
         await page.locator("#actionForm button").click();
         await page
           .locator("#connectionMessage")
-          .filter({ hasText: "đã xác nhận" })
+          .filter({ hasText: "đã được lưu" })
           .waitFor();
         assert.match(writes.at(-1).query, /context=contact/);
         assert.equal(await page.locator("#connectionError").innerText(), "");

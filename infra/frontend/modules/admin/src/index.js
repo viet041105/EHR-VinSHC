@@ -100,7 +100,7 @@ const actions = {
     {
       method: "GET",
       notice:
-        "Backend trả 403 nếu workspace hiện tại không được phép thực hiện thao tác đã chọn.",
+        "Kiểm tra xem vai trò đang dùng có được phép thực hiện công việc đã chọn hay không.",
     },
   ),
   assignWorkspace: action(
@@ -112,7 +112,7 @@ const actions = {
     (d) => ({ ...d }),
     {
       notice:
-        "User phải có role ứng dụng tương ứng. Chọn cơ sở cấp cho user, có thể khác cơ sở đang mở.",
+        "Tài khoản cần có vai trò tương ứng. Chọn cơ sở mà nhân viên sẽ làm việc.",
     },
   ),
   revokeWorkspace: action(
@@ -124,7 +124,7 @@ const actions = {
     (d) => ({ ...d }),
     {
       method: "DELETE",
-      notice: "Thu hồi phân công đã chọn. Không xóa tài khoản hoặc role.",
+      notice: "Thu hồi quyền làm việc tại cơ sở đã chọn. Tài khoản và vai trò vẫn được giữ.",
       prepare(data, ctx) {
         if (
           data.user === ctx.client.user.uuid &&
@@ -163,16 +163,16 @@ const actions = {
       adminCore: true,
       systemOnly: true,
       notice:
-        "Chỉ System Developer có quyền đọc tài khoản Core. Dùng UUID trả về để cấp role và phân công workspace.",
+        "Tìm tài khoản theo tên đăng nhập. Cần quyền quản trị hệ thống để sử dụng.",
     },
   ),
   grantAppRole: action(
-    "Thêm role ứng dụng cho tài khoản",
+    "Đổi vai trò VinSHC của tài khoản",
     "metadata_admin",
     "update",
     [
       id("user", "Mã tài khoản (UUID)"),
-      choice("role", "Role ứng dụng cần thêm", roleChoices),
+      choice("role", "Role VinSHC mới", roleChoices),
     ],
     (d) => "user/" + uuid(d.user),
     null,
@@ -180,8 +180,7 @@ const actions = {
       adminCore: true,
       systemOnly: true,
       notice:
-        "Chỉ System Developer. Giữ nguyên mọi role đang có, thêm role ứng dụng; sau đó dùng Gán vai trò và cơ sở.",
-      // Core replaces the whole role list, so read the current roles and add one.
+        "Thay role VinSHC hiện tại bằng một role mới. Các role hệ thống/Core như System Developer được giữ nguyên. Sau đó phân công cơ sở làm việc.",
       async send({ client }, { path, data }) {
         const user = await client.request(
           path + "?v=custom:(uuid,retired,roles:(uuid,name))",
@@ -189,12 +188,15 @@ const actions = {
         );
         if (user.retired)
           throw new BackendError("Tài khoản đã ngừng hoạt động.");
+        const appRoleIds = new Set(
+          Object.values(m.permissions.roles).map((role) => role.openmrs.uuid),
+        );
         return client.request(path, {
           method: "POST",
           body: {
             roles: [
               ...new Set([
-                ...user.roles.map((r) => r.uuid),
+                ...user.roles.map((r) => r.uuid).filter((roleId) => !appRoleIds.has(roleId)),
                 m.permissions.roles[data.role].openmrs.uuid,
               ]),
             ],
@@ -208,16 +210,16 @@ const actions = {
 
 function directory(ctx) {
   return (
-    `<section class="panel admin-directory"><div class="workspace-heading"><div><h2>Tài khoản và phân quyền</h2><p>Vai trò được định nghĩa trong metadata; quyền sử dụng còn phụ thuộc phân công cơ sở của từng tài khoản.</p></div>${CONNECTED_BADGE}</div><div class="role-tags">${Object.values(
+    `<section class="panel admin-directory"><div class="workspace-heading"><div><h2>Tài khoản và phân quyền</h2><p>Phân công vai trò và cơ sở cho tài khoản nhân viên đã có.</p></div>${CONNECTED_BADGE}</div><div class="role-tags">${Object.values(
       m.permissions.roles,
     )
       .map((role) => `<span>${esc(role.label)}</span>`)
       .join(
         "",
-      )}</div><div class="context-links">${ctx.canAction("systemUsers") ? openButton("admin", "systemUsers", "Tìm tài khoản") : ""}${ctx.canAction("grantAppRole") ? openButton("admin", "grantAppRole", "Thêm role cho tài khoản") : ""}${openButton("admin", "assignWorkspace", "Phân công cơ sở")}${openButton("admin", "workspace", "Kiểm tra phân công")}${openButton("admin", "audit", "Nhật ký truy cập")}</div></section>` +
+      )}</div><div class="context-links">${ctx.canAction("systemUsers") ? openButton("admin", "systemUsers", "Tìm tài khoản") : ""}${ctx.canAction("grantAppRole") ? openButton("admin", "grantAppRole", "Đổi vai trò VinSHC") : ""}${openButton("admin", "assignWorkspace", "Phân công cơ sở")}${openButton("admin", "workspace", "Kiểm tra phân công")}${openButton("admin", "audit", "Nhật ký truy cập")}</div></section>` +
     preparationPanel(
       "Tạo tài khoản nhân viên",
-      "Chưa có luồng tạo tài khoản trên FE. Việc thêm role hiện tại chỉ áp dụng cho user đã tồn tại.",
+      "Chức năng tạo tài khoản chưa khả dụng. Hiện chỉ phân công được tài khoản đã có.",
       [
         F("username", "Tên đăng nhập"),
         F("fullName", "Họ tên nhân viên"),
@@ -228,7 +230,7 @@ function directory(ctx) {
     ) +
     preparationPanel(
       "Thiết lập cơ sở và biểu mẫu",
-      "Cấu hình hiện tại có thể đọc qua chức năng Kiểm tra cấu hình nghiệp vụ; backend chưa có API chỉnh cấu hình dành cho workspace.",
+      "Có thể xem cấu hình hiện tại. Chức năng thay đổi cơ sở và biểu mẫu chưa khả dụng.",
       [
         F("facilityName", "Tên cơ sở"),
         F("facilityAddress", "Địa chỉ cơ sở", "textarea"),
@@ -262,9 +264,9 @@ export default defineModule({
         "systemUsers",
         "grantAppRole",
       ],
-      note: "Quản lý phân công dùng API VinSHC. Tìm tài khoản và cấp role Core chỉ hiện cho System Developer; tài khoản quản trị ứng dụng vẫn bị backend kiểm tra quyền.",
+      note: "Phân công nhân viên và xem nhật ký hoạt động. Một số công việc cần quyền quản trị hệ thống.",
       icon: "⚙",
-      partial: "Một phần chờ backend",
+      partial: "Một số mục chưa khả dụng",
       footer: directory,
     },
   ],

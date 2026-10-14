@@ -233,7 +233,7 @@ Có thể làm service và fixtures A/P song song với FE hoàn thiện/ghép n
 - [Clinical summary trên main đã kiểm tra](https://github.com/viet041105/EHR-VinSHC/blob/d9d5b957223f6bc73db173dbbc1d413910689526/infra/backend/vinshc-module/omod/src/main/java/org/openmrs/module/vinshc/service/ClinicalService.java).
 - [Phân quyền và audit trên main](https://github.com/viet041105/EHR-VinSHC/blob/d9d5b957223f6bc73db173dbbc1d413910689526/docs/api/authorization-audit.md).
 - [Mapping và giới hạn FHIR trên main](https://github.com/viet041105/EHR-VinSHC/blob/d9d5b957223f6bc73db173dbbc1d413910689526/docs/api/fhir-mapping.md).
-- [Ánh xạ UI/API và chức năng còn chờ ở FE](https://github.com/viet041105/EHR-VinSHC/blob/b5bd148cb3033990d07966590f5dc8ac3767422a/infra/frontend/UI_BACKEND_MAP.md).
+- [Ánh xạ UI/API và chức năng còn chờ ở FE](../infra/frontend/docs/UI_BACKEND_MAP.md).
 
 Khi BE/FE đổi contract hoặc bổ sung endpoint, cập nhật bảng API và bộ fixture trước khi mở rộng phạm vi agent.
 

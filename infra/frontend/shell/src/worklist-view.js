@@ -7,8 +7,8 @@ export function renderWorklist(worklists, key, ctx) {
   const w = worklists[key],
     list = ctx.list || {},
     blocked = w.needs && !ctx.context[w.needs];
-  return `<section class="panel workspace-records worklist" data-worklist-panel="${key}"><div class="workspace-heading"><div><h2>${esc(w.title)}</h2><p>${esc(w.hint)}</p></div><span class="capability-badge connected">Dữ liệu từ backend</span></div>
-<form data-worklist="${key}" class="worklist-filters"><div class="form-grid">${w.filters.map((f) => ctx.field({ ...f, name: "wl_" + f.name, placeholder: "Tất cả" }, { ["wl_" + f.name]: (list.filters || {})[f.name] ?? f.value ?? "" })).join("")}</div><div class="form-actions"><button type="submit" ${blocked ? "disabled" : ""}>Tải danh sách</button></div></form>
+  return `<section class="panel workspace-records worklist" data-worklist-panel="${key}"><div class="workspace-heading"><div><h2>${esc(w.title)}</h2><p>${esc(w.hint)}</p></div></div>
+<form data-worklist="${key}" class="worklist-filters"><div class="form-grid">${w.filters.map((f) => ctx.field({ ...f, name: "wl_" + f.name, placeholder: "Tất cả" }, { ["wl_" + f.name]: (list.filters || {})[f.name] ?? f.value ?? "" })).join("")}</div><div class="form-actions"><button type="submit" ${blocked ? "disabled" : ""}>Tìm kiếm</button></div></form>
 <div data-worklist-results="${key}" aria-live="polite">${renderWorklistResults(worklists, key, ctx)}</div></section>`;
 }
 // Only this part is repainted when a response arrives, so filters being edited are never reset.
@@ -20,14 +20,11 @@ export function renderWorklistResults(
   const w = worklists[key],
     rows = list.rows || [],
     blocked = w.needs && !context[w.needs];
-  const actionButtons = (row, index) =>
-    row.actions
-      .map((a, i) =>
-        canNavigate(a)
-          ? `<button type="button" data-row-action data-list="${key}" data-row="${index}" data-action-index="${i}">${esc(a.label)}</button>`
-          : "",
-      )
-      .join("");
+  const actionButtons = (row, index) => {
+    const buttons = row.actions.map((a, i) => canNavigate(a)
+      ? `<button type="button" data-row-action data-list="${key}" data-row="${index}" data-action-index="${i}">${esc(a.label)}</button>` : '').filter(Boolean);
+    return buttons.slice(0, 2).join('') + (buttons.length > 2 ? `<details class="row-more"><summary>Khác</summary><div>${buttons.slice(2).join('')}</div></details>` : '');
+  };
   const status = list.loading
     ? '<p class="readonly">Đang tải…</p>'
     : list.loadedAt
@@ -42,14 +39,14 @@ export function renderWorklistResults(
   if (!rows.length)
     return (
       status +
-      '<div class="workspace-empty"><strong>Không có bản ghi phù hợp</strong><p>Backend không trả bản ghi nào cho bộ lọc này.</p></div>'
+      '<div class="workspace-empty"><strong>Chưa có kết quả phù hợp</strong><p>Thử đổi bộ lọc hoặc kiểm tra lại ngày đã chọn.</p></div>'
     );
   return (
     status +
     `<div class="workspace-table-wrap"><table class="workspace-table"><thead><tr><th>Bản ghi</th><th>Thông tin</th><th>Trạng thái</th><th>Thao tác</th></tr></thead><tbody>${rows
       .map((raw, index) => {
         const row = w.row(raw);
-        return `<tr data-worklist-row="${key}"><td><strong>${esc(row.title || "—")}</strong><small class="record-id">${esc(row.id)}</small></td><td>${esc(row.detail)}</td><td>${esc(row.status)}</td><td><button type="button" data-row-action data-list="${key}" data-row="${index}" data-action-index="select">Chọn</button>${actionButtons(row, index)}</td></tr>`;
+        return `<tr data-worklist-row="${key}"><td><strong>${esc(row.title || "—")}</strong></td><td>${esc(row.detail)}</td><td><span class="row-status" data-state="${esc(raw.status || raw.state || '')}">${esc(row.status)}</span></td><td><button type="button" data-row-action data-list="${key}" data-row="${index}" data-action-index="select">Chọn</button>${actionButtons(row, index)}</td></tr>`;
       })
       .join(
         "",

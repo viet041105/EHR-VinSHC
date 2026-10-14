@@ -1,7 +1,7 @@
 import { defineConfig } from "vite";
 import { join } from "node:path";
 import { ROOT, vinshcImportMap } from "./scripts/importmap.mjs";
-// Keep credentials on the same origin; never expose OpenMRS to the LAN.
+// Keep credentials on the same origin; never expose the clinical service to the LAN.
 const target = process.env.VINSHC_BACKEND_ORIGIN || "http://127.0.0.1:8080";
 const url = new URL(target);
 if (
@@ -17,6 +17,10 @@ if (
     "VINSHC_BACKEND_ORIGIN phải là HTTP origin loopback, không kèm đường dẫn.",
   );
 }
+// VinSHC extends OpenMRS. The product keeps a neutral /api entry point on the same origin.
+const servicePrefix = process.env.VINSHC_API_UPSTREAM_PATH || "/openmrs/ws/rest/v1";
+if (!/^\/(?:[a-zA-Z0-9_-]+\/?)*$/.test(servicePrefix) || servicePrefix.includes(".."))
+  throw new Error("VINSHC_API_UPSTREAM_PATH phải là đường dẫn tuyệt đối trong dịch vụ.");
 const agentUrl = new URL(process.env.VINSHC_AGENT_ORIGIN || "http://127.0.0.1:8000");
 if (agentUrl.protocol !== "http:" || !["localhost", "127.0.0.1", "[::1]"].includes(agentUrl.hostname) || agentUrl.username || agentUrl.password || agentUrl.pathname !== "/" || agentUrl.search || agentUrl.hash) throw new Error("VINSHC_AGENT_ORIGIN phải là HTTP origin loopback.");
 // Dev serves every package from source; the import map (vinshcImportMap) tells the browser where
@@ -35,6 +39,7 @@ export default defineConfig(({ command }) => ({
         }
       : {},
   server: {
+    headers: { "Cache-Control": "no-store" },
     fs: {
       deny: [".env", ".env.*", "*.{crt,pem}", "**/.git/**", "**/.runtime/**"],
     },
@@ -45,12 +50,14 @@ export default defineConfig(({ command }) => ({
         timeout: 100000,
         proxyTimeout: 100000,
       },
-      "/openmrs": {
+      "/api": {
         target: url.origin,
         changeOrigin: true,
+        rewrite: path => path.replace(/^\/api(?=\/|$)/, servicePrefix.replace(/\/$/, "")),
         timeout: 15000,
         proxyTimeout: 15000,
       },
+
     },
   },
   build: {

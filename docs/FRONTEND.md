@@ -31,7 +31,7 @@ Hai chế độ phải phân biệt rõ:
 
 ## 2. Phân quyền và phạm vi dữ liệu
 
-Một tài khoản có thể có nhiều role. Quyền hiệu lực là tập privilege backend cấp, có ràng buộc cơ sở, đối tượng và trạng thái. FE chỉ mở không gian của role được cấp; nút thao tác được giới hạn theo nhiệm vụ của không gian đó. Riêng bác sĩ ghi sinh hiệu khi kiêm điều dưỡng hoặc cơ sở không có điều dưỡng và backend cấp privilege tương ứng.
+Mỗi tài khoản chỉ có một role VinSHC và một workspace hoạt động. Quyền hiệu lực lấy từ role backend cấp, có ràng buộc cơ sở, đối tượng và trạng thái. Người cần làm nhiều chức năng phải dùng tài khoản riêng cho từng role.
 
 | Role | Trang FE được mở | Được ghi | Dữ liệu được đọc |
 | --- | --- | --- | --- |
@@ -157,7 +157,7 @@ Các bài test FE phải bao gồm: 8 role và role kiêm nhiệm; locked accoun
 
 ## 9. Triển khai FE trong đợt này
 
-- `landing.js` và `styles.css`: bố cục theo ảnh tham chiếu, ảnh chụp Pexels tải local, nội dung công khai tuần tự theo viewport; menu bên trái cho nhân viên và menu mở/đóng trên điện thoại. Không tạo hotline, chứng nhận hoặc số bệnh nhân giả để quảng bá.
+- `infra/frontend/landing/` và `infra/frontend/styles/`: trang giới thiệu, stylesheet và assets bố cục theo ảnh tham chiếu; menu mở/đóng trên điện thoại. Không tạo hotline, chứng nhận hoặc số bệnh nhân giả để quảng bá.
 - `workflow.js`: ma trận 8 role, guard theo tài khoản và không gian hiện tại, ngoại lệ bác sĩ ghi sinh hiệu khi có quyền; validation trường thuốc và hủy/bỏ về có lý do. `modules.js`/`operations.js` tách kết quả hoàn tất, lịch sử cấp thuốc và trang bàn giao FE–BE.
 - Phiếu khám: chẩn đoán có mức chắc chắn, thêm ngày tái khám, trạng thái dị ứng không rõ; dòng thuốc có liều/đơn vị/đường dùng/tần suất/số ngày. Thuốc/ICD vẫn chưa lấy từ danh mục có mã chuẩn. Đơn đã xác nhận giữ snapshot thuốc và lời dặn, không in lời dặn mới của phiếu khám thay cho bản đơn cũ.
 - Giấy hẹn/tóm tắt lượt có xem/in mẫu. Hủy/bỏ về giữ dữ liệu và giao dịch, chặn cấp đơn của lượt hủy; số lượt hủy tách khỏi lượt hoàn tất trong báo cáo theo nhóm lượt mở của ngày được chọn.

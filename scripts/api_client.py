@@ -61,8 +61,8 @@ class Client:
             result = json.loads(body)
         except (ValueError, UnicodeDecodeError) as error:
             raise ApiError(f"{path}: invalid JSON response.") from error
-        if not isinstance(result, dict):
-            raise ApiError(f"{path}: expected a JSON object.")
+        if not isinstance(result, (dict, list)):
+            raise ApiError(f"{path}: expected a JSON object or array.")
         return result
 
     def multipart(self, path, *, filename, content_type, content, fields=None,
