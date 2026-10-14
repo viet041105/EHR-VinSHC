@@ -99,6 +99,30 @@ public class AuthorizationService {
 	        String detail) {
 		instance().auditRead(resource, patient, encounter, entityUuid, detail);
 	}
+
+	/** Active app role of a scoped caller, or null for system developers and legacy unscoped users. */
+	public static String activeRoleStatic() {
+		AuthorizationService service = instance();
+		return service.bypassWorkspace() ? null : service.workspaceRole(true);
+	}
+
+	/**
+	 * Facility that listings are restricted to. Scoped callers always get their assigned facility;
+	 * unscoped callers get the facility named by the workspace header when present (a display filter,
+	 * not a security boundary), otherwise null meaning every facility.
+	 */
+	public static Location listingFacilityStatic() {
+		AuthorizationService service = instance();
+		if (!service.bypassWorkspace())
+			return service.assignedFacility();
+		String uuid = header(FACILITY_HEADER);
+		if (uuid == null || uuid.isEmpty())
+			return null;
+		Location location = Context.getLocationService().getLocationByUuid(uuid);
+		if (location == null || location.getRetired())
+			throw VinshcService.bad("workspace facility does not exist");
+		return location;
+	}
 	
 	public static void requireOperation(String resource, String action) {
 		AuthorizationService service = instance();
@@ -125,13 +149,19 @@ public class AuthorizationService {
 			throw VinshcService.bad("facility does not exist");
 		if (openmrsRole == null || !target.hasRole(openmrsRole.getRole()))
 			throw VinshcService.bad("user does not hold the requested role");
+		if (target.getRoles().stream().filter(r -> r.getName().startsWith(ROLE_PREFIX))
+		        .anyMatch(r -> !r.getRole().equals(openmrsRole.getRole())))
+			throw VinshcService.bad("user must have exactly one VinSHC application role");
 		int actor = authenticatedUser().getUserId();
 		sessionFactory.getCurrentSession().doWork(connection -> {
+			try (PreparedStatement lock = connection.prepareStatement(
+			    "SELECT user_id FROM users WHERE user_id=? FOR UPDATE")) {
+				lock.setInt(1, target.getUserId());
+				lock.executeQuery().close();
+			}
 			try (PreparedStatement close = connection.prepareStatement("UPDATE vinshc_workspace_assignment SET active=false"
-			        + " WHERE user_id=? AND role_name=? AND facility_location_id=? AND active=true")) {
+			        + " WHERE user_id=? AND active=true")) {
 				close.setInt(1, target.getUserId());
-				close.setString(2, role);
-				close.setInt(3, facility.getLocationId());
 				close.executeUpdate();
 			}
 			try (PreparedStatement insert = connection.prepareStatement(
@@ -170,6 +200,44 @@ public class AuthorizationService {
 	
 	public Map<String, Object> workspace() {
 		return activeWorkspace(true);
+	}
+
+	/** The authenticated account's sole active role/facility assignment, if it has one. */
+	public List<Map<String, Object>> workspaces() {
+		User user = authenticatedUser();
+		long applicationRoleCount = user.getRoles().stream()
+		        .filter(role -> role.getName().startsWith(ROLE_PREFIX)).count();
+		if (applicationRoleCount > 1)
+			throw new VinshcExceptions.Conflict("account has multiple VinSHC application roles; an administrator must replace them with one role", null);
+		List<Object[]> assignments = new ArrayList<>();
+		sessionFactory.getCurrentSession().doWork(connection -> {
+			try (PreparedStatement statement = connection.prepareStatement(
+			    "SELECT a.role_name,l.uuid,l.name FROM vinshc_workspace_assignment a"
+			            + " JOIN location l ON l.location_id=a.facility_location_id"
+			            + " WHERE a.user_id=? AND a.active=true AND l.retired=false"
+			            + " ORDER BY a.role_name,l.name,l.uuid")) {
+				statement.setInt(1, user.getUserId());
+				try (ResultSet rows = statement.executeQuery()) {
+					while (rows.next())
+						assignments.add(new Object[] { rows.getString(1), rows.getString(2), rows.getString(3) });
+				}
+			}
+		});
+		List<Map<String, Object>> out = new ArrayList<>();
+		for (Object[] row : assignments) {
+			String role = (String) row[0];
+			Role openmrsRole = Context.getUserService().getRole(ROLE_PREFIX + role);
+			if (openmrsRole == null || !user.hasRole(openmrsRole.getRole()))
+				continue;
+			Map<String, Object> assignment = new LinkedHashMap<>();
+			assignment.put("role", role);
+			assignment.put("facilityUuid", row[1]);
+			assignment.put("facilityName", row[2]);
+			out.add(assignment);
+		}
+		if (out.size() > 1)
+			throw new VinshcExceptions.Conflict("account has multiple active workspaces; an administrator must reassign it", null);
+		return out;
 	}
 	
 	public Map<String, Object> evaluate(String resource, String action) {
@@ -261,10 +329,11 @@ public class AuthorizationService {
 	}
 	
 	/**
-	 * A patient is in scope when it has a non-voided visit in the workspace facility or its
-	 * descendants.
+	 * A patient is in scope when it was registered at the workspace facility (or its descendants)
+	 * through the VinSHC adapter, or has a non-voided visit there.
 	 */
 	public void requirePatientScope(Patient patient) {
+        requireAgentAssignment(patient);
 		if (bypassWorkspace())
 			return;
 		Location facility = assignedFacility();
@@ -272,11 +341,14 @@ public class AuthorizationService {
 			try (PreparedStatement statement = connection
 			        .prepareStatement("WITH RECURSIVE tree AS (SELECT location_id FROM location WHERE location_id=?"
 			                + " UNION SELECT l.location_id FROM location l JOIN tree t ON l.parent_location=t.location_id)"
-			                + " SELECT count(*) FROM visit v JOIN location l ON l.location_id=v.location_id"
+			                + " SELECT (SELECT count(*) FROM visit v JOIN location l ON l.location_id=v.location_id"
 			                + " WHERE v.patient_id=? AND v.voided=false AND l.retired=false"
-			                + " AND v.location_id IN (SELECT location_id FROM tree)")) {
+			                + " AND v.location_id IN (SELECT location_id FROM tree))"
+			                + " + (SELECT count(*) FROM vinshc_patient_registration r WHERE r.patient_id=?"
+			                + " AND r.facility_location_id IN (SELECT location_id FROM tree))")) {
 				statement.setInt(1, facility.getLocationId());
 				statement.setInt(2, patient.getPatientId());
+				statement.setInt(3, patient.getPatientId());
 				try (ResultSet result = statement.executeQuery()) {
 					result.next();
 					return result.getLong(1);
@@ -288,6 +360,7 @@ public class AuthorizationService {
 	}
 	
 	public void requireEncounterScope(Encounter encounter) {
+        requireAgentAssignment(encounter.getPatient());
 		if (bypassWorkspace())
 			return;
 		Location location = encounter.getLocation();
@@ -320,7 +393,7 @@ public class AuthorizationService {
 				statement.setObject(3, patientId);
 				statement.setObject(4, encounterId);
 				statement.setString(5, entityUuid);
-				statement.setString(6, truncate(detail));
+				statement.setString(6, truncate(("agent".equals(header("X-VinSHC-Request-Origin")) ? "agent:" : "") + (detail == null ? "" : detail)));
 				statement.setInt(7, user.getUserId());
 				statement.setTimestamp(8, Timestamp.from(Instant.now()));
 				statement.executeUpdate();
@@ -361,7 +434,18 @@ public class AuthorizationService {
 		return assignment(user, role, facility);
 	}
 	
-	private Location assignedFacility() {
+	private void requireAgentAssignment(Patient patient) {
+        if (!"agent".equals(header("X-VinSHC-Request-Origin")) || !"doctor".equals(workspaceRole(false))) return;
+        activeWorkspace(true);
+        Number count=(Number)sessionFactory.getCurrentSession().createSQLQuery(
+            "SELECT count(*) FROM encounter e JOIN encounter_provider ep ON ep.encounter_id=e.encounter_id "
+            + "JOIN provider p ON p.provider_id=ep.provider_id JOIN users u ON u.person_id=p.person_id "
+            + "WHERE e.patient_id=:patient AND u.user_id=:user AND e.voided=false AND ep.voided=false AND p.retired=false")
+            .setParameter("patient",patient.getPatientId()).setParameter("user",authenticatedUser().getUserId()).uniqueResult();
+        if(count.longValue()==0) throw forbidden("assigned_patient");
+    }
+
+    private Location assignedFacility() {
 		return Context.getLocationService().getLocationByUuid(activeWorkspace(true).get("facilityUuid").toString());
 	}
 	

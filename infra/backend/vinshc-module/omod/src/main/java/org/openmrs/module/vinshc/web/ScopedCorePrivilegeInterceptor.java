@@ -26,7 +26,16 @@ public class ScopedCorePrivilegeInterceptor implements HandlerInterceptor {
 	    "Get Locations", "Get Encounter Types", "Get Encounter Roles", "Get Visit Types", "Get Order Frequencies",
 	    "Get Order Types", "Add Observations", "Edit Observations", "Delete Observations", "Add Diagnoses", "Edit Diagnoses",
 	    "Delete Diagnoses", "Add Allergies", "Edit Allergies", "Remove Allergies", "Add Orders", "Edit Orders",
-	    "Delete Orders");
+	    "Delete Orders", "Add Patients", "Edit Patients", "Get Patient Identifiers", "Add Patient Identifiers",
+	    "Edit Patient Identifiers", "Get Identifier Types", "Get Patient Identifier Types", "Get People", "Add People",
+	    "Edit People", "Get Person Attribute Types", "Add Visits", "Edit Visits", "Get Visit Attribute Types",
+	    "Add Encounters", "Edit Encounters", "Get Identifier Sources", "Generate Batch of Identifiers",
+	    "Get Autogeneration Options", "Get Care Settings",
+	    // bedmanagement registers Visit/Encounter SaveHandlers that check bed assignments on every save
+	    // (requireAll=true pairs). The adapter never calls bed APIs itself; outpatients hold no beds.
+	    "Get Beds", "Get Admission Locations", "Assign Beds", "Edit Admission Locations",
+	    // queue's Visit SaveHandler/validator look up native queue entries of the visit (VinSHC keeps its own).
+	    "Get Queue Entries", "Get Users", "Get Roles", "Manage Roles", "Edit Users");
 	
 	@Override
 	public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {

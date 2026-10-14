@@ -313,4 +313,80 @@
       <sql>ALTER TABLE vinshc_address_snapshot ALTER COLUMN date_created TYPE TIMESTAMP USING date_created AT TIME ZONE 'UTC'</sql>
     </rollback>
   </changeSet>
+  <changeSet id="vinshc-0.4.0-patient-registration" author="vinshc" dbms="postgresql">
+    <comment>Facility where a patient was registered through the staff adapter; brings the patient into that facility's
+      scope before a first visit. The idempotency key lets a retried registration return the same patient.</comment>
+    <createTable tableName="vinshc_patient_registration">
+      <column name="registration_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="registration_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_registration_uuid"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_registration_patient"/></column>
+      <column name="facility_location_id" type="INT"><constraints nullable="false" references="location(location_id)" foreignKeyName="fk_vinshc_registration_location"/></column>
+      <column name="idempotency_key" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_registration_key"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_registration_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+    </createTable>
+    <addUniqueConstraint tableName="vinshc_patient_registration" columnNames="patient_id,facility_location_id" constraintName="ux_vinshc_registration_patient_facility"/>
+    <createIndex tableName="vinshc_patient_registration" indexName="ix_vinshc_registration_facility"><column name="facility_location_id"/><column name="date_created"/></createIndex>
+  </changeSet>
+  <changeSet id="vinshc-0.4.0-dispensing" author="vinshc" dbms="postgresql">
+    <comment>Append-only pharmacy dispense records against native DrugOrders. Batch/expiry are captured as dispensed;
+      stock levels stay out of scope until Stock Management is accepted for the pilot.</comment>
+    <createTable tableName="vinshc_dispense">
+      <column name="dispense_id" type="BIGSERIAL"><constraints primaryKey="true" nullable="false"/></column>
+      <column name="dispense_uuid" type="VARCHAR(38)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_dispense_uuid"/></column>
+      <column name="order_id" type="INT"><constraints nullable="false" references="orders(order_id)" foreignKeyName="fk_vinshc_dispense_order"/></column>
+      <column name="patient_id" type="INT"><constraints nullable="false" references="patient(patient_id)" foreignKeyName="fk_vinshc_dispense_patient"/></column>
+      <column name="visit_id" type="INT"><constraints references="visit(visit_id)" foreignKeyName="fk_vinshc_dispense_visit"/></column>
+      <column name="facility_location_id" type="INT"><constraints nullable="false" references="location(location_id)" foreignKeyName="fk_vinshc_dispense_location"/></column>
+      <column name="quantity" type="NUMERIC(19,4)"><constraints nullable="false"/></column>
+      <column name="batch_number" type="VARCHAR(64)"/>
+      <column name="expiry_date" type="DATE"/>
+      <column name="note" type="VARCHAR(1000)"/>
+      <column name="status" type="VARCHAR(16)"><constraints nullable="false"/></column>
+      <column name="void_reason" type="VARCHAR(1000)"/>
+      <column name="idempotency_key" type="VARCHAR(128)"><constraints nullable="false" unique="true" uniqueConstraintName="ux_vinshc_dispense_key"/></column>
+      <column name="creator" type="INT"><constraints nullable="false" references="users(user_id)" foreignKeyName="fk_vinshc_dispense_creator"/></column>
+      <column name="date_created" type="TIMESTAMP WITH TIME ZONE"><constraints nullable="false"/></column>
+      <column name="changed_by" type="INT"><constraints references="users(user_id)" foreignKeyName="fk_vinshc_dispense_changed_by"/></column>
+      <column name="date_changed" type="TIMESTAMP WITH TIME ZONE"/>
+    </createTable>
+    <createIndex tableName="vinshc_dispense" indexName="ix_vinshc_dispense_order"><column name="order_id"/><column name="status"/></createIndex>
+    <createIndex tableName="vinshc_dispense" indexName="ix_vinshc_dispense_facility"><column name="facility_location_id"/><column name="date_created"/></createIndex>
+  </changeSet>
+  <changeSet id="vinshc-0.4.0-worklist-indexes" author="vinshc" dbms="postgresql">
+    <comment>Indexes for the staff worklists (date/state filters per facility).</comment>
+    <createIndex tableName="vinshc_bill" indexName="ix_vinshc_bill_facility_created"><column name="facility_uuid"/><column name="date_created"/></createIndex>
+    <createIndex tableName="vinshc_bill" indexName="ix_vinshc_bill_visit"><column name="visit_id"/></createIndex>
+    <createIndex tableName="vinshc_service_order" indexName="ix_vinshc_service_order_facility_created"><column name="facility_uuid"/><column name="date_created"/></createIndex>
+    <createIndex tableName="vinshc_service_order" indexName="ix_vinshc_service_order_visit"><column name="visit_id"/></createIndex>
+    <createIndex tableName="vinshc_queue_item" indexName="ix_vinshc_queue_visit"><column name="visit_id"/><column name="state"/></createIndex>
+  </changeSet>
+  <changeSet id="vinshc-0.4.1-patient-portal" author="vinshc" dbms="postgresql">
+    <sql>
+      CREATE TABLE vinshc_portal_account (user_id INT PRIMARY KEY REFERENCES users(user_id), patient_id INT NOT NULL REFERENCES patient(patient_id), active BOOLEAN NOT NULL DEFAULT true, creator INT NOT NULL REFERENCES users(user_id), date_created TIMESTAMP WITH TIME ZONE NOT NULL);
+      CREATE TABLE vinshc_portal_publication (publication_id BIGSERIAL PRIMARY KEY, publication_uuid VARCHAR(38) NOT NULL UNIQUE, patient_id INT NOT NULL REFERENCES patient(patient_id), visit_id INT NOT NULL REFERENCES visit(visit_id), encounter_id INT NOT NULL REFERENCES encounter(encounter_id), version INT NOT NULL, source_revision BIGINT NOT NULL, payload_json TEXT NOT NULL, active BOOLEAN NOT NULL DEFAULT true, creator INT NOT NULL REFERENCES users(user_id), date_created TIMESTAMP WITH TIME ZONE NOT NULL, UNIQUE(visit_id,version));
+      CREATE UNIQUE INDEX ux_vinshc_portal_active_visit ON vinshc_portal_publication(visit_id) WHERE active=true;
+      CREATE INDEX ix_vinshc_portal_patient ON vinshc_portal_publication(patient_id,active);
+      CREATE INDEX ix_vinshc_portal_account_patient ON vinshc_portal_account(patient_id);
+    </sql>
+    <rollback><sql>DROP TABLE vinshc_portal_publication; DROP TABLE vinshc_portal_account;</sql></rollback>
+  </changeSet>
+  <changeSet id="vinshc-0.4.2-single-user-workspace" author="vinshc" dbms="postgresql">
+    <comment>Keep only the newest active role/facility workspace per staff account.</comment>
+    <sql>
+      WITH ranked AS (
+        SELECT assignment_id, ROW_NUMBER() OVER (
+          PARTITION BY user_id ORDER BY date_created DESC, assignment_id DESC
+        ) AS position
+        FROM vinshc_workspace_assignment
+        WHERE active=true
+      )
+      UPDATE vinshc_workspace_assignment a
+      SET active=false
+      FROM ranked r
+      WHERE a.assignment_id=r.assignment_id AND r.position&gt;1;
+    </sql>
+    <sql>CREATE UNIQUE INDEX ux_vinshc_workspace_one_per_user ON vinshc_workspace_assignment(user_id) WHERE active=true</sql>
+    <rollback><sql>DROP INDEX ux_vinshc_workspace_one_per_user;</sql></rollback>
+  </changeSet>
 </databaseChangeLog>

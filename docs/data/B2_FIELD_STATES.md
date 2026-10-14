@@ -8,7 +8,7 @@ Mỗi fieldState có fieldCode, rowKey, context, dataStatus, source và recorded
 | --- | --- | --- | --- | --- |
 | `patient.uuid` | forbidden |  | patient/null | server_generated |
 | `patient.ma_noi_bo` | forbidden |  | patient/null | on_create |
-| `patient.cccd` | field_states | not_recorded, not_asked, unknown, refused, not_applicable, masked, unreadable | patient/null | optional |
+| `patient.cccd` | field_states | not_recorded, not_asked, unknown, refused, not_applicable, masked, unreadable | patient/null | on_create |
 | `patient.ma_bhxh` | field_states | not_recorded, not_asked, unknown, refused, not_applicable, masked, unreadable | patient/null | optional |
 | `patient.ma_bhyt` | field_states | not_recorded, not_asked, unknown, refused, not_applicable, masked, unreadable | identifier/UUID | optional |
 | `patient.ho_ten` | forbidden |  | patient/null | on_create |

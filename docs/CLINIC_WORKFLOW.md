@@ -10,7 +10,7 @@ Tài liệu này mô tả phòng khám tư nhân mà dự án nhắm tới. Các
 | --- | --- |
 | Loại cơ sở | Phòng khám đa khoa hoặc chuyên khoa tư nhân, một địa điểm |
 | Quy mô | 1–5 bác sĩ, 20–150 lượt khám/ngày |
-| Nhân sự | Một người có thể kiêm nhiều vai trò, ví dụ lễ tân kiêm thu ngân hoặc bác sĩ tự nhập sinh hiệu |
+| Nhân sự | Mỗi tài khoản nhân viên chỉ có một role VinSHC và một cơ sở làm việc; dùng tài khoản riêng cho từng chức năng |
 | Cận lâm sàng | Xét nghiệm cơ bản, siêu âm, điện tim; có thể làm tại chỗ hoặc gửi ra ngoài |
 | Thuốc | Có hoặc không có quầy thuốc đi kèm |
 | Thanh toán | Chủ yếu tự chi trả; BHYT là tùy chọn khi phòng khám có hợp đồng |
@@ -20,7 +20,7 @@ Bệnh viện, nội trú và chuỗi nhiều cơ sở thuộc các tầng sau. 
 
 ## 2. Vai trò
 
-Hệ thống cấu hình **role ghép từ privilege**. Một tài khoản có thể giữ nhiều role. Không viết logic gắn cứng "mỗi người một vai trò".
+Hệ thống cấu hình **role ghép từ privilege**. Mỗi tài khoản chỉ được gán một role VinSHC và một cơ sở làm việc. Người cần làm nhiều chức năng phải được cấp tài khoản riêng cho từng role; không gộp quyền bằng cách thêm role thứ hai vào cùng tài khoản.
 
 | Role | Việc chính | Không được làm (mặc định) |
 | --- | --- | --- |

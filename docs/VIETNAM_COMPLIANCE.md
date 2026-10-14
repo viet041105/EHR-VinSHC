@@ -47,3 +47,37 @@ Một mốc riêng, không thuộc MVP:
 4. Thử backup–restore trên bản sao.
 5. Có thỏa thuận với phòng khám về trách nhiệm dữ liệu, hỗ trợ và giới hạn của phần mềm.
 6. Có quy trình xử lý sự cố và người liên hệ.
+7. Nếu bật trợ lý AI với dữ liệu thật: qua gate AI ở mục 4.
+
+## 4. Trợ lý AI
+
+Trợ lý AI (MVP-3, [AGENT_PLAN.md](AGENT_PLAN.md)) được nghiệm thu trên dữ liệu giả. Với dữ liệu thật, trợ lý **mặc định tắt** cho tới khi qua gate dưới đây. Nếu chưa qua gate, phần còn lại của hệ thống vẫn có thể pilot, chỉ là không có trợ lý.
+
+### 4.1. Vấn đề cần đối chiếu
+
+| Vấn đề | Văn bản tham chiếu (cần xác minh hiệu lực) | Ảnh hưởng tới hệ thống | Đã xác minh |
+| --- | --- | --- | --- |
+| Gửi dữ liệu sức khỏe tới model | Luật Bảo vệ dữ liệu cá nhân (2025), Nghị định 13/2023/NĐ-CP | Mục đích xử lý, căn cứ/đồng ý, đánh giá tác động. Nếu nhà cung cấp model xử lý ở nước ngoài thì có thể là chuyển dữ liệu ra nước ngoài, cần hồ sơ riêng | ☐ |
+| Trợ lý có bị coi là trang thiết bị y tế (phần mềm) không | Nghị định 98/2021/NĐ-CP về quản lý trang thiết bị y tế và văn bản sửa đổi | Phần mềm hỗ trợ chẩn đoán/điều trị có thể phải phân loại và đăng ký. Giữ phạm vi đọc và giải thích giúp giảm rủi ro nhưng vẫn cần xác nhận | ☐ |
+| Quy định về trí tuệ nhân tạo | Luật Công nghiệp công nghệ số (2025) và văn bản riêng về AI nếu đã ban hành | Minh bạch, ghi nhãn nội dung do AI tạo, phân loại rủi ro | ☐ |
+
+### 4.2. Yêu cầu thiết kế
+
+Áp dụng ngay trong MVP-3, kể cả khi chỉ chạy dữ liệu giả:
+
+- [ ] **Chỉ đọc:** agent không có tool ghi, chốt hồ sơ, kê đơn hay đặt chỉ định.
+- [ ] **Quyền của người hỏi:** mỗi lần đọc dùng phiên đăng nhập của người hỏi; backend kiểm quyền và ghi audit; audit phân biệt lượt đọc do agent.
+- [ ] **Tối thiểu dữ liệu:** chỉ gửi tới model dữ liệu cần cho câu hỏi; không gửi CCCD, số điện thoại, địa chỉ, credential.
+- [ ] **Dẫn nguồn và nhãn AI:** mỗi câu trả lời có nguồn mở lại được và ghi rõ do AI tạo.
+- [ ] **Bệnh nhân:** chỉ đọc phần đã công bố của chính mình; dấu hiệu khẩn cấp nhận câu trả lời cố định khuyên gọi 115 hoặc liên hệ phòng khám.
+- [ ] **Log:** không chứa nội dung hồ sơ hoặc câu hỏi; MVP không lưu hội thoại.
+- [ ] **Bật/tắt:** cấu hình theo cơ sở; tắt mặc định với dữ liệu thật; model bên ngoài cần cờ cho phép riêng.
+
+### 4.3. Gate trước khi bật với dữ liệu thật
+
+1. Đánh giá tác động xử lý dữ liệu cá nhân có phần AI. Nếu dùng model bên ngoài: hợp đồng xử lý dữ liệu với nhà cung cấp, nơi xử lý, chính sách lưu và không dùng dữ liệu để huấn luyện, và hồ sơ chuyển dữ liệu ra nước ngoài nếu áp dụng. Phương án thay thế là model chạy tại chỗ.
+2. Xác nhận phân loại pháp lý của trợ lý ở bảng 4.1.
+3. Thông báo cho nhân viên và bệnh nhân về trợ lý, phạm vi, giới hạn và cách không dùng.
+4. Kết quả đánh giá (AI-07) đạt trên bộ ca mở rộng gần với dữ liệu thực tế; bác sĩ của phòng khám pilot review cách diễn đạt.
+5. Có kênh báo câu trả lời sai và người xử lý.
+6. Có theo dõi sau khi bật: tỷ lệ câu bị validator loại, câu bị từ chối, phản hồi của người dùng.

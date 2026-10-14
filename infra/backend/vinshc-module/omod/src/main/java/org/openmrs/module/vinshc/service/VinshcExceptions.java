@@ -1,5 +1,9 @@
 package org.openmrs.module.vinshc.service;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+
 import org.openmrs.api.APIAuthenticationException;
 
 /**
@@ -35,6 +39,27 @@ public final class VinshcExceptions {
 		}
 	}
 	
+	/**
+	 * State conflict (HTTP 409) that carries in-scope records the caller may act on instead, for
+	 * example possible duplicate patients. Records outside the caller's facility are never listed.
+	 */
+	public static class Conflict extends IllegalStateException {
+
+		private static final long serialVersionUID = 1L;
+
+		private final List<Map<String, Object>> matches;
+
+		public Conflict(String message, List<Map<String, Object>> matches) {
+			super(message);
+			this.matches = matches == null ? Collections.<Map<String, Object>> emptyList()
+			        : Collections.unmodifiableList(matches);
+		}
+
+		public List<Map<String, Object>> getMatches() {
+			return matches;
+		}
+	}
+
 	/** The request reached the adapter without an authenticated OpenMRS user (HTTP 401). */
 	public static class NotAuthenticated extends APIAuthenticationException {
 		

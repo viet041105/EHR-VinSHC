@@ -153,7 +153,7 @@ Result gắn Order đúng patient/visit; raw value/unit/reference giữ theo phi
 
 Tiền VND số nguyên, server tính tổng và chụp snapshot tên/giá. Thu/hoàn có idempotency, không vượt số còn nợ/đã thu. Quy tắc làm tròn số lượng lẻ cần cơ sở chốt. Cấp thuốc dựa trên snapshot đơn xác nhận, không sửa đơn khi cấp.
 
-Ma trận quyền lấy 8 role từ tài liệu nhóm, default deny. Account có thể kiêm nhiệm. Reception chỉ hành chính, cashier chỉ projection thu phí, lab chỉ order được giao, pharmacy chỉ snapshot đơn, manager chỉ aggregate. Admin ứng dụng không tự có quyền chart; Core admin dùng kiểm chứng không chứng minh role ứng dụng đã an toàn. CSV gói này không cấp privilege rộng để giả lập ma trận. B5 cần test read/search/write/download/print trên API.
+Ma trận quyền lấy 8 role từ tài liệu nhóm, default deny. Mỗi account chỉ có một role VinSHC; reception chỉ hành chính, cashier chỉ projection thu phí, lab chỉ order được giao, pharmacy chỉ snapshot đơn, manager chỉ aggregate. Admin ứng dụng không tự có quyền chart; Core admin dùng kiểm chứng không chứng minh role ứng dụng đã an toàn. CSV gói này không cấp privilege rộng để giả lập ma trận. B5 cần test read/search/write/download/print trên API.
 
 ## 7. Kiểm tra và nạp
 
