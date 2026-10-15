@@ -98,6 +98,7 @@ const actions = {
 };
 
 const prescriptions = {
+  recordType: "prescription",
   section: "pharmacy",
   resource: "dispensing",
   title: "Đơn thuốc cần cấp",
@@ -126,9 +127,9 @@ const prescriptions = {
     }),
   row: (r) => ({
     id: r.uuid,
-    title: [r.drugName, r.drug?.strength].filter(Boolean).join(" "),
+    title: patientLabel(r) || "Đơn thuốc",
     detail: [
-      patientLabel(r),
+      [r.drugName, r.drug?.strength].filter(Boolean).join(" "),
       [r.dose, r.doseUnits, r.route, r.frequency].filter(Boolean).join(" "),
       "SL " +
         r.quantity +

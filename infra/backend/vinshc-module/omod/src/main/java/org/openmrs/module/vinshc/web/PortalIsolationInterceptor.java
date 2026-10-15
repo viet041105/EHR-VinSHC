@@ -35,6 +35,8 @@ public class PortalIsolationInterceptor implements HandlerInterceptor {
 		String uri = request.getRequestURI();
 		response.setHeader("Cache-Control", "no-store");
 		boolean allowed = uri.matches(".*/rest/v1/session/?")
+		        || ("GET".equals(request.getMethod()) && uri.matches(".*/rest/v1/vinshc/notifications/?"))
+		        || ("POST".equals(request.getMethod()) && uri.matches(".*/rest/v1/vinshc/notifications/([0-9a-fA-F-]{36}/read|read-all)/?"))
 		        || ("POST".equals(request.getMethod()) && uri.matches(".*/rest/v1/vinshc/portal/password/?"))
 		        || ("GET".equals(request.getMethod()) && uri.matches(
 		            ".*/rest/v1/vinshc/portal/(session|me|visits|visits/[0-9a-fA-F-]{36}|visits/[0-9a-fA-F-]{36}/instructions|prescriptions|prescriptions/[0-9a-fA-F-]{36}|results|results/[0-9a-fA-F-]{36}|attachments/[0-9a-fA-F-]{36}/content|appointments)/?"));

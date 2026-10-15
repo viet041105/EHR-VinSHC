@@ -1,0 +1,12 @@
+# Isolated synthetic acceptance. Do not attach existing local or CI database volumes.
+# Use with compose.yaml, --env-file, and project name vinshc-patient-access-test.
+services:
+  db:
+    restart: "no"
+  backend:
+    image: vinshc-patient-access:dev
+    platform: linux/amd64
+    pull_policy: never
+    restart: "no"
+    ports:
+      - "127.0.0.1:17888:8080"

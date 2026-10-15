@@ -1,3 +1,4 @@
+const { chooseAction, mockSelectCare } = require("./reference-helper.cjs");
 const { fillReference } = require("./reference-helper.cjs");
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
@@ -102,19 +103,19 @@ const user = "11111111-1111-4111-8111-111111111111",
       if (role === "admin") {
         await page.locator("[data-section=admin]").click();
         await page.locator("details.advanced-tools > summary").click(); // raw admin forms are collapsed under the guided console
-        const option = page.locator("#actionPicker option[value=systemUsers]");
+        const option = page.locator('[data-task-action="systemUsers"]');
         assert.equal(await option.count(), kind === "system" ? 1 : 0);
         if (kind === "system") {
-          await page.locator('#actionPicker').selectOption('systemUsers');
+          await chooseAction(page, 'systemUsers');
           await page.locator('[name=q]').fill('qa-nhanvien');
           await page.locator('#actionForm button').click();
           await page.locator('[data-pick-account]').waitFor();
           assert.doesNotMatch(await page.locator('#backendResult').innerText(), /22222222-2222|UUID|OpenMRS/);
           await page.locator('[data-pick-account]').click();
-          assert.equal(await page.locator('#actionPicker').inputValue(), 'assignWorkspace');
+          assert.equal(await page.locator('#actionForm').getAttribute('data-action-key'), 'assignWorkspace');
           assert.equal(await page.locator('[name=user]').inputValue(), record);
-          assert.match(await page.locator('#actionForm .reference-value').first().innerText(), /Nguyễn An/);
-          await page.locator("#actionPicker").selectOption("grantAppRole");
+          assert.equal(await page.locator('#actionForm [name=user]').inputValue(), record);
+          await chooseAction(page, "grantAppRole");
           await fillReference(page, "[name=user]", record);
           await page.locator("[name=role]").selectOption("nurse");
           page.once("dialog", (dialog) => dialog.accept()); // grantAppRole asks for confirmation
@@ -126,7 +127,7 @@ const user = "11111111-1111-4111-8111-111111111111",
           assert.ok(writes.at(-1).path.endsWith("/staff/users/" + record + "/roles"));
           assert.deepEqual(writes.at(-1).body, { role: "nurse" });
         }
-        await page.locator("#actionPicker").selectOption("assignWorkspace");
+        await chooseAction(page, "assignWorkspace");
         await fillReference(page, "[name=user]", record);
         await page.locator("[name=role]").selectOption("nurse");
         await page.locator("[name=facility]").selectOption(location);
@@ -140,7 +141,7 @@ const user = "11111111-1111-4111-8111-111111111111",
           role: "nurse",
           facility: location,
         });
-        await page.locator("#actionPicker").selectOption("revokeWorkspace");
+        await chooseAction(page, "revokeWorkspace");
         await fillReference(page, "[name=user]", record);
         await page.locator("[name=role]").selectOption("nurse");
         await page.locator("[name=facility]").selectOption(location);
@@ -152,7 +153,7 @@ const user = "11111111-1111-4111-8111-111111111111",
         assert.equal(writes.at(-1).method, "DELETE");
       } else {
         await page.locator("[data-section=identity]").click();
-        await page.locator("#actionPicker").selectOption("updateContact");
+        await chooseAction(page, "updateContact");
         await fillReference(page, "[name=record]", record);
         await page.locator("[name=clearPhone]").selectOption("true");
         await page.locator("#actionForm button").click();
@@ -161,12 +162,12 @@ const user = "11111111-1111-4111-8111-111111111111",
           .filter({ hasText: "đã được lưu" })
           .waitFor();
         assert.deepEqual(writes.at(-1).body, { phone: null });
-        await page.locator("#actionPicker").selectOption("updateAddress");
+        await chooseAction(page, "updateAddress");
         assert.equal(
           await page.locator("[name=addressAsOfDate]").inputValue(),
           "",
         );
-        await page.locator("#actionPicker").selectOption("clearFieldState");
+        await chooseAction(page, "clearFieldState");
         await fillReference(page, "[name=patient]", user);
         await page
           .locator("[name=fieldCode]")

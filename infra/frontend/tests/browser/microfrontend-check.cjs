@@ -87,7 +87,7 @@ async function session(browser, { breakModule } = {}) {
     const cashier = await broken.open("cashier");
     assert.ok(cashier.includes("billing"), cashier.join());
     await broken.page.locator("[data-section=billing]").click();
-    await broken.page.locator("#actionPicker").waitFor();
+    await broken.page.locator('[data-task-action=bill]').waitFor();
     const reception = await broken.open("reception");
     assert.ok(reception.includes("patients") && reception.includes("visits"), reception.join());
     assert.deepEqual(broken.errors, []);

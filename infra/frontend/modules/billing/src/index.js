@@ -149,6 +149,7 @@ const actions = {
 };
 
 const bills = {
+  recordType: "bill",
   section: "billing",
   resource: "billing",
   title: "Phiếu phí",
@@ -195,16 +196,15 @@ const bills = {
             go("Thu tiền", "billing", "receipt", {
               prefill: { record: b.uuid, amountVnd: b.outstandingVnd },
             }),
-            go("Hủy phiếu", "billing", "cancelBill", {
-              prefill: { record: b.uuid },
-            }),
           ]
         : []),
       go("Xem chi tiết", "billing", "bills", { prefill: { record: b.uuid } }),
+      ...(['unpaid', 'partially_paid'].includes(b.status) ? [go('Hủy phiếu', 'billing', 'cancelBill', { prefill: { record: b.uuid } })] : []),
     ],
   }),
 };
 const payments = {
+  recordType: "payment",
   section: "billing",
   resource: "payment",
   title: "Giao dịch chờ xác nhận / trong ngày",
@@ -254,10 +254,10 @@ const payments = {
         : []),
       ...(p.kind === "receipt" && p.status === "settled"
         ? [
-            go("Hoàn tiền", "billing", "refund", {
+            go("In phiếu thu", "documents", "printReceipt", {
               prefill: { record: p.uuid },
             }),
-            go("In phiếu thu", "documents", "printReceipt", {
+            go("Hoàn tiền", "billing", "refund", {
               prefill: { record: p.uuid },
             }),
           ]

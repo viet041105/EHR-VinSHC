@@ -537,4 +537,45 @@
       DROP TABLE vinshc_portal_link_event;
     </sql></rollback>
   </changeSet>
+  <changeSet id="vinshc-20261016-patient-access-notifications" author="vinshc" dbms="postgresql">
+    <comment>Persist doctor requests and recipient-scoped notifications; preserve all existing clinical data.</comment>
+    <sql>
+      CREATE TABLE vinshc_patient_access_request (
+        request_uuid VARCHAR(38) PRIMARY KEY,
+        request_type VARCHAR(32) NOT NULL CHECK(request_type IN('patient_account_create','patient_password_reset')),
+        patient_id INT NOT NULL REFERENCES patient(patient_id),
+        visit_id INT NOT NULL REFERENCES visit(visit_id),
+        facility_location_id INT NOT NULL REFERENCES location(location_id),
+        requester INT NOT NULL REFERENCES users(user_id),
+        idempotency_key VARCHAR(100) NOT NULL,
+        status VARCHAR(16) NOT NULL DEFAULT 'pending' CHECK(status IN('pending','fulfilled','rejected')),
+        note VARCHAR(1000), reason VARCHAR(1000),
+        user_id INT REFERENCES users(user_id),
+        processed_by INT REFERENCES users(user_id),
+        processed_at TIMESTAMP WITH TIME ZONE,
+        fulfill_key VARCHAR(100),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL,
+        UNIQUE(requester,idempotency_key)
+      );
+      CREATE UNIQUE INDEX ux_vinshc_pending_patient_access ON vinshc_patient_access_request(patient_id,request_type) WHERE status='pending';
+      CREATE INDEX ix_vinshc_access_inbox ON vinshc_patient_access_request(facility_location_id,status,date_created DESC);
+      CREATE INDEX ix_vinshc_access_requester ON vinshc_patient_access_request(requester,date_created DESC);
+      CREATE TABLE vinshc_notification (
+        notification_id BIGSERIAL PRIMARY KEY,
+        notification_uuid VARCHAR(38) NOT NULL UNIQUE,
+        recipient_id INT NOT NULL REFERENCES users(user_id),
+        recipient_role VARCHAR(20) NOT NULL,
+        facility_location_id INT REFERENCES location(location_id),
+        event_type VARCHAR(60) NOT NULL, event_key VARCHAR(150) NOT NULL,
+        title VARCHAR(200) NOT NULL, message VARCHAR(500) NOT NULL,
+        target_kind VARCHAR(32), target_uuid VARCHAR(38),
+        date_created TIMESTAMP WITH TIME ZONE NOT NULL,
+        read_at TIMESTAMP WITH TIME ZONE,
+        UNIQUE(recipient_id,event_key)
+      );
+      CREATE INDEX ix_vinshc_notification_inbox ON vinshc_notification(recipient_id,recipient_role,facility_location_id,notification_id DESC);
+      CREATE INDEX ix_vinshc_notification_unread ON vinshc_notification(recipient_id,recipient_role,facility_location_id) WHERE read_at IS NULL;
+    </sql>
+    <rollback><sql>DROP TABLE vinshc_notification; DROP TABLE vinshc_patient_access_request;</sql></rollback>
+  </changeSet>
 </databaseChangeLog>

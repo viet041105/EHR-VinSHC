@@ -6,12 +6,12 @@ export const SECTION_COPY = {
   patients: ["Bệnh nhân", "Tìm hồ sơ trước khi đăng ký mới. Chọn bệnh nhân để tiếp tục."],
   identity: ["Thông tin hành chính", "Thông tin cá nhân, địa chỉ và người liên hệ của bệnh nhân."],
   visits: ["Lượt khám", "Theo dõi lượt đang mở, tiếp nhận và kết thúc khám."],
-  vitals: ["Sinh hiệu", "Ghi lần đo, xem lịch sử và đính chính số đo khi cần."],
+  vitals: ["Sinh hiệu", "Ghi mạch, huyết áp, nhiệt độ và các chỉ số đo của người bệnh."],
   clinical: ["Khám và điều trị", "Phiếu khám, chẩn đoán, đơn thuốc và lời dặn."],
   appointments: ["Lịch hẹn", "Đặt lịch, xác nhận và tiếp nhận bệnh nhân đến khám."],
   queue: ["Hàng đợi", "Gọi bệnh nhân, theo dõi phục vụ và chuyển đến bước tiếp theo."],
   billing: ["Thu ngân", "Phiếu phí, thu tiền, xác nhận chuyển khoản và hoàn tiền."],
-  orders: ["Chỉ định và kết quả", "Theo dõi chỉ định, ghi kết quả và xem tệp đính kèm."],
+  orders: ["Chỉ định và kết quả", "Xét nghiệm, siêu âm và các dịch vụ cận lâm sàng (CLS) được bác sĩ yêu cầu."],
   pharmacy: ["Quầy thuốc", "Xem đơn chờ cấp, ghi nhận số lượng và lịch sử cấp thuốc."],
   reports: ["Báo cáo", "Xem số liệu hoạt động và thu chi theo ngày hoặc khoảng ngày."],
   admin: ["Quản trị", "Thêm nhân viên, phân công nơi làm việc và xem lịch sử thay đổi."],
@@ -31,17 +31,19 @@ export const PRIMARY_ACTIONS = {
   patients: ["registerPatient", "patientProfile", "updatePatient"],
   identity: ["identity", "contact", "address"],
   visits: ["openVisit", "closeVisit"],
-  vitals: ["startVitalsEncounter", "correctVitals", "voidVitals"],
-  clinical: ["summary", "consultation", "diagnosis", "prescription", "finalize"],
+  vitals: ["startVitalsEncounter", "vitalsHistory"],
+  clinical: ["startConsultation", "consultation", "diagnosis", "prescription", "finalize"],
   appointments: ["book", "appointmentTransition"],
-  queue: ["enqueue", "queueTransition", "advance"],
-  billing: ["bill", "receipt", "settle", "refund"],
-  orders: ["createOrder", "orderTransition", "saveResult"],
-  pharmacy: ["dispense", "prescriptionDetail"],
+  queue: ["enqueue"],
+  billing: ["bill"],
+  orders: ["createOrder"],
+  pharmacy: [],
   reports: ["report", "rangeReport"],
   admin: ["systemUsers", "assignWorkspace", "audit", "configuration"],
 };
 const TITLES = {
+  startVitalsEncounter: 'Bắt đầu lần đo', startConsultation: 'Bắt đầu khám',
+  consultation: 'Ghi phiếu khám', prescription: 'Kê thuốc', finalize: 'Kiểm tra và chốt phiếu',
   patientProfile: "Xem hồ sơ bệnh nhân", configuration: "Cấu hình hoạt động", workspace: "Xem phân công hiện tại",
   evaluate: "Kiểm tra quyền", systemUsers: "Tìm nhân viên", grantAppRole: "Đổi vai trò VinSHC",
   assignWorkspace: "Phân công nhân viên", revokeWorkspace: "Thu hồi phân công",
@@ -61,6 +63,8 @@ export function submitLabel(key, action) {
   if (key === "registerPatient") return "Đăng ký bệnh nhân";
   if (key === "openVisit") return "Mở lượt khám";
   if (key === "finalize") return "Chốt phiếu khám";
+  const labels = { startVitalsEncounter: 'Bắt đầu lần đo', startConsultation: 'Bắt đầu khám', consultation: 'Lưu phiếu khám', diagnosis: 'Lưu chẩn đoán', prescription: 'Xác nhận kê thuốc', createOrder: 'Gửi chỉ định', saveResult: 'Lưu kết quả', correctResult: 'Lưu bản đính chính', bill: 'Lập phiếu phí', enqueue: 'Xác nhận xếp hàng', advance: 'Chuyển người bệnh', queueTransition: 'Xác nhận trạng thái', orderTransition: 'Xác nhận trạng thái', closeVisit: 'Xác nhận kết thúc lượt' };
+  if (labels[key]) return labels[key];
   if (action.method === "DELETE") return "Xác nhận hủy";
   return "Lưu thông tin";
 }

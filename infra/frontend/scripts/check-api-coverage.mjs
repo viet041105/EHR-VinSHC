@@ -66,10 +66,20 @@ callers.push(
   { name: "portal:me", method: "GET", path: "/vinshc/portal/me" },
   { name: "portal:password", method: "POST", path: "/vinshc/portal/password" },
   { name: "portal:visits", method: "GET", path: "/vinshc/portal/visits" },
+  { name: "portal:notificationVisit", method: "GET", path: "/vinshc/portal/visits/" + id },
   { name: "portal:instructions", method: "GET", path: "/vinshc/portal/visits/" + id + "/instructions" },
   { name: "portal:prescriptions", method: "GET", path: "/vinshc/portal/prescriptions" },
   { name: "portal:results", method: "GET", path: "/vinshc/portal/results" },
   { name: "portal:appointments", method: "GET", path: "/vinshc/portal/appointments" },
+  // Persisted handoff and recipient-scoped notifications used by patient-access.js / notifications.js.
+  { name: "patient-access:list", method: "GET", path: "/vinshc/patient-access/requests" },
+  { name: "patient-access:detail", method: "GET", path: "/vinshc/patient-access/requests/" + id },
+  { name: "patient-access:create", method: "POST", path: "/vinshc/patient-access/requests" },
+  { name: "patient-access:fulfill", method: "POST", path: "/vinshc/patient-access/requests/" + id + "/fulfill" },
+  { name: "patient-access:reject", method: "POST", path: "/vinshc/patient-access/requests/" + id + "/reject" },
+  { name: "notifications:list", method: "GET", path: "/vinshc/notifications" },
+  { name: "notifications:read", method: "POST", path: "/vinshc/notifications/" + id + "/read" },
+  { name: "notifications:read-all", method: "POST", path: "/vinshc/notifications/read-all" },
   // Calls made by the shell itself.
   { name: "shell:login", method: "GET", path: "/session" },
   { name: "shell:loadWorkspaces", method: "GET", path: "/vinshc/authorization/workspaces" },
@@ -82,7 +92,6 @@ callers.push(
 const noCaller = new Map([
   ["GET /vinshc/directory/facilities/{uuid}", "the facility list already carries every field the admin screens use"],
   ["GET /vinshc/portal/session", "superseded by GET portal/me"],
-  ["GET /vinshc/portal/visits/{uuid}", "the portal reads instructions/prescriptions/results of a visit separately"],
   ["GET /vinshc/portal/prescriptions/{uuid}", "the portal lists prescriptions by visit"],
   ["GET /vinshc/portal/results/{uuid}", "the portal lists results by visit"],
   ["GET /vinshc/portal/attachments/{uuid}/content", "disabled by the backend until attachments are malware-scanned (checklist 8.2)"],
@@ -97,7 +106,7 @@ for (const file of readdirSync(dir).filter((f) =>
     base = source.match(/@RequestMapping\("\/rest\/v1([^"\n]+)"\)/)?.[1];
   if (!base) continue;
   for (const match of source.matchAll(
-    /@(Get|Post|Delete|Put|Patch)Mapping\((?:path\s*=\s*)?"([^"]+)"/g,
+    /@(Get|Post|Delete|Put|Patch)Mapping\((?:path\s*=\s*)?"([^"]*)"/g,
   )) {
     total++;
     const method = match[1].toUpperCase(),

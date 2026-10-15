@@ -1,3 +1,4 @@
+const { mockSelectCare } = require("./reference-helper.cjs");
 // Integration regressions for the merged floating doctor chat. Synthetic API responses only.
 const { chromium } = require('playwright');
 const assert = require('node:assert/strict');
@@ -23,6 +24,7 @@ const send=async(route,data)=>{try{await route.fulfill({contentType:'application
       page.on('pageerror',e=>errors.push(e.message));
       await page.route('**/api/**',async route=>{
         const p=new URL(route.request().url()).pathname;
+        if(p.endsWith('/providers/me'))return send(route,{providers:[{uuid:patient}]});
         if(p.endsWith('/session'))return send(route,{authenticated:true,user:{uuid:patient,display:'Bác sĩ mẫu',roles:[{name:'VinSHC App: doctor'}]}});
         if(p.endsWith('/authorization/workspaces'))return send(route,[{role:'doctor',facilityUuid:facility,facilityName:'Cơ sở thử'}]);
         if(p.endsWith('/authorization/workspace'))return send(route,{role:'doctor',facilityUuid:facility});
@@ -53,8 +55,7 @@ const send=async(route,data)=>{try{await route.fulfill({contentType:'application
       await page.goto(base+'/connected.html');
       await page.fill('[name=username]','synthetic');await page.fill('#loginForm [name=password]','synthetic');await page.click('#loginForm button');
       await page.locator('[data-section=visits]').click();
-      for(const [name,value] of Object.entries({patient,visit,encounter}))await fillReference(page,'[name=care_'+name+']',value);
-      await page.click('#careContextForm button[type=submit]');
+      await mockSelectCare(page,{patient,visit,encounter});
       await page.click('[data-assistant-toggle]');
       const ask=async message=>{await page.fill('[data-chat] textarea',message);await page.locator('[data-chat] textarea').press('Enter');};
       await ask('Tóm tắt');await page.locator('.assistant-msg.bot',{hasText:'Nội dung trong hồ sơ'}).waitFor();
@@ -95,7 +96,7 @@ const send=async(route,data)=>{try{await route.fulfill({contentType:'application
       await page.click('[data-clear]');chatRelease=null;await ask('Chậm');
       for(let i=0;!chatRelease&&i<100;i++)await delay(20);assert.ok(chatRelease);
       if(width<600)await page.click('[data-assistant-close]');
-      await fillReference(page,'[name=care_patient]',other);await page.click('#careContextForm button[type=submit]');
+      await mockSelectCare(page,{patient:other,visit:other,encounter,provider:patient});
       chatRelease();await delay(100);if(width<600)await page.click('[data-assistant-toggle]');
       assert.equal(await page.locator('.assistant-msg.user').count(),0);assert.equal(await page.inputValue('[data-chat] textarea'),'');
       assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);

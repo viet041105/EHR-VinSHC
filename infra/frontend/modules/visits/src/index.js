@@ -114,6 +114,7 @@ const actions = {
 };
 
 const visits = {
+  recordType: "visit",
   section: "visits",
   resource: "visit",
   title: "Lượt khám tại cơ sở",
@@ -167,9 +168,11 @@ const visits = {
           ? [
               vitals
                 ? go("Ghi sinh hiệu", "vitals", null, {
+                    onlyRoles: ['nurse'],
                     context: { ...visitContext(v), encounter: vitals.uuid },
                   })
-                : go("Ghi sinh hiệu", "vitals", "startVitalsEncounter"),
+                : go("Ghi sinh hiệu", "vitals", "startVitalsEncounter", {onlyRoles: ['nurse']}),
+              go('Xem sinh hiệu', 'vitals', null, { onlyRoles: ['doctor'] }),
               consult
                 ? go("Hồ sơ khám", "clinical", "summary")
                 : go("Khám", "clinical", "startConsultation"),
@@ -207,6 +210,6 @@ export default defineModule({
   actions,
   worklists: { visits },
   records: {
-    visit: { label: "Lượt khám", section: "visits", read: "visitDetail" },
+    visit: { label: "Lượt khám", section: "visits", read: "visitDetail", contextFrom: r => ({ patient: r.patientUuid, visit: r.uuid }) },
   },
 });

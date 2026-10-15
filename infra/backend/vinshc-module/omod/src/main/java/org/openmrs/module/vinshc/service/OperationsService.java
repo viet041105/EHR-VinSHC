@@ -104,13 +104,16 @@ public class OperationsService {
 
 	private final SessionFactory sessionFactory;
 
+	private final NotificationService notifications;
+
 	private volatile Metadata metadata;
 
-	public OperationsService(SessionFactory sessionFactory) {
+	public OperationsService(SessionFactory sessionFactory, NotificationService notifications) {
 		ConnectionProvider provider = ((SessionFactoryImplementor) sessionFactory).getServiceRegistry()
 		        .getService(ConnectionProvider.class);
 		this.jdbc = new JdbcTemplate(provider.unwrap(javax.sql.DataSource.class));
 		this.sessionFactory = sessionFactory;
+		this.notifications = notifications;
 	}
 
 	// ---------------------------------------------------------------- configuration
@@ -332,6 +335,8 @@ public class OperationsService {
 		    uuid, patient.getPatientId(), visit.getVisitId(), location.getLocationId(),
 		    provider == null ? null : provider.getProviderId(), config, point, iteration.intValue(), queueNumber.intValue(),
 		    key, actorId(), now());
+		if (provider != null)
+			notifications.assignedDoctor(provider.getProviderId(), location.getLocationId(), uuid, visit.getUuid());
 		return queue(uuid);
 	}
 
