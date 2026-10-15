@@ -25,9 +25,14 @@ class ChatIn(BaseModel):
 
     message: str = Field(min_length=1, max_length=1000)
     history: list[HistoryIn] = Field(default_factory=list, max_length=12)
+    remember: bool = False
+    conversationId: str | None = Field(default=None, pattern=r"^[a-fA-F0-9-]{36}$")
+    stream: bool = False
 
     @model_validator(mode="after")
     def alternating_history(self) -> "ChatIn":
+        if self.conversationId and self.history:
+            raise ValueError("conversationId dùng lịch sử server; không gửi thêm history")
         expected = ["user", "assistant"] * (len(self.history) // 2)
         if len(self.history) % 2 or [h.role for h in self.history] != expected:
             raise ValueError("history phải xen kẽ user/assistant, bắt đầu bằng user và kết thúc bằng assistant")
@@ -35,8 +40,9 @@ class ChatIn(BaseModel):
 
 
 class DoctorChatIn(ChatIn):
-    patientUuid: str
-    encounterUuid: str
+    # Both omitted: general question without an open chart (reference documents and conversation only).
+    patientUuid: str | None = None
+    encounterUuid: str | None = None
     visitUuid: str | None = None
 
 
@@ -55,6 +61,17 @@ class SourceOut(BaseModel):
     status: str | None
     encounterUuid: str | None = None
     visitUuid: str | None = None
+    documentId: str | None = None
+    documentTitle: str | None = None
+    documentVersion: str | None = None
+    documentSection: str | None = None
+    sourceUrl: str | None = None
+
+
+class KnowledgeSearchIn(BaseModel):
+    model_config = ConfigDict(extra="forbid", str_strip_whitespace=True)
+    query: str = Field(min_length=1, max_length=400)
+    limit: int = Field(default=3, ge=1, le=4)
 
 
 class AnswerOut(BaseModel):
@@ -70,8 +87,8 @@ class MissingOut(BaseModel):
 
 
 class DoctorContextOut(BaseModel):
-    patientUuid: str
-    encounterUuid: str
+    patientUuid: str | None
+    encounterUuid: str | None
     visitUuid: str | None
     role: str
     facilityUuid: str
@@ -98,6 +115,9 @@ class ChatOut(BaseModel):
     disclaimer: str
     generatedAt: str
     model: ModelOut
+    conversationId: str | None = None
+    conversationRevision: int | None = None
+    diagnostics: dict | None = None
 
 
 class ErrorOut(BaseModel):

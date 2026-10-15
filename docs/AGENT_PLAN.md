@@ -1,8 +1,8 @@
 # Kế hoạch tổng quan Agent cho EHR-VinSHC
 
-**Ngày:** 13/10/2026 · cập nhật MVP 14/10/2026
+**Ngày:** 13/10/2026 · cập nhật nâng cao 15/10/2026
 
-**Trạng thái:** Đã bổ sung tích hợp MVP trong nhánh agent-mvp-integration: A đọc API nhân viên, P đọc cổng bệnh nhân đã công bố; có FE, Compose và CI. Xem [bàn giao](AGENT_MVP_HANDOFF.md). Đánh giá chất lượng/model thật và nâng cấp B/C được để lại theo phạm vi đã chốt.
+**Trạng thái:** Có code MVP A/P và gói nâng cao trên `feature/mvp3-agent-chatbot`. Stack local đã nối BE HTTP và Gemini; phạm vi đã kiểm chứng và các giới hạn xem [bản rà soát 15/10/2026](AGENT_AUDIT_2026-10-15.md). RAG hiện là corpus metadata mẫu; cổng bệnh nhân local chưa có tài khoản/bản công bố. Streaming có ở API, màn chat hiện dùng request JSON với trạng thái chờ.
 
 **Người phụ trách đề xuất:** Người 3 — metadata, dữ liệu và agent.
 
@@ -97,7 +97,7 @@ Sau MVP P có thể thêm **nhắc lịch tự động** và **gửi câu hỏi/
 
 ## 5. Dữ liệu và API hiện có
 
-Base API ứng dụng hiện tại: `/openmrs/ws/rest/v1/vinshc`.
+Base API ứng dụng hiện tại: `/openmrs/ws/rest/v1/vinshc`. **Lưu ý P0 (14/10/2026):** `clinical-summary` hiện đã chứa sinh hiệu trong phạm vi visit; không coi sinh hiệu là dữ liệu chưa có khi xây tool agent. Nếu lần khám không có bản ghi sinh hiệu hoặc tool không tải được, cần thể hiện đúng trạng thái tương ứng.
 
 | Nguồn | Hiện có gì? | Dùng trong agent |
 | --- | --- | --- |
@@ -239,4 +239,4 @@ Khi BE/FE đổi contract hoặc bổ sung endpoint, cập nhật bảng API và
 
 ## 14. Phạm vi hoàn thiện MVP đã chốt
 
-MVP A/P, FE, patient portal, phân quyền/công bố, Docker và CI được thực hiện trong lần này. Test code/phân quyền/tích hợp vẫn bắt buộc; bộ đánh giá chất lượng với đáp án chuẩn và model thật, timeline nâng cao và RAG được để lại. Các mô tả API ở bản plan ban đầu là snapshot cũ; contract mới xem [patient portal](api/patient-portal.md) và [bàn giao MVP](AGENT_MVP_HANDOFF.md).
+MVP A/P và gói nâng cao đã có code và kiểm thử synthetic; xem [AGENT_ADVANCED.md](AGENT_ADVANCED.md). Baseline model demo không thay đánh giá chất lượng model thật hay bác sĩ duyệt đáp án. Adapter/nguồn/quyền cần đối chiếu BE/FE đang xây lại. Contract hiện tại xem [patient portal](api/patient-portal.md), [bàn giao MVP](AGENT_MVP_HANDOFF.md) và [bàn giao dữ liệu](AGENT_DATA_HANDOFF.md).

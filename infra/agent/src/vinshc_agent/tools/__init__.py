@@ -13,11 +13,12 @@ import json
 from dataclasses import dataclass, field
 from typing import Any, Awaitable, Callable
 
-from ..backend import BackendError, Credentials, VinshcBackend
+from ..backend import BackendError, Credentials, ClinicalDataProvider
 from ..facts import FactRegistry, ToolError, ToolOutput
 from ..fields import FieldCatalog
-from ..llm import ToolCall, ToolResult
+from ..llm import HistoryTurn, ToolCall, ToolResult
 from ..portal import PatientPortal, PatientSession
+from ..knowledge import KnowledgeBase, KnowledgeScope
 
 REF_PARAM_MAX = 16
 
@@ -28,15 +29,20 @@ class ToolContext:
     registry: FactRegistry
     catalog: FieldCatalog
     patient_uuid: str
-    backend: VinshcBackend | None = None
+    backend: ClinicalDataProvider | None = None
     credentials: Credentials | None = None
     encounter_uuid: str | None = None
     visit_uuid: str | None = None
     portal: PatientPortal | None = None
     session: PatientSession | None = None
+    knowledge: KnowledgeBase | None = None
+    knowledge_scope: KnowledgeScope | None = None
     used: list[str] = field(default_factory=list)
     cache: dict[str, Any] = field(default_factory=dict)
     read_errors: list[str] = field(default_factory=list)
+    parallel: bool = False
+    conversation_history: tuple[HistoryTurn, ...] = ()
+    conversation_reply: str | None = None
 
 
 Handler = Callable[[ToolContext, dict[str, Any]], Awaitable[ToolOutput]]
@@ -71,7 +77,7 @@ def check_arguments(tool: Tool, arguments: Any) -> dict[str, Any]:
         raise ToolError(f"Tham số không hợp lệ cho {tool.name}; cần đúng các khóa: {', '.join(tool.parameters) or 'không có'}.")
     for name, schema in tool.parameters.items():
         value = arguments[name]
-        if schema.get("type") == "string" and (not isinstance(value, str) or not value.strip() or len(value) > REF_PARAM_MAX):
+        if schema.get("type") == "string" and (not isinstance(value, str) or not value.strip() or len(value) > schema.get("maxLength", REF_PARAM_MAX)):
             raise ToolError(f"Tham số {name} phải là chuỗi ngắn không rỗng.")
         if "enum" in schema and value not in schema["enum"]:
             raise ToolError(f"Tham số {name} chỉ nhận: {', '.join(schema['enum'])}.")

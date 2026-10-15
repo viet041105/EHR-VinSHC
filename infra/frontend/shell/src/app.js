@@ -30,7 +30,7 @@ import {
   resultHighlights,
 } from "./screens.js";
 import { displayResult, resultLabels } from "./result-view.js";
-import { AgentChat } from "./agent-chat.js";
+import { DoctorAssistant } from "./doctor-assistant.js";
 import { SECTION_COPY, PRIMARY_ACTIONS, actionTitle, submitLabel, plainText, sectionIcon } from "./presentation.js";
 
 let registry = createRegistry([]),
@@ -39,7 +39,7 @@ let registry = createRegistry([]),
   modulesLoaded = Promise.resolve();
 const client = new BackendClient();
 const memory = new WorkspaceMemory();
-const agentChat = new AgentChat(client);
+const agentChat = new DoctorAssistant(client);
 const state = {
   role: null,
   facility: null,
@@ -157,9 +157,10 @@ function field(f, values = {}) {
 function shell(content) {
   document.querySelector("#app").innerHTML =
     `<a class="skip-link" href="#main-content">Đến nội dung chính</a><header class="site-header clinic-header"><a class="site-brand" href="/"><span class="logo-plus">✚</span><span><strong>VinSHC</strong><small>QUẢN LÝ PHÒNG KHÁM</small></span></a><div class="header-controls">${state.workspace ? `<div class="session-identity" aria-label="Thông tin phiên đăng nhập"><dl><div><dt>Tài khoản:</dt><dd>${esc(client.user?.display)}</dd></div><div><dt>Vai trò:</dt><dd>${esc(m.permissions.roles[state.role].label)}</dd></div></dl></div><div class="session-actions"><button id="logout" ${state.busy ? "disabled" : ""}>Đăng xuất</button></div>` : '<a class="back-home" href="/">Về trang chủ</a>'}</div></header>${content}`;
-  if(state.workspace && state.role === "doctor" && state.section === "clinical") {
-    const host=document.createElement("div");host.id="agentPanel";document.querySelector("#main-content")?.append(host);
-    agentChat.mount(host,"doctor",memory.context);
+  // The doctor assistant floats over every doctor screen; its open state and turns survive re-renders.
+  if(state.workspace && state.role === "doctor") {
+    const host=document.createElement("div");host.id="agentPanel";document.querySelector("#app").append(host);
+    agentChat.mount(host,"doctor",memory.context,{label:memory.contextLabel,navigate,labels});
   } else agentChat.clear();
   document.querySelector("#logout")?.addEventListener("click", logout);
 }
@@ -248,6 +249,9 @@ function sectionContent(section) {
   const primary = (PRIMARY_ACTIONS[section.id] || choices.slice(0, 3)).filter(k => choices.includes(k));
   const toolbar = `<section class="task-actions" aria-label="Công việc ${esc(SECTION_COPY[section.id]?.[0] || section.title)}"><div class="action-shortcuts">${primary.map(k => `<button type="button" data-go-section="${section.id}" data-go-action="${k}" ${state.action === k ? 'aria-current="true"' : ''}>${esc(actionTitle(k, registry.actions[k]))}</button>`).join('')}</div><label class="action-menu">Chọn công việc<select id="actionPicker"><option value="">Chọn thao tác…</option>${choices.map(k => `<option value="${k}" ${state.action === k ? 'selected' : ''}>${esc(actionTitle(k, registry.actions[k]))}</option>`).join('')}</select></label></section>`;
   const form = a ? `<section class="panel form-card task-form"><div class="workspace-heading"><h2>${esc(actionTitle(state.action, a))}</h2><button type="button" id="closeTaskForm" aria-label="Đóng biểu mẫu">Đóng</button></div>${a.notice ? note(plainText(a.notice)) : ''}${knownRecordPicker(a)}<form id="actionForm"><div class="form-grid">${actionFields(a)}</div>${a.formNote ? note(plainText(a.formNote)) : ''}<div class="form-actions"><button class="primary" ${state.busy ? 'disabled' : ''}>${state.busy ? 'Đang xử lý…' : esc(submitLabel(state.action, a))}</button></div></form></section>` : '';
+  // Sections with their own guided screen keep the raw per-endpoint forms collapsed below it.
+  if (section.advancedTools)
+    return before + screen + (section.intro?.(ctx) || '') + `<details class="advanced-tools" ${a ? 'open' : ''}><summary>Công cụ nâng cao <small>Dành cho kỹ thuật viên: cổng bệnh nhân, biểu mẫu, quy trình, nhật ký truy cập</small></summary>${toolbar}${form}</details>`;
   return before + toolbar + screen + (section.intro?.(ctx) || '') + form;
 }
 function actionFields(action) {
@@ -268,7 +272,7 @@ function actionFields(action) {
 function accountResults(result) {
   const users = result?.results || [];
   if (!users.length) return '<div class="workspace-empty"><strong>Chưa tìm thấy tài khoản</strong><p>Thử tìm bằng tên đăng nhập hoặc tên nhân viên.</p></div>';
-  return `<div class="workspace-table-wrap"><table class="workspace-table"><thead><tr><th>Nhân viên</th><th>Vai trò</th><th>Trạng thái</th><th>Phân công</th></tr></thead><tbody>${users.map((user, i) => `<tr><td><strong>${esc(user.display || user.username || user.systemId)}</strong><small>${esc(user.username || user.systemId || '')}</small></td><td>${esc((user.roles || []).map(r => {const name=r.name || r.display; return Object.values(m.permissions.roles).find(role => role.openmrs.name === name)?.label || plainText(name);}).join(', '))}</td><td>${user.retired ? 'Ngừng hoạt động' : 'Đang hoạt động'}</td><td><button type="button" data-pick-account="${i}" ${user.retired ? 'disabled' : ''}>Chọn nhân viên</button></td></tr>`).join('')}</tbody></table></div>`;
+  return `<div class="workspace-table-wrap"><table class="workspace-table"><thead><tr><th>Nhân viên</th><th>Vai trò</th><th>Trạng thái</th><th>Phân công</th></tr></thead><tbody>${users.map((user, i) => `<tr><td><strong>${esc(user.display || user.username || user.systemId)}</strong><small>${esc(user.username || user.systemId || '')}</small></td><td>${esc((user.roles || []).map(r => {const name=typeof r === 'string' ? r : r.name || r.display; return Object.entries(m.permissions.roles).find(([key, role]) => key === name || role.openmrs.name === name)?.[1].label || plainText(name);}).join(', '))}</td><td>${user.retired ? 'Ngừng hoạt động' : 'Đang hoạt động'}</td><td><button type="button" data-pick-account="${i}" ${user.retired ? 'disabled' : ''}>Chọn nhân viên</button></td></tr>`).join('')}</tbody></table></div>`;
 }
 
 function knownRecordPicker(action) {
@@ -663,30 +667,34 @@ async function login(e) {
   state.error = "";
   render();
   try {
-    const session = await client.login(f.get("username"), f.get("password"));
-    const roles = new Set(assignedRoles(session.user));
-    const assigned = await client.request("vinshc/authorization/workspaces", { scoped: false });
-    const workspaces = (Array.isArray(assigned) ? assigned : []).filter(
-      (workspace) => roles.has(workspace.role) &&
-        m.permissions.roles[workspace.role] &&
-        facilityForLocation(workspace.facilityUuid) &&
-        typeof workspace.facilityName === "string",
-    );
-    if (workspaces.length > 1)
-      throw new BackendError("Tài khoản có nhiều phân công đang hoạt động. Quản trị viên cần gán lại một vai trò và một cơ sở.", 409);
-    state.role = workspaces[0]?.role || null;
-    state.facility = workspaces[0]?.facilityUuid || null;
-    if (workspaces.length === 1) {
-      await activateWorkspace(state.role, state.facility);
-    } else {
-      state.error = "Tài khoản chưa được phân công vai trò và cơ sở. Liên hệ quản trị phòng khám để được cấp quyền.";
-    }
+    await client.login(f.get("username"), f.get("password"));
+    await openAssignedWorkspace();
   } catch (error) {
     state.error = plainText(error.message);
   } finally {
     f.delete("password");
     state.busy = false;
     render();
+  }
+}
+// Loads the account's single assigned workspace.
+async function openAssignedWorkspace() {
+  const roles = new Set(assignedRoles(client.user));
+  const assigned = await client.request("vinshc/authorization/workspaces", { scoped: false });
+  const workspaces = (Array.isArray(assigned) ? assigned : []).filter(
+    (workspace) => roles.has(workspace.role) &&
+      m.permissions.roles[workspace.role] &&
+      facilityForLocation(workspace.facilityUuid) &&
+      typeof workspace.facilityName === "string",
+  );
+  if (workspaces.length > 1)
+    throw new BackendError("Tài khoản có nhiều phân công đang hoạt động. Quản trị viên cần gán lại một vai trò và một cơ sở.", 409);
+  state.role = workspaces[0]?.role || null;
+  state.facility = workspaces[0]?.facilityUuid || null;
+  if (workspaces.length === 1) {
+    await activateWorkspace(state.role, state.facility);
+  } else {
+    state.error = "Tài khoản chưa được phân công vai trò và cơ sở. Liên hệ quản trị phòng khám để được cấp quyền.";
   }
 }
 async function modulesReady() {
@@ -770,6 +778,7 @@ async function submitAction(e) {
       data.facility = facility.uuid;
     }
     a.prepare?.(data, ctx);
+    if (a.confirm && !window.confirm(a.confirm)) return;
     const payload = a.build ? a.build(data) : undefined;
     let body = payload;
     if (a.upload) {
@@ -787,7 +796,8 @@ async function submitAction(e) {
     }
     a.finish?.(body, data, ctx);
     const path = (a.adminCore ? "" : "vinshc/") + a.path(data);
-    const fingerprint = JSON.stringify([
+    // Never include credentials in the retry fingerprint or retained UI state.
+    const fingerprint = a.sensitive ? null : JSON.stringify([
       client.workspace,
       state.action,
       path,
@@ -825,7 +835,8 @@ async function submitAction(e) {
         }
         if (a.document)
           state.message =
-            "Bản in đã sẵn sàng. Chọn In chứng từ để in.";
+            "Đã lấy chứng từ từ OpenMRS. Dùng nút In chứng từ để in nội dung đã nhận.";
+        if (a.sensitive) delete data.password;
         captureWorkspaceResponse(state.action, result, data);
         if (data.orderer) state.context.orderer = data.orderer;
         if (a.method !== "GET") {
@@ -836,6 +847,13 @@ async function submitAction(e) {
     );
   } catch (error) {
     showError(error);
+  } finally {
+    // Password inputs must not survive rerender or appear in session metadata.
+    if (a.sensitive) {
+      delete data.password;
+      const secret = e.target?.elements?.namedItem("password");
+      if (secret) secret.value = "";
+    }
   }
 }
 async function perform(task, message, onSuccess) {

@@ -6,5 +6,5 @@ services:
       - ./metadata/vinshc/initializer-test/encounterroles/vinshc/result-reviewer.csv:/openmrs/distribution/openmrs_config/encounterroles/vinshc/result-reviewer.csv:ro
       - ./metadata/vinshc/initializer-test/locations/vinshc/test-rooms.csv:/openmrs/distribution/openmrs_config/locations/vinshc/test-rooms.csv:ro
       - ./metadata/vinshc/initializer-test/orderfrequencies/vinshc/frequencies.csv:/openmrs/distribution/openmrs_config/orderfrequencies/vinshc/frequencies.csv:ro
-      - ./metadata/vinshc/initializer-test/privileges/vinshc/metadata.csv:/openmrs/distribution/openmrs_config/privileges/vinshc/metadata.csv:ro
-      - ./metadata/vinshc/initializer-test/roles/vinshc/metadata.csv:/openmrs/distribution/openmrs_config/roles/vinshc/metadata.csv:ro
+      # Roles and privileges are baked into the production backend image.
+      # Never mount test-owned copies over production authorization configuration.

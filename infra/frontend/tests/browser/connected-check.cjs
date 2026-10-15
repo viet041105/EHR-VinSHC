@@ -233,6 +233,8 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
           .evaluateAll((els) => els.map((el) => el.dataset.section));
         for (const section of sections) {
           await page.locator("[data-section=" + section + "]").click();
+          const advanced = page.locator("details.advanced-tools:not([open]) > summary");
+          if (await advanced.count()) await advanced.click();
           if (await page.locator("#actionPicker").count()) {
             const choices = await page
               .locator("#actionPicker option")

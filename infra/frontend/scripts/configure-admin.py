@@ -21,11 +21,22 @@ if set(roles)!={r['uuid'] for r in user['roles']}:
 facility=json.loads((runtime/'metadata/vinshc/catalogues/facilities.json').read_text(encoding='utf-8'))['records'][0]
 headers={'X-VinSHC-Workspace-Role':'admin','X-VinSHC-Workspace-Facility':facility['locationUuid']}
 scoped=Client(client.base_url,client.username,client.password,default_headers=headers)
-status,_,_=scoped.request('/openmrs/ws/rest/v1/vinshc/authorization/workspace')
-if status==403:
+# GET /authorization/workspace always answers 200 for a System Developer, so it cannot show whether an
+# assignment exists. The login screen uses /authorization/workspaces (the stored assignments): require
+# exactly admin@facility there and (re)assign otherwise; assigning deactivates any other active row.
+wanted=[('admin',facility['locationUuid'])]
+def current():
+    stored=client.json('/openmrs/ws/rest/v1/vinshc/authorization/workspaces',statuses=(200,409))
+    if isinstance(stored,dict):
+        raise RuntimeError('Workspace lookup refused: '+str(stored.get('error')))
+    return [(w['role'],w['facilityUuid']) for w in stored]
+try: found=current()
+except RuntimeError: found=None  # e.g. 409 conflict; the assignment below replaces it
+if found!=wanted:
     client.json('/openmrs/ws/rest/v1/vinshc/authorization/assignment',method='POST',payload={'user':user['uuid'],'role':'admin','facility':facility['locationUuid']},statuses=(200,201))
-elif status!=200:
-    raise RuntimeError('Workspace validation failed; no assignment changed.')
+    found=current()
+if found!=wanted:
+    raise RuntimeError('Admin workspace is still '+repr(found)+'; expected '+repr(wanted))
 verified=scoped.json('/openmrs/ws/rest/v1/vinshc/authorization/workspace')
 assert verified['role']=='admin' and verified['facilityUuid']==facility['locationUuid']
 print('Existing admin configured with the single VinSHC role admin + '+facility['name']+'. Existing Core roles preserved; no accounts/patients generated.')

@@ -698,16 +698,20 @@ public class OperationsService {
 		if (stopping)
 			discontinueNative(nativeOrder(row), reason);
 		if ("completed".equals(target)) {
-			Number finals = jdbc.queryForObject(
-			    "SELECT count(*) FROM vinshc_result_revision WHERE service_order_id=? AND state IN ('final','corrected')",
-			    Number.class, row.get("service_order_id"));
-			if (finals.longValue() == 0)
-				throw conflict("service order cannot complete without a final result");
+			List<String> latestStates = jdbc.queryForList("SELECT state FROM vinshc_result_revision WHERE service_order_id=?"
+			        + " ORDER BY version_number DESC LIMIT 1",
+			    String.class, row.get("service_order_id"));
+			if (latestStates.isEmpty() || !("final".equals(latestStates.get(0)) || "corrected".equals(latestStates.get(0))))
+				throw conflict("service order cannot complete unless its latest result is final or corrected");
 		}
 		jdbc.update(
 		    "UPDATE vinshc_service_order SET state=?,state_reason=COALESCE(?,state_reason),assigned_provider_id=COALESCE(?,assigned_provider_id),changed_by=?,date_changed=? WHERE service_order_id=?",
 		    target, reason, assigned == null ? null : assigned.getProviderId(), actorId(), now(),
 		    row.get("service_order_id"));
+		ClinicalEvents.record(sessionFactory, "diagnostic_order_" + target,
+		    Context.getPatientService().getPatient(number(row.get("patient_id")).intValue()),
+		    Context.getEncounterService().getEncounter(number(row.get("encounter_id")).intValue()), uuid, reason,
+		    assigned == null ? null : "assignedProvider=" + assigned.getUuid());
 		return serviceOrder(uuid);
 	}
 
@@ -763,7 +767,17 @@ public class OperationsService {
 		return insertResult(order, body, old, number(old.get("version_number")).intValue() + 1, true);
 	}
 
-	private Map<String, Object> insertResult(Map<String, Object> order, Map<String, Object> body,
+	private void ensureActiveProviderAssignment(int actor, Provider provider, Location facility, String field) {
+		Number count = jdbc.queryForObject(
+		    "SELECT count(*) FROM vinshc_provider_link x JOIN users u ON u.user_id=x.user_id"
+		            + " WHERE x.active=true AND u.retired=false AND x.user_id=? AND x.provider_id=?"
+		            + " AND x.facility_location_id=?",
+		    Number.class, actor, provider.getProviderId(), facility.getLocationId());
+		if (count == null || count.longValue() != 1)
+			throw new org.openmrs.api.APIAuthenticationException(field + " is not assigned to the actor at this facility");
+	}
+
+private Map<String, Object> insertResult(Map<String, Object> order, Map<String, Object> body,
 	        Map<String, Object> previous, int version, boolean correction) {
 		String state = correction ? "corrected" : requiredString(body, "state");
 		if (!RESULT_STATES.contains(state) || (!correction && "corrected".equals(state)))
@@ -781,11 +795,26 @@ public class OperationsService {
 		Provider author = provider(requiredString(body, "authorProvider"));
 		Provider reviewer = null;
 		Instant reviewed = null;
+		Instant recorded = instant(body.get("recordedAt"), "recordedAt");
+		if (recorded.isAfter(Instant.now().plusSeconds(300)))
+			throw bad("recordedAt must not be more than five minutes in the future");
 		if ("final".equals(state) || "corrected".equals(state)) {
 			reviewer = provider(requiredString(body, "reviewerProvider"));
 			reviewed = instant(body.get("reviewedAt"), "reviewedAt");
+			if (reviewed.isBefore(recorded))
+				throw bad("reviewedAt cannot precede recordedAt");
+			if (reviewed.isAfter(Instant.now().plusSeconds(300)))
+				throw bad("reviewedAt must not be more than five minutes in the future");
 		}
-		Instant recorded = instant(body.get("recordedAt"), "recordedAt");
+		// A provider UUID supplied by the client never grants reviewer authority.
+		// System Developer is the only unrestricted identity for synthetic setup.
+		if (AuthorizationService.activeRoleStatic() != null) {
+			int actor = Context.getAuthenticatedUser().getUserId();
+			Location location = facilityLocation(string(order.get("facility_uuid")));
+			ensureActiveProviderAssignment(actor, author, location, "authorProvider");
+			if (reviewer != null)
+				ensureActiveProviderAssignment(actor, reviewer, location, "reviewerProvider");
+		}
 		String uuid = UUID.randomUUID().toString();
 		jdbc.update(
 		    "INSERT INTO vinshc_result_revision(result_uuid,service_order_id,version_number,state,numeric_value,text_value,unit,previous_result_id,correction_reason,author_provider_id,reviewer_provider_id,recorded_at,reviewed_at,creator,date_created)"
@@ -795,6 +824,11 @@ public class OperationsService {
 		    correction ? bounded(requiredString(body, "reason"), 1000, "reason") : null, author.getProviderId(),
 		    reviewer == null ? null : reviewer.getProviderId(), Timestamp.from(recorded),
 		    reviewed == null ? null : Timestamp.from(reviewed), actorId(), now());
+		ClinicalEvents.record(sessionFactory, reviewer == null ? "diagnostic_result_recorded" : "diagnostic_result_reviewed",
+		    Context.getPatientService().getPatient(number(order.get("patient_id")).intValue()),
+		    Context.getEncounterService().getEncounter(number(order.get("encounter_id")).intValue()), uuid,
+		    correction ? requiredString(body, "reason") : null, "version=" + version + ";state=" + state + ";author="
+		            + author.getUuid() + (reviewer == null ? "" : ";reviewer=" + reviewer.getUuid()));
 		return result(uuid);
 	}
 
@@ -1412,6 +1446,8 @@ public class OperationsService {
 			line.put("quantityUnit", drug.getQuantityUnits().getDisplayString());
 			line.put("instructions", drug.getDosingInstructions());
 			payload.put("lines", Collections.singletonList(line));
+			payload.put("inventoryReconciled", false);
+			payload.put("stockWarning", "KHÔNG ĐỐI CHIẾU TỒN KHO: số lô và hạn dùng chỉ ghi nhận; không xác nhận số tồn hoặc trừ kho.");
 		} else
 			throw bad("unsupported print template");
 		payload.put("facility", publicFacility(facility));

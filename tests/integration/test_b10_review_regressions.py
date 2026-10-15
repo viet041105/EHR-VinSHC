@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 
 
 REST = "/openmrs/ws/rest/v1"
@@ -38,10 +38,9 @@ class ReviewRegressionTests(unittest.TestCase):
         settings = read_settings()
         cls.base = f"http://127.0.0.1:{settings.get('EHR_HTTP_PORT', '8080')}"
         cls.admin = Client(cls.base, settings["EHR_ADMIN_USERNAME"], settings["EHR_ADMIN_PASSWORD"])
-        fixtures = ROOT / ".runtime/fixtures"
-        cls.ctx = json.loads((fixtures / "b4b-clinical.json").read_text(encoding="utf-8"))
-        cls.b2 = json.loads((fixtures / "b2-patients.json").read_text(encoding="utf-8"))
-        cls.b3 = json.loads((fixtures / "b3-vitals.json").read_text(encoding="utf-8"))
+        cls.ctx = json.loads(fixture_path("b4b-clinical.json").read_text(encoding="utf-8"))
+        cls.b2 = json.loads(fixture_path("b2-patients.json").read_text(encoding="utf-8"))
+        cls.b3 = json.loads(fixture_path("b3-vitals.json").read_text(encoding="utf-8"))
         cls.entities = json.loads(
             (ROOT / "metadata/vinshc/frontend-map.json").read_text(encoding="utf-8"))["entities"]
         cls.permissions = json.loads((ROOT / "metadata/vinshc/permissions.json").read_text(encoding="utf-8"))
@@ -56,7 +55,7 @@ class ReviewRegressionTests(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         cls.report["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        target = ROOT / ".runtime/reports/b10-review-regressions.json"
+        target = report_path("b10-review-regressions.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         for user, person in cls.created_users:

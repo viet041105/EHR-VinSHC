@@ -39,11 +39,11 @@ Các chức năng sau đã có trong source hiện tại. Agent không cần vi�
 
 Regression bắt buộc:
 
-- [ ] Unit test Java hiện có tiếp tục đạt.
-- [ ] `npm --prefix infra/frontend test` tiếp tục đạt.
-- [ ] Test tích hợp B1–B11 tiếp tục đạt trên database sạch.
-- [ ] Restart container giữ nguyên dữ liệu và đọc lại đúng fixture.
-- [ ] Backup–restore sang Compose project mới đọc lại đúng database và attachment.
+- [x] Unit test Java hiện có tiếp tục đạt.
+- [x] `npm --prefix infra/frontend test` tiếp tục đạt.
+- [x] Test tích hợp B1–B11 tiếp tục đạt trên database sạch.
+- [x] Restart container giữ nguyên dữ liệu và đọc lại đúng fixture.
+- [x] Backup–restore sang Compose project mới đọc lại đúng database và attachment.
 
 ## 3. Thứ tự triển khai
 
@@ -66,30 +66,32 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 4.1. Đồng bộ version
 
-- [ ] Chọn một version release VinSHC thống nhất cho backend module, metadata pack, frontend và print template.
-- [ ] Giải quyết chênh lệch hiện tại: module Maven `0.3.0`, metadata `0.3.0`, frontend `0.2.0`, trong khi Liquibase có changeset tên `0.4.0`.
-- [ ] Cập nhật `config/baseline.json` để phản ánh đúng metadata/module/frontend hiện tại.
-- [ ] Cập nhật số module runtime kỳ vọng: upstream bỏ demo cộng module `vinshc`; xác nhận bằng API module sau khi Docker chạy.
-- [ ] Sửa các mô tả lỗi thời trong README và tài liệu agent, ví dụ clinical summary hiện đã chứa sinh hiệu.
-- [ ] Thêm kiểm tra CI phát hiện version drift giữa POM, pack, frontend và image artifact.
+- [x] Chọn một version release VinSHC thống nhất cho backend module, metadata pack, frontend và print template.
+- [x] Giải quyết chênh lệch hiện tại: module Maven `0.3.0`, metadata `0.3.0`, frontend `0.2.0`, trong khi Liquibase có changeset tên `0.4.0`.
+- [x] Cập nhật `config/baseline.json` để phản ánh đúng metadata/module/frontend hiện tại.
+- [x] Cập nhật số module runtime kỳ vọng: upstream bỏ demo cộng module `vinshc`; xác nhận bằng API module sau khi Docker chạy.
+- [x] Sửa các mô tả lỗi thời trong README và tài liệu agent, ví dụ clinical summary hiện đã chứa sinh hiệu.
+- [x] Thêm kiểm tra CI phát hiện version drift giữa POM, pack, frontend và image artifact.
+
+> **Ghi chú P0 (14/10/2026):** Chọn release VinSHC `0.3.0` cho POM, metadata, frontend và hợp đồng mẫu in. ID Liquibase `vinshc-0.4.0-*` là lịch sử migration bất biến, **không đổi tên** để tránh chạy lại migration. `printing-reporting.json` vẫn đánh dấu `testOnly: true`, do đó đồng bộ version **không đồng nghĩa** mẫu in được phê duyệt cho dữ liệu thật.
 
 ### 4.2. Chuyển role/privilege khỏi metadata test
 
-- [ ] Không dùng `metadata/vinshc/initializer-test/roles` và `privileges` làm nguồn production.
-- [ ] Tạo cấu hình production version hóa dưới `infra/backend/configuration/privileges/vinshc/` và `roles/vinshc/`, hoặc một content package VinSHC riêng.
-- [ ] Provision đủ 8 role nhân viên: reception, nurse, doctor, lab, cashier, pharmacy, manager, admin.
-- [ ] Provision tất cả privilege trong `metadata/vinshc/permission-matrix.csv`.
-- [ ] Đối chiếu role CSV, ma trận quyền và privilege thực tế trong database; thất bại nếu thiếu hoặc dư quyền rộng.
-- [ ] Kiểm tra mỗi role không thể gọi trực tiếp Core REST/FHIR để vượt projection/scoping của VinSHC.
-- [ ] Test database sạch không cần overlay `tests/integration/compose.b4-metadata.yaml` vẫn tạo đủ role/privilege production.
-- [ ] Giữ tài khoản fixture/test ngoài cấu hình production.
+- [x] Không dùng `metadata/vinshc/initializer-test/roles` và `privileges` làm nguồn production.
+- [x] Tạo cấu hình production version hóa dưới `infra/backend/configuration/privileges/vinshc/` và `roles/vinshc/`, hoặc một content package VinSHC riêng.
+- [x] Provision đủ 8 role nhân viên: reception, nurse, doctor, lab, cashier, pharmacy, manager, admin.
+- [x] Provision tất cả privilege trong `metadata/vinshc/permission-matrix.csv`.
+- [x] Đối chiếu role CSV, ma trận quyền và privilege thực tế trong database; thất bại nếu thiếu hoặc dư quyền rộng.
+- [x] Kiểm tra mỗi role không thể gọi trực tiếp Core REST/FHIR để vượt projection/scoping của VinSHC.
+- [x] Test database sạch không cần overlay `tests/integration/compose.b4-metadata.yaml` vẫn tạo đủ role/privilege production.
+- [x] Giữ tài khoản fixture/test ngoài cấu hình production.
 
 ### 4.3. Tiêu chí nghiệm thu P0
 
-- [ ] Database sạch khởi động thành công, đủ metadata bắt buộc và không có role test giả.
-- [ ] Bảng kiểm 8 role × resource × action khớp hoàn toàn permission matrix.
-- [ ] `scripts/check_config.py`, metadata validation, smoke và B1–B11 đạt.
-- [ ] Báo cáo ghi commit, image digest, module version, metadata version và số module started.
+- [x] Database sạch khởi động thành công, đủ metadata bắt buộc và không có role test giả.
+- [x] Bảng kiểm 8 role × resource × action khớp hoàn toàn permission matrix.
+- [x] `scripts/check_config.py`, metadata validation, smoke và B1–B11 đạt.
+- [x] Báo cáo ghi commit, image digest, module version, metadata version và số module started.
 
 ---
 
@@ -97,62 +99,64 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 5.1. Tài khoản nhân viên
 
-- [ ] Thiết kế API ứng dụng dành riêng cho System Developer để tạo user OpenMRS.
-- [ ] Payload tạo user không cho client gửi privilege trực tiếp; chỉ chọn role VinSHC trong allowlist.
-- [ ] Hỗ trợ username, tên hiển thị, person, trạng thái active/retired và mật khẩu khởi tạo.
-- [ ] Không trả password/hash/salt trong response hoặc log.
+- [x] Thiết kế API ứng dụng dành riêng cho System Developer để tạo user OpenMRS.
+- [x] Payload tạo user không cho client gửi privilege trực tiếp; chỉ chọn role VinSHC trong allowlist.
+- [x] Hỗ trợ username, tên hiển thị, person, trạng thái active/retired và mật khẩu khởi tạo.
+- [x] Không trả password/hash/salt trong response hoặc log.
 - [ ] Bắt buộc đổi mật khẩu lần đầu nếu OpenMRS baseline hỗ trợ; nếu không, ghi rõ cơ chế thay thế.
-- [ ] Thêm API khóa/mở hoặc retire user có audit và chặn tự khóa tài khoản quản trị cuối cùng.
-- [ ] Thêm API reset mật khẩu; không có API đọc lại mật khẩu cũ.
-- [ ] Chặn username trùng, user đã retired, role không hợp lệ và thao tác ngoài quyền.
-- [ ] Thêm tìm kiếm/phân trang user ở backend VinSHC thay vì mở rộng tùy ý Core API cho frontend.
+  - Quyết định 2026-10-15 (phục vụ demo): **không** bắt buộc đổi mật khẩu lần đầu. Tài khoản dùng ngay mật khẩu do quản trị đặt; BE không còn gắn `forcePassword` khi tạo/reset và không trả 403 `Password change required`; FE shell đã gỡ màn đổi mật khẩu lần đầu. `staff/me/password` vẫn giữ cho người dùng tự đổi. Cần bật lại trước khi dùng với dữ liệu bệnh nhân thật.
+  - Chính sách mật khẩu nhân viên: tối thiểu 6, tối đa 256 ký tự, không yêu cầu chữ hoa/thường/số (`StaffAccountService.validPassword`, `passwordRules` ở FE, global property OpenMRS trong `infra/backend/configuration/globalproperties/vinshc/security.xml`). Portal bệnh nhân vẫn giữ yêu cầu 12 ký tự ở FE.
+- [x] Thêm API khóa/mở hoặc retire user có audit và chặn tự khóa tài khoản quản trị cuối cùng.
+- [x] Thêm API reset mật khẩu; không có API đọc lại mật khẩu cũ.
+- [x] Chặn username trùng, user đã retired, role không hợp lệ và thao tác ngoài quyền.
+- [x] Thêm tìm kiếm/phân trang user ở backend VinSHC thay vì mở rộng tùy ý Core API cho frontend.
 - [ ] Thêm test không lộ credential trong response, exception, access log và CI report.
 
 ### 5.2. Provider và liên kết user–provider
 
-- [ ] Tạo API tạo/sửa/retire provider.
-- [ ] Tạo hoặc chọn Person hợp lệ cho provider; không tự dùng Patient làm provider.
-- [ ] Tạo API liên kết/hủy liên kết user–provider.
-- [ ] Ràng buộc tài khoản lâm sàng có đúng một provider active tại thời điểm tạo encounter/kê đơn/ghi kết quả, trừ khi workflow hỗ trợ chọn rõ nhiều provider.
-- [ ] Kiểm tra provider thuộc đúng cơ sở hoặc assignment chuyên môn trước khi sử dụng.
-- [ ] Không cho reception/cashier/pharmacy tự nhận provider nếu không cần nghiệp vụ.
-- [ ] Ghi audit cho tạo, sửa, retire và liên kết provider.
-- [ ] Test provider bị retire, nhiều provider, provider khác cơ sở và giả mạo UUID.
+- [x] Tạo API tạo/sửa/retire provider.
+- [x] Tạo hoặc chọn Person hợp lệ cho provider; không tự dùng Patient làm provider.
+- [x] Tạo API liên kết/hủy liên kết user–provider.
+- [x] Ràng buộc tài khoản lâm sàng có đúng một provider active tại thời điểm tạo encounter/kê đơn/ghi kết quả, trừ khi workflow hỗ trợ chọn rõ nhiều provider.
+- [x] Kiểm tra provider thuộc đúng cơ sở hoặc assignment chuyên môn trước khi sử dụng.
+- [x] Không cho reception/cashier/pharmacy tự nhận provider nếu không cần nghiệp vụ.
+- [x] Ghi audit cho tạo, sửa, retire và liên kết provider.
+- [x] Test provider bị retire, nhiều provider, provider khác cơ sở và giả mạo UUID.
 
 ### 5.3. Cơ sở và location
 
-- [ ] Tạo API quản lý business facility và ánh xạ tới OpenMRS Location.
-- [ ] Phân biệt rõ business facility UUID với OpenMRS Location UUID trong DTO và database.
-- [ ] Hỗ trợ tên pháp lý, mã cơ sở, địa chỉ, điện thoại, timezone, active/effective dates và location hierarchy.
-- [ ] Không cho sửa UUID hoặc lịch sử snapshot đã được dùng trên chứng từ.
-- [ ] Khi retire cơ sở, chặn tạo mới nhưng vẫn đọc được dữ liệu lịch sử.
+- [x] Tạo API quản lý business facility và ánh xạ tới OpenMRS Location.
+- [x] Phân biệt rõ business facility UUID với OpenMRS Location UUID trong DTO và database.
+- [x] Hỗ trợ tên pháp lý, mã cơ sở, địa chỉ, điện thoại, timezone, active/effective dates và location hierarchy.
+- [x] Không cho sửa UUID hoặc lịch sử snapshot đã được dùng trên chứng từ.
+- [x] Khi retire cơ sở, chặn tạo mới nhưng vẫn đọc được dữ liệu lịch sử.
 - [ ] Test assignment, báo cáo, visit và dữ liệu ngoài cơ sở sau khi cấu hình nhiều location con.
 
 ### 5.4. Biểu mẫu và cấu hình workflow
 
-- [ ] Chốt nguồn sự thật của form: O3 Form Engine schema hoặc schema VinSHC version hóa; không để `forms.json` chỉ là tài liệu mà UI hiểu như form production.
-- [ ] Tạo CRUD/versioning cho form template với draft/active/retired.
-- [ ] Không cho sửa đè phiên bản form đã dùng trong hồ sơ.
+- [x] Chốt nguồn sự thật của form: O3 Form Engine schema hoặc schema VinSHC version hóa; không để `forms.json` chỉ là tài liệu mà UI hiểu như form production.
+- [x] Tạo CRUD/versioning cho form template với draft/active/retired.
+- [x] Không cho sửa đè phiên bản form đã dùng trong hồ sơ.
 - [ ] Cấu hình workflow `STANDARD_POSTPAY` và `COMPACT_PREPAY` theo cơ sở bằng metadata, không hardcode nhánh riêng.
-- [ ] Thêm API đọc configuration projection cho FE; API ghi chỉ dành cho admin đúng cơ sở.
+- [x] Thêm API đọc configuration projection cho FE; API ghi chỉ dành cho admin đúng cơ sở.
 - [ ] Test rollback/cấu hình thiếu và migration từ version cũ.
 
 ### 5.5. Frontend quản trị
 
-- [ ] Thay các form “Chờ backend” trong `modules/admin` bằng thao tác thật.
-- [ ] Thêm màn hình tạo/khóa/reset tài khoản.
-- [ ] Thêm màn hình role và facility assignment.
-- [ ] Thêm màn hình tạo/liên kết/retire provider.
-- [ ] Thêm màn hình cấu hình cơ sở và version biểu mẫu.
-- [ ] Yêu cầu xác nhận trước thao tác nhạy cảm; hiển thị actor/time/kết quả audit.
-- [ ] Không lưu password hoặc credential trong localStorage/sessionStorage.
+- [x] Thay các form “Chờ backend” trong `modules/admin` bằng thao tác thật.
+- [x] Thêm màn hình tạo/khóa/reset tài khoản.
+- [x] Thêm màn hình role và facility assignment.
+- [x] Thêm màn hình tạo/liên kết/retire provider.
+- [x] Thêm màn hình cấu hình cơ sở và version biểu mẫu.
+- [x] Yêu cầu xác nhận trước thao tác nhạy cảm; hiển thị actor/time/kết quả audit.
+- [x] Không lưu password hoặc credential trong localStorage/sessionStorage.
 
 ### 5.6. Tiêu chí nghiệm thu P1
 
-- [ ] System Developer tạo được một tài khoản cho từng role mà không dùng SQL hoặc UI Legacy.
-- [ ] Bác sĩ/điều dưỡng/KTV sau khi liên kết provider tạo được encounter đúng provider của mình.
-- [ ] User không có quyền không thể tự cấp role/cơ sở/provider.
-- [ ] Admin ứng dụng không mặc nhiên đọc được hồ sơ lâm sàng.
+- [x] System Developer tạo được một tài khoản cho từng role mà không dùng SQL hoặc UI Legacy.
+- [x] Bác sĩ/điều dưỡng/KTV sau khi liên kết provider tạo được encounter đúng provider của mình.
+- [x] User không có quyền không thể tự cấp role/cơ sở/provider.
+- [x] Admin ứng dụng không mặc nhiên đọc được hồ sơ lâm sàng.
 - [ ] Restart/backup–restore giữ nguyên user, role, provider và assignment.
 
 ---
@@ -161,20 +165,20 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 6.1. Đính chính/hủy cấp thuốc
 
-- [ ] Thiết kế dispense ledger append-only; không UPDATE số lượng/lô của bản đã xác nhận.
+- [x] Thiết kế dispense ledger append-only; không UPDATE số lượng/lô của bản đã xác nhận.
 - [ ] Thêm privilege `dispensing update` và `dispensing void` chỉ sau khi owner duyệt ma trận quyền.
-- [ ] Thêm endpoint correction/void với lý do bắt buộc, bản ghi gốc, actor và time.
-- [ ] Tính lại tổng đã cấp và số còn lại từ các ledger entry còn hiệu lực.
-- [ ] Chặn đính chính làm tổng cấp âm hoặc vượt số kê.
-- [ ] Chặn sửa đơn đã hết hiệu lực theo cách che mất lịch sử; correction phải tạo revision/compensating entry.
-- [ ] Thêm optimistic locking hoặc kiểm tra revision để tránh hai quầy cấp đồng thời vượt số lượng.
-- [ ] Thêm UI lịch sử cấp, đính chính/hủy theo quyền và cảnh báo ảnh hưởng số còn lại.
-- [ ] Test retry/idempotency, concurrent dispense, correction, void và restart.
+- [x] Thêm endpoint correction/void với lý do bắt buộc, bản ghi gốc, actor và time.
+- [x] Tính lại tổng đã cấp và số còn lại từ các ledger entry còn hiệu lực.
+- [x] Chặn đính chính làm tổng cấp âm hoặc vượt số kê.
+- [x] Chặn sửa đơn đã hết hiệu lực theo cách che mất lịch sử; correction phải tạo revision/compensating entry.
+- [x] Thêm optimistic locking hoặc kiểm tra revision để tránh hai quầy cấp đồng thời vượt số lượng.
+- [x] Thêm UI lịch sử cấp, đính chính/hủy theo quyền và cảnh báo ảnh hưởng số còn lại.
+- [x] Test retry/idempotency, concurrent dispense, correction, void và restart.
 
 ### 6.2. Tồn kho
 
-- [ ] Quyết định phạm vi: tiếp tục “ghi lô/hạn dùng không trừ kho” hay tích hợp Stock Management.
-- [ ] Nếu chưa tích hợp, UI và phiếu phải hiển thị rõ “không đối chiếu tồn kho”.
+- [x] Quyết định phạm vi: tiếp tục “ghi lô/hạn dùng không trừ kho” hay tích hợp Stock Management.
+- [x] Nếu chưa tích hợp, UI và phiếu phải hiển thị rõ “không đối chiếu tồn kho”.
 - [ ] Nếu tích hợp, ánh xạ drug/item/location/batch và dùng transaction hoặc outbox để không cấp thuốc mà trừ kho thất bại âm thầm.
 - [ ] Chặn cấp lô không tồn tại, hết hạn, không đủ tồn hoặc sai cơ sở.
 - [ ] Có ledger nhập–xuất–điều chỉnh và kiểm kê; không tính tồn chỉ từ đơn thuốc.
@@ -182,13 +186,13 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 6.3. Duyệt kết quả CLS
 
-- [ ] Không chỉ kiểm tra `reviewerProvider` tồn tại; xác minh reviewer là provider của user hoặc là người duyệt được ủy quyền tại đúng cơ sở.
-- [ ] Tách rõ author, performer và reviewer nếu workflow yêu cầu.
-- [ ] Không cho client ghi reviewer là người khác chỉ bằng UUID.
+- [x] Không chỉ kiểm tra `reviewerProvider` tồn tại; xác minh reviewer là provider của user hoặc là người duyệt được ủy quyền tại đúng cơ sở.
+- [x] Tách rõ author, performer và reviewer nếu workflow yêu cầu.
+- [x] Không cho client ghi reviewer là người khác chỉ bằng UUID.
 - [ ] Quy định reviewer có được duyệt kết quả do chính mình nhập hay không; mã hóa policy và test.
-- [ ] Kết quả `final`/`corrected` bắt buộc reviewer, reviewedAt hợp lệ và quyền duyệt.
+- [x] Kết quả `final`/`corrected` bắt buộc reviewer, reviewedAt hợp lệ và quyền duyệt.
 - [ ] Chặn `reviewedAt` vô lý so với recordedAt/thời điểm hiện tại theo policy đã chốt.
-- [ ] Hoàn tất order chỉ khi revision cuối hợp lệ là final/corrected.
+- [x] Hoàn tất order chỉ khi revision cuối hợp lệ là final/corrected.
 - [ ] Thêm audit cho phân công, bắt đầu, nhập kết quả, duyệt, sửa và hoàn tất.
 - [ ] Nếu cần chữ ký chính thức, thiết kế chữ ký số/tài liệu ký riêng; không coi tên reviewer là chữ ký pháp lý.
 
@@ -203,10 +207,10 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 
 ### 6.5. Tiêu chí nghiệm thu P2
 
-- [ ] Phiếu cấp sai được đính chính có lịch sử, tổng đã cấp đúng sau restart.
-- [ ] KTV không thể tự khai reviewer tùy ý.
+- [x] Phiếu cấp sai được đính chính có lịch sử, tổng đã cấp đúng sau restart.
+- [x] KTV không thể tự khai reviewer tùy ý.
 - [ ] Bác sĩ/KTV chỉ xem/in/download kết quả trong đúng phạm vi quyền.
-- [ ] Attachment restore sang project mới vẫn đúng byte và SHA-256.
+- [x] Attachment restore sang project mới vẫn đúng byte và SHA-256.
 
 ---
 
@@ -216,47 +220,47 @@ P3 là điều kiện bắt buộc trước portal và chatbot bệnh nhân.
 
 ### 7.1. Mô hình liên kết account–patient
 
-- [ ] Thêm bảng version hóa liên kết OpenMRS User/Person với Patient.
-- [ ] Một account bệnh nhân mặc định chỉ liên kết một patient; nếu hỗ trợ người giám hộ, dùng loại quan hệ/ủy quyền riêng.
-- [ ] Lưu trạng thái pending/active/revoked, phương thức xác minh, actor xác minh, thời gian hiệu lực và lý do thu hồi.
-- [ ] Không suy liên kết từ trùng tên, điện thoại, CCCD, email hoặc contact.
-- [ ] Không coi contact/người nhà hiện có là người được quyền đọc hồ sơ.
-- [ ] Chặn liên kết một user tới patient khác khi liên kết active còn tồn tại, trừ workflow chuyển có kiểm soát.
-- [ ] Thêm audit cho tạo, xác minh, kích hoạt và thu hồi liên kết.
-- [ ] Thêm API System Developer/admin được ủy quyền để quản lý liên kết.
+- [x] Thêm bảng version hóa liên kết OpenMRS User/Person với Patient.
+- [x] Một account bệnh nhân mặc định chỉ liên kết một patient; nếu hỗ trợ người giám hộ, dùng loại quan hệ/ủy quyền riêng.
+- [x] Lưu trạng thái pending/active/revoked, phương thức xác minh, actor xác minh, thời gian hiệu lực và lý do thu hồi.
+- [x] Không suy liên kết từ trùng tên, điện thoại, CCCD, email hoặc contact.
+- [x] Không coi contact/người nhà hiện có là người được quyền đọc hồ sơ.
+- [x] Chặn liên kết một user tới patient khác khi liên kết active còn tồn tại, trừ workflow chuyển có kiểm soát.
+- [x] Thêm audit cho tạo, xác minh, kích hoạt và thu hồi liên kết.
+- [x] Thêm API System Developer/admin được ủy quyền để quản lý liên kết.
 - [ ] Thêm test giả mạo patient UUID, liên kết chéo cơ sở, account retired và link revoked.
 
 ### 7.2. Mô hình công bố
 
-- [ ] Thêm entity/table publication append-only hoặc versioned.
-- [ ] Công bố phải tham chiếu rõ patient, visit/encounter, loại tài liệu/bản ghi, UUID nguồn và revision/version.
-- [ ] Lưu trạng thái draft/published/revoked/superseded.
-- [ ] Lưu publishedBy/publishedAt, revokedBy/revokedAt/reason và facility.
+- [x] Thêm entity/table publication append-only hoặc versioned.
+- [x] Công bố phải tham chiếu rõ patient, visit/encounter, loại tài liệu/bản ghi, UUID nguồn và revision/version.
+- [x] Lưu trạng thái draft/published/revoked/superseded.
+- [x] Lưu publishedBy/publishedAt, revokedBy/revokedAt/reason và facility.
 - [ ] Quy định rõ các loại có thể công bố: lời dặn, đơn thuốc, kết quả CLS, lịch hẹn và tài liệu đã duyệt.
-- [ ] Không tự công bố toàn bộ clinical summary.
-- [ ] `consultation final` không tự đồng nghĩa `published`.
-- [ ] Correction sau công bố không tự thay nội dung đã xem; tạo publication revision mới hoặc supersede rõ ràng.
-- [ ] Không công bố draft, kết quả preliminary, đơn đã ngừng nếu policy không cho phép, hoặc attachment chưa scan.
-- [ ] Thêm API publish/revoke/list history cho bác sĩ/người có quyền.
+- [x] Không tự công bố toàn bộ clinical summary.
+- [x] `consultation final` không tự đồng nghĩa `published`.
+- [x] Correction sau công bố không tự thay nội dung đã xem; tạo publication revision mới hoặc supersede rõ ràng.
+- [x] Không công bố draft, kết quả preliminary, đơn đã ngừng nếu policy không cho phép, hoặc attachment chưa scan.
+- [x] Thêm API publish/revoke/list history cho bác sĩ/người có quyền.
 - [ ] Thêm privilege/resource/action mới vào permission matrix và configuration production.
-- [ ] Audit mọi lần publish/revoke/read của bệnh nhân.
+- [x] Audit mọi lần publish/revoke/read của bệnh nhân.
 
 ### 7.3. Projection bệnh nhân
 
-- [ ] Tạo DTO patient-safe riêng; không tái sử dụng nguyên DTO nhân viên.
-- [ ] Chỉ trả dữ liệu đã công bố và còn hiệu lực.
-- [ ] Loại CCCD, số điện thoại người liên hệ, ghi chú nội bộ, audit nhân viên, dữ liệu draft và metadata không cần thiết.
-- [ ] Trả source reference đủ để mở đúng phần đã công bố, nhưng không trả Core REST/FHIR URL có thể bị thay UUID.
-- [ ] Giữ đúng đơn vị, thời gian, trạng thái thuốc/kết quả và revision.
-- [ ] Thêm pagination cho danh sách lượt/tài liệu đã công bố.
+- [x] Tạo DTO patient-safe riêng; không tái sử dụng nguyên DTO nhân viên.
+- [x] Chỉ trả dữ liệu đã công bố và còn hiệu lực.
+- [x] Loại CCCD, số điện thoại người liên hệ, ghi chú nội bộ, audit nhân viên, dữ liệu draft và metadata không cần thiết.
+- [x] Trả source reference đủ để mở đúng phần đã công bố, nhưng không trả Core REST/FHIR URL có thể bị thay UUID.
+- [x] Giữ đúng đơn vị, thời gian, trạng thái thuốc/kết quả và revision.
+- [x] Thêm pagination cho danh sách lượt/tài liệu đã công bố.
 
 ### 7.4. Tiêu chí nghiệm thu P3
 
-- [ ] Chốt phiếu nhưng chưa publish thì bệnh nhân không đọc được.
-- [ ] Publish đúng một lời dặn/đơn thì bệnh nhân chỉ thấy phần đó.
-- [ ] Revoke chặn lần đọc tiếp theo nhưng lịch sử audit vẫn còn.
-- [ ] Patient A sửa URL/UUID sang Patient B luôn nhận 403/404 không rò rỉ sự tồn tại hoặc dữ liệu.
-- [ ] Admin/manager không tự có quyền công bố hoặc đọc chart nếu permission matrix không cấp.
+- [x] Chốt phiếu nhưng chưa publish thì bệnh nhân không đọc được.
+- [x] Publish đúng một lời dặn/đơn thì bệnh nhân chỉ thấy phần đó.
+- [x] Revoke chặn lần đọc tiếp theo nhưng lịch sử audit vẫn còn.
+- [x] Patient A sửa URL/UUID sang Patient B luôn nhận 403/404 không rò rỉ sự tồn tại hoặc dữ liệu.
+- [x] Admin/manager không tự có quyền công bố hoặc đọc chart nếu permission matrix không cấp.
 
 ---
 
@@ -264,9 +268,9 @@ P3 là điều kiện bắt buộc trước portal và chatbot bệnh nhân.
 
 ### 8.1. Xác thực và phiên
 
-- [ ] Tạo loại tài khoản/role bệnh nhân riêng, không dùng một trong 8 workspace nhân viên.
-- [ ] Portal không yêu cầu header role/facility do client tự chọn; backend suy patient từ session và active account–patient link.
-- [ ] Thêm endpoint `GET /vinshc/portal/me` trả identity tối thiểu và trạng thái liên kết.
+- [x] Tạo loại tài khoản/role bệnh nhân riêng, không dùng một trong 8 workspace nhân viên.
+- [x] Portal không yêu cầu header role/facility do client tự chọn; backend suy patient từ session và active account–patient link.
+- [x] Thêm endpoint `GET /vinshc/portal/me` trả identity tối thiểu và trạng thái liên kết.
 - [ ] Thiết kế đổi/reset mật khẩu và khóa tài khoản; không trả password cũ.
 - [ ] Có rate limit, lockout/throttling và audit login thất bại theo chính sách triển khai.
 - [ ] Chống session fixation, CSRF (nếu dùng cookie) và open redirect.
@@ -275,44 +279,44 @@ P3 là điều kiện bắt buộc trước portal và chatbot bệnh nhân.
 
 Tên endpoint có thể điều chỉnh trong bước chốt contract, nhưng phải giữ nguyên nguyên tắc không nhận patient UUID tùy ý.
 
-- [ ] `GET /vinshc/portal/me` — tài khoản và patient projection.
-- [ ] `GET /vinshc/portal/visits?limit=&offset=` — các lần khám có nội dung được công bố.
-- [ ] `GET /vinshc/portal/visits/{visitUuid}` — nội dung được công bố của chính account.
+- [x] `GET /vinshc/portal/me` — tài khoản và patient projection.
+- [x] `GET /vinshc/portal/visits?limit=&offset=` — các lần khám có nội dung được công bố.
+- [x] `GET /vinshc/portal/visits/{visitUuid}` — nội dung được công bố của chính account.
 - [ ] `GET /vinshc/portal/appointments` — lịch hẹn của chính patient.
-- [ ] `GET /vinshc/portal/prescriptions/{publicationUuid}` — đơn đã công bố.
-- [ ] `GET /vinshc/portal/results/{publicationUuid}` — kết quả đã công bố.
+- [x] `GET /vinshc/portal/prescriptions/{publicationUuid}` — đơn đã công bố.
+- [x] `GET /vinshc/portal/results/{publicationUuid}` — kết quả đã công bố.
 - [ ] `GET /vinshc/portal/attachments/{publicationUuid}/content` — download có quyền, scan và audit.
-- [ ] Không có API portal nhận `?patient=<uuid>` từ client.
-- [ ] Mọi endpoint đọc lại active link và publication ở thời điểm request, không chỉ lúc login.
+- [x] Không có API portal nhận `?patient=<uuid>` từ client.
+- [x] Mọi endpoint đọc lại active link và publication ở thời điểm request, không chỉ lúc login.
 
 ### 8.3. Frontend portal
 
-- [ ] Tạo `/portal.html` hoặc một entrypoint/package portal riêng.
-- [ ] Màn hình đăng nhập/đăng xuất và trạng thái khóa/liên kết chưa xác minh.
-- [ ] Danh sách lần khám đã công bố.
+- [x] Tạo `/portal.html` hoặc một entrypoint/package portal riêng.
+- [x] Màn hình đăng nhập/đăng xuất và trạng thái khóa/liên kết chưa xác minh.
+- [x] Danh sách lần khám đã công bố.
 - [ ] Trang lời dặn, đơn thuốc, kết quả và lịch hẹn.
 - [ ] Hiển thị rõ ngày, cơ sở, người công bố, phiên bản và trạng thái thu hồi/sửa đổi khi áp dụng.
-- [ ] Không có ô nhập patient UUID, encounter UUID hoặc URL Core.
-- [ ] Đổi account/logout phải xóa toàn bộ context và response cũ khỏi bộ nhớ trình duyệt.
-- [ ] Không lưu hồ sơ/credential trong localStorage/sessionStorage.
+- [x] Không có ô nhập patient UUID, encounter UUID hoặc URL Core.
+- [x] Đổi account/logout phải xóa toàn bộ context và response cũ khỏi bộ nhớ trình duyệt.
+- [x] Không lưu hồ sơ/credential trong localStorage/sessionStorage.
 - [ ] Responsive, keyboard accessible và có trạng thái loading/error/empty rõ ràng.
 
 ### 8.4. Kiểm thử portal
 
-- [ ] Patient A không xem được Patient B bằng cách sửa mọi UUID/path/query/header.
+- [x] Patient A không xem được Patient B bằng cách sửa mọi UUID/path/query/header.
 - [ ] Account chưa link, link pending/revoked/expired bị từ chối.
-- [ ] Draft/final chưa publish không xuất hiện.
-- [ ] Publication revoked biến mất hoặc trả trạng thái phù hợp ngay sau revoke.
-- [ ] Attachment ngoài publication bị từ chối.
+- [x] Draft/final chưa publish không xuất hiện.
+- [x] Publication revoked biến mất hoặc trả trạng thái phù hợp ngay sau revoke.
+- [x] Attachment ngoài publication bị từ chối.
 - [ ] Không rò rỉ dữ liệu qua cache, log, error detail hoặc browser history.
-- [ ] Test hai tab/hai account không trộn context.
-- [ ] Test desktop/mobile bằng Playwright trên backend thật, không chỉ route mock.
+- [x] Test hai tab/hai account không trộn context.
+- [x] Test desktop/mobile bằng Playwright trên backend thật, không chỉ route mock.
 
 ### 8.5. Tiêu chí nghiệm thu P4
 
 - [ ] Một bệnh nhân synthetic đăng nhập, xem đúng lời dặn/đơn/kết quả/lịch hẹn đã công bố.
-- [ ] Ít nhất 10 ca tấn công quyền chéo đều bị chặn ở backend.
-- [ ] Thu hồi link hoặc publication có hiệu lực ngay mà không cần rebuild frontend.
+- [x] Ít nhất 10 ca tấn công quyền chéo đều bị chặn ở backend.
+- [x] Thu hồi link hoặc publication có hiệu lực ngay mà không cần rebuild frontend.
 
 ---
 

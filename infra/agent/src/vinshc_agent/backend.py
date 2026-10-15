@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Protocol
 
 import httpx
 
@@ -48,6 +48,30 @@ def require_uuid(value: str | None, name: str) -> str:
     return str(value).lower()
 
 
+class ClinicalDataProvider(Protocol):
+    """Dữ liệu chuẩn hóa mà tool cần; API/DB/xác thực cụ thể thuộc lớp adapter.
+
+    Đây là interface nội bộ của agent, không buộc BE mới giữ URL hoặc schema OpenMRS.
+    Mỗi lần đọc phải kiểm tra quyền bằng danh tính của người hỏi.
+    """
+
+    async def workspace(self, credentials: Credentials) -> dict[str, Any]: ...
+    async def clinical_summary(self, credentials: Credentials, encounter: str) -> dict[str, Any]: ...
+    async def patient(self, credentials: Credentials, patient: str) -> dict[str, Any]: ...
+    async def visits(self, credentials: Credentials, patient: str, limit: int) -> dict[str, Any]: ...
+    async def vitals(self, credentials: Credentials, patient: str, visit: str | None) -> dict[str, Any]: ...
+    async def allergies(self, credentials: Credentials, patient: str) -> dict[str, Any]: ...
+    async def service_orders(self, credentials: Credentials, patient: str, visit: str | None) -> dict[str, Any]: ...
+    async def result(self, credentials: Credentials, result: str) -> dict[str, Any]: ...
+    async def appointments(self, credentials: Credentials, patient: str) -> dict[str, Any]: ...
+
+
+class DoctorContextAuthorizer(Protocol):
+    """Optional server check before the model runs, supplied by a mock or a new BE adapter."""
+
+    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str | None, visit: str | None) -> dict[str, Any] | None: ...
+
+
 class VinshcBackend:
     def __init__(self, client: httpx.AsyncClient):
         self._client = client
@@ -58,6 +82,12 @@ class VinshcBackend:
     async def clinical_summary(self, credentials: Credentials, encounter: str) -> dict[str, Any]:
         encounter = require_uuid(encounter, "encounterUuid")
         return await self._get(f"vinshc/encounter/{encounter}/clinical-summary", credentials)
+
+    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str | None,
+                                      visit: str | None) -> dict[str, Any]:
+        # The scoped clinical endpoint enforces the doctor's backend privileges/facility.
+        # Check the relationship even when no model/tool will run (greeting/history recap).
+        return await read_doctor_context(self, credentials, patient, encounter, visit)
 
     async def patient(self, credentials: Credentials, patient: str) -> dict[str, Any]:
         return await self._get(f"vinshc/patients/{require_uuid(patient, 'patientUuid')}", credentials)
@@ -98,6 +128,27 @@ class VinshcBackend:
         except httpx.HTTPError as ex:
             raise BackendError(503, "backend_unavailable", "Không kết nối được OpenMRS.") from ex
         return decode(response)
+
+
+async def read_doctor_context(backend: ClinicalDataProvider, credentials: Credentials, patient: str,
+                              encounter: str | None, visit: str | None) -> dict[str, Any]:
+    """A provider's scoped read is required before any positive doctor response or memory access."""
+    if not encounter:
+        # Chỉ chọn bệnh nhân: đọc hồ sơ bằng quyền của bác sĩ để backend kiểm tra phạm vi truy cập.
+        record = await backend.patient(credentials, patient)
+        if str(record.get("uuid") or record.get("patientUuid") or "").lower() != patient:
+            raise BackendError(400, "invalid_context", "Hồ sơ bệnh nhân trả về không khớp hồ sơ đang chọn.")
+        if visit:
+            rows = (await backend.visits(credentials, patient, 100)).get("results") or []
+            if not any(str(v.get("uuid") or v.get("visitUuid") or "").lower() == visit for v in rows):
+                raise BackendError(400, "invalid_context", "Lượt khám không thuộc bệnh nhân đang chọn.")
+        return record
+    summary = await backend.clinical_summary(credentials, encounter)
+    if (str(summary.get("patientUuid") or "").lower() != patient
+            or str(summary.get("encounterUuid") or "").lower() != encounter
+            or visit and str(summary.get("visitUuid") or "").lower() != visit):
+        raise BackendError(400, "invalid_context", "Bệnh nhân, lượt khám và phiếu khám không khớp nhau.")
+    return summary
 
 
 def decode(response: httpx.Response) -> dict[str, Any]:

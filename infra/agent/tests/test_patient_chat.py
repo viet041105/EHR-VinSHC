@@ -1,6 +1,6 @@
 import re
 
-from vinshc_agent.llm import ModelTurn
+from vinshc_agent.llm import ModelTurn, ModelUnavailable
 
 from conftest import PATIENT_HEADERS, ScriptedModel, answer, fact_ids
 
@@ -13,6 +13,35 @@ def ask(client, message, headers=PATIENT_HEADERS, **extra):
 
 def texts(body):
     return [a["text"] for a in body["answer"]]
+
+
+def test_model_failure_explains_service_issue_and_keeps_clinic_contact(make_client):
+    class Broken:
+        provider, name = "test", "broken"
+
+        async def next_turn(self, system, tools, conversation):
+            raise ModelUnavailable("http_503")
+
+    body = ask(make_client(model=Broken(), clinic_contact="1900 0000"), "Lời dặn của tôi là gì?").json()
+    assert body["status"] == "limited" and body["answer"] == []
+    assert "tạm thời không sẵn sàng (503)" in body["message"]
+    assert "thử lại sau" in body["message"] and "1900 0000" in body["message"]
+
+
+def test_patient_greeting_works_without_model_and_emergency_still_wins(make_client):
+    class Unreachable:
+        provider, name = "test", "unreachable"
+
+        async def next_turn(self, *args):
+            raise AssertionError("Greeting/emergency must not call the model")
+
+    client = make_client(model=Unreachable())
+    greeting = ask(client, "hello").json()
+    assert greeting["status"] == "ok" and "phòng khám đã cung cấp cho bạn" in greeting["message"]
+    assert greeting["answer"] == [] and greeting["toolsUsed"] == []
+    emergency = ask(client, "Chào bạn, tôi đang khó thở").json()
+    assert emergency["status"] == "emergency" and "115" in emergency["message"]
+    assert ask(client, "hello", headers={}).status_code == 401
 
 
 def test_portal_disabled_by_default(make_client):
@@ -93,4 +122,4 @@ def test_patient_tools_only(make_client, vinshc):
     body = ask(make_client(vinshc, model=model), "Tóm tắt hồ sơ").json()
     assert body["status"] == "not_found"
     assert vinshc.requests == []
-    assert model.seen[0][1] == ["list_my_visits", "get_visit_instructions", "get_my_prescriptions", "list_my_appointments"]
+    assert model.seen[0][1] == ["list_my_visits", "get_visit_instructions", "get_my_prescriptions", "list_my_appointments", "recall_conversation"]

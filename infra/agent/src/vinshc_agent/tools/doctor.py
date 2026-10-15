@@ -5,7 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 from .. import records
-from ..facts import Recorder, ToolError, ToolOutput
+from ..facts import Recorder, Source, ToolError, ToolOutput
 from . import Tool, ToolContext, ref_param
 
 VISITS_LIMIT = 20
@@ -73,7 +73,7 @@ async def get_vitals_history(ctx: ToolContext, args: dict[str, Any]) -> ToolOutp
     backend, credentials = _staff(ctx)
     visit = await _visit(ctx, args["visit_ref"])
     rec = Recorder(ctx.registry)
-    records.vitals_history(rec, await backend.vitals(credentials, ctx.patient_uuid, visit), ctx.catalog, ctx.patient_uuid, VITALS_LIMIT)
+    records.vitals_history(rec, await backend.vitals(credentials, ctx.patient_uuid, visit), ctx.catalog, ctx.patient_uuid, VITALS_LIMIT, visit)
     return rec.output
 
 
@@ -81,6 +81,15 @@ async def get_active_allergies(ctx: ToolContext, args: dict[str, Any]) -> ToolOu
     backend, credentials = _staff(ctx)
     rec = Recorder(ctx.registry)
     records.allergy_list(rec, await backend.allergies(credentials, ctx.patient_uuid), ctx.patient_uuid)
+    if ctx.encounter_uuid:
+        summary = await _summary(ctx, ctx.encounter_uuid)
+        consultation = summary.get("consultation") or {}
+        state = (consultation.get("values") or {}).get("allergy.trang_thai")
+        if isinstance(state, str) and state in records.STATE_TEXT:
+            rec.add("allergies", ctx.catalog.get("allergy.trang_thai").label, records.STATE_TEXT[state],
+                    "recorded" if state in records.ANSWERED_STATES else state,
+                    Source("consultation", (consultation.get("memberUuids") or {}).get("allergy.trang_thai"),
+                           "allergy.trang_thai", None, summary.get("status"), ctx.encounter_uuid))
     return rec.output
 
 
@@ -88,7 +97,7 @@ async def list_diagnostic_orders(ctx: ToolContext, args: dict[str, Any]) -> Tool
     backend, credentials = _staff(ctx)
     visit = await _visit(ctx, args["visit_ref"])
     rec = Recorder(ctx.registry)
-    records.service_orders(rec, await backend.service_orders(credentials, ctx.patient_uuid, visit), ctx.patient_uuid, ORDERS_LIMIT)
+    records.service_orders(rec, await backend.service_orders(credentials, ctx.patient_uuid, visit), ctx.patient_uuid, ORDERS_LIMIT, visit)
     return rec.output
 
 

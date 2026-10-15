@@ -1,0 +1,11 @@
+# Synthetic acceptance only: exercise advanced tools against the real HTTP backend.
+services:
+  agent:
+    environment:
+      VINSHC_AGENT_MODEL_PROVIDER: fake
+      VINSHC_AGENT_ALLOW_EXTERNAL_MODEL: "false"
+      VINSHC_AGENT_ADVANCED_ENABLED: "true"
+      VINSHC_AGENT_KNOWLEDGE_ENABLED: "true"
+      VINSHC_AGENT_KNOWLEDGE_ALLOW_DEVELOPMENT: "true"
+      VINSHC_AGENT_KNOWLEDGE_MODE: offline
+      VINSHC_AGENT_RATE_LIMIT_PER_MINUTE: "300"

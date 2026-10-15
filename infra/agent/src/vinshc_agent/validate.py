@@ -59,6 +59,10 @@ def validate(final: FinalAnswer, registry: FactRegistry, persona: str) -> Valida
         if len(facts) != len(cited):
             result.rejected.append((statement, "unknown_source"))
             continue
+        document_facts = [f for f in facts if f.source.kind == "document"]
+        if document_facts and len(document_facts) != len(facts):
+            result.rejected.append((statement, "mixed_source_types"))
+            continue
         allowed = set().union(*(numbers(f"{f.label} {f.value}") for f in facts))
         if not numbers(text) <= allowed:
             result.rejected.append((statement, "unsupported_number"))
@@ -70,5 +74,7 @@ def validate(final: FinalAnswer, registry: FactRegistry, persona: str) -> Valida
         # MVP renders clinical statements from source facts. The model selects facts and
         # ordering; free-form prose cannot change a diagnosis, unit, BP pair or missing state.
         grounded = "\n".join(f"{f.label}: {f.value}" for f in facts)
+        if document_facts:
+            grounded = "Tài liệu tham khảo — " + grounded
         result.accepted.append(Checked(Statement(text=grounded, fact_ids=ids), facts))
     return result

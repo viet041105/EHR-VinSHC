@@ -5,6 +5,8 @@ import {
   metadata as m,
   active,
   BackendError,
+  passwordRules,
+  usernameProblem,
   uuid,
   action,
   F,
@@ -12,11 +14,9 @@ import {
   id,
   optional,
   workflowConfigOptions,
-  esc,
-  CONNECTED_BADGE,
-  openButton,
   preparationPanel,
 } from "@vinshc/core";
+import { adminConsole, bindAdminConsole } from "./console.js";
 
 const roleChoices = Object.entries(m.permissions.roles).map(([k, v]) => [
   k,
@@ -36,7 +36,25 @@ const userView =
 
 const actions = {
   linkPortal: action("Liên kết tài khoản bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân"), id("patient", "Mã bệnh nhân")], () => "portal/accounts", d => ({userUuid:uuid(d.user),patientUuid:uuid(d.patient)}), {systemOnly:true}),
-  unlinkPortal: action("Thu hồi truy cập cổng bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân")], d => "portal/accounts/"+uuid(d.user), () => undefined, {method:"DELETE",systemOnly:true}),
+  portalLinkHistory: action(
+    "Lịch sử xác minh và thu hồi liên kết", "metadata_admin", "read",
+    [id("user","UUID tài khoản bệnh nhân")],
+    d=>"portal/accounts/"+uuid(d.user)+"/history",null,
+    {method:"GET",systemOnly:true},
+  ),
+  verifyPortal: action(
+    "Xác minh danh tính bệnh nhân", "metadata_admin", "update",
+    [id("user","UUID tài khoản"),
+     choice("verificationMethod","Phương pháp đã xác minh",[
+       ["in_person_document","Đối chiếu giấy tờ trực tiếp"],
+       ["verified_eid","Định danh điện tử đã xác minh"],
+       ["verified_clinic_record","Đối chiếu hồ sơ cơ sở đã xác minh"]
+     ])],
+    d=>"portal/accounts/"+uuid(d.user)+"/verify",
+    d=>({verificationMethod:d.verificationMethod}),
+    {systemOnly:true,confirm:"Xác nhận đã đối chiếu danh tính bệnh nhân? Thao tác sẽ kích hoạt quyền xem dữ liệu đã công bố."}
+  ),
+  unlinkPortal: action("Thu hồi truy cập cổng bệnh nhân", "metadata_admin", "update", [id("user", "Mã tài khoản bệnh nhân"), F("reason","Lý do thu hồi","textarea",{max:1000})], d => "portal/accounts/"+uuid(d.user)+"/revoke", d=>({reason:d.reason}), {systemOnly:true,confirm:"Thu hồi ngay quyền xem dữ liệu công bố?"}),
   configuration: action(
     "Kiểm tra cấu hình nghiệp vụ",
     "metadata_admin",
@@ -137,112 +155,171 @@ const actions = {
       },
     },
   ),
+  staffAudit: action(
+    "Lịch sử quản trị nhân viên", "metadata_admin", "read", [],
+    ()=>"staff/audit?limit=100",null,{method:"GET",systemOnly:true},
+  ),
   systemUsers: action(
-    "Tìm tài khoản OpenMRS",
-    "metadata_admin",
-    "read",
-    [
-      optional("query", "Tên đăng nhập cần tìm"),
-      F("startIndex", "Bỏ qua số tài khoản", "number", {
-        min: 0,
-        step: 1,
-        value: "0",
-      }),
-    ],
-    (d) =>
-      "user?" +
-      new URLSearchParams({
-        v: userView,
-        limit: "50",
-        startIndex: d.startIndex,
-        ...(d.query ? { q: d.query } : {}),
-      }),
-    null,
-    {
-      method: "GET",
-      adminCore: true,
-      systemOnly: true,
-      notice:
-        "Tìm tài khoản theo tên đăng nhập. Cần quyền quản trị hệ thống để sử dụng.",
-    },
+    "Tìm tài khoản nhân viên", "metadata_admin", "read",
+    [optional("q", "Tên đăng nhập"), F("offset", "Trang bắt đầu", "number", { min: 0, value: "0" })],
+    d => "staff/users?" + new URLSearchParams({ q: d.q || "", offset: d.offset, limit: "25" }),
+    null, { method: "GET", systemOnly: true },
+  ),
+  createStaff: action(
+    "Tạo tài khoản nhân viên", "metadata_admin", "create",
+    [F("username", "Tên đăng nhập (3-50 ký tự: chữ/số không dấu, . _ -)"), F("givenName", "Tên"), F("familyName", "Họ"),
+      choice("gender", "Giới tính", [["U", "Không rõ"], ["M", "Nam"], ["F", "Nữ"]]),
+      choice("role", "Vai trò ứng dụng", roleChoices),
+      F("password", "Mật khẩu (tối thiểu 6 ký tự)", "password", { min: 6 })],
+    () => "staff/users",
+    d => ({ username: d.username, givenName: d.givenName, familyName: d.familyName,
+      gender: d.gender, role: d.role, password: d.password }),
+    { systemOnly: true, sensitive: true,
+      prepare(d) {
+        const problem = usernameProblem(d.username || "") || passwordRules(d.password || "", "Mật khẩu");
+        if (problem) throw new BackendError(problem);
+      },
+      notice: "Chỉ System Developer. Giao mật khẩu cho nhân viên qua kênh riêng." },
   ),
   grantAppRole: action(
-    "Đổi vai trò VinSHC của tài khoản",
-    "metadata_admin",
-    "update",
-    [
-      id("user", "Mã tài khoản (UUID)"),
-      choice("role", "Role VinSHC mới", roleChoices),
-    ],
-    (d) => "user/" + uuid(d.user),
-    null,
-    {
-      adminCore: true,
-      systemOnly: true,
-      notice:
-        "Thay role VinSHC hiện tại bằng một role mới. Các role hệ thống/Core như System Developer được giữ nguyên. Sau đó phân công cơ sở làm việc.",
-      async send({ client }, { path, data }) {
-        const user = await client.request(
-          path + "?v=custom:(uuid,retired,roles:(uuid,name))",
-          { adminCore: true },
-        );
-        if (user.retired)
-          throw new BackendError("Tài khoản đã ngừng hoạt động.");
-        const appRoleIds = new Set(
-          Object.values(m.permissions.roles).map((role) => role.openmrs.uuid),
-        );
-        return client.request(path, {
-          method: "POST",
-          body: {
-            roles: [
-              ...new Set([
-                ...user.roles.map((r) => r.uuid).filter((roleId) => !appRoleIds.has(roleId)),
-                m.permissions.roles[data.role].openmrs.uuid,
-              ]),
-            ],
-          },
-          adminCore: true,
-        });
-      },
-    },
+    "Thêm role ứng dụng", "metadata_admin", "update",
+    [id("user", "UUID tài khoản"), choice("role", "Role được phép", roleChoices)],
+    d => "staff/users/" + uuid(d.user) + "/roles",
+    d => ({role:d.role}), {systemOnly:true,confirm:"Xác nhận cấp thêm role cho tài khoản đã chọn?"},
+  ),
+  retireUser: action(
+    "Khóa tài khoản", "metadata_admin", "update",
+    [id("user","UUID tài khoản"), F("reason","Lý do khóa")],
+    d => "staff/users/"+uuid(d.user)+"/state",
+    d => ({active:false,reason:d.reason}),
+    { systemOnly:true, confirm:"Xác nhận khóa tài khoản? Các workspace và liên kết provider đang hoạt động sẽ bị thu hồi.", prepare(d, ctx) { if(d.user===ctx.client.user?.uuid)
+      throw new BackendError("Không được tự khóa tài khoản quản trị đang dùng."); },
+      notice:"Yêu cầu xác nhận trước khi khóa; dữ liệu lịch sử được giữ lại." },
+  ),
+  unretireUser: action(
+    "Mở khóa tài khoản", "metadata_admin", "update",
+    [id("user","UUID tài khoản")],
+    d => "staff/users/"+uuid(d.user)+"/state",
+    () => ({active:true}), {systemOnly:true},
+  ),
+  renameStaff: action(
+    "Đổi tên đăng nhập", "metadata_admin", "update",
+    [id("user","UUID tài khoản"),F("username","Tên đăng nhập mới (3-50 ký tự: chữ/số không dấu, . _ -)")],
+    d => "staff/users/"+uuid(d.user)+"/username",
+    d => ({username:d.username}),
+    {systemOnly:true,prepare(d,ctx){const problem=usernameProblem(d.username||"");if(problem)throw new BackendError(problem);if(d.user===ctx.client.user?.uuid)throw new BackendError("Không thể đổi tên đăng nhập của tài khoản đang đăng nhập.");}},
+  ),
+  resetStaffPassword: action(
+    "Đặt lại mật khẩu", "metadata_admin", "update",
+    [id("user","UUID tài khoản"),F("password","Mật khẩu mới (tối thiểu 6 ký tự)","password")],
+    d => "staff/users/"+uuid(d.user)+"/password",
+    d => ({password:d.password}),
+    {systemOnly:true,sensitive:true,prepare(d){const problem=passwordRules(d.password||"","Mật khẩu mới");if(problem)throw new BackendError(problem);},confirm:"Xác nhận đặt lại mật khẩu tài khoản?",notice:"Mật khẩu mới chỉ được gửi tới server, không lưu ở trình duyệt hoặc trả về."},
+  ),
+  createProvider: action(
+    "Tạo provider và gán cơ sở", "metadata_admin", "create",
+    [id("userUuid","UUID tài khoản bác sĩ/điều dưỡng/KTV"),
+      id("facilityLocationUuid","OpenMRS Location UUID"),
+      F("identifier","Mã nhân viên chuyên môn")],
+    () => "directory/providers", d=>d, {systemOnly:true},
+  ),
+  linkProvider: action(
+    "Liên kết provider–user", "metadata_admin", "update",
+    [id("userUuid","UUID tài khoản"),id("providerUuid","Provider UUID"),
+      id("facilityLocationUuid","Location UUID")],
+    () => "directory/providers/link", d=>d, {systemOnly:true},
+  ),
+  unlinkProvider: action(
+    "Hủy liên kết provider", "metadata_admin", "void",
+    [id("userUuid","UUID tài khoản"),id("providerUuid","Provider UUID"),
+      id("facilityLocationUuid","Location UUID")],
+    () => "directory/providers/unlink", d=>d, {systemOnly:true,confirm:"Xác nhận thu hồi liên kết provider–cơ sở?"},
+  ),
+  retireProvider: action(
+    "Ngừng provider", "metadata_admin", "void",
+    [id("providerUuid","Provider UUID"),F("reason","Lý do")],
+    d=>"directory/providers/"+uuid(d.providerUuid)+"/retire",
+    d=>({reason:d.reason}), {systemOnly:true,confirm:"Xác nhận ngừng provider?"},
+  ),
+  userProviders: action(
+    "Đọc liên kết provider", "metadata_admin", "read",
+    [id("userUuid","UUID tài khoản")],
+    d=>"directory/users/"+uuid(d.userUuid)+"/providers",
+    null, {method:"GET",systemOnly:true},
+  ),
+  createFacility: action(
+    "Tạo cơ sở mới", "metadata_admin", "create",
+    [F("code","Mã cơ sở"),F("name","Tên hiển thị"),F("legalName","Tên pháp lý"),
+      F("address","Địa chỉ"),optional("phone","Số điện thoại","tel"),
+      F("timezone","Múi giờ","text",{value:"Asia/Ho_Chi_Minh"}),
+      F("effectiveFrom","Hiệu lực từ ngày","date")],
+    ()=>"directory/facilities",d=>d,{systemOnly:true},
+  ),
+  facilities: action(
+    "Danh sách cơ sở", "metadata_admin", "read", [],
+    ()=>"directory/facilities", null, {method:"GET",systemOnly:true},
+  ),
+  updateFacility: action(
+    "Sửa thông tin cơ sở", "metadata_admin", "update",
+    [id("facilityUuid","Business facility UUID"),F("legalName","Tên pháp lý"),
+     F("address","Địa chỉ"),optional("phone","Điện thoại","tel")],
+    d=>"directory/facilities/"+uuid(d.facilityUuid),
+    d=>({legalName:d.legalName,address:d.address,...(d.phone?{phone:d.phone}:{})}),
+    {systemOnly:true},
+  ),
+  retireFacility: action(
+    "Ngừng hoạt động cơ sở", "metadata_admin", "void",
+    [id("facilityUuid","Business facility UUID"),F("reason","Lý do ngừng"),
+     F("effectiveTo","Ngày kết thúc hiệu lực","date")],
+    d=>"directory/facilities/"+uuid(d.facilityUuid)+"/retire",
+    d=>({reason:d.reason,effectiveTo:d.effectiveTo}),{systemOnly:true,confirm:"Xác nhận ngừng hoạt động cơ sở? Không thể tạo lượt khám mới tại cơ sở này."},
+  ),
+  draftForm: action(
+    "Tạo phiên bản biểu mẫu nháp", "metadata_admin", "create",
+    [id("facilityLocationUuid","Location UUID"),F("code","Mã biểu mẫu"),
+      F("schemaJson",'JSON form schema, ví dụ {"fields":[]}',"textarea")],
+    ()=>"admin-configuration/forms",d=>d,
+    {onlyRoles:["admin"],notice:"Schema VinSHC version hóa; không dùng metadata/forms.json handoff làm form production."},
+  ),
+  listForms: action(
+    "Danh sách phiên bản biểu mẫu", "metadata_admin", "read",
+    [id("facilityLocationUuid","Location UUID"),optional("code","Mã biểu mẫu (để trống = tất cả)")],
+    d=>"admin-configuration/forms?"+new URLSearchParams({facilityLocationUuid:uuid(d.facilityLocationUuid),...(d.code?{code:d.code.trim().toLowerCase()}:{})}),
+    null,{method:"GET",onlyRoles:["admin"]},
+  ),
+  formDetail: action(
+    "Đọc phiên bản biểu mẫu", "metadata_admin", "read",
+    [id("formUuid","Form UUID")],
+    d=>"admin-configuration/forms/"+uuid(d.formUuid),null,{method:"GET"},
+  ),
+  activateForm: action(
+    "Kích hoạt phiên bản form", "metadata_admin", "update",
+    [id("formUuid","Form UUID")],
+    d=>"admin-configuration/forms/"+uuid(d.formUuid)+"/activate",()=>({}),
+    {onlyRoles:["admin"],confirm:"Kích hoạt biểu mẫu mới và ngừng phiên bản active trước đó?"},
+  ),
+  retireForm: action(
+    "Ngừng phiên bản form", "metadata_admin", "update",
+    [id("formUuid","Form UUID")],
+    d=>"admin-configuration/forms/"+uuid(d.formUuid)+"/retire",()=>({}),
+    {onlyRoles:["admin"],confirm:"Xác nhận ngừng hiệu lực biểu mẫu này?"},
+  ),
+  readWorkflow: action(
+    "Đọc workflow theo cơ sở", "metadata_admin", "read",
+    [id("locationUuid","Location UUID")],
+    d=>"admin-configuration/workflow/"+uuid(d.locationUuid),null,{method:"GET"},
+  ),
+  setWorkflow: action(
+    "Đặt workflow theo cơ sở", "metadata_admin", "update",
+    [id("facilityLocationUuid","Location UUID"),
+     choice("workflowCode","Quy trình", workflowConfigOptions()),
+     F("expectedVersion","Version hiện tại (0 nếu mới)","number",{min:0,value:"0"})],
+    ()=>"admin-configuration/workflow",
+    d=>({facilityLocationUuid:d.facilityLocationUuid,workflowCode:d.workflowCode,
+      expectedVersion:Number(d.expectedVersion)}),
+    {onlyRoles:["admin"],confirm:"Thay đổi cấu hình workflow của cơ sở? Kiểm tra với quản lý vận hành trước khi xác nhận.",notice:"Cấu hình metadata có version; các workflow thực thi phải được nghiệm thu riêng."},
   ),
 };
-
-function directory(ctx) {
-  return (
-    `<section class="panel admin-directory"><div class="workspace-heading"><div><h2>Tài khoản và phân quyền</h2><p>Phân công vai trò và cơ sở cho tài khoản nhân viên đã có.</p></div>${CONNECTED_BADGE}</div><div class="role-tags">${Object.values(
-      m.permissions.roles,
-    )
-      .map((role) => `<span>${esc(role.label)}</span>`)
-      .join(
-        "",
-      )}</div><div class="context-links">${ctx.canAction("systemUsers") ? openButton("admin", "systemUsers", "Tìm tài khoản") : ""}${ctx.canAction("grantAppRole") ? openButton("admin", "grantAppRole", "Đổi vai trò VinSHC") : ""}${openButton("admin", "assignWorkspace", "Phân công cơ sở")}${openButton("admin", "workspace", "Kiểm tra phân công")}${openButton("admin", "audit", "Nhật ký truy cập")}</div></section>` +
-    preparationPanel(
-      "Tạo tài khoản nhân viên",
-      "Chức năng tạo tài khoản chưa khả dụng. Hiện chỉ phân công được tài khoản đã có.",
-      [
-        F("username", "Tên đăng nhập"),
-        F("fullName", "Họ tên nhân viên"),
-        choice("role", "Vai trò ứng dụng", roleChoices),
-      ],
-      ctx.field,
-      "Tạo tài khoản",
-    ) +
-    preparationPanel(
-      "Thiết lập cơ sở và biểu mẫu",
-      "Có thể xem cấu hình hiện tại. Chức năng thay đổi cơ sở và biểu mẫu chưa khả dụng.",
-      [
-        F("facilityName", "Tên cơ sở"),
-        F("facilityAddress", "Địa chỉ cơ sở", "textarea"),
-        F("facilityPhone", "Điện thoại", "tel", { required: false }),
-        choice("workflow", "Quy trình", workflowConfigOptions()),
-        F("formVersion", "Phiên bản biểu mẫu", "text", { required: false }),
-      ],
-      ctx.field,
-      "Lưu thiết lập",
-    )
-  );
-}
 
 export default defineModule({
   name: "admin",
@@ -254,20 +331,25 @@ export default defineModule({
       title: "Quản trị",
       resource: "metadata_admin",
       order: 120,
-      actions: ["linkPortal", "unlinkPortal",
+      actions: ["linkPortal", "verifyPortal", "unlinkPortal", "portalLinkHistory",
         "configuration",
         "audit",
         "workspace",
         "evaluate",
         "assignWorkspace",
         "revokeWorkspace",
-        "systemUsers",
-        "grantAppRole",
+        "systemUsers", "staffAudit", "createStaff", "grantAppRole",
+        "retireUser", "unretireUser", "renameStaff", "resetStaffPassword",
+        "createProvider", "linkProvider", "unlinkProvider", "retireProvider", "userProviders",
+        "createFacility", "facilities", "updateFacility", "retireFacility",
+        "draftForm", "listForms", "formDetail", "activateForm", "retireForm", "readWorkflow", "setWorkflow",
       ],
-      note: "Phân công nhân viên và xem nhật ký hoạt động. Một số công việc cần quyền quản trị hệ thống.",
+      note: "Quản trị qua VinSHC API. System Developer quản lý tài khoản/provider/cơ sở; admin theo workspace quản lý biểu mẫu và workflow được cấp quyền.",
       icon: "⚙",
-      partial: "Một số mục chưa khả dụng",
-      footer: directory,
+      footer: adminConsole,
+      bind: bindAdminConsole,
+      // Per-endpoint forms (UUID based) stay reachable for technical staff, collapsed by default.
+      advancedTools: true,
     },
   ],
   actions,

@@ -25,11 +25,13 @@ SECTIONS = {
     "visits": "Các lượt khám",
     "appointments": "Lịch hẹn",
     "other": "Thông tin khác",
+    "reference": "Tài liệu tham khảo",
+    "comparison": "So sánh giữa các lần khám",
 }
 
 # Câu trả lời đã khai thác là dữ kiện; các mã còn lại là trạng thái thiếu.
 PRESENT_STATES = {"recorded", "needs_verification"}
-REF_PREFIX = {"encounter": "E", "visit": "V", "result": "R"}
+REF_PREFIX = {"encounter": "E", "visit": "V", "result": "R", "document": "D"}
 
 
 class ContextMismatch(Exception):
@@ -49,6 +51,11 @@ class Source:
     status: str | None
     encounterUuid: str | None = None
     visitUuid: str | None = None
+    documentId: str | None = None
+    documentTitle: str | None = None
+    documentVersion: str | None = None
+    documentSection: str | None = None
+    sourceUrl: str | None = None
 
 
 @dataclass(frozen=True)
@@ -59,6 +66,7 @@ class Fact:
     value: str
     state: str
     source: Source
+    evidence_ids: tuple[str, ...] = ()
 
     def for_model(self) -> dict[str, str]:
         return {"id": self.id, "section": self.section, "label": self.label, "value": self.value, "state": self.state}
@@ -105,9 +113,12 @@ class FactRegistry:
     def fact(self, fact_id: str) -> Fact | None:
         return self._facts.get(fact_id)
 
-    def add(self, section: str, label: str, value: str, state: str, source: Source) -> Fact:
-        from .guardrails import redact
-        fact = Fact(f"F{len(self._facts) + 1}", section, redact(label), redact(value), state, source)
+    def add(self, section: str, label: str, value: str, state: str, source: Source, evidence_ids: tuple[str, ...] = ()) -> Fact:
+        from .guardrails import redact, is_injection
+        if is_injection(label + " " + value):
+            label, value, state = "Nội dung nguồn bị cách ly", "Đoạn nguồn có chỉ dẫn không an toàn; cần đọc trực tiếp và kiểm tra lại.", "unreadable"
+            self.gap(Gap(section, label, "unsafe_source", value))
+        fact = Fact(f"F{len(self._facts) + 1}", section, redact(label), redact(value), state, source, evidence_ids)
         self._facts[fact.id] = fact
         return fact
 
@@ -142,8 +153,18 @@ class FactRegistry:
             Gap(f.section, f.label, f.state, f"Hồ sơ ghi: {f.value}.")
             for f in self._facts.values()
             if f.state not in PRESENT_STATES
+            and not any(g.section == f.section and g.label == f.label and g.reason == f.state for g in self.gaps)
         ]
         return self.gaps + stated
+
+    def evidence(self, fact: Fact) -> list[Fact]:
+        """One-hop, server-created derived facts retain both original sources."""
+        if not fact.evidence_ids:
+            return [fact]
+        sources = [self.fact(key) for key in fact.evidence_ids]
+        if any(f is None or f.evidence_ids for f in sources):
+            raise ContextMismatch("Dữ kiện so sánh thiếu nguồn gốc hợp lệ")
+        return sources
 
 
 class Recorder:
@@ -158,10 +179,14 @@ class Recorder:
         self.output.facts.append(fact)
         return fact
 
-    def gap(self, section: str, label: str, reason: str, detail: str) -> None:
+    def gap(self, section: str, label: str, reason: str, detail: str, source: Source | None = None) -> None:
         gap = Gap(section, label, reason, detail)
         self.registry.gap(gap)
         self.output.gaps.append(gap)
+        if source is not None:
+            # The observed absence in this exact source is citable. It does not mean
+            # a negative clinical finding (e.g. no drugs taken or no allergies).
+            self.add(section, label, detail, reason, source)
 
     def note(self, text: str) -> None:
         self.registry.note(text)

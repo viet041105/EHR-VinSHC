@@ -16,6 +16,28 @@ const messages = {
   409: "Dữ liệu đã thay đổi hoặc thao tác không phù hợp trạng thái hiện tại.",
   503: "Dịch vụ chưa sẵn sàng cho chức năng này. Vui lòng thử lại sau.",
 };
+// Mirrors StaffAccountService.validPassword: length only (6-256), no character-class rules.
+// The BE trims the value before storing it, so edge whitespace would make the new token wrong.
+export function passwordRules(password, label = "Mật khẩu mới") {
+  if (password !== password.trim())
+    return label + " không được bắt đầu hoặc kết thúc bằng dấu cách.";
+  if (password.length < 6 || password.length > 256)
+    return label + " cần từ 6 đến 256 ký tự.";
+  return "";
+}
+export function passwordProblem(current, next) {
+  if (!current) return "Nhập mật khẩu hiện tại.";
+  const rules = passwordRules(next);
+  if (rules) return rules;
+  if (next === current) return "Mật khẩu mới phải khác mật khẩu hiện tại.";
+  return "";
+}
+// Backend pattern allows 3-60 chars but OpenMRS core rejects usernames over 50: 3-50 chars, starts with a letter or digit.
+export function usernameProblem(username) {
+  return /^[A-Za-z0-9][A-Za-z0-9._-]{2,49}$/.test(username.trim())
+    ? ""
+    : "Tên đăng nhập cần 3-50 ký tự, bắt đầu bằng chữ hoặc số, chỉ gồm chữ/số không dấu và . _ - (không dấu cách, không chữ có dấu, không @).";
+}
 export const isSystemAdministrator = (user) =>
   (user?.roles || []).some(
     (r) =>
@@ -23,6 +45,7 @@ export const isSystemAdministrator = (user) =>
   );
 export class BackendClient {
   #token = null;
+  #username = null;
   constructor(fetcher = (...args) => globalThis.fetch(...args)) {
     this.fetcher = fetcher;
     this.workspace = null;
@@ -37,6 +60,7 @@ export class BackendClient {
       scoped = true,
       binary = false,
       adminCore = false,
+      signal,
     } = {},
   ) {
     if (adminCore) {
@@ -88,9 +112,10 @@ export class BackendClient {
         credentials: "omit",
         redirect: "error",
         cache: "no-store",
-        signal: AbortSignal.timeout(15000),
+        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000),
       });
-    } catch {
+    } catch (error) {
+      if (signal?.aborted) throw error;
       throw new BackendError(
         "Chưa kết nối được dịch vụ phòng khám. Vui lòng thử lại hoặc liên hệ quản trị.",
       );
@@ -122,9 +147,18 @@ export class BackendClient {
         !/[\r\n]/.test(data.detail)
           ? " " + data.detail
           : "";
+      // 400/409 bodies carry {error: reason}; show it so users can see which field was refused.
+      const reason =
+        !detail &&
+        [400, 409].includes(response.status) &&
+        typeof data.error === "string" &&
+        data.error.length < 200 &&
+        !/[\r\n]/.test(data.error)
+          ? " (" + data.error + ")"
+          : "";
       throw new BackendError(
         (messages[response.status] ||
-          "Dịch vụ trả lỗi " + response.status + ".") + detail,
+          "Dịch vụ trả lỗi " + response.status + ".") + detail + reason,
         response.status,
         data,
       );
@@ -132,6 +166,12 @@ export class BackendClient {
     return data;
   }
   async chat(persona, body, { signal } = {}) {
+    return this.#agentRequest(persona, "chat", { body, signal });
+  }
+  async readKnowledgeChunk(persona, chunkUuid, { signal } = {}) {
+    return this.#agentRequest(persona, "knowledge/chunks/" + uuid(chunkUuid), { signal });
+  }
+  async #agentRequest(persona, path, { body, signal } = {}) {
     if (!["doctor", "patient"].includes(persona) || !this.#token)
       throw new BackendError("Cần đăng nhập đúng tài khoản để dùng trợ lý.", 401);
     if (persona === "doctor" && this.workspace?.role !== "doctor")
@@ -144,8 +184,8 @@ export class BackendClient {
     }
     let response;
     try {
-      response = await this.fetcher("/agent/v1/" + persona + "/chat", {
-        method: "POST", headers, body: JSON.stringify(body), credentials: "omit", redirect: "error", cache: "no-store",
+      response = await this.fetcher("/agent/v1/" + persona + "/" + path, {
+        method: body === undefined ? "GET" : "POST", headers, body: body === undefined ? undefined : JSON.stringify(body), credentials: "omit", redirect: "error", cache: "no-store",
         signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(95000)]) : AbortSignal.timeout(95000),
       });
     } catch (error) {
@@ -156,16 +196,17 @@ export class BackendClient {
     if (response.status === 401) this.clear();
     let data;
     try { data = await response.json(); } catch { throw new BackendError("Trợ lý không trả dữ liệu hợp lệ.", response.status); }
-    if (!response.ok) throw new BackendError(data.detail || messages[response.status] || "Trợ lý chưa sẵn sàng.", response.status);
+    if (!response.ok) throw new BackendError(data.detail || messages[response.status] || "Trợ lý chưa sẵn sàng.", response.status, data);
     return data;
   }
   async login(username, password) {
     this.clear();
     if (!username.trim() || !password)
       throw new BackendError("Cần tên đăng nhập và mật khẩu.");
+    this.#username = username.trim();
     this.#token = btoa(
       String.fromCharCode(
-        ...new TextEncoder().encode(username.trim() + ":" + password),
+        ...new TextEncoder().encode(this.#username + ":" + password),
       ),
     );
     try {
@@ -178,6 +219,31 @@ export class BackendClient {
       this.clear();
       throw error;
     }
+  }
+  // Replaces the temporary password, then signs in again with the new one so the token is verified
+  // by the server. Passwords are never kept after the call.
+  async changeOwnPassword(current, next) {
+    const username = this.#username;
+    if (!this.#token || !username) throw new BackendError(messages[401], 401);
+    const problem = passwordProblem(current, next);
+    if (problem) throw new BackendError(problem);
+    try {
+      await this.request("vinshc/staff/me/password", {
+        method: "POST",
+        scoped: false,
+        body: { currentPassword: current, newPassword: next },
+      });
+    } catch (error) {
+      const reason = error.details?.error;
+      if (error.status === 400 && typeof reason === "string" && reason.length < 300 && !/[\r\n]/.test(reason))
+        throw new BackendError(
+          "Không đổi được mật khẩu (kiểm tra mật khẩu hiện tại và yêu cầu mật khẩu mới): " + reason,
+          400,
+          error.details,
+        );
+      throw error;
+    }
+    return this.login(username, next);
   }
   async selectWorkspace(role, facility) {
     this.generation++;
@@ -194,6 +260,7 @@ export class BackendClient {
   }
   clear() {
     this.#token = null;
+    this.#username = null;
     this.workspace = null;
     this.user = null;
     this.generation++;

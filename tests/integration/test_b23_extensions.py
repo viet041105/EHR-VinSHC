@@ -12,7 +12,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, fixture_path, report_path
 
 
 class B23ExtensionTests(unittest.TestCase):
@@ -27,10 +27,10 @@ class B23ExtensionTests(unittest.TestCase):
             (ROOT / "metadata/vinshc/frontend-map.json").read_text(encoding="utf-8")
         )["entities"]
         cls.b2 = json.loads(
-            (ROOT / ".runtime/fixtures/b2-patients.json").read_text(encoding="utf-8")
+            (fixture_path("b2-patients.json")).read_text(encoding="utf-8")
         )
         cls.b3 = json.loads(
-            (ROOT / ".runtime/fixtures/b3-vitals.json").read_text(encoding="utf-8")
+            (fixture_path("b3-vitals.json")).read_text(encoding="utf-8")
         )
         cls.patient = cls.b2["patients"][0]["patientUuid"]
         cls.evidence = {
@@ -43,7 +43,7 @@ class B23ExtensionTests(unittest.TestCase):
     def tearDownClass(cls):
         cls.evidence["passed"] = len(cls.evidence["checks"]) == 5
         cls.evidence["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        target = ROOT / ".runtime/reports/b23-extension-integration.json"
+        target = report_path("b23-extension-integration.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.evidence, ensure_ascii=False, indent=2) + "\n",
                           encoding="utf-8")

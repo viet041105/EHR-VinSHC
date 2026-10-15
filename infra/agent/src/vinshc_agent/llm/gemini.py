@@ -110,6 +110,12 @@ class GeminiChatModel:
                 "responseMimeType": "application/json", "responseJsonSchema": FINAL_SCHEMA},
         }
         response = await self._request("POST", ":generateContent", payload)
+        raw_usage = response.get("usageMetadata") or {}
+        if not isinstance(raw_usage, dict):
+            raw_usage = {}
+        usage = {"inputTokens": raw_usage.get("promptTokenCount"), "outputTokens": raw_usage.get("candidatesTokenCount"),
+                 "thinkingTokens": raw_usage.get("thoughtsTokenCount")}
+        usage = {k: v for k, v in usage.items() if isinstance(v, int) and not isinstance(v, bool) and v >= 0} or None
         if response.get("promptFeedback", {}).get("blockReason"):
             raise ModelUnavailable("refusal")
         try:
@@ -132,8 +138,8 @@ class GeminiChatModel:
             if calls:
                 if len({c.id for c in calls}) != len(calls):
                     raise ModelUnavailable("invalid_output")
-                return ModelTurn(calls, None, deepcopy(content))
+                return ModelTurn(calls, None, deepcopy(content), usage)
             text = "".join(part.get("text", "") for part in parts if not part.get("thought"))
-            return ModelTurn([], FinalAnswer.model_validate_json(text), deepcopy(content))
+            return ModelTurn([], FinalAnswer.model_validate_json(text), deepcopy(content), usage)
         except (AttributeError, KeyError, IndexError, TypeError, ValueError):
             raise ModelUnavailable("invalid_output") from None

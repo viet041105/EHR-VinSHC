@@ -1,0 +1,110 @@
+{
+  "version": "0.1.0",
+  "synthetic": true,
+  "purpose": "Development reference corpus derived from VinSHC metadata contracts; not clinical guidance or approved production material.",
+  "documents": [
+    {
+      "id": "data-fields",
+      "title": "Trường dữ liệu và trạng thái thiếu",
+      "version": "0.1.0",
+      "path": "documents/data-fields.md",
+      "sha256": "18c3cf41a5359ebc6b4f634d8af18016a1571871ccbe2d5875d4df04f8b27834",
+      "roles": [
+        "doctor"
+      ],
+      "facilityUuids": [],
+      "status": "development",
+      "effectiveFrom": "2026-10-01",
+      "effectiveTo": null,
+      "reviewedBy": null,
+      "allowExternalEmbedding": true,
+      "origins": [
+        "metadata/vinshc/contracts/b2.json",
+        "metadata/vinshc/fields.csv (0.3.0)"
+      ]
+    },
+    {
+      "id": "vitals",
+      "title": "Sinh hiệu trong metadata VinSHC",
+      "version": "0.1.0",
+      "path": "documents/vitals.md",
+      "sha256": "c6ba737e0c48e8144a8ea90c37f39e60e6ebe49bca70b267766bf510307325d7",
+      "roles": [
+        "doctor"
+      ],
+      "facilityUuids": [],
+      "status": "development",
+      "effectiveFrom": "2026-10-01",
+      "effectiveTo": null,
+      "reviewedBy": null,
+      "allowExternalEmbedding": true,
+      "origins": [
+        "metadata/vinshc/contracts/b3.json",
+        "metadata/vinshc/fields.csv (0.3.0)"
+      ]
+    },
+    {
+      "id": "visits",
+      "title": "Lượt khám và nguồn hồ sơ",
+      "version": "0.1.0",
+      "path": "documents/visits.md",
+      "sha256": "a2925493428a2990983493ba6835fc29693d935afee398dde06ed5dddc896bce",
+      "roles": [
+        "doctor"
+      ],
+      "facilityUuids": [],
+      "status": "development",
+      "effectiveFrom": "2026-10-01",
+      "effectiveTo": null,
+      "reviewedBy": null,
+      "allowExternalEmbedding": true,
+      "origins": [
+        "docs/AGENT_DATA_HANDOFF.md",
+        "metadata/vinshc/forms.json (0.3.0)"
+      ]
+    },
+    {
+      "id": "publication",
+      "title": "Hướng dẫn xem hồ sơ trên cổng bệnh nhân",
+      "version": "0.1.0",
+      "path": "documents/publication.md",
+      "sha256": "f89e23b6a65b778ba831e087c96a3d85548d1a687072da161bf3aede78b4fc9e",
+      "roles": [
+        "doctor",
+        "patient"
+      ],
+      "facilityUuids": [],
+      "status": "development",
+      "effectiveFrom": "2026-10-01",
+      "effectiveTo": null,
+      "reviewedBy": null,
+      "allowExternalEmbedding": true,
+      "origins": [
+        "docs/AGENT_DATA_HANDOFF.md",
+        "metadata/vinshc/permissions.json (0.3.0)"
+      ]
+    },
+    {
+      "id": "prescriptions",
+      "title": "Đơn thuốc, lời dặn và lịch hẹn",
+      "version": "0.1.0",
+      "path": "documents/prescriptions.md",
+      "sha256": "777a793c94b0e75644de83520b65555d92e053500b39c72ca40de068acfa4a69",
+      "roles": [
+        "doctor",
+        "patient"
+      ],
+      "facilityUuids": [],
+      "status": "development",
+      "effectiveFrom": "2026-10-01",
+      "effectiveTo": null,
+      "reviewedBy": null,
+      "allowExternalEmbedding": true,
+      "origins": [
+        "docs/AGENT_DATA_HANDOFF.md",
+        "metadata/vinshc/fields.csv (0.3.0)",
+        "metadata/vinshc/permissions.json (0.3.0)"
+      ]
+    }
+  ]
+}

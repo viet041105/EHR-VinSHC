@@ -44,8 +44,35 @@ const actions = {
       record: "prescription",
       captures: "dispense",
       notice:
-        "Kiểm tra số lượng còn lại và hạn dùng. Không cấp đơn đã ngừng hoặc lượt đã hủy; hiện chưa theo dõi tồn kho.",
+        "Backend chặn cấp vượt số lượng kê, đơn đã ngừng/hết hiệu lực, lượt đã hủy và lô hết hạn. KHÔNG ĐỐI CHIẾU TỒN KHO: hệ thống chỉ ghi nhận số lô/hạn dùng, không xác nhận lô còn hàng.",
     },
+  ),
+  correctDispense: action(
+    "Đính chính phiếu cấp (giữ nguyên bản gốc)", "dispensing", "update",
+    [
+      id("record", "UUID phiếu cấp thuốc"),
+      F("expectedVersion", "Phiên bản hiện tại", "number", { min: 0, value: "0" }),
+      F("quantity", "Số lượng đúng (sau đính chính)", "number", { min: 0.0001, step: "any" }),
+      F("reason", "Lý do đính chính", "textarea", { max: 1000 }),
+    ],
+    d => "pharmacy/dispenses/" + uuid(d.record) + "/corrections",
+    d => ({ expectedVersion: Number(d.expectedVersion), quantity: Number(d.quantity), reason: d.reason }),
+    { idempotent: true, record: "dispense", captures: "dispense",
+      confirm: "Xác nhận tạo revision? Phiếu cũ được giữ nguyên; tổng đã cấp sẽ được tính lại.",
+      notice: "CHƯA ĐỐI CHIẾU TỒN KHO. Chỉ tài khoản có quyền được phê duyệt mới sử dụng; cập nhật này không trả/nhập hàng vào kho." },
+  ),
+  voidDispense: action(
+    "Hủy hiệu lực phiếu cấp (giữ lịch sử)", "dispensing", "void",
+    [
+      id("record", "UUID phiếu cấp thuốc"),
+      F("expectedVersion", "Phiên bản hiện tại", "number", { min: 0, value: "0" }),
+      F("reason", "Lý do hủy", "textarea", { max: 1000 }),
+    ],
+    d => "pharmacy/dispenses/" + uuid(d.record) + "/void",
+    d => ({ expectedVersion: Number(d.expectedVersion), reason: d.reason }),
+    { idempotent: true, record: "dispense", captures: "dispense",
+      confirm: "Xác nhận hủy hiệu lực? Không xóa bản gốc; tổng số đã cấp giảm theo revision.",
+      notice: "CHƯA ĐỐI CHIẾU TỒN KHO. Cần quy trình thu hồi thuốc thực tế ngoài hệ thống." },
   ),
   prescriptionDetail: action(
     "Xem dòng thuốc và lịch sử cấp",
@@ -153,11 +180,13 @@ export default defineModule({
       order: 100,
       actions: [
         "dispense",
+        "correctDispense",
+        "voidDispense",
         "prescriptionDetail",
         "dispenseRecord",
         "printPrescription",
       ],
-      note: "Danh sách đơn cần cấp lấy từ đơn thuốc đã xác nhận tại cơ sở. Kho, tồn và lô chi tiết thuộc phạm vi sau pilot; số lô/hạn dùng được ghi theo lần cấp.",
+      note: "Danh sách đơn cần cấp lấy từ đơn thuốc đã xác nhận tại cơ sở. KHÔNG ĐỐI CHIẾU TỒN KHO. Số lô/hạn dùng chỉ là dữ liệu ghi nhận khi cấp thuốc; không xác thực hàng trong kho hoặc trừ tồn. Chỉ sử dụng sau đối chiếu thủ công tại quầy.",
       description:
         "Đơn thuốc chờ cấp, ghi cấp theo số lượng kê, số lô và hạn dùng.",
       icon: "✚",

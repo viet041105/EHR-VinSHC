@@ -1,6 +1,6 @@
 # Chuyển baseline MariaDB sang PostgreSQL
 
-Baseline hiện tại dùng **PostgreSQL 16.15**, không còn service MariaDB. Phiên bản OpenMRS Reference Application 3.7.1, Core 2.8.8 và 29 module được giữ; Docker backend bổ sung bản sửa PostgreSQL cho migration Appointments, đọc/ghi TEXT/BYTEA và cấp ID. Nguồn và cách build được ghi trong [postgresql/README.md](../infra/backend/postgresql/README.md). Image PostgreSQL được khóa bằng tag và digest trong `config/baseline.json`.
+Baseline hiện tại dùng **PostgreSQL 16.15**, không còn service MariaDB. Phiên bản OpenMRS Reference Application 3.7.1, Core 2.8.8 và 29 module upstream được giữ; Docker backend bổ sung module VinSHC 0.3.0 thành tổng 30 module runtime, cùng bản sửa PostgreSQL cho migration Appointments, đọc/ghi TEXT/BYTEA và cấp ID. Nguồn và cách build được ghi trong [postgresql/README.md](../infra/backend/postgresql/README.md). Image PostgreSQL được khóa bằng tag và digest trong `config/baseline.json`.
 
 ## Thành viên chưa chạy bản cũ
 

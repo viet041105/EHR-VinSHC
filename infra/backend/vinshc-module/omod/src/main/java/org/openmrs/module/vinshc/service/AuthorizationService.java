@@ -1,3 +1,12 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public License,
+ * v. 2.0. If a copy of the MPL was not distributed with this file, You can
+ * obtain one at http://mozilla.org/MPL/2.0/. OpenMRS is also distributed under
+ * the terms of the Healthcare Disclaimer located at http://openmrs.org/license.
+ *
+ * Copyright (C) OpenMRS Inc. OpenMRS is a registered trademark and the OpenMRS
+ * graphic logo is a trademark of OpenMRS Inc.
+ */
 package org.openmrs.module.vinshc.service;
 
 import java.sql.PreparedStatement;
@@ -30,27 +39,27 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 /** Server-side B5 workspace, facility-scope and authorization policy. */
 @Transactional
 public class AuthorizationService {
-	
+
 	public static final String MANAGE_PRIVILEGE = "VinSHC: Manage authorization";
-	
+
 	public static final String AUDIT_PRIVILEGE = "VinSHC: Read audit log";
-	
+
 	public static final String ROLE_HEADER = "X-VinSHC-Workspace-Role";
-	
+
 	public static final String FACILITY_HEADER = "X-VinSHC-Workspace-Facility";
-	
+
 	private static final String ROLE_PREFIX = "VinSHC App: ";
-	
+
 	private static final int AUDIT_DEFAULT_LIMIT = 200;
-	
+
 	private static final int AUDIT_MAX_LIMIT = 1000;
-	
+
 	private static volatile AuthorizationService instance;
-	
+
 	private final SessionFactory sessionFactory;
-	
+
 	private final Map<String, List<String>> legacyRoles = new HashMap<>();
-	
+
 	public AuthorizationService(SessionFactory sessionFactory) {
 		this.sessionFactory = sessionFactory;
 		legacyRoles.put(VinshcService.READ_PRIVILEGE,
@@ -65,36 +74,36 @@ public class AuthorizationService {
 		legacyRoles.put(ClinicalService.PRESCRIBE_PRIVILEGE, Collections.singletonList("doctor"));
 		instance = this;
 	}
-	
+
 	// ---------------------------------------------------------------- static entry points for other services
-	
+
 	private static AuthorizationService instance() {
 		AuthorizationService service = instance;
 		if (service == null)
 			throw new VinshcExceptions.Configuration("authorization service is not initialized");
 		return service;
 	}
-	
+
 	public static void requireLegacy(String privilege) {
 		instance().require(privilege);
 	}
-	
+
 	public static void requireAuthenticated() {
 		authenticatedUser();
 	}
-	
+
 	public static void requirePatientScopeStatic(Patient patient) {
 		instance().requirePatientScope(patient);
 	}
-	
+
 	public static void requireEncounterScopeStatic(Encounter encounter) {
 		instance().requireEncounterScope(encounter);
 	}
-	
+
 	public static void requireLocationScopeStatic(Location location) {
 		instance().requireLocationScope(location);
 	}
-	
+
 	public static void auditReadStatic(String resource, Patient patient, Encounter encounter, String entityUuid,
 	        String detail) {
 		instance().auditRead(resource, patient, encounter, entityUuid, detail);
@@ -123,7 +132,7 @@ public class AuthorizationService {
 			throw VinshcService.bad("workspace facility does not exist");
 		return location;
 	}
-	
+
 	public static void requireOperation(String resource, String action) {
 		AuthorizationService service = instance();
 		User user = authenticatedUser();
@@ -134,9 +143,9 @@ public class AuthorizationService {
 			return;
 		service.evaluate(resource, action);
 	}
-	
+
 	// ---------------------------------------------------------------- endpoints
-	
+
 	public Map<String, Object> assign(Map<String, Object> body) {
 		requireAdministrator(MANAGE_PRIVILEGE, "metadata_admin", "update");
 		User target = Context.getUserService().getUserByUuid(required(body, "user"));
@@ -147,7 +156,9 @@ public class AuthorizationService {
 			throw VinshcService.bad("user does not exist");
 		if (facility == null || facility.getRetired())
 			throw VinshcService.bad("facility does not exist");
-		if (openmrsRole == null || !target.hasRole(openmrsRole.getRole()))
+		// ignoreSuperUser: hasRole(name) is true for every name when the user is a superuser, which would let
+		// an assignment be stored for a role the account does not actually hold.
+		if (openmrsRole == null || !target.hasRole(openmrsRole.getRole(), true))
 			throw VinshcService.bad("user does not hold the requested role");
 		if (target.getRoles().stream().filter(r -> r.getName().startsWith(ROLE_PREFIX))
 		        .anyMatch(r -> !r.getRole().equals(openmrsRole.getRole())))
@@ -178,7 +189,7 @@ public class AuthorizationService {
 		});
 		return assignment(target, role, facility);
 	}
-	
+
 	public Map<String, Object> revoke(Map<String, Object> body) {
 		requireAdministrator(MANAGE_PRIVILEGE, "metadata_admin", "void");
 		User target = Context.getUserService().getUserByUuid(required(body, "user"));
@@ -197,7 +208,7 @@ public class AuthorizationService {
 		result.put("active", false);
 		return result;
 	}
-	
+
 	public Map<String, Object> workspace() {
 		return activeWorkspace(true);
 	}
@@ -227,7 +238,7 @@ public class AuthorizationService {
 		for (Object[] row : assignments) {
 			String role = (String) row[0];
 			Role openmrsRole = Context.getUserService().getRole(ROLE_PREFIX + role);
-			if (openmrsRole == null || !user.hasRole(openmrsRole.getRole()))
+			if (openmrsRole == null || !user.hasRole(openmrsRole.getRole(), true))
 				continue;
 			Map<String, Object> assignment = new LinkedHashMap<>();
 			assignment.put("role", role);
@@ -239,7 +250,7 @@ public class AuthorizationService {
 			throw new VinshcExceptions.Conflict("account has multiple active workspaces; an administrator must reassign it", null);
 		return out;
 	}
-	
+
 	public Map<String, Object> evaluate(String resource, String action) {
 		Map<String, Object> workspace = activeWorkspace(true);
 		String role = workspace.get("role").toString();
@@ -256,7 +267,7 @@ public class AuthorizationService {
 		result.put("allowed", true);
 		return result;
 	}
-	
+
 	/**
 	 * Newest events first. An unknown patient/encounter UUID is a client error rather than an
 	 * unfiltered dump of the whole log.
@@ -315,9 +326,9 @@ public class AuthorizationService {
 			}
 		});
 	}
-	
+
 	// ---------------------------------------------------------------- scope and audit
-	
+
 	private void require(String privilege) {
 		User user = authenticatedUser();
 		if (isSystemAdministrator(user) || (workspaceRole(false) == null && user.hasPrivilege(privilege)))
@@ -327,13 +338,13 @@ public class AuthorizationService {
 		if (allowed == null || !allowed.contains(role))
 			throw forbidden(privilege);
 	}
-	
+
 	/**
 	 * A patient is in scope when it was registered at the workspace facility (or its descendants)
 	 * through the VinSHC adapter, or has a non-voided visit there.
 	 */
 	public void requirePatientScope(Patient patient) {
-        requireAgentAssignment(patient);
+		requireAgentAssignment(patient);
 		if (bypassWorkspace())
 			return;
 		Location facility = assignedFacility();
@@ -358,9 +369,9 @@ public class AuthorizationService {
 		if (count == 0)
 			throw forbidden("same_facility");
 	}
-	
+
 	public void requireEncounterScope(Encounter encounter) {
-        requireAgentAssignment(encounter.getPatient());
+		requireAgentAssignment(encounter.getPatient());
 		if (bypassWorkspace())
 			return;
 		Location location = encounter.getLocation();
@@ -368,7 +379,7 @@ public class AuthorizationService {
 			location = encounter.getVisit().getLocation();
 		requireLocationScope(location);
 	}
-	
+
 	/**
 	 * A record bound to a location is in scope when that location is the workspace facility or below
 	 * it.
@@ -379,7 +390,7 @@ public class AuthorizationService {
 		if (!sameOrDescendant(location, assignedFacility()))
 			throw forbidden("same_facility");
 	}
-	
+
 	public void auditRead(String resource, Patient patient, Encounter encounter, String entityUuid, String detail) {
 		User user = authenticatedUser();
 		Integer patientId = patient == null ? null : patient.getPatientId();
@@ -393,23 +404,24 @@ public class AuthorizationService {
 				statement.setObject(3, patientId);
 				statement.setObject(4, encounterId);
 				statement.setString(5, entityUuid);
-				statement.setString(6, truncate(("agent".equals(header("X-VinSHC-Request-Origin")) ? "agent:" : "") + (detail == null ? "" : detail)));
+				statement.setString(6, truncate(
+				    ("agent".equals(header("X-VinSHC-Request-Origin")) ? "agent:" : "") + (detail == null ? "" : detail)));
 				statement.setInt(7, user.getUserId());
 				statement.setTimestamp(8, Timestamp.from(Instant.now()));
 				statement.executeUpdate();
 			}
 		});
 	}
-	
+
 	// ---------------------------------------------------------------- helpers
-	
+
 	private void requireAdministrator(String legacy, String resource, String action) {
 		User user = authenticatedUser();
 		if (isSystemAdministrator(user) || user.hasPrivilege(legacy))
 			return;
 		evaluate(resource, action);
 	}
-	
+
 	private Map<String, Object> activeWorkspace(boolean required) {
 		User user = authenticatedUser();
 		String role = workspaceRole(required);
@@ -419,7 +431,8 @@ public class AuthorizationService {
 		if (facilityUuid == null || facilityUuid.isEmpty())
 			throw forbidden("active facility workspace");
 		Role openmrsRole = Context.getUserService().getRole(ROLE_PREFIX + role);
-		if (openmrsRole == null || !user.hasRole(openmrsRole.getRole()))
+		boolean developerAdmin = isSystemAdministrator(user) && "admin".equals(role);
+		if (!developerAdmin && (openmrsRole == null || !user.hasRole(openmrsRole.getRole())))
 			throw forbidden("active role workspace");
 		Location facility = Context.getLocationService().getLocationByUuid(facilityUuid);
 		if (facility == null || facility.getRetired())
@@ -429,46 +442,56 @@ public class AuthorizationService {
 		                + " WHERE user_id=:user AND role_name=:role AND facility_location_id=:facility AND active=true")
 		        .setParameter("user", user.getUserId()).setParameter("role", role)
 		        .setParameter("facility", facility.getLocationId()).uniqueResult();
-		if (count.longValue() != 1)
+		if (!developerAdmin && count.longValue() != 1)
 			throw forbidden("workspace assignment");
 		return assignment(user, role, facility);
 	}
-	
-	private void requireAgentAssignment(Patient patient) {
-        if (!"agent".equals(header("X-VinSHC-Request-Origin")) || !"doctor".equals(workspaceRole(false))) return;
-        activeWorkspace(true);
-        Number count=(Number)sessionFactory.getCurrentSession().createSQLQuery(
-            "SELECT count(*) FROM encounter e JOIN encounter_provider ep ON ep.encounter_id=e.encounter_id "
-            + "JOIN provider p ON p.provider_id=ep.provider_id JOIN users u ON u.person_id=p.person_id "
-            + "WHERE e.patient_id=:patient AND u.user_id=:user AND e.voided=false AND ep.voided=false AND p.retired=false")
-            .setParameter("patient",patient.getPatientId()).setParameter("user",authenticatedUser().getUserId()).uniqueResult();
-        if(count.longValue()==0) throw forbidden("assigned_patient");
-    }
 
-    private Location assignedFacility() {
+	private void requireAgentAssignment(Patient patient) {
+		if (!"agent".equals(header("X-VinSHC-Request-Origin")) || !"doctor".equals(workspaceRole(false)))
+			return;
+		activeWorkspace(true);
+		// The doctor may read a patient they examined, or one with an open visit at their facility
+		// (chart selected from the queue before a consultation encounter exists).
+		Number count = (Number) sessionFactory.getCurrentSession().createSQLQuery(
+		    "SELECT (SELECT count(*) FROM encounter e JOIN encounter_provider ep ON ep.encounter_id=e.encounter_id "
+		            + "JOIN provider p ON p.provider_id=ep.provider_id JOIN users u ON u.person_id=p.person_id "
+		            + "WHERE e.patient_id=:patient AND u.user_id=:user AND e.voided=false AND ep.voided=false AND p.retired=false)"
+		            + " + (WITH RECURSIVE tree AS (SELECT location_id FROM location WHERE location_id=:facility"
+		            + " UNION SELECT l.location_id FROM location l JOIN tree t ON l.parent_location=t.location_id)"
+		            + " SELECT count(*) FROM visit v WHERE v.patient_id=:patient AND v.voided=false"
+		            + " AND v.date_stopped IS NULL AND v.location_id IN (SELECT location_id FROM tree))")
+		        .setParameter("patient", patient.getPatientId()).setParameter("user", authenticatedUser().getUserId())
+		        .setParameter("facility", assignedFacility().getLocationId())
+		        .uniqueResult();
+		if (count.longValue() == 0)
+			throw forbidden("assigned_patient");
+	}
+
+	private Location assignedFacility() {
 		return Context.getLocationService().getLocationByUuid(activeWorkspace(true).get("facilityUuid").toString());
 	}
-	
+
 	/** System developers and users without any VinSHC app role keep the legacy, unscoped behaviour. */
 	private boolean bypassWorkspace() {
 		User user = authenticatedUser();
 		return isSystemAdministrator(user) || (workspaceRole(false) == null && !hasAppRole(user));
 	}
-	
+
 	private boolean hasAppRole(User user) {
 		for (Role role : user.getAllRoles())
 			if (role.getRole().startsWith(ROLE_PREFIX))
 				return true;
 		return false;
 	}
-	
+
 	private String workspaceRole(boolean required) {
 		String value = header(ROLE_HEADER);
 		if (required && (value == null || value.isEmpty()))
 			throw forbidden("active role workspace");
 		return value == null || value.isEmpty() ? null : value;
 	}
-	
+
 	private static String header(String name) {
 		ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
 		if (attributes == null)
@@ -476,24 +499,25 @@ public class AuthorizationService {
 		HttpServletRequest request = attributes.getRequest();
 		return request.getHeader(name);
 	}
-	
+
 	private static User authenticatedUser() {
 		if (!Context.isAuthenticated() || Context.getAuthenticatedUser() == null)
 			throw new VinshcExceptions.NotAuthenticated();
+		// No forced first-login password change: accounts work with the password the admin set.
 		return Context.getAuthenticatedUser();
 	}
-	
+
 	private static boolean isSystemAdministrator(User user) {
 		return user.hasPrivilege("System Developer");
 	}
-	
+
 	private static boolean sameOrDescendant(Location candidate, Location facility) {
 		for (Location value = candidate; value != null; value = value.getParentLocation())
 			if (value.getLocationId().equals(facility.getLocationId()))
 				return true;
 		return false;
 	}
-	
+
 	private static Map<String, Object> assignment(User user, String role, Location facility) {
 		Map<String, Object> out = new LinkedHashMap<>();
 		out.put("userUuid", user.getUuid());
@@ -502,18 +526,18 @@ public class AuthorizationService {
 		out.put("roleName", ROLE_PREFIX + role);
 		return out;
 	}
-	
+
 	private static String required(Map<String, Object> body, String name) {
 		Object value = body.get(name);
 		if (!(value instanceof String) || ((String) value).trim().isEmpty())
 			throw VinshcService.bad(name + " is required");
 		return ((String) value).trim();
 	}
-	
+
 	private static String truncate(String value) {
 		return value == null ? null : value.length() > 1000 ? value.substring(0, 1000) : value;
 	}
-	
+
 	private static APIAuthenticationException forbidden(String privilege) {
 		return new APIAuthenticationException("Privileges required: " + privilege);
 	}

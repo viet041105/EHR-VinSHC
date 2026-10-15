@@ -26,7 +26,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from api_client import Client
-from common import read_settings
+from common import read_settings, report_path
 import b4_catalogue
 import b4_metadata_catalogue
 
@@ -66,20 +66,24 @@ class CareWorkflowTests(unittest.TestCase):
         cls.staff, cls.providers = {}, {}
         location = cls.facility["locationUuid"]
         for role in ROLES:
-            username, password, person = cls.user_with_role(role, [location])
+            username, password, person, user_uuid = cls.user_with_role(role, [location])
             cls.staff[role] = cls.workspace(username, password, role, location)
             if role in ("nurse", "doctor", "lab"):
                 provider = cls.admin.json(f"{REST}/provider", method="POST", statuses=(200, 201), payload={
                     "person": person, "identifier": "B11-" + uuid.uuid4().hex[:10].upper()})
                 cls.created_providers.append(provider["uuid"])
                 cls.providers[role] = provider["uuid"]
+                cls.admin.json(f"{VINSHC}/directory/providers/link", method="POST", payload={
+                    "userUuid": user_uuid, "providerUuid": provider["uuid"],
+                    "facilityLocationUuid": location,
+                })
         cls.state = {"middle": letters(), "cccd": f"{random.randrange(10**11, 10**12)}"}
 
     @classmethod
     def tearDownClass(cls):
         cls.report["finishedAt"] = datetime.now(timezone.utc).isoformat()
-        cls.report["passed"] = len(cls.report["checks"]) == 12
-        target = ROOT / ".runtime/reports/b11-care-workflow.json"
+        cls.report["passed"] = len(cls.report["checks"]) == 15
+        target = report_path("b11-care-workflow.json")
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_text(json.dumps(cls.report, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         for provider in cls.created_providers:
@@ -103,7 +107,7 @@ class CareWorkflowTests(unittest.TestCase):
         for location in locations:
             cls.admin.json(f"{VINSHC}/authorization/assignment", method="POST", statuses=(201,),
                            payload={"user": user["uuid"], "role": role, "facility": location})
-        return username, password, person["uuid"]
+        return username, password, person["uuid"], user["uuid"]
 
     @classmethod
     def workspace(cls, username, password, role, location):
@@ -212,7 +216,7 @@ class CareWorkflowTests(unittest.TestCase):
         other = self.admin.json(f"{REST}/location", method="POST", statuses=(200, 201), payload={
             "name": "B11 Other Clinic " + uuid.uuid4().hex[:6], "description": "Synthetic second facility"})
         type(self).created_locations.append(other["uuid"])
-        username, password, _ = self.user_with_role("reception", [other["uuid"]])
+        username, password, _, _ = self.user_with_role("reception", [other["uuid"]])
         away = self.workspace(username, password, "reception", other["uuid"])
         away_status, _, _ = away.request(f"{VINSHC}/patients/{patient}")
         away_search = json.loads(away.request(f"{VINSHC}/patients?q={self.state['identifier']}")[2])
@@ -304,6 +308,26 @@ class CareWorkflowTests(unittest.TestCase):
         self.assertEqual(self.call("cashier", f"{OPS}/service-orders")[0], 403)
         self.record("lab sees requested pool and own assignments with patient label", order=order)
 
+    def test_06b_lab_cannot_impersonate_another_reviewer(self):
+        order = self.state["serviceOrder"]
+        now = datetime.now(timezone.utc).isoformat()
+        payload = {
+            "state": "final", "numericValue": 90, "unit": "mg/dL",
+            "authorProvider": self.providers["lab"],
+            "reviewerProvider": self.providers["doctor"],
+            "recordedAt": now, "reviewedAt": now,
+        }
+        status, response = self.call("lab", f"{OPS}/service-orders/{order}/results",
+                                     method="POST", payload=payload)
+        self.assertEqual(status, 403, response)
+        payload["reviewerProvider"] = self.providers["lab"]
+        payload["recordedAt"] = "2099-01-01T00:00:00Z"
+        payload["reviewedAt"] = "2099-01-01T00:00:00Z"
+        status, response = self.call("lab", f"{OPS}/service-orders/{order}/results",
+                                     method="POST", payload=payload)
+        self.assertEqual(status, 400, response)
+        self.record("lab result cannot impersonate another reviewer; future timestamps rejected")
+
     def test_07_cashier_lists_bills_and_payments(self):
         bill = self.ok("cashier", f"{OPS}/bills", {
             "patient": self.state["patient"], "visit": self.state["visit"], "facility": self.facility["uuid"],
@@ -363,10 +387,82 @@ class CareWorkflowTests(unittest.TestCase):
         self.assertEqual(after["results"], [])
         printed = self.get("pharmacy", f"{OPS}/documents/prescription/{order}")
         self.assertEqual(printed["templateCode"], "prescription")
+        self.assertIs(printed["inventoryReconciled"], False)
+        self.assertIn("KHÔNG ĐỐI CHIẾU TỒN KHO", printed["stockWarning"])
         self.assertEqual(self.call("doctor", f"{VINSHC}/pharmacy/dispenses", method="POST", payload={
             "order": order, "quantity": 1, "idempotencyKey": key("doctor")})[0], 403)
         self.record("dispense partial/complete, idempotent replay, over-dispense 409, expired batch 400, "
                     "pharmacy prescription print", order=order)
+
+    def test_09b_append_only_dispense_correction_and_void(self):
+        order = self.state["drugOrder"]
+        initial = self.get("admin", f"{VINSHC}/pharmacy/prescriptions/{order}")
+        self.assertEqual(initial["dispensedQuantity"], 10)
+        first, second = initial["dispenses"]
+        self.assertEqual([first["quantity"], second["quantity"]], [4, 6])
+        patch = {"quantity": 2, "reason": "B11 synthetic dispensing error",
+                 "expectedVersion": 0, "idempotencyKey": key("correction")}
+        path = f"{VINSHC}/pharmacy/dispenses/{first['uuid']}/corrections"
+        self.assertEqual(self.call("pharmacy", path, method="POST", payload=patch)[0], 403)
+        corrected = self.ok("admin", path, patch, statuses=(200,))
+        self.assertEqual(corrected["quantity"], 4)
+        self.assertEqual(corrected["effectiveQuantity"], 2)
+        self.assertEqual(corrected["revisionVersion"], 1)
+        self.assertEqual(len(corrected["revisions"]), 1)
+        self.assertEqual(self.ok("admin", path, patch, statuses=(200,))["revisionVersion"], 1)
+        self.assertEqual(self.get("admin", f"{VINSHC}/pharmacy/prescriptions/{order}")["dispensedQuantity"], 8)
+        self.assertEqual(self.call("admin", path, method="POST", payload={
+            **patch, "quantity": 11, "idempotencyKey": key("over-correction")})[0], 409)
+        self.assertEqual(self.call("admin", path, method="POST", payload={
+            **patch, "quantity": 3, "idempotencyKey": key("stale-version")})[0], 409)
+        void_key = key("void")
+        voided = self.ok("admin", f"{VINSHC}/pharmacy/dispenses/{second['uuid']}/void",
+                         {"reason": "B11 synthetic void", "expectedVersion": 0,
+                          "idempotencyKey": void_key}, statuses=(200,))
+        self.assertEqual(voided["quantity"], 6)  # immutable original
+        self.assertEqual(voided["effectiveQuantity"], 0)
+        self.assertEqual(voided["effectiveStatus"], "voided")
+        self.assertEqual(self.call("admin", f"{VINSHC}/pharmacy/dispenses/{second['uuid']}/void",
+                                   method="POST", payload={
+                                       "reason": "B11 synthetic void", "expectedVersion": 0,
+                                       "idempotencyKey": void_key,
+                                       "quantity": 1})[0], 400)
+        final = self.get("admin", f"{VINSHC}/pharmacy/prescriptions/{order}")
+        self.assertEqual(final["dispensedQuantity"], 2)
+        self.assertEqual(final["remainingQuantity"], 8)
+        self.record("immutable dispense originals, revision history, idempotent replay, stale-version denial, void and recalculated totals")
+
+    def test_09c_concurrent_revision_writers_serialize(self):
+        from concurrent.futures import ThreadPoolExecutor
+
+        order = self.state["drugOrder"]
+        current = self.get("admin", f"{VINSHC}/pharmacy/prescriptions/{order}")
+        first = current["dispenses"][0]
+        self.assertEqual(first["revisionVersion"], 1)
+        path = f"{VINSHC}/pharmacy/dispenses/{first['uuid']}/corrections"
+
+        def submit(value):
+            return self.call("admin", path, method="POST", payload={
+                "quantity": value, "reason": "B11 concurrent revision synthetic",
+                "expectedVersion": 1, "idempotencyKey": key("race"),
+            })[0]
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            statuses = list(executor.map(submit, (1, 3)))
+        self.assertEqual(sorted(statuses), [200, 409], statuses)
+        winner = self.get("admin", f"{VINSHC}/pharmacy/dispenses/{first['uuid']}")
+        self.assertEqual(winner["revisionVersion"], 2)
+        self.assertIn(winner["effectiveQuantity"], [1, 3])
+        self.assertEqual(len(winner["revisions"]), 2)
+        restored = self.ok("admin", path, {
+            "quantity": 2, "reason": "Restore expected synthetic ledger quantity",
+            "expectedVersion": 2, "idempotencyKey": key("restore"),
+        }, statuses=(200,))
+        self.assertEqual(restored["revisionVersion"], 3)
+        final = self.get("admin", f"{VINSHC}/pharmacy/prescriptions/{order}")
+        self.assertEqual(final["dispensedQuantity"], 2)
+        self.assertEqual(final["remainingQuantity"], 8)
+        self.record("concurrent revision writers serialized by advisory lock; only one version wins")
 
     def test_10_visit_closure_rules(self):
         visit = self.state["visit"]
@@ -415,12 +511,20 @@ class CareWorkflowTests(unittest.TestCase):
             "route": self.catalogue["route"], "frequency": self.catalogue["frequency"], "duration": 3,
             "durationUnits": self.catalogue["days"], "quantity": 3,
             "quantityUnits": self.catalogue["quantityUnit"], "numRefills": 0}, statuses=(201,))
+        dispensed = self.ok("pharmacy", f"{VINSHC}/pharmacy/dispenses", {
+            "order": order["uuid"], "quantity": 1, "idempotencyKey": key("before-cancel")}, statuses=(201,))
         self.assertEqual(self.call("doctor", f"{VINSHC}/visits/{visit['uuid']}/close", method="POST",
                                    payload={"closeReason": "cancelled", "note": "B11"})[0], 403)
         self.ok("reception", f"{VINSHC}/visits/{visit['uuid']}/close",
                 {"closeReason": "cancelled", "note": "B11 tiếp nhận nhầm"})
         status, body = self.call("pharmacy", f"{VINSHC}/pharmacy/dispenses", method="POST", payload={
             "order": order["uuid"], "quantity": 1, "idempotencyKey": key("cancelled")})
+        self.assertEqual(status, 409, body)
+        self.assertIn("cancelled", body["error"])
+        status, body = self.call("admin", f"{VINSHC}/pharmacy/dispenses/{dispensed['uuid']}/corrections",
+                                 method="POST", payload={
+                                     "quantity": 2, "reason": "must not increase after cancellation",
+                                     "expectedVersion": 0, "idempotencyKey": key("cancelled-correction")})
         self.assertEqual(status, 409, body)
         self.assertIn("cancelled", body["error"])
         self.record("cancelled visit (reception only) blocks dispensing", visit=visit["uuid"])

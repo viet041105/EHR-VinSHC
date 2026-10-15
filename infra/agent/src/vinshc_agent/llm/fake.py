@@ -7,6 +7,7 @@ dữ kiện. Không thay thế model thật về chất lượng ngôn ngữ; d�
 from __future__ import annotations
 
 import json
+import re
 from dataclasses import dataclass
 from typing import Any
 
@@ -56,8 +57,40 @@ class FakeChatModel:
 
     async def next_turn(self, system: str, tools: list[dict[str, Any]], conversation: Conversation) -> ModelTurn:
         allowed = {tool["name"] for tool in tools}
+        if any(call.name == "recall_conversation" for ex in conversation.exchanges for call in ex.turn.tool_calls):
+            return ModelTurn([], FinalAnswer(scope="answered", statements=[]))
+        # Demo-only routing. Production Gemini selects this tool semantically from its schema/prompt.
+        q = fold(conversation.message)
+        if "recall_conversation" in allowed and re.search(r"hoi thoai|tro chuyen|tin nhan|toi\b.{0,25}\b(?:hoi|noi)|cau hoi.{0,20}toi|ban\b.{0,20}tra loi", q):
+            speaker = "assistant" if re.search(r"ban\b.{0,20}tra loi|tro ly", q) else "user"
+            if "trao doi" in q or "cuoc tro chuyen" in q:
+                speaker = "both"
+            selection = "last" if re.search(r"\b(?:vua|moi|gan nhat)\b", q) else "all"
+            return self._calls(0, [("recall_conversation", {"speaker": speaker, "selection": selection})])
+        selected_message = conversation.message
+        if fold(selected_message).strip(" ?.! ") in {"chi tiet hon", "giai thich them", "tom tat lai", "con cai do", "the con don vi"}:
+            selected_message = next((h.text for h in reversed(conversation.history) if h.role == "user"), selected_message)
         rules = [r for r in (DOCTOR_RULES if conversation.persona == "doctor" else PATIENT_RULES)
-                 if any(k in f" {fold(conversation.message)} " for k in r.keywords)]
+                 if any(k in f" {fold(selected_message)} " for k in r.keywords)]
+        question = fold(selected_message)
+        if "compare_previous_visit" in allowed and any(k in question for k in ("so sanh", "so voi lan", "thay doi so", "chenh lech")):
+            rules = [Rule((), (("compare_previous_visit", {}),), frozenset({"comparison"}))]
+        elif any(k in question for k in ("timeline", "dong thoi gian", "toan bo lich su")):
+            name = "get_patient_timeline" if conversation.persona == "doctor" else "get_my_timeline"
+            if name in allowed:
+                rules = [Rule((), ((name, {}),), None)]
+        reference = "search_documents" in allowed and any(k in question for k in
+            ("tai lieu", "metadata", "fieldstates", "not_asked", "not_recorded", "unknown",
+             "don vi", "r_bp", "r_percent", "published", "final", "cong bo", "cong benh nhan"))
+        if "timeline" in question or "dong thoi gian" in question:
+            reference = "search_documents" in allowed and any(k in question for k in ("tai lieu", "metadata", "fieldstates"))
+        if reference:
+            # Pure reference questions do not read a patient's chart. Mixed questions retain both routes.
+            if not any(k in question for k in ("lan kham nay", "lan kham hien tai", "da ghi", "cua toi", "cua benh nhan")):
+                rules = []
+            elif "don vi" in question and "don thuoc" not in question and "thuoc" not in question:
+                rules = [r for r in rules if r.sections != frozenset({"medications"})]
+            rules.append(Rule((), (("search_documents", {"query": selected_message[:400]}),), frozenset({"reference"})))
         if not rules:
             return ModelTurn([], FinalAnswer(scope="out_of_scope", statements=[]))
         sections = None if any(r.sections is None for r in rules) else frozenset().union(*(r.sections for r in rules))
@@ -66,7 +99,11 @@ class FakeChatModel:
 
         if round_no == 0:
             calls = list(dict.fromkeys((name, json.dumps(args)) for r in rules for name, args in r.calls))
-            return self._calls(round_no, [(n, json.loads(a)) for n, a in calls if n in allowed])
+            calls = [(n, json.loads(a)) for n, a in calls if n in allowed]
+            # E.g. a chart question while no chart is open: the record tools are not offered.
+            if not calls:
+                return ModelTurn([], FinalAnswer(scope="not_found", statements=[]))
+            return self._calls(round_no, calls)
         if round_no == 1:
             follow = self._follow_up(sections, payloads, allowed)
             if follow:
