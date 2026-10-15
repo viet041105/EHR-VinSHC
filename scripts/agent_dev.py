@@ -140,7 +140,7 @@ def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["setup", "dev", "demo", "check", "chat", "test"])
     parser.add_argument("--port", type=int, default=8001)
-    parser.add_argument("--model", choices=["fake", "gemini", "anthropic"])
+    parser.add_argument("--model", choices=["fake", "gemini", "anthropic", "openai"])
     parser.add_argument("--rag", choices=["offline", "gemini"], help="cách tìm tài liệu; gemini cần index đã tạo")
     parser.add_argument("--persona", choices=["doctor", "patient"], default="doctor")
     parser.add_argument("--case", type=int, default=1)

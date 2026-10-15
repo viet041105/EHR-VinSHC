@@ -50,6 +50,10 @@ class Settings:
     gemini_thinking_level: str = "low"
     gemini_api_key_file: Path | None = None
     gemini_credential: str | None = None
+    openai_model: str = "gpt-5-mini"
+    openai_reasoning_effort: str = "low"
+    openai_api_key_file: Path | None = None
+    openai_credential: str | None = None
     model_timeout: float = 45.0
     request_timeout: float = 90.0
     model_max_tokens: int = 4096
@@ -92,6 +96,10 @@ def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
         gemini_thinking_level=env.get("VINSHC_AGENT_GEMINI_THINKING_LEVEL", d.gemini_thinking_level).strip().lower(),
         gemini_api_key_file=Path(env["VINSHC_AGENT_GEMINI_API_KEY_FILE"])
         if (env.get("VINSHC_AGENT_GEMINI_API_KEY_FILE") or "").strip() else None,
+        openai_model=env.get("VINSHC_AGENT_OPENAI_MODEL", d.openai_model).strip(),
+        openai_reasoning_effort=env.get("VINSHC_AGENT_OPENAI_REASONING_EFFORT", d.openai_reasoning_effort).strip().lower(),
+        openai_api_key_file=Path(env["VINSHC_AGENT_OPENAI_API_KEY_FILE"])
+        if (env.get("VINSHC_AGENT_OPENAI_API_KEY_FILE") or "").strip() else None,
         anthropic_api_key_file=Path(env["VINSHC_AGENT_ANTHROPIC_API_KEY_FILE"])
         if (env.get("VINSHC_AGENT_ANTHROPIC_API_KEY_FILE") or "").strip()
         else None,
@@ -133,6 +141,15 @@ def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
         else:
             raise ConfigError("Chưa có Gemini API key: đặt GEMINI_API_KEY trong infra/agent/.env.")
         settings = replace(settings, gemini_credential=source)
+    elif settings.model_provider == "openai":
+        if settings.openai_api_key_file:
+            read_api_key(settings.openai_api_key_file)
+            source = f"file {settings.openai_api_key_file}"
+        elif (env.get("OPENAI_API_KEY") or "").strip():
+            source = "OPENAI_API_KEY"
+        else:
+            raise ConfigError("Chưa có OpenAI API key: đặt OPENAI_API_KEY trong infra/agent/.env.")
+        settings = replace(settings, openai_credential=source)
     return settings
 
 
@@ -188,8 +205,8 @@ def validate(settings: Settings) -> None:
         raise ConfigError("VINSHC_AGENT_BACKEND_URL không được chứa credential, query hoặc fragment.")
     if not settings.fields_csv.is_file():
         raise ConfigError(f"Không tìm thấy metadata trường: {settings.fields_csv}")
-    if settings.model_provider not in ("fake", "anthropic", "gemini"):
-        raise ConfigError("VINSHC_AGENT_MODEL_PROVIDER chỉ nhận 'fake', 'anthropic' hoặc 'gemini'.")
+    if settings.model_provider not in ("fake", "anthropic", "gemini", "openai"):
+        raise ConfigError("VINSHC_AGENT_MODEL_PROVIDER chỉ nhận 'fake', 'anthropic', 'gemini' hoặc 'openai'.")
     if settings.model_provider != "fake" and not settings.allow_external_model:
         # Dữ liệu sức khỏe là dữ liệu nhạy cảm (docs/VIETNAM_COMPLIANCE.md): chỉ gửi ra dịch vụ ngoài
         # khi môi trường chỉ có dữ liệu synthetic hoặc đã có đánh giá tác động được duyệt.
@@ -203,6 +220,10 @@ def validate(settings: Settings) -> None:
         raise ConfigError("VINSHC_AGENT_GEMINI_MODEL phải là model ID Gemini, không chứa URL hoặc đường dẫn.")
     if settings.gemini_thinking_level not in ("low", "medium", "high"):
         raise ConfigError("Gemini 3.8 Flash chỉ nhận thinking level low, medium hoặc high.")
+    if not re.fullmatch(r"[a-zA-Z0-9][a-zA-Z0-9._:-]*", settings.openai_model):
+        raise ConfigError("VINSHC_AGENT_OPENAI_MODEL phải là model ID OpenAI, không chứa URL hoặc đường dẫn.")
+    if settings.openai_reasoning_effort not in ("", "none", "minimal", "low", "medium", "high"):
+        raise ConfigError("VINSHC_AGENT_OPENAI_REASONING_EFFORT chỉ nhận none, minimal, low, medium, high hoặc để trống.")
     if settings.patient_portal not in ("disabled", "fixture", "http"):
         # "http" được thêm khi backend có API cổng bệnh nhân (xem README, mục Luồng bệnh nhân).
         raise ConfigError("VINSHC_AGENT_PATIENT_PORTAL chỉ nhận 'disabled', 'fixture' hoặc 'http'.")

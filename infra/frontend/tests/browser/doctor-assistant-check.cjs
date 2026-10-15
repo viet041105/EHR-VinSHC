@@ -48,7 +48,9 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574";
       assert.equal(await page.locator("#assistantPanel").isVisible(), false);
       await page.click("[data-assistant-toggle]");
       assert.match(await page.locator(".assistant-context").innerText(), /Chưa chọn bệnh nhân/);
-      assert.equal(await page.locator(".assistant-input textarea").isDisabled(), true);
+      // General questions are allowed before a chart is open (reference documents only).
+      assert.equal(await page.locator(".assistant-input textarea").isDisabled(), false);
+      assert.match(await page.locator(".assistant-suggestions").innerText(), /Đơn vị sinh hiệu/);
       // The guided step opens the visit list. Wide screens keep the panel docked beside the page;
       // phones minimise the full-screen panel so the list can be used.
       await page.click("[data-assistant-go]");

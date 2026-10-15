@@ -12,7 +12,14 @@ const SUGGESTIONS = [
   ["🧪", "Kết quả CLS", "Kết quả cận lâm sàng của lần khám này là gì?"],
   ["💊", "Thuốc đã kê", "Bệnh nhân đang được kê những thuốc nào?"],
 ];
-const WIDTH_KEY = "vinshc.assistantWidth";
+// Offered with no chart open; answered from the reference documents only.
+const GENERAL_SUGGESTIONS = [
+  ["📏", "Đơn vị sinh hiệu", "SpO2 và huyết áp dùng đơn vị nào?"],
+  ["❔", "Trạng thái thiếu dữ liệu", "not_asked, not_recorded và unknown khác nhau thế nào?"],
+  ["🗂️", "Lượt và phiếu khám", "Visit và Encounter khác nhau thế nào?"],
+  ["📤", "Công bố cho bệnh nhân", "Hồ sơ final và published khác nhau thế nào?"],
+];
+const WIDTH_KEY ="vinshc.assistantWidth";
 const clampWidth = (w) => Math.round(Math.min(Math.max(w, 320), Math.min(900, window.innerWidth * 0.7)));
 const applyWidth = (w) => document.documentElement.style.setProperty("--assistant-w", `${clampWidth(w)}px`);
 try {
@@ -58,7 +65,8 @@ export class DoctorAssistant extends AgentChat {
     // Wide screens dock the panel: the page reflows beside it instead of being covered.
     document.body.classList.toggle("assistant-docked", this.open);
     const missing = this.missingStep();
-    const ready = !missing;
+    const ready = this.ready;
+    const record = this.hasRecord;
     const busy = this.pending;
     const turns = this.turns
       .map((t, i) => {
@@ -78,6 +86,7 @@ export class DoctorAssistant extends AgentChat {
       .join("");
     const welcome = `<div class="assistant-msg bot"><span class="assistant-avatar" aria-hidden="true">🩺</span><div class="assistant-bubble">
       <p>Chào bác sĩ. Tôi đọc <strong>hồ sơ của bệnh nhân đang chọn</strong> và trả lời kèm nguồn trích dẫn để bác sĩ đối chiếu.</p>
+      ${record ? "" : "<p>Chưa chọn hồ sơ: bác sĩ vẫn có thể hỏi chung, tôi trả lời từ tài liệu hướng dẫn của hệ thống.</p>"}
       <p>Tôi không chẩn đoán hay kê đơn thay bác sĩ.</p></div></div>`;
     this.root.innerHTML = `<div class="assistant ${this.open ? "open" : ""}">
       <button type="button" class="assistant-fab" data-assistant-toggle aria-expanded="${this.open}" aria-controls="assistantPanel">
@@ -91,8 +100,8 @@ export class DoctorAssistant extends AgentChat {
           <button type="button" data-clear title="Bắt đầu hội thoại mới" ${!this.turns.length && !this.draft ? "disabled" : ""}>↺</button>
           <button type="button" data-assistant-close title="Thu nhỏ">✕</button>
         </header>
-        <div class="assistant-context ${ready ? "" : "warn"}">
-          ${this.context.patient ? `<span>Đang hỏi về</span><strong>${esc(this.label || "Bệnh nhân đã chọn")}</strong>` : "<strong>Chưa chọn bệnh nhân</strong>"}
+        <div class="assistant-context ${record ? "" : "warn"}">
+          ${this.context.patient ? `<span>Đang hỏi về</span><strong>${esc(this.label || "Bệnh nhân đã chọn")}</strong>` : "<strong>Chưa chọn bệnh nhân · đang hỏi chung</strong>"}
           ${missing ? `<p>${esc(missing[0])}</p>${this.navigate ? `<button type="button" data-assistant-go="${missing[1]}" data-assistant-action="${missing[2] || ""}">${esc(missing[3])} →</button>` : ""}` : ""}
         </div>
         <div class="assistant-messages" aria-live="polite">
@@ -100,9 +109,9 @@ export class DoctorAssistant extends AgentChat {
           ${this.error ? `<div class="assistant-error" role="alert">${esc(this.error)}</div>` : ""}
         </div>
         ${this.source ? `<div class="assistant-source" aria-label="Đối chiếu nguồn hồ sơ"><div class="assistant-source-head"><strong>📎 ${esc(this.source.label || "Nguồn trong hồ sơ")}</strong><button type="button" data-source-close>Đóng</button></div><div class="assistant-source-body">${this.sourcePending ? '<p role="status">Đang mở bản ghi…</p>' : this.sourceError ? `<p role="alert">${esc(this.sourceError)}</p><button type="button" data-source-retry>Thử mở lại</button>` : this.sourceRecord ? displayResult(readingFields(this.sourceRecord), { ...RESULT_LABELS, ...this.options.labels, text: "Nội dung ghi nhận", items: "Nội dung" }) : ""}</div></div>` : ""}
-        ${ready && !busy ? `<div class="assistant-suggestions">${SUGGESTIONS.map(([icon, label, q]) => `<button type="button" data-ask="${esc(q)}">${icon} ${esc(label)}</button>`).join("")}</div>` : ""}
+        ${ready && !busy ? `<div class="assistant-suggestions">${(record ? SUGGESTIONS : GENERAL_SUGGESTIONS).map(([icon, label, q]) => `<button type="button" data-ask="${esc(q)}">${icon} ${esc(label)}</button>`).join("")}</div>` : ""}
         <form data-chat class="assistant-input">
-          <textarea name="message" rows="1" maxlength="1000" placeholder="${ready ? "Hỏi về hồ sơ… (Enter để gửi)" : "Chọn bệnh nhân và lần khám trước"}" aria-label="Câu hỏi cho trợ lý" ${!ready || busy ? "disabled" : ""}>${esc(this.draft)}</textarea>
+          <textarea name="message" rows="1" maxlength="1000" placeholder="${record ? "Hỏi về hồ sơ… (Enter để gửi)" : "Hỏi chung, hoặc chọn bệnh nhân để hỏi về hồ sơ…"}" aria-label="Câu hỏi cho trợ lý" ${!ready || busy ? "disabled" : ""}>${esc(this.draft)}</textarea>
           ${busy ? '<button type="button" data-stop aria-label="Dừng chờ phản hồi">■</button>' : `<button class="primary" aria-label="Gửi câu hỏi" ${!ready ? "disabled" : ""}>➤</button>`}
         </form>
         <p class="assistant-disclaimer">Chỉ để tham khảo. Bác sĩ chịu trách nhiệm quyết định lâm sàng.</p>

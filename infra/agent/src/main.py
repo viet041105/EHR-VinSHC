@@ -81,7 +81,7 @@ def build_parser() -> argparse.ArgumentParser:
                         help="file biến môi trường (mặc định infra/agent/.env)")
     parser.add_argument("--reload", action="store_true", help="tự khởi động lại khi sửa code (chỉ dùng khi phát triển)")
     parser.add_argument("--data-provider", choices=["http", "mock"], help="nguồn dữ liệu: BE qua HTTP hoặc bộ hồ sơ giả độc lập")
-    parser.add_argument("--model", choices=["fake", "gemini", "anthropic"], help="ghi đè model trong .env; không thay đổi nguồn dữ liệu")
+    parser.add_argument("--model", choices=["fake", "gemini", "anthropic", "openai"], help="ghi đè model trong .env; không thay đổi nguồn dữ liệu")
     parser.add_argument("--knowledge-mode", choices=["offline", "gemini"], help="chế độ tìm tài liệu; không thay đổi model chat")
     parser.add_argument("--log-level", default="info", choices=["critical", "error", "warning", "info", "debug"])
     parser.add_argument("--check", action="store_true", help="chỉ kiểm tra cấu hình rồi thoát")
@@ -129,7 +129,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     pre = argparse.ArgumentParser(add_help=False)
     pre.add_argument("--env-file", type=Path, default=AGENT_DIR / ".env")
     pre.add_argument("--data-provider", choices=["http", "mock"])
-    pre.add_argument("--model", choices=["fake", "gemini", "anthropic"])
+    pre.add_argument("--model", choices=["fake", "gemini", "anthropic", "openai"])
     pre.add_argument("--knowledge-mode", choices=["offline", "gemini"])
     known, _ = pre.parse_known_args(argv)
     loaded = load_env_file(known.env_file)
@@ -159,6 +159,8 @@ def main(argv: Sequence[str] | None = None) -> int:
                                        if settings.model_provider == "anthropic" else "")
     if settings.model_provider == "gemini":
         model += f" ({settings.gemini_model}, thinking {settings.gemini_thinking_level})"
+    if settings.model_provider == "openai":
+        model += f" ({settings.openai_model}, reasoning {settings.openai_reasoning_effort or 'mặc định'})"
     print(f"Env file: {known.env_file} ({len(loaded)} biến)" if loaded else f"Env file: không dùng ({known.env_file})")
     print(f"Nguồn dữ liệu: {settings.data_provider}")
     print(f"Hồ sơ giả: {settings.mock_fixture}" if settings.data_provider == "mock" else f"Backend: {settings.backend_url}")
@@ -167,6 +169,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         print(f"Credential: {settings.anthropic_credential}")
     if settings.gemini_credential:
         print(f"Credential: {settings.gemini_credential}")
+    if settings.openai_credential:
+        print(f"Credential: {settings.openai_credential}")
     print(f"Cổng bệnh nhân: {'mock' if settings.data_provider == 'mock' else settings.patient_portal}")
     print(f"Tài liệu RAG: {settings.knowledge_mode if settings.knowledge_enabled else 'tắt'}")
     if args.check_model:

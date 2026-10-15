@@ -37,7 +37,7 @@ from .llm import ChatModel, Conversation, HistoryTurn
 from .llm.fake import FakeChatModel
 from .knowledge import KnowledgeBase, KnowledgeScope, make_knowledge
 from .portal import PatientPortal, make_portal
-from .prompts import doctor_context, patient_context, system_prompt
+from .prompts import doctor_context, doctor_general_context, patient_context, system_prompt
 from .schemas import ChatOut, DoctorChatIn, DoctorContextOut, ErrorOut, PatientChatIn, KnowledgeSearchIn
 from .guardrails import RateLimiter, screen_input
 from .tools import ToolContext
@@ -58,6 +58,11 @@ def make_model(settings: Settings) -> ChatModel:
         from .llm.gemini import GeminiChatModel
         api_key = read_api_key(settings.gemini_api_key_file) if settings.gemini_api_key_file else os.environ["GEMINI_API_KEY"].strip()
         return GeminiChatModel(settings.gemini_model, settings.gemini_thinking_level,
+            settings.model_timeout, settings.model_max_retries, api_key, settings.model_max_tokens)
+    if settings.model_provider == "openai":
+        from .llm.openai import OpenAIChatModel
+        api_key = read_api_key(settings.openai_api_key_file) if settings.openai_api_key_file else os.environ["OPENAI_API_KEY"].strip()
+        return OpenAIChatModel(settings.openai_model, settings.openai_reasoning_effort or None,
             settings.model_timeout, settings.model_max_retries, api_key, settings.model_max_tokens)
     if settings.model_provider == "anthropic":
         from .llm.claude import ClaudeChatModel
@@ -123,9 +128,12 @@ def create_app(
     doctor_tools = {tool.name: tool for tool in DOCTOR_TOOLS}
     patient_tools = {tool.name: tool for tool in PATIENT_TOOLS}
     doctor_tools.update({tool.name: tool for tool in CONVERSATION_TOOLS})
+    # Without an open chart only non-record tools are offered, so no patient data can be read.
+    doctor_general_tools = {tool.name: tool for tool in CONVERSATION_TOOLS}
     patient_tools.update({tool.name: tool for tool in CONVERSATION_TOOLS})
     if knowledge is not None:
         doctor_tools.update({tool.name: tool for tool in KNOWLEDGE_TOOLS})
+        doctor_general_tools.update({tool.name: tool for tool in KNOWLEDGE_TOOLS})
         patient_tools.update({tool.name: tool for tool in KNOWLEDGE_TOOLS})
     if settings.advanced_enabled:
         doctor_tools.update({tool.name: tool for tool in DOCTOR_ADVANCED_TOOLS})
@@ -367,9 +375,13 @@ def create_app(
     ):
         credentials = staff_credentials(authorization, x_vinshc_workspace_role, x_vinshc_workspace_facility)
         throttle("doctor", credentials.authorization)
-        patient = require_uuid(body.patientUuid, "patientUuid")
-        encounter = require_uuid(body.encounterUuid, "encounterUuid")
-        visit = require_uuid(body.visitUuid, "visitUuid") if body.visitUuid else None
+        general = not body.patientUuid and not body.encounterUuid and not body.visitUuid
+        if general:
+            patient = encounter = visit = None
+        else:
+            patient = require_uuid(body.patientUuid, "patientUuid")
+            encounter = require_uuid(body.encounterUuid, "encounterUuid")
+            visit = require_uuid(body.visitUuid, "visitUuid") if body.visitUuid else None
         backend: ClinicalDataProvider = request.app.state.backend
         workspace = await backend.workspace(credentials)
         throttle("doctor-user", str(workspace.get("userUuid") or credentials.authorization))
@@ -380,7 +392,7 @@ def create_app(
         verified_summary = None
         preliminary = screen_input("doctor", body.message, [turn.text for turn in body.history],
                                    set(u for u in (patient, encounter, visit) if u), None)
-        if preliminary.action == "allow":
+        if preliminary.action == "allow" and not general:
             verified_summary = (await context_authorizer.validate_doctor_context(credentials, patient, encounter, visit)
                                 if context_authorizer is not None else
                                 await read_doctor_context(backend, credentials, patient, encounter, visit))
@@ -388,7 +400,7 @@ def create_app(
             persona="doctor",
             registry=FactRegistry(),
             catalog=catalog,
-            patient_uuid=patient,
+            patient_uuid=patient or "",
             backend=backend,
             credentials=credentials,
             encounter_uuid=encounter,
@@ -402,14 +414,15 @@ def create_app(
             ctx.cache[f"summary:{encounter}"] = verified_summary
         deps = AgentDeps(
             model=model,
-            tools=doctor_tools,
+            tools=doctor_general_tools if general else doctor_tools,
             system=system_prompt("doctor", knowledge is not None, settings.advanced_enabled),
             ctx=ctx,
             allowed_uuids=frozenset(u for u in (patient, encounter, visit) if u),
             max_rounds=settings.max_tool_rounds,
             max_calls_per_round=settings.max_tool_calls_per_round,
         )
-        conversation = Conversation("doctor", doctor_context(), _history(body), body.message)
+        conversation = Conversation("doctor", doctor_general_context() if general else doctor_context(),
+                                    _history(body), body.message)
         context = DoctorContextOut(
             patientUuid=patient, encounterUuid=encounter, visitUuid=visit, role="doctor", facilityUuid=credentials.facility
         )

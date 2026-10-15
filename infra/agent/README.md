@@ -207,6 +207,7 @@ Guardrail bằng luật là lớp bổ sung, không bắt được mọi cách d
 ## Model
 
 - `gemini`: Gemini Developer API, mặc định `gemini-3.8-flash`, thinking `low`. Dùng tool calling và JSON schema trong cùng vòng agent; giữ nguyên thought signature giữa các vòng. Free tier chỉ thử dữ liệu synthetic: Google không cho gửi thông tin nhạy cảm/cá nhân vào unpaid services ([điều khoản](https://ai.google.dev/gemini-api/terms)).
+- `openai`: OpenAI Chat Completions qua REST (không cần SDK), mặc định `gpt-5-mini`, reasoning `low`. Tool calling + JSON schema `strict` cho câu trả lời. Cấu hình `OPENAI_API_KEY` (hoặc `VINSHC_AGENT_OPENAI_API_KEY_FILE`), `VINSHC_AGENT_OPENAI_MODEL`, `VINSHC_AGENT_OPENAI_REASONING_EFFORT` (để trống với model không suy luận như `gpt-4.1-mini`). Kiểm tra bằng `npm run mvp:model-check`. Chỉ dùng với dữ liệu synthetic.
 - `fake` (mặc định): chọn tool theo từ khóa và trả mỗi dữ kiện liên quan thành một câu. Dùng cho test, contract
   và demo; không phản ánh chất lượng ngôn ngữ của model thật.
 - `anthropic`: Claude (`claude-opus-5-5`, effort `high`), tool `strict`, câu trả lời theo JSON schema, cache
