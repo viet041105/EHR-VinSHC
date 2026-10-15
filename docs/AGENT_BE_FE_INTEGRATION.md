@@ -57,6 +57,8 @@ Muốn dùng DB hiện có, chạy bộ `mvp` và mở trang bác sĩ như bên 
 Từ gốc repo, sau khi cập nhật code:
 
 ```powershell
+npm start               # một lệnh: kiểm tra Docker/cổng/key, build phần đổi, chờ mọi service healthy
+npm start -- --no-build # như trên nhưng dùng image đã có
 npm run mvp:build       # build lại BE, FE và agent khi source thay đổi
 npm run mvp:up          # những lần chạy sau, dùng image đã build
 npm run mvp:stop        # dừng, giữ dữ liệu

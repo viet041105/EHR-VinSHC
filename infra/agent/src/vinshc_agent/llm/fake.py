@@ -99,7 +99,11 @@ class FakeChatModel:
 
         if round_no == 0:
             calls = list(dict.fromkeys((name, json.dumps(args)) for r in rules for name, args in r.calls))
-            return self._calls(round_no, [(n, json.loads(a)) for n, a in calls if n in allowed])
+            calls = [(n, json.loads(a)) for n, a in calls if n in allowed]
+            # E.g. a chart question while no chart is open: the record tools are not offered.
+            if not calls:
+                return ModelTurn([], FinalAnswer(scope="not_found", statements=[]))
+            return self._calls(round_no, calls)
         if round_no == 1:
             follow = self._follow_up(sections, payloads, allowed)
             if follow:

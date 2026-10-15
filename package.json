@@ -2,6 +2,7 @@
   "name": "ehr-vinshc",
   "private": true,
   "scripts": {
+    "start": "python scripts/mvp.py start",
     "agent:setup": "python scripts/agent_dev.py setup",
     "agent:dev": "python scripts/agent_dev.py dev",
     "agent:demo": "python scripts/agent_dev.py demo",
@@ -20,6 +21,7 @@
     "mvp:model-check": "python scripts/mvp.py model-check",
     "mvp:status": "python scripts/mvp.py status",
     "mvp:stop": "python scripts/mvp.py stop",
-    "mvp:down": "python scripts/mvp.py down"
+    "mvp:down": "python scripts/mvp.py down",
+    "mvp:start": "python scripts/mvp.py start"
   }
 }
