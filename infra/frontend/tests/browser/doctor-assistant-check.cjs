@@ -16,7 +16,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574";
       const page = await browser.newPage({ viewport });
       const mobile = viewport.width < 600;
       const openPanel = async () => { if (!(await page.locator("#assistantPanel").isVisible())) await page.click("[data-assistant-toggle]"); };
-      const errors = [], asked = [];
+      const errors = [], asked = [], partialAsked = [];
       page.on("pageerror", (e) => errors.push(e.message));
       const send = (route, data, status = 200) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(data) });
       await page.route("**/api/**", (route) => {
@@ -30,6 +30,18 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574";
       });
       await page.route("**/agent/v1/doctor/chat", (route) => {
         const body = route.request().postDataJSON();
+        if (!body.encounterUuid) {
+          partialAsked.push(body);
+          return send(route, {
+            persona: "doctor", status: "ok", message: null,
+            answer: [{ text: "Phiếu đã có: đau thượng vị 3 ngày.", sources: [
+              { factId: "f1", section: "visits", label: "Phiếu khám gần nhất", kind: "encounter", uuid: encounter },
+            ] }],
+            missing: [], notes: ["Đang đọc phiếu khám bệnh gần nhất trong lượt đã chọn."], toolsUsed: ["get_encounter_summary"],
+            context: { patientUuid: body.patientUuid, encounterUuid: null, visitUuid: body.visitUuid, role: "doctor", facilityUuid: location },
+            disclaimer: "Tham khảo", generatedAt: new Date().toISOString(), model: { provider: "fake", name: "fake" },
+          });
+        }
         asked.push(body);
         return send(route, {
           requestId: "r" + asked.length, persona: "doctor", status: "ok", message: null,
@@ -65,7 +77,16 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574";
       await fillReference(page, "[name=care_visit]", visit);
       await page.locator("#careContextForm button[type=submit]").click();
       await openPanel();
-      assert.match(await page.locator(".assistant-context").innerText(), /Bắt đầu phiếu khám/);
+      assert.match(await page.locator(".assistant-context").innerText(), /phiếu khám bệnh gần nhất trong lượt đã chọn/);
+      assert.match(await page.locator(".assistant-suggestions").innerText(), /Tóm tắt lần khám gần nhất/);
+      assert.equal(await page.locator("[data-assistant-go]").getAttribute("data-assistant-action"), "");
+      // An existing consultation can be read without replacing the FE's partial context.
+      await page.locator(".assistant-suggestions [data-ask]").first().click();
+      await page.locator(".assistant-msg.bot", { hasText: "Phiếu đã có:" }).waitFor();
+      assert.deepEqual([partialAsked[0].patientUuid, partialAsked[0].encounterUuid, partialAsked[0].visitUuid], [patient, null, visit]);
+      await page.locator("[data-source]").first().click();
+      await page.locator(".assistant-source", { hasText: "Đau thượng vị 3 ngày" }).waitFor();
+      await page.click("[data-source-close]");
       if (mobile) await page.click("[data-assistant-close]");
       await fillReference(page, "[name=care_encounter]", encounter);
       await page.locator("#careContextForm button[type=submit]").click();

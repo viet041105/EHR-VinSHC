@@ -68,13 +68,22 @@ PATIENT_SYSTEM = f"""Bạn là trợ lý hồ sơ dành cho người bệnh củ
 {_DATA_RULES}"""
 
 
-def doctor_context() -> str:
+def doctor_context(has_encounter: bool = True, has_visit: bool = False) -> str:
+    if has_encounter:
+        selected = ('Hồ sơ đang mở: một bệnh nhân và một lần khám. Dùng encounter_ref = "current" cho lần khám này và '
+                    'visit_ref = "current" cho lượt khám chứa nó.')
+    else:
+        selected = ('Đã chọn bệnh nhân nhưng chưa chọn phiếu khám. Với encounter_ref = "current", tool đọc phiếu '
+                    'khám bệnh gần nhất trong lượt đã chọn. Nếu chưa chọn lượt, tool dùng lượt gần nhất trong phạm vi '
+                    'được phép đọc. visit_ref = "current" cũng dùng cùng lượt đó. '
+                    'Không tự chuyển sang lượt cũ nếu lượt này chưa có phiếu khám bệnh; giải thích phần thiếu do tool báo. '
+                    'Giữ thời điểm/trạng thái và nói rõ đang đọc nguồn gần nhất đã có, không khẳng định đó là phiếu đang mở. '
+                    + ('Hiện đã chọn một lượt khám cụ thể.' if has_visit else 'Hiện chưa chọn lượt khám cụ thể.'))
     return "\n".join(
         [
             f"Thời điểm hiện tại: {now_text()} (giờ Việt Nam).",
             "Người dùng: bác sĩ đang làm việc trong workspace bác sĩ của cơ sở đã chọn.",
-            "Hồ sơ đang mở: một bệnh nhân và một lần khám. Dùng encounter_ref = \"current\" cho lần khám này và "
-            "visit_ref = \"current\" cho lượt khám chứa nó.",
+            selected,
         ]
     )
 

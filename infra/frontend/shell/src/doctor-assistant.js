@@ -51,7 +51,10 @@ export class DoctorAssistant extends AgentChat {
   missingStep() {
     if (!this.context.patient) return ["Chọn bệnh nhân hoặc lượt khám trong danh sách.", "visits", null, "Mở danh sách lượt khám"];
     if (!this.context.encounter)
-      return ["Đã có thể hỏi về hồ sơ bệnh nhân. Bắt đầu phiếu khám nếu muốn trợ lý đọc thêm lần khám này.", "clinical", "startConsultation", "Bắt đầu phiếu khám"];
+      return [this.context.visit
+        ? "Chưa chọn phiếu: trợ lý đọc phiếu khám bệnh gần nhất trong lượt đã chọn, nếu có."
+        : "Chưa chọn lượt/phiếu: trợ lý đọc phiếu khám bệnh của lượt gần nhất được phép xem, nếu có.",
+        "clinical", null, "Mở màn khám bệnh"];
     return null;
   }
   draw() {
@@ -67,6 +70,12 @@ export class DoctorAssistant extends AgentChat {
     const missing = this.missingStep();
     const ready = this.ready;
     const record = this.hasRecord;
+    const suggestions = !record ? GENERAL_SUGGESTIONS : this.context.encounter ? SUGGESTIONS : [
+      ["📋", "Tóm tắt lần khám gần nhất", this.context.visit
+        ? "Tóm tắt phiếu khám bệnh gần nhất của lượt khám đang chọn"
+        : "Tóm tắt lần khám gần nhất của bệnh nhân"],
+      ...SUGGESTIONS.slice(1),
+    ];
     const busy = this.pending;
     const turns = this.turns
       .map((t, i) => {
@@ -109,7 +118,7 @@ export class DoctorAssistant extends AgentChat {
           ${this.error ? `<div class="assistant-error" role="alert">${esc(this.error)}</div>` : ""}
         </div>
         ${this.source ? `<div class="assistant-source" aria-label="Đối chiếu nguồn hồ sơ"><div class="assistant-source-head"><strong>📎 ${esc(this.source.label || "Nguồn trong hồ sơ")}</strong><button type="button" data-source-close>Đóng</button></div><div class="assistant-source-body">${this.sourcePending ? '<p role="status">Đang mở bản ghi…</p>' : this.sourceError ? `<p role="alert">${esc(this.sourceError)}</p><button type="button" data-source-retry>Thử mở lại</button>` : this.sourceRecord ? displayResult(readingFields(this.sourceRecord), { ...RESULT_LABELS, ...this.options.labels, text: "Nội dung ghi nhận", items: "Nội dung" }) : ""}</div></div>` : ""}
-        ${ready && !busy ? `<div class="assistant-suggestions">${(record ? SUGGESTIONS : GENERAL_SUGGESTIONS).map(([icon, label, q]) => `<button type="button" data-ask="${esc(q)}">${icon} ${esc(label)}</button>`).join("")}</div>` : ""}
+        ${ready && !busy ? `<div class="assistant-suggestions">${suggestions.map(([icon, label, q]) => `<button type="button" data-ask="${esc(q)}">${icon} ${esc(label)}</button>`).join("")}</div>` : ""}
         <form data-chat class="assistant-input">
           <textarea name="message" rows="1" maxlength="1000" placeholder="${record ? "Hỏi về hồ sơ… (Enter để gửi)" : "Hỏi chung, hoặc chọn bệnh nhân để hỏi về hồ sơ…"}" aria-label="Câu hỏi cho trợ lý" ${!ready || busy ? "disabled" : ""}>${esc(this.draft)}</textarea>
           ${busy ? '<button type="button" data-stop aria-label="Dừng chờ phản hồi">■</button>' : `<button class="primary" aria-label="Gửi câu hỏi" ${!ready ? "disabled" : ""}>➤</button>`}
