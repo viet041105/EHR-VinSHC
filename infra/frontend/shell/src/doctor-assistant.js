@@ -51,7 +51,7 @@ export class DoctorAssistant extends AgentChat {
   missingStep() {
     if (!this.context.patient) return ["Chọn bệnh nhân hoặc lượt khám trong danh sách.", "visits", null, "Mở danh sách lượt khám"];
     if (!this.context.encounter)
-      return ["Bắt đầu phiếu khám để trợ lý đọc đúng lần khám này.", "clinical", "startConsultation", "Bắt đầu phiếu khám"];
+      return ["Đã có thể hỏi về hồ sơ bệnh nhân. Bắt đầu phiếu khám nếu muốn trợ lý đọc thêm lần khám này.", "clinical", "startConsultation", "Bắt đầu phiếu khám"];
     return null;
   }
   draw() {

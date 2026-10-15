@@ -380,7 +380,8 @@ def create_app(
             patient = encounter = visit = None
         else:
             patient = require_uuid(body.patientUuid, "patientUuid")
-            encounter = require_uuid(body.encounterUuid, "encounterUuid")
+            # Chỉ chọn hồ sơ bệnh nhân là đủ; lượt/phiếu khám có thể chưa có.
+            encounter = require_uuid(body.encounterUuid, "encounterUuid") if body.encounterUuid else None
             visit = require_uuid(body.visitUuid, "visitUuid") if body.visitUuid else None
         backend: ClinicalDataProvider = request.app.state.backend
         workspace = await backend.workspace(credentials)
@@ -409,7 +410,7 @@ def create_app(
             knowledge_scope=KnowledgeScope("doctor", credentials.facility),
             parallel=settings.advanced_enabled,
         )
-        if isinstance(verified_summary, dict):
+        if isinstance(verified_summary, dict) and encounter:
             # Reuse this request's authorized snapshot instead of fetching the chart twice.
             ctx.cache[f"summary:{encounter}"] = verified_summary
         deps = AgentDeps(
