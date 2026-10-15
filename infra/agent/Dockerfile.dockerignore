@@ -6,4 +6,8 @@
 !metadata/vinshc/fields.csv
 !infra/agent/fixtures/
 !infra/agent/fixtures/**
+!infra/agent/knowledge/
+!infra/agent/knowledge/**
+!infra/agent/playground/
+!infra/agent/playground/**
 **/__pycache__

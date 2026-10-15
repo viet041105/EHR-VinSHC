@@ -1,10 +1,11 @@
 """Nguồn dữ liệu cho luồng bệnh nhân (P).
 
-Backend chưa có đăng nhập bệnh nhân, liên kết tài khoản–hồ sơ hay API công bố hồ sơ, nên đây là **hợp đồng
-đề xuất** (xem README, mục Luồng bệnh nhân). Có hai bản cài đặt:
+Interface này tách xác thực bệnh nhân và đọc bản công bố khỏi graph/tool. Các bản cài đặt:
 
 - `DisabledPortal` (mặc định): mọi lời gọi trả 503, agent không đọc dữ liệu bệnh nhân.
 - `FixturePortal`: đọc file JSON synthetic, chỉ để phát triển FE/agent trước khi backend có API thật.
+- `HttpPortal`: gọi API cổng bệnh nhân trong module VinSHC hiện có.
+- `MockPortal` (mock.py): bộ hồ sơ và quyền synthetic cho phát triển agent độc lập với BE.
 
 Không dùng API nhân viên hay tài khoản dùng chung để đọc thay bệnh nhân. Bản cài đặt thật phải để backend xác
 định bệnh nhân từ phiên đăng nhập và chỉ trả phần hồ sơ đã được công bố.

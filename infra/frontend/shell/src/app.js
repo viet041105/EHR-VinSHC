@@ -160,7 +160,7 @@ function shell(content) {
   // The doctor assistant floats over every doctor screen; its open state and turns survive re-renders.
   if(state.workspace && state.role === "doctor") {
     const host=document.createElement("div");host.id="agentPanel";document.querySelector("#app").append(host);
-    agentChat.mount(host,"doctor",memory.context,{label:memory.contextLabel,navigate});
+    agentChat.mount(host,"doctor",memory.context,{label:memory.contextLabel,navigate,labels});
   } else agentChat.clear();
   document.querySelector("#logout")?.addEventListener("click", logout);
 }

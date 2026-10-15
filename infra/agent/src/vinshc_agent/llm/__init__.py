@@ -42,6 +42,7 @@ class ModelTurn:
     tool_calls: list[ToolCall]
     final: FinalAnswer | None = None
     raw: Any = None
+    usage: dict[str, int] | None = None
 
 
 @dataclass

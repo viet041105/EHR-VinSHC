@@ -4,7 +4,7 @@ import pytest
 
 import main
 
-KEYS = ("VINSHC_AGENT_MODEL_PROVIDER", "VINSHC_AGENT_PATIENT_PORTAL", "VINSHC_AGENT_PORT", "QUOTED", "EXPORTED")
+KEYS = ("VINSHC_AGENT_MODEL_PROVIDER", "VINSHC_AGENT_PATIENT_PORTAL", "VINSHC_AGENT_PORT", "VINSHC_AGENT_DATA_PROVIDER", "VINSHC_AGENT_MOCK_FIXTURE", "QUOTED", "EXPORTED")
 
 
 @pytest.fixture
@@ -37,6 +37,16 @@ def test_check_reports_valid_configuration(tmp_path, clean_env, capsys):
     assert "Cổng bệnh nhân: fixture" in out and "Cấu hình hợp lệ." in out
 
 
+def test_http_check_accepts_explicit_synthetic_reference_opt_in(tmp_path, clean_env, monkeypatch):
+    env = tmp_path / ".env"
+    env.write_text("", encoding="utf-8")
+    monkeypatch.setenv("VINSHC_AGENT_DATA_PROVIDER", "http")
+    monkeypatch.setenv("VINSHC_AGENT_MODEL_PROVIDER", "fake")
+    monkeypatch.setenv("VINSHC_AGENT_KNOWLEDGE_ENABLED", "true")
+    monkeypatch.setenv("VINSHC_AGENT_KNOWLEDGE_ALLOW_DEVELOPMENT", "true")
+    assert main.main(["--check", "--env-file", str(env)]) == 0
+
+
 def test_invalid_configuration_exits_before_serving(tmp_path, clean_env, capsys):
     env = tmp_path / ".env"
     env.write_text("VINSHC_AGENT_MODEL_PROVIDER=anthropic\n", encoding="utf-8")
@@ -47,6 +57,15 @@ def test_invalid_configuration_exits_before_serving(tmp_path, clean_env, capsys)
 def test_port_is_validated(clean_env):
     with pytest.raises(SystemExit):
         main.main(["--check", "--port", "70000", "--env-file", "missing.env"])
+
+
+def test_mock_cli_checks_fixture_and_rejects_public_binding(tmp_path, clean_env, capsys):
+    args = ['--data-provider', 'mock', '--model', 'fake', '--env-file', str(tmp_path / 'none.env'), '--check']
+    assert main.main(args) == 0
+    output = capsys.readouterr().out
+    assert 'Nguồn dữ liệu: mock' in output and 'Cổng bệnh nhân: mock' in output
+    assert main.main([*args, '--host', '0.0.0.0']) == 2
+    assert 'loopback' in capsys.readouterr().err
 
 
 CLAUDE_KEYS = ("VINSHC_AGENT_ALLOW_EXTERNAL_MODEL", "ANTHROPIC_API_KEY", "ANTHROPIC_AUTH_TOKEN", "ANTHROPIC_PROFILE",

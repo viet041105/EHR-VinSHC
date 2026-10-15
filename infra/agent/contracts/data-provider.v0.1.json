@@ -1,0 +1,207 @@
+{
+  "version": "0.1.0",
+  "status": "draft",
+  "scope": "agent-internal-normalized-data",
+  "sourceMetadataVersion": "0.3.0",
+  "description": "Bản nháp để đối chiếu khi BE mới có thiết kế. Không áp đặt database, URL hay response của BE. Adapter chuyển đổi dữ liệu/xác thực.",
+  "doctor": {
+    "dataInterface": "ClinicalDataProvider",
+    "preModelAuthorization": "DoctorContextAuthorizer.validate_doctor_context(credentials, patient, encounter, visit)",
+    "operations": [
+      {
+        "name": "workspace",
+        "input": [
+          "credentials"
+        ],
+        "output": [
+          "userUuid",
+          "role",
+          "facilityUuid"
+        ]
+      },
+      {
+        "name": "clinical_summary",
+        "input": [
+          "credentials",
+          "encounter"
+        ],
+        "output": [
+          "patientUuid",
+          "encounterUuid",
+          "visitUuid",
+          "status",
+          "encounterDatetime",
+          "consultation",
+          "vitals",
+          "diagnoses",
+          "drugOrders",
+          "allergies",
+          "events"
+        ]
+      },
+      {
+        "name": "patient",
+        "input": [
+          "credentials",
+          "patient"
+        ],
+        "output": [
+          "uuid",
+          "patientUuid",
+          "gender",
+          "age"
+        ]
+      },
+      {
+        "name": "visits",
+        "input": [
+          "credentials",
+          "patient",
+          "limit"
+        ],
+        "output": [
+          "results",
+          "hasMore"
+        ]
+      },
+      {
+        "name": "vitals",
+        "input": [
+          "credentials",
+          "patient",
+          "visit?"
+        ],
+        "output": [
+          "patientUuid",
+          "results"
+        ]
+      },
+      {
+        "name": "allergies",
+        "input": [
+          "credentials",
+          "patient"
+        ],
+        "output": [
+          "patientUuid",
+          "allergies"
+        ]
+      },
+      {
+        "name": "service_orders",
+        "input": [
+          "credentials",
+          "patient",
+          "visit?"
+        ],
+        "output": [
+          "results",
+          "hasMore"
+        ]
+      },
+      {
+        "name": "result",
+        "input": [
+          "credentials",
+          "result"
+        ],
+        "output": [
+          "uuid",
+          "patientUuid",
+          "state",
+          "numericValue",
+          "textValue",
+          "unit",
+          "recordedAt",
+          "reviewedAt",
+          "version"
+        ]
+      },
+      {
+        "name": "appointments",
+        "input": [
+          "credentials",
+          "patient"
+        ],
+        "output": [
+          "results",
+          "hasMore"
+        ]
+      }
+    ]
+  },
+  "patient": {
+    "dataInterface": "PatientPortal",
+    "identity": "PatientSession: patient_uuid is resolved by server, never chosen by model/message",
+    "operations": [
+      {
+        "name": "authenticate",
+        "input": [
+          "authorization"
+        ],
+        "output": [
+          "PatientSession"
+        ]
+      },
+      {
+        "name": "visits",
+        "input": [
+          "session"
+        ],
+        "output": [
+          "patientUuid",
+          "results"
+        ]
+      },
+      {
+        "name": "visit_instructions",
+        "input": [
+          "session",
+          "visit"
+        ],
+        "output": [
+          "patientUuid",
+          "visitUuid",
+          "publishedAt",
+          "version?",
+          "items"
+        ]
+      },
+      {
+        "name": "prescriptions",
+        "input": [
+          "session",
+          "visit?"
+        ],
+        "output": [
+          "patientUuid",
+          "results"
+        ]
+      },
+      {
+        "name": "appointments",
+        "input": [
+          "session"
+        ],
+        "output": [
+          "patientUuid",
+          "results"
+        ]
+      }
+    ]
+  },
+  "rules": [
+    "Check caller identity, facility, provider-patient scope and patient-visit-encounter linkage.",
+    "An absent clinical value is distinct from a normal or negative finding.",
+    "Keep units, measurement/record times, source record IDs and status/version.",
+    "Patients read only their own eligible published snapshots; draft/revoked/stale data stays hidden.",
+    "Errors preserve 401/403/404/timeout meaning; no silent fallback to another patient's data.",
+    "The current chat API uses UUIDs; a different BE identifier scheme requires agreed mapping or DTO changes."
+  ],
+  "samples": "../fixtures/clinical.demo.json",
+  "implementation": [
+    "../src/vinshc_agent/backend.py",
+    "../src/vinshc_agent/portal.py",
+    "../src/vinshc_agent/mock.py"
+  ]
+}

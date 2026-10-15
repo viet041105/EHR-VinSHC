@@ -71,7 +71,7 @@ def test_foreign_visit_is_rejected_before_patient_model(make_client):
 
 def test_doctor_visit_must_match_encounter(make_client):
     response=make_client().post('/v1/doctor/chat',headers=HEADERS,json=doctor_body('Tóm tắt',visitUuid='b9999999-0000-4000-8000-000000000009'))
-    assert response.status_code==502 and response.json()['code']=='context_mismatch'
+    assert response.status_code==400 and response.json()['code']=='invalid_context'
 
 
 def test_backend_session_cookie_cannot_cross_users():

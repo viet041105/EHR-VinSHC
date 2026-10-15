@@ -1,7 +1,7 @@
 // Doctor-workspace chatbot. Request handling, stale-response protection and source
 // lookup are inherited from AgentChat; this class renders a launcher that opens a docked side column
 // that stays available on every doctor screen and survives shell re-renders.
-import { AgentChat } from "./agent-chat.js";
+import { AgentChat, readingFields, missingView, notesView } from "./agent-chat.js";
 import { displayResult } from "./result-view.js";
 import { RESULT_LABELS, esc } from "@vinshc/core";
 
@@ -33,7 +33,7 @@ export class DoctorAssistant extends AgentChat {
     this.label = options.label || "";
     this.navigate = options.navigate;
     if (changed) this.draft = "";
-    super.mount(root, persona, context);
+    super.mount(root, persona, context, options);
   }
   clear() {
     super.clear();
@@ -49,6 +49,12 @@ export class DoctorAssistant extends AgentChat {
   }
   draw() {
     if (!this.root) return;
+    const previousInput = this.root.querySelector("[data-chat] textarea");
+    const focused = previousInput && document.activeElement === previousInput;
+    const selection = previousInput ? [previousInput.selectionStart, previousInput.selectionEnd] : null;
+    const previousList = this.root.querySelector(".assistant-messages");
+    const oldScroll = previousList?.scrollTop || 0;
+    const atEnd = !previousList || previousList.scrollHeight - oldScroll - previousList.clientHeight < 60;
     // Wide screens dock the panel: the page reflows beside it instead of being covered.
     document.body.classList.toggle("assistant-docked", this.open);
     const missing = this.missingStep();
@@ -57,15 +63,16 @@ export class DoctorAssistant extends AgentChat {
     const turns = this.turns
       .map((t, i) => {
         const r = t.result;
-        const answer = r.answer
+        const answer = (r?.answer || [])
           .map((a, j) => `<p>${esc(a.text)}</p>${a.sources.length ? `<div class="assistant-sources">${a.sources.map((s, k) => `<button type="button" data-source="${i},${j},${k}" title="Xem nguồn trong hồ sơ">📎 ${esc(s.label)}</button>`).join("")}</div>` : ""}`)
           .join("");
         return `<div class="assistant-msg user"><div class="assistant-bubble">${esc(t.question)}</div></div>
           <div class="assistant-msg bot"><span class="assistant-avatar" aria-hidden="true">🩺</span><div class="assistant-bubble">
-            ${r.message ? `<p class="assistant-status">${esc(r.message)}</p>` : ""}${answer || (r.message ? "" : "<p>Chưa có thông tin trong hồ sơ.</p>")}
-            ${r.missing.length ? `<details class="assistant-missing"><summary>Thông tin thiếu hoặc chưa đọc được (${r.missing.length})</summary><ul>${r.missing.map((m) => `<li><strong>${esc(m.label)}</strong>: ${esc(m.detail)}</li>`).join("")}</ul></details>` : ""}
-            ${r.notes.map((n) => `<p class="assistant-note">${esc(n)}</p>`).join("")}
-            <small class="assistant-meta">${esc(time(r.generatedAt))}</small>
+            ${t.pending ? '<p class="assistant-typing" role="status">Đang đọc hồ sơ…</p>' : t.error || t.cancelled ? `<p class="assistant-status" role="status">${esc(t.error || "Đã dừng chờ phản hồi. Bạn có thể gửi lại câu hỏi.")}</p>` : `${r?.message ? `<p class="assistant-status">${esc(r.message)}</p>` : ""}${answer || (r?.message ? "" : "<p>Chưa có thông tin trong hồ sơ.</p>")}`}
+            ${missingView(r, 'assistant-missing')}${notesView(r, 'assistant-note')}
+            ${!t.pending && (t.error || t.cancelled || r?.status === "limited" && !r.answer?.length) ? `<button type="button" data-retry="${i}" ${busy ? "disabled" : ""}>Thử lại câu hỏi</button>` : ""}
+            ${r?.answer?.length ? `<button type="button" data-copy="${i}">${this.copied === i ? "Đã sao chép" : "Sao chép"}</button>` : ""}
+            ${r?.generatedAt ? `<small class="assistant-meta">${esc(time(r.generatedAt))}</small>` : ""}
           </div></div>`;
       })
       .join("");
@@ -81,8 +88,8 @@ export class DoctorAssistant extends AgentChat {
         <header class="assistant-head">
           <span class="assistant-avatar" aria-hidden="true">🩺</span>
           <div><strong>Trợ lý bác sĩ</strong><small>Đọc hồ sơ · có trích nguồn</small></div>
-          <button type="button" data-clear title="Bắt đầu hội thoại mới" ${busy || !this.turns.length ? "disabled" : ""}>↺</button>
-          <button type="button" data-assistant-close title="Đóng trợ lý" aria-label="Đóng trợ lý">✕</button>
+          <button type="button" data-clear title="Bắt đầu hội thoại mới" ${!this.turns.length && !this.draft ? "disabled" : ""}>↺</button>
+          <button type="button" data-assistant-close title="Thu nhỏ">✕</button>
         </header>
         <div class="assistant-context ${ready ? "" : "warn"}">
           ${this.context.patient ? `<span>Đang hỏi về</span><strong>${esc(this.label || "Bệnh nhân đã chọn")}</strong>` : "<strong>Chưa chọn bệnh nhân</strong>"}
@@ -90,19 +97,23 @@ export class DoctorAssistant extends AgentChat {
         </div>
         <div class="assistant-messages" aria-live="polite">
           ${welcome}${turns}
-          ${busy ? `<div class="assistant-msg bot"><span class="assistant-avatar" aria-hidden="true">🩺</span><div class="assistant-bubble assistant-typing" role="status"><span></span><span></span><span></span> Đang đọc hồ sơ…</div></div>` : ""}
           ${this.error ? `<div class="assistant-error" role="alert">${esc(this.error)}</div>` : ""}
         </div>
-        ${this.source ? `<div class="assistant-source"><div class="assistant-source-head"><strong>📎 Nguồn trong hồ sơ</strong><button type="button" data-source-close>Đóng</button></div><div class="assistant-source-body">${displayResult(this.source, RESULT_LABELS)}</div></div>` : ""}
+        ${this.source ? `<div class="assistant-source" aria-label="Đối chiếu nguồn hồ sơ"><div class="assistant-source-head"><strong>📎 ${esc(this.source.label || "Nguồn trong hồ sơ")}</strong><button type="button" data-source-close>Đóng</button></div><div class="assistant-source-body">${this.sourcePending ? '<p role="status">Đang mở bản ghi…</p>' : this.sourceError ? `<p role="alert">${esc(this.sourceError)}</p><button type="button" data-source-retry>Thử mở lại</button>` : this.sourceRecord ? displayResult(readingFields(this.sourceRecord), { ...RESULT_LABELS, ...this.options.labels, text: "Nội dung ghi nhận", items: "Nội dung" }) : ""}</div></div>` : ""}
         ${ready && !busy ? `<div class="assistant-suggestions">${SUGGESTIONS.map(([icon, label, q]) => `<button type="button" data-ask="${esc(q)}">${icon} ${esc(label)}</button>`).join("")}</div>` : ""}
         <form data-chat class="assistant-input">
           <textarea name="message" rows="1" maxlength="1000" placeholder="${ready ? "Hỏi về hồ sơ… (Enter để gửi)" : "Chọn bệnh nhân và lần khám trước"}" aria-label="Câu hỏi cho trợ lý" ${!ready || busy ? "disabled" : ""}>${esc(this.draft)}</textarea>
-          <button class="primary" aria-label="Gửi câu hỏi" ${!ready || busy ? "disabled" : ""}>➤</button>
+          ${busy ? '<button type="button" data-stop aria-label="Dừng chờ phản hồi">■</button>' : `<button class="primary" aria-label="Gửi câu hỏi" ${!ready ? "disabled" : ""}>➤</button>`}
         </form>
         <p class="assistant-disclaimer">Chỉ để tham khảo. Bác sĩ chịu trách nhiệm quyết định lâm sàng.</p>
       </section>
     </div>`;
     this.bind();
+    const input = this.root.querySelector("[data-chat] textarea");
+    if (focused && !input.disabled) { input.focus({ preventScroll: true }); if (selection) input.setSelectionRange(...selection); }
+    const list = this.root.querySelector(".assistant-messages");
+    list.scrollTop = this.followEnd || atEnd ? list.scrollHeight : oldScroll;
+    this.followEnd = false;
   }
   bind() {
     const root = this.root;
@@ -142,7 +153,7 @@ export class DoctorAssistant extends AgentChat {
       this.controller?.abort();
       this.key = null;
       this.draft = "";
-      this.mount(this.root, this.persona, this.context, { label: this.label, navigate: this.navigate });
+      this.mount(this.root, this.persona, this.context, this.options);
     };
     root.querySelector("[data-assistant-go]")?.addEventListener("click", (e) => {
       const { assistantGo, assistantAction } = e.currentTarget.dataset;
@@ -152,14 +163,19 @@ export class DoctorAssistant extends AgentChat {
       this.draw();
     });
     root.querySelector("[data-source-close]")?.addEventListener("click", () => {
+      this.sourceController?.abort(); this.sourceVersion++;
       this.source = null;
       this.draw();
     });
+    root.querySelector("[data-source-retry]")?.addEventListener("click", () => this.openSource(this.source, this.sourceExcerpt));
+    root.querySelector("[data-stop]")?.addEventListener("click", () => this.stop());
+    for (const b of root.querySelectorAll("[data-retry]")) b.onclick = () => this.ask(this.turns[Number(b.dataset.retry)].question, Number(b.dataset.retry));
+    for (const b of root.querySelectorAll("[data-copy]")) b.onclick = () => this.copy(Number(b.dataset.copy));
     for (const b of root.querySelectorAll("[data-ask]")) b.onclick = () => this.send(b.dataset.ask);
     for (const b of root.querySelectorAll("[data-source]"))
       b.onclick = () => {
         const [i, j, k] = b.dataset.source.split(",").map(Number);
-        this.openSource(this.turns[i].result.answer[j].sources[k]);
+        this.openSource(this.turns[i].result.answer[j].sources[k], this.turns[i].result.answer[j].text);
       };
     const form = root.querySelector("[data-chat]");
     const input = form.elements.message;
@@ -182,8 +198,6 @@ export class DoctorAssistant extends AgentChat {
       this.send(input.value);
     };
     grow();
-    const list = root.querySelector(".assistant-messages");
-    list.scrollTop = list.scrollHeight;
   }
   send(question) {
     if (!question?.trim() || this.pending) return;

@@ -93,8 +93,11 @@ class ClaudeChatModel:
             for block in response.content
             if block.type == "tool_use"
         ]
+        raw_usage = getattr(response, "usage", None)
+        usage = {k: getattr(raw_usage, name, None) for k, name in (("inputTokens", "input_tokens"), ("outputTokens", "output_tokens"))}
+        usage = {k: v for k, v in usage.items() if isinstance(v, int) and not isinstance(v, bool) and v >= 0} or None
         if calls:
-            return ModelTurn(calls, None, response.content)
+            return ModelTurn(calls, None, response.content, usage)
         if response.stop_reason != "end_turn":
             raise ModelUnavailable(f"stop_{response.stop_reason}")
         text = next((block.text for block in response.content if block.type == "text"), None)
@@ -104,4 +107,4 @@ class ClaudeChatModel:
             final = FinalAnswer.model_validate_json(text)
         except ValueError as ex:
             raise ModelUnavailable("invalid_output") from ex
-        return ModelTurn([], final, response.content)
+        return ModelTurn([], final, response.content, usage)

@@ -1,0 +1,910 @@
+{
+  "version": "0.1.0",
+  "synthetic": true,
+  "description": "Bộ hồ sơ tự tạo để phát triển agent độc lập. Mọi danh tính, thuốc, chẩn đoán, chỉ số và lịch hẹn chỉ là tình huống thử; không phải dữ liệu hoặc hướng dẫn lâm sàng.",
+  "metadata": {
+    "path": "metadata/vinshc/fields.csv",
+    "version": "0.3.0",
+    "fieldsSha256": "30ef303661535acf36d2b894edbdc339ae8c61762dd43b2e58945825829bd54b"
+  },
+  "facilities": {
+    "f1000000-0000-4000-8000-000000000001": "Cơ sở giả lập A",
+    "f2000000-0000-4000-8000-000000000002": "Cơ sở giả lập B"
+  },
+  "identities": {
+    "doctor": {
+      "role": "doctor",
+      "userUuid": "dd000000-0000-4000-8000-000000000001",
+      "facilityUuids": [
+        "f1000000-0000-4000-8000-000000000001"
+      ],
+      "patientUuids": [
+        "a1000000-0000-4000-8000-000000000001",
+        "a2000000-0000-4000-8000-000000000002"
+      ]
+    },
+    "doctor-other": {
+      "role": "doctor",
+      "userUuid": "dd000000-0000-4000-8000-000000000002",
+      "facilityUuids": [
+        "f2000000-0000-4000-8000-000000000002"
+      ],
+      "patientUuids": [
+        "a3000000-0000-4000-8000-000000000003"
+      ]
+    },
+    "nurse": {
+      "role": "nurse",
+      "userUuid": "dd000000-0000-4000-8000-000000000003",
+      "facilityUuids": [
+        "f1000000-0000-4000-8000-000000000001"
+      ],
+      "patientUuids": [
+        "a1000000-0000-4000-8000-000000000001",
+        "a2000000-0000-4000-8000-000000000002"
+      ]
+    },
+    "patient-a": {
+      "role": "patient",
+      "userUuid": "dd000000-0000-4000-8000-000000000004",
+      "patientUuid": "a1000000-0000-4000-8000-000000000001"
+    },
+    "patient-b": {
+      "role": "patient",
+      "userUuid": "dd000000-0000-4000-8000-000000000005",
+      "patientUuid": "a2000000-0000-4000-8000-000000000002"
+    },
+    "patient-c": {
+      "role": "patient",
+      "userUuid": "dd000000-0000-4000-8000-000000000006",
+      "patientUuid": "a3000000-0000-4000-8000-000000000003"
+    }
+  },
+  "patients": {
+    "a1000000-0000-4000-8000-000000000001": {
+      "scenario": "A · đầy đủ và đã công bố",
+      "facilityUuid": "f1000000-0000-4000-8000-000000000001",
+      "administrative": {
+        "uuid": "a1000000-0000-4000-8000-000000000001",
+        "patientUuid": "a1000000-0000-4000-8000-000000000001",
+        "fullName": "Bệnh nhân A · đầy đủ và đã công bố — GIẢ LẬP",
+        "gender": "U",
+        "age": 30,
+        "birthdateEstimated": false
+      },
+      "visits": [
+        {
+          "uuid": "b1000000-0000-4000-8000-000000000001",
+          "visitUuid": "b1000000-0000-4000-8000-000000000001",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitType": {
+            "key": "outpatient",
+            "name": "Khám ngoại trú (giả lập)"
+          },
+          "startDatetime": "2026-10-14T09:00:00+07:00",
+          "stopDatetime": null,
+          "status": "open",
+          "closeReason": null,
+          "closeNote": null,
+          "encounters": [
+            {
+              "uuid": "c1000000-0000-4000-8000-000000000001",
+              "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "visitUuid": "b1000000-0000-4000-8000-000000000001",
+              "encounterDatetime": "2026-10-14T09:00:00+07:00",
+              "encounterType": {
+                "key": "consultation",
+                "name": "Phiếu khám"
+              }
+            },
+            {
+              "uuid": "c4000000-0000-4000-8000-000000000001",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000001",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "visitUuid": "b1000000-0000-4000-8000-000000000001",
+              "encounterDatetime": "2026-10-14T09:00:00+07:00",
+              "encounterType": {
+                "key": "vitals",
+                "name": "Sinh hiệu"
+              }
+            }
+          ]
+        },
+        {
+          "uuid": "b0000000-0000-4000-8000-000000000009",
+          "visitUuid": "b0000000-0000-4000-8000-000000000009",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitType": {
+            "key": "outpatient",
+            "name": "Khám ngoại trú (giả lập)"
+          },
+          "startDatetime": "2026-09-10T09:00:00+07:00",
+          "stopDatetime": "2026-09-10T09:00:00+07:00",
+          "status": "closed",
+          "closeReason": "completed",
+          "closeNote": null,
+          "encounters": [
+            {
+              "uuid": "c0000000-0000-4000-8000-000000000009",
+              "encounterUuid": "c0000000-0000-4000-8000-000000000009",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "visitUuid": "b0000000-0000-4000-8000-000000000009",
+              "encounterDatetime": "2026-09-10T09:00:00+07:00",
+              "encounterType": {
+                "key": "consultation",
+                "name": "Phiếu khám"
+              }
+            },
+            {
+              "uuid": "c4000000-0000-4000-8000-000000000009",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000009",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "visitUuid": "b0000000-0000-4000-8000-000000000009",
+              "encounterDatetime": "2026-09-10T09:00:00+07:00",
+              "encounterType": {
+                "key": "vitals",
+                "name": "Sinh hiệu"
+              }
+            }
+          ]
+        }
+      ],
+      "summaries": {
+        "c1000000-0000-4000-8000-000000000001": {
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitUuid": "b1000000-0000-4000-8000-000000000001",
+          "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+          "encounterDatetime": "2026-10-14T09:00:00+07:00",
+          "status": "final",
+          "consultation": {
+            "groupUuid": "d3000000-0000-4000-8000-000000000001",
+            "patientUuid": "a1000000-0000-4000-8000-000000000001",
+            "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+            "values": {
+              "visit.ly_do_kham": "Đau đầu nhẹ từ hôm qua (tình huống giả lập).",
+              "history.benh_su": "Đau đầu nhẹ; người khám đã ghi nhận triệu chứng trong hồ sơ mẫu.",
+              "history.tien_su_ban_than_trang_thai": "none_reported",
+              "history.tien_su_gia_dinh_trang_thai": "none_reported",
+              "allergy.trang_thai": "present",
+              "exam.tom_tat": "Nội dung khám mô phỏng, dùng để kiểm tra trích nguồn.",
+              "exam.huong_dieu_tri": "Theo dõi ngoại trú theo nội dung đã ghi trong phiếu mẫu.",
+              "exam.loi_dan": "Đọc lại hướng dẫn đã ghi và liên hệ phòng khám nếu cần làm rõ.",
+              "followup.ngay_tai_kham": "2026-10-21",
+              "followup.loi_dan": "Tái khám theo lịch hẹn đã ghi nhận."
+            },
+            "memberUuids": {
+              "visit.ly_do_kham": "d4000000-0000-4000-8000-000000000101",
+              "history.benh_su": "d4000000-0000-4000-8000-000000000102",
+              "history.tien_su_ban_than_trang_thai": "d4000000-0000-4000-8000-000000000103",
+              "history.tien_su_gia_dinh_trang_thai": "d4000000-0000-4000-8000-000000000104",
+              "allergy.trang_thai": "d4000000-0000-4000-8000-000000000105",
+              "exam.tom_tat": "d4000000-0000-4000-8000-000000000106",
+              "exam.huong_dieu_tri": "d4000000-0000-4000-8000-000000000107",
+              "exam.loi_dan": "d4000000-0000-4000-8000-000000000108",
+              "followup.ngay_tai_kham": "d4000000-0000-4000-8000-000000000109",
+              "followup.loi_dan": "d4000000-0000-4000-8000-000000000110"
+            }
+          },
+          "vitals": [
+            {
+              "uuid": "d2000000-0000-4000-8000-000000000001",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "visitUuid": "b1000000-0000-4000-8000-000000000001",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000001",
+              "measuredAt": "2026-10-14T09:00:00+07:00",
+              "values": {
+                "vitals.mach": 82,
+                "vitals.ha_tam_thu": 120,
+                "vitals.ha_tam_truong": 80,
+                "vitals.nhiet_do": 37.1,
+                "vitals.nhip_tho": 18,
+                "vitals.spo2": 97,
+                "vitals.can_nang": 65,
+                "vitals.chieu_cao": 170
+              },
+              "states": {},
+              "needsVerification": false,
+              "voided": false
+            }
+          ],
+          "allergies": {
+            "patientUuid": "a1000000-0000-4000-8000-000000000001",
+            "allergies": [
+              {
+                "uuid": "da000000-0000-4000-8000-000000000001",
+                "patientUuid": "a1000000-0000-4000-8000-000000000001",
+                "allergenType": "DRUG",
+                "allergen": {
+                  "nonCoded": "Penicillin (dữ liệu mô phỏng)"
+                },
+                "severity": {
+                  "display": "Trung bình"
+                },
+                "reactions": [
+                  {
+                    "concept": {
+                      "display": "Mày đay"
+                    }
+                  }
+                ],
+                "voided": false
+              }
+            ]
+          },
+          "diagnoses": [
+            {
+              "uuid": "d5000000-0000-4000-8000-000000000001",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+              "concept": {
+                "display": "Đau đầu (chẩn đoán mẫu đã ghi)"
+              },
+              "code": "R51",
+              "rank": "primary",
+              "certainty": "provisional",
+              "voided": false,
+              "dateCreated": "2026-10-14T09:00:00+07:00"
+            }
+          ],
+          "drugOrders": [
+            {
+              "uuid": "d8000000-0000-4000-8000-000000000001",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+              "drug": {
+                "name": "Paracetamol (mẫu)",
+                "strength": "500 mg"
+              },
+              "dose": 1,
+              "doseUnits": {
+                "display": "viên"
+              },
+              "route": {
+                "display": "Uống"
+              },
+              "frequency": {
+                "display": "Theo hướng dẫn trong đơn mẫu"
+              },
+              "duration": 3,
+              "durationUnits": {
+                "display": "ngày"
+              },
+              "quantity": 3,
+              "quantityUnits": {
+                "display": "viên"
+              },
+              "dosingInstructions": "Đơn mô phỏng để kiểm thử; không sử dụng cho điều trị.",
+              "status": "active",
+              "dateActivated": "2026-10-14T09:00:00+07:00",
+              "dateStopped": null
+            },
+            {
+              "uuid": "d8000000-0000-4000-8000-000000000002",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+              "drug": {
+                "name": "Ibuprofen (mẫu)",
+                "strength": "400 mg"
+              },
+              "dose": 1,
+              "doseUnits": {
+                "display": "viên"
+              },
+              "route": {
+                "display": "Uống"
+              },
+              "frequency": {
+                "display": "Theo hướng dẫn trong đơn mẫu"
+              },
+              "duration": 3,
+              "durationUnits": {
+                "display": "ngày"
+              },
+              "quantity": 3,
+              "quantityUnits": {
+                "display": "viên"
+              },
+              "dosingInstructions": "Đơn mô phỏng để kiểm thử; không sử dụng cho điều trị.",
+              "status": "discontinued",
+              "dateActivated": "2026-10-14T09:00:00+07:00",
+              "dateStopped": "2026-10-14T09:00:00+07:00"
+            }
+          ],
+          "events": []
+        },
+        "c0000000-0000-4000-8000-000000000009": {
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitUuid": "b0000000-0000-4000-8000-000000000009",
+          "encounterUuid": "c0000000-0000-4000-8000-000000000009",
+          "encounterDatetime": "2026-09-10T09:00:00+07:00",
+          "status": "final",
+          "consultation": {
+            "groupUuid": "d3000000-0000-4000-8000-000000000009",
+            "patientUuid": "a1000000-0000-4000-8000-000000000001",
+            "encounterUuid": "c0000000-0000-4000-8000-000000000009",
+            "values": {
+              "visit.ly_do_kham": "Lần khám trước trong hồ sơ giả lập.",
+              "history.benh_su": "Thông tin đã ghi ở lần khám trước.",
+              "history.tien_su_ban_than_trang_thai": "none_reported",
+              "history.tien_su_gia_dinh_trang_thai": "none_reported",
+              "allergy.trang_thai": "present",
+              "exam.tom_tat": "Nội dung khám mô phỏng, dùng để kiểm tra trích nguồn.",
+              "exam.huong_dieu_tri": "Theo dõi ngoại trú theo nội dung đã ghi trong phiếu mẫu.",
+              "exam.loi_dan": "Đọc lại hướng dẫn đã ghi và liên hệ phòng khám nếu cần làm rõ.",
+              "followup.ngay_tai_kham": "2026-09-17",
+              "followup.loi_dan": "Tái khám theo lịch hẹn đã ghi nhận."
+            },
+            "memberUuids": {
+              "visit.ly_do_kham": "d4000000-0000-4000-8000-000000000901",
+              "history.benh_su": "d4000000-0000-4000-8000-000000000902",
+              "history.tien_su_ban_than_trang_thai": "d4000000-0000-4000-8000-000000000903",
+              "history.tien_su_gia_dinh_trang_thai": "d4000000-0000-4000-8000-000000000904",
+              "allergy.trang_thai": "d4000000-0000-4000-8000-000000000905",
+              "exam.tom_tat": "d4000000-0000-4000-8000-000000000906",
+              "exam.huong_dieu_tri": "d4000000-0000-4000-8000-000000000907",
+              "exam.loi_dan": "d4000000-0000-4000-8000-000000000908",
+              "followup.ngay_tai_kham": "d4000000-0000-4000-8000-000000000909",
+              "followup.loi_dan": "d4000000-0000-4000-8000-000000000910"
+            }
+          },
+          "vitals": [
+            {
+              "uuid": "d2000000-0000-4000-8000-000000000009",
+              "patientUuid": "a1000000-0000-4000-8000-000000000001",
+              "visitUuid": "b0000000-0000-4000-8000-000000000009",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000009",
+              "measuredAt": "2026-09-10T09:00:00+07:00",
+              "values": {
+                "vitals.mach": 82,
+                "vitals.ha_tam_thu": 120,
+                "vitals.ha_tam_truong": 80,
+                "vitals.nhiet_do": 37.1,
+                "vitals.nhip_tho": 18,
+                "vitals.spo2": 97,
+                "vitals.can_nang": 65,
+                "vitals.chieu_cao": 170
+              },
+              "states": {},
+              "needsVerification": false,
+              "voided": false
+            }
+          ],
+          "allergies": {
+            "patientUuid": "a1000000-0000-4000-8000-000000000001",
+            "allergies": [
+              {
+                "uuid": "da000000-0000-4000-8000-000000000001",
+                "patientUuid": "a1000000-0000-4000-8000-000000000001",
+                "allergenType": "DRUG",
+                "allergen": {
+                  "nonCoded": "Penicillin (dữ liệu mô phỏng)"
+                },
+                "severity": {
+                  "display": "Trung bình"
+                },
+                "reactions": [
+                  {
+                    "concept": {
+                      "display": "Mày đay"
+                    }
+                  }
+                ],
+                "voided": false
+              }
+            ]
+          },
+          "diagnoses": [],
+          "drugOrders": [],
+          "events": []
+        }
+      },
+      "vitals": [
+        {
+          "uuid": "d2000000-0000-4000-8000-000000000001",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitUuid": "b1000000-0000-4000-8000-000000000001",
+          "encounterUuid": "c4000000-0000-4000-8000-000000000001",
+          "measuredAt": "2026-10-14T09:00:00+07:00",
+          "values": {
+            "vitals.mach": 82,
+            "vitals.ha_tam_thu": 120,
+            "vitals.ha_tam_truong": 80,
+            "vitals.nhiet_do": 37.1,
+            "vitals.nhip_tho": 18,
+            "vitals.spo2": 97,
+            "vitals.can_nang": 65,
+            "vitals.chieu_cao": 170
+          },
+          "states": {},
+          "needsVerification": false,
+          "voided": false
+        },
+        {
+          "uuid": "d2000000-0000-4000-8000-000000000009",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitUuid": "b0000000-0000-4000-8000-000000000009",
+          "encounterUuid": "c4000000-0000-4000-8000-000000000009",
+          "measuredAt": "2026-09-10T09:00:00+07:00",
+          "values": {
+            "vitals.mach": 82,
+            "vitals.ha_tam_thu": 120,
+            "vitals.ha_tam_truong": 80,
+            "vitals.nhiet_do": 37.1,
+            "vitals.nhip_tho": 18,
+            "vitals.spo2": 97,
+            "vitals.can_nang": 65,
+            "vitals.chieu_cao": 170
+          },
+          "states": {},
+          "needsVerification": false,
+          "voided": false
+        }
+      ],
+      "allergies": [
+        {
+          "uuid": "da000000-0000-4000-8000-000000000001",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "allergenType": "DRUG",
+          "allergen": {
+            "nonCoded": "Penicillin (dữ liệu mô phỏng)"
+          },
+          "severity": {
+            "display": "Trung bình"
+          },
+          "reactions": [
+            {
+              "concept": {
+                "display": "Mày đay"
+              }
+            }
+          ],
+          "voided": false
+        }
+      ],
+      "serviceOrders": [
+        {
+          "uuid": "e5000000-0000-4000-8000-000000000001",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitUuid": "b1000000-0000-4000-8000-000000000001",
+          "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+          "serviceCode": "SYN-LAB",
+          "serviceName": "Xét nghiệm mẫu",
+          "state": "completed",
+          "createdAt": "2026-10-14T09:00:00+07:00",
+          "results": [
+            {
+              "result_uuid": "e6000000-0000-4000-8000-000000000001",
+              "version_number": 1,
+              "state": "final"
+            }
+          ]
+        }
+      ],
+      "results": {
+        "e6000000-0000-4000-8000-000000000001": {
+          "uuid": "e6000000-0000-4000-8000-000000000001",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitUuid": "b1000000-0000-4000-8000-000000000001",
+          "encounterUuid": "c1000000-0000-4000-8000-000000000001",
+          "orderUuid": "e5000000-0000-4000-8000-000000000001",
+          "version": 1,
+          "state": "final",
+          "numericValue": 5.6,
+          "textValue": null,
+          "unit": "mmol/L",
+          "recordedAt": "2026-10-14T09:00:00+07:00",
+          "reviewedAt": "2026-10-14T09:10:00+07:00"
+        }
+      },
+      "appointments": [
+        {
+          "uuid": "d7000000-0000-4000-8000-000000000001",
+          "patientUuid": "a1000000-0000-4000-8000-000000000001",
+          "visitUuid": null,
+          "startAt": "2026-10-21T09:00:00+07:00",
+          "status": "booked",
+          "serviceName": "Tái khám (giả lập)"
+        }
+      ],
+      "publications": [
+        {
+          "visitUuid": "b1000000-0000-4000-8000-000000000001",
+          "status": "published",
+          "sourceVersion": 1,
+          "currentSourceVersion": 1,
+          "publishedAt": "2026-10-14T09:45:00+07:00",
+          "items": [
+            {
+              "field": "exam.loi_dan",
+              "label": "Lời dặn",
+              "text": "Đọc lại hướng dẫn đã ghi và liên hệ phòng khám nếu cần làm rõ."
+            },
+            {
+              "field": "followup.ngay_tai_kham",
+              "label": "Ngày tái khám",
+              "text": "2026-10-21"
+            },
+            {
+              "field": "followup.loi_dan",
+              "label": "Lời dặn tái khám",
+              "text": "Tái khám theo lịch hẹn đã ghi nhận."
+            }
+          ],
+          "prescriptions": [
+            {
+              "uuid": "d8000000-0000-4000-8000-000000000001",
+              "visitUuid": "b1000000-0000-4000-8000-000000000001",
+              "drugName": "Paracetamol (mẫu)",
+              "strength": "500 mg",
+              "dose": "1 viên",
+              "frequency": "Theo hướng dẫn trong đơn mẫu",
+              "route": "Uống",
+              "duration": "3 ngày",
+              "instructions": "Đơn mô phỏng để kiểm thử; không sử dụng cho điều trị.",
+              "status": "active",
+              "confirmedAt": "2026-10-14T09:00:00+07:00"
+            },
+            {
+              "uuid": "d8000000-0000-4000-8000-000000000002",
+              "visitUuid": "b1000000-0000-4000-8000-000000000001",
+              "drugName": "Ibuprofen (mẫu)",
+              "strength": "400 mg",
+              "dose": "1 viên",
+              "frequency": "Theo hướng dẫn trong đơn mẫu",
+              "route": "Uống",
+              "duration": "3 ngày",
+              "instructions": "Đơn mô phỏng để kiểm thử; không sử dụng cho điều trị.",
+              "status": "discontinued",
+              "confirmedAt": "2026-10-14T09:00:00+07:00"
+            }
+          ]
+        },
+        {
+          "visitUuid": "b0000000-0000-4000-8000-000000000009",
+          "status": "stale",
+          "sourceVersion": 1,
+          "currentSourceVersion": 2,
+          "publishedAt": "2026-10-14T09:45:00+07:00",
+          "items": [
+            {
+              "field": "exam.loi_dan",
+              "label": "Lời dặn",
+              "text": "Đọc lại hướng dẫn đã ghi và liên hệ phòng khám nếu cần làm rõ."
+            },
+            {
+              "field": "followup.ngay_tai_kham",
+              "label": "Ngày tái khám",
+              "text": "2026-09-17"
+            },
+            {
+              "field": "followup.loi_dan",
+              "label": "Lời dặn tái khám",
+              "text": "Tái khám theo lịch hẹn đã ghi nhận."
+            }
+          ],
+          "prescriptions": []
+        }
+      ]
+    },
+    "a2000000-0000-4000-8000-000000000002": {
+      "scenario": "B · phiếu nháp, thiếu thông tin",
+      "facilityUuid": "f1000000-0000-4000-8000-000000000001",
+      "administrative": {
+        "uuid": "a2000000-0000-4000-8000-000000000002",
+        "patientUuid": "a2000000-0000-4000-8000-000000000002",
+        "fullName": "Bệnh nhân B · phiếu nháp, thiếu thông tin — GIẢ LẬP",
+        "gender": "U",
+        "age": 30,
+        "birthdateEstimated": false
+      },
+      "visits": [
+        {
+          "uuid": "b2000000-0000-4000-8000-000000000002",
+          "visitUuid": "b2000000-0000-4000-8000-000000000002",
+          "patientUuid": "a2000000-0000-4000-8000-000000000002",
+          "visitType": {
+            "key": "outpatient",
+            "name": "Khám ngoại trú (giả lập)"
+          },
+          "startDatetime": "2026-10-14T09:00:00+07:00",
+          "stopDatetime": null,
+          "status": "open",
+          "closeReason": null,
+          "closeNote": null,
+          "encounters": [
+            {
+              "uuid": "c2000000-0000-4000-8000-000000000002",
+              "encounterUuid": "c2000000-0000-4000-8000-000000000002",
+              "patientUuid": "a2000000-0000-4000-8000-000000000002",
+              "visitUuid": "b2000000-0000-4000-8000-000000000002",
+              "encounterDatetime": "2026-10-14T09:00:00+07:00",
+              "encounterType": {
+                "key": "consultation",
+                "name": "Phiếu khám"
+              }
+            },
+            {
+              "uuid": "c4000000-0000-4000-8000-000000000002",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000002",
+              "patientUuid": "a2000000-0000-4000-8000-000000000002",
+              "visitUuid": "b2000000-0000-4000-8000-000000000002",
+              "encounterDatetime": "2026-10-14T09:00:00+07:00",
+              "encounterType": {
+                "key": "vitals",
+                "name": "Sinh hiệu"
+              }
+            }
+          ]
+        }
+      ],
+      "summaries": {
+        "c2000000-0000-4000-8000-000000000002": {
+          "patientUuid": "a2000000-0000-4000-8000-000000000002",
+          "visitUuid": "b2000000-0000-4000-8000-000000000002",
+          "encounterUuid": "c2000000-0000-4000-8000-000000000002",
+          "encounterDatetime": "2026-10-14T09:00:00+07:00",
+          "status": "draft",
+          "consultation": {
+            "groupUuid": "d3000000-0000-4000-8000-000000000002",
+            "patientUuid": "a2000000-0000-4000-8000-000000000002",
+            "encounterUuid": "c2000000-0000-4000-8000-000000000002",
+            "values": {
+              "visit.ly_do_kham": "Hồ sơ mẫu chưa hoàn tất.",
+              "history.benh_su": "Thông tin ban đầu trong phiếu nháp.",
+              "history.tien_su_ban_than_trang_thai": "unknown",
+              "history.tien_su_gia_dinh_trang_thai": "not_asked",
+              "allergy.trang_thai": "unknown"
+            },
+            "memberUuids": {
+              "visit.ly_do_kham": "d4000000-0000-4000-8000-000000000201",
+              "history.benh_su": "d4000000-0000-4000-8000-000000000202",
+              "history.tien_su_ban_than_trang_thai": "d4000000-0000-4000-8000-000000000203",
+              "history.tien_su_gia_dinh_trang_thai": "d4000000-0000-4000-8000-000000000204",
+              "allergy.trang_thai": "d4000000-0000-4000-8000-000000000205"
+            }
+          },
+          "vitals": [
+            {
+              "uuid": "d2000000-0000-4000-8000-000000000002",
+              "patientUuid": "a2000000-0000-4000-8000-000000000002",
+              "visitUuid": "b2000000-0000-4000-8000-000000000002",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000002",
+              "measuredAt": "2026-10-14T09:00:00+07:00",
+              "values": {
+                "vitals.mach": 78,
+                "vitals.nhiet_do": 36.8
+              },
+              "states": {
+                "vitals.spo2": "not_recorded"
+              },
+              "needsVerification": false,
+              "voided": false
+            }
+          ],
+          "allergies": {
+            "patientUuid": "a2000000-0000-4000-8000-000000000002",
+            "allergies": []
+          },
+          "diagnoses": [],
+          "drugOrders": [],
+          "events": []
+        }
+      },
+      "vitals": [
+        {
+          "uuid": "d2000000-0000-4000-8000-000000000002",
+          "patientUuid": "a2000000-0000-4000-8000-000000000002",
+          "visitUuid": "b2000000-0000-4000-8000-000000000002",
+          "encounterUuid": "c4000000-0000-4000-8000-000000000002",
+          "measuredAt": "2026-10-14T09:00:00+07:00",
+          "values": {
+            "vitals.mach": 78,
+            "vitals.nhiet_do": 36.8
+          },
+          "states": {
+            "vitals.spo2": "not_recorded"
+          },
+          "needsVerification": false,
+          "voided": false
+        }
+      ],
+      "allergies": [],
+      "serviceOrders": [],
+      "results": {},
+      "appointments": [
+        {
+          "uuid": "d7000000-0000-4000-8000-000000000002",
+          "patientUuid": "a2000000-0000-4000-8000-000000000002",
+          "visitUuid": null,
+          "startAt": "2026-10-22T10:00:00+07:00",
+          "status": "booked",
+          "serviceName": "Lịch hẹn (giả lập)"
+        }
+      ],
+      "publications": [
+        {
+          "visitUuid": "b2000000-0000-4000-8000-000000000002",
+          "status": "draft",
+          "sourceVersion": 1,
+          "currentSourceVersion": 1,
+          "publishedAt": null,
+          "items": [],
+          "prescriptions": []
+        }
+      ]
+    },
+    "a3000000-0000-4000-8000-000000000003": {
+      "scenario": "C · ngoài quyền bác sĩ A",
+      "facilityUuid": "f2000000-0000-4000-8000-000000000002",
+      "administrative": {
+        "uuid": "a3000000-0000-4000-8000-000000000003",
+        "patientUuid": "a3000000-0000-4000-8000-000000000003",
+        "fullName": "Bệnh nhân C · ngoài quyền bác sĩ A — GIẢ LẬP",
+        "gender": "U",
+        "age": 30,
+        "birthdateEstimated": false
+      },
+      "visits": [
+        {
+          "uuid": "b3000000-0000-4000-8000-000000000003",
+          "visitUuid": "b3000000-0000-4000-8000-000000000003",
+          "patientUuid": "a3000000-0000-4000-8000-000000000003",
+          "visitType": {
+            "key": "outpatient",
+            "name": "Khám ngoại trú (giả lập)"
+          },
+          "startDatetime": "2026-10-14T09:00:00+07:00",
+          "stopDatetime": null,
+          "status": "open",
+          "closeReason": null,
+          "closeNote": null,
+          "encounters": [
+            {
+              "uuid": "c3000000-0000-4000-8000-000000000003",
+              "encounterUuid": "c3000000-0000-4000-8000-000000000003",
+              "patientUuid": "a3000000-0000-4000-8000-000000000003",
+              "visitUuid": "b3000000-0000-4000-8000-000000000003",
+              "encounterDatetime": "2026-10-14T09:00:00+07:00",
+              "encounterType": {
+                "key": "consultation",
+                "name": "Phiếu khám"
+              }
+            },
+            {
+              "uuid": "c4000000-0000-4000-8000-000000000003",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000003",
+              "patientUuid": "a3000000-0000-4000-8000-000000000003",
+              "visitUuid": "b3000000-0000-4000-8000-000000000003",
+              "encounterDatetime": "2026-10-14T09:00:00+07:00",
+              "encounterType": {
+                "key": "vitals",
+                "name": "Sinh hiệu"
+              }
+            }
+          ]
+        }
+      ],
+      "summaries": {
+        "c3000000-0000-4000-8000-000000000003": {
+          "patientUuid": "a3000000-0000-4000-8000-000000000003",
+          "visitUuid": "b3000000-0000-4000-8000-000000000003",
+          "encounterUuid": "c3000000-0000-4000-8000-000000000003",
+          "encounterDatetime": "2026-10-14T09:00:00+07:00",
+          "status": "final",
+          "consultation": {
+            "groupUuid": "d3000000-0000-4000-8000-000000000003",
+            "patientUuid": "a3000000-0000-4000-8000-000000000003",
+            "encounterUuid": "c3000000-0000-4000-8000-000000000003",
+            "values": {
+              "visit.ly_do_kham": "Đau đầu nhẹ từ hôm qua (tình huống giả lập).",
+              "history.benh_su": "Nội dung riêng của hồ sơ C (giả lập).",
+              "history.tien_su_ban_than_trang_thai": "none_reported",
+              "history.tien_su_gia_dinh_trang_thai": "none_reported",
+              "allergy.trang_thai": "no_known_allergy",
+              "exam.tom_tat": "Nội dung khám mô phỏng, dùng để kiểm tra trích nguồn.",
+              "exam.huong_dieu_tri": "Theo dõi ngoại trú theo nội dung đã ghi trong phiếu mẫu.",
+              "exam.loi_dan": "Đọc lại hướng dẫn đã ghi và liên hệ phòng khám nếu cần làm rõ.",
+              "followup.ngay_tai_kham": "2026-10-21",
+              "followup.loi_dan": "Tái khám theo lịch hẹn đã ghi nhận."
+            },
+            "memberUuids": {
+              "visit.ly_do_kham": "d4000000-0000-4000-8000-000000000301",
+              "history.benh_su": "d4000000-0000-4000-8000-000000000302",
+              "history.tien_su_ban_than_trang_thai": "d4000000-0000-4000-8000-000000000303",
+              "history.tien_su_gia_dinh_trang_thai": "d4000000-0000-4000-8000-000000000304",
+              "allergy.trang_thai": "d4000000-0000-4000-8000-000000000305",
+              "exam.tom_tat": "d4000000-0000-4000-8000-000000000306",
+              "exam.huong_dieu_tri": "d4000000-0000-4000-8000-000000000307",
+              "exam.loi_dan": "d4000000-0000-4000-8000-000000000308",
+              "followup.ngay_tai_kham": "d4000000-0000-4000-8000-000000000309",
+              "followup.loi_dan": "d4000000-0000-4000-8000-000000000310"
+            }
+          },
+          "vitals": [
+            {
+              "uuid": "d2000000-0000-4000-8000-000000000003",
+              "patientUuid": "a3000000-0000-4000-8000-000000000003",
+              "visitUuid": "b3000000-0000-4000-8000-000000000003",
+              "encounterUuid": "c4000000-0000-4000-8000-000000000003",
+              "measuredAt": "2026-10-14T09:00:00+07:00",
+              "values": {
+                "vitals.mach": 82,
+                "vitals.ha_tam_thu": 120,
+                "vitals.ha_tam_truong": 80,
+                "vitals.nhiet_do": 37.1,
+                "vitals.nhip_tho": 18,
+                "vitals.spo2": 97,
+                "vitals.can_nang": 65,
+                "vitals.chieu_cao": 170
+              },
+              "states": {},
+              "needsVerification": false,
+              "voided": false
+            }
+          ],
+          "allergies": {
+            "patientUuid": "a3000000-0000-4000-8000-000000000003",
+            "allergies": []
+          },
+          "diagnoses": [],
+          "drugOrders": [],
+          "events": []
+        }
+      },
+      "vitals": [
+        {
+          "uuid": "d2000000-0000-4000-8000-000000000003",
+          "patientUuid": "a3000000-0000-4000-8000-000000000003",
+          "visitUuid": "b3000000-0000-4000-8000-000000000003",
+          "encounterUuid": "c4000000-0000-4000-8000-000000000003",
+          "measuredAt": "2026-10-14T09:00:00+07:00",
+          "values": {
+            "vitals.mach": 82,
+            "vitals.ha_tam_thu": 120,
+            "vitals.ha_tam_truong": 80,
+            "vitals.nhiet_do": 37.1,
+            "vitals.nhip_tho": 18,
+            "vitals.spo2": 97,
+            "vitals.can_nang": 65,
+            "vitals.chieu_cao": 170
+          },
+          "states": {},
+          "needsVerification": false,
+          "voided": false
+        }
+      ],
+      "allergies": [],
+      "serviceOrders": [],
+      "results": {},
+      "appointments": [],
+      "publications": [
+        {
+          "visitUuid": "b3000000-0000-4000-8000-000000000003",
+          "status": "revoked",
+          "sourceVersion": 1,
+          "currentSourceVersion": 1,
+          "publishedAt": "2026-10-14T09:45:00+07:00",
+          "items": [
+            {
+              "field": "exam.loi_dan",
+              "label": "Lời dặn",
+              "text": "Đọc lại hướng dẫn đã ghi và liên hệ phòng khám nếu cần làm rõ."
+            },
+            {
+              "field": "followup.ngay_tai_kham",
+              "label": "Ngày tái khám",
+              "text": "2026-10-21"
+            },
+            {
+              "field": "followup.loi_dan",
+              "label": "Lời dặn tái khám",
+              "text": "Tái khám theo lịch hẹn đã ghi nhận."
+            }
+          ],
+          "prescriptions": []
+        }
+      ]
+    }
+  }
+}

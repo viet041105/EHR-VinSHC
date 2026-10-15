@@ -11,9 +11,13 @@ from pathlib import Path
 from typing import Mapping
 from urllib.parse import urlsplit
 
-AGENT_ROOT = Path(__file__).resolve().parents[2]
+# A wheel lives in site-packages, while Docker assets live in /app. Source/editable
+# installs keep the repository default; packaged deployments set this root explicitly.
+AGENT_ROOT = Path((os.environ.get("VINSHC_AGENT_ASSET_ROOT") or "").strip() or Path(__file__).resolve().parents[2]).resolve()
 DEFAULT_FIELDS_CSV = AGENT_ROOT.parent.parent / "metadata" / "vinshc" / "fields.csv"
 DEMO_PATIENT_FIXTURE = AGENT_ROOT / "fixtures" / "patient_portal.demo.json"
+DEMO_CLINICAL_FIXTURE = AGENT_ROOT / "fixtures" / "clinical.demo.json"
+DEFAULT_KNOWLEDGE = AGENT_ROOT / "knowledge" / "manifest.json"
 EFFORTS = ("low", "medium", "high", "xhigh", "max")
 # Các nguồn credential Anthropic SDK tự đọc từ môi trường (theo thứ tự ưu tiên của SDK).
 ANTHROPIC_CREDENTIAL_ENV = (
@@ -30,6 +34,8 @@ class ConfigError(ValueError):
 
 @dataclass(frozen=True)
 class Settings:
+    data_provider: str = "http"
+    mock_fixture: Path = DEMO_CLINICAL_FIXTURE
     backend_url: str = "http://127.0.0.1:8080/openmrs/ws/rest/v1"
     backend_timeout: float = 15.0
     fields_csv: Path = DEFAULT_FIELDS_CSV
@@ -54,6 +60,16 @@ class Settings:
     rate_limit_per_minute: int = 20
     max_tool_rounds: int = 4
     max_tool_calls_per_round: int = 4
+    knowledge_enabled: bool = False
+    knowledge_allow_development: bool = False
+    knowledge_manifest: Path = DEFAULT_KNOWLEDGE
+    knowledge_mode: str = "offline"
+    knowledge_index: Path = AGENT_ROOT.parent.parent / ".runtime" / "agent-rag" / "gemini-768.json"
+    advanced_enabled: bool = False
+    conversation_ttl: int = 900
+    conversation_limit: int = 256
+    model_circuit_failures: int = 3
+    model_circuit_cooldown: float = 30.0
 
 
 def _flag(value: str | None) -> bool:
@@ -63,6 +79,8 @@ def _flag(value: str | None) -> bool:
 def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
     d = Settings()
     settings = Settings(
+        data_provider=env.get("VINSHC_AGENT_DATA_PROVIDER", d.data_provider).strip().lower(),
+        mock_fixture=Path(env.get("VINSHC_AGENT_MOCK_FIXTURE", str(d.mock_fixture))),
         backend_url=env.get("VINSHC_AGENT_BACKEND_URL", d.backend_url).rstrip("/"),
         backend_timeout=float(env.get("VINSHC_AGENT_BACKEND_TIMEOUT", d.backend_timeout)),
         fields_csv=Path(env.get("VINSHC_AGENT_FIELDS_CSV", str(d.fields_csv))),
@@ -87,8 +105,23 @@ def load_settings(env: Mapping[str, str] = os.environ) -> Settings:
         rate_limit_per_minute=int(env.get("VINSHC_AGENT_RATE_LIMIT_PER_MINUTE", d.rate_limit_per_minute)),
         max_tool_rounds=int(env.get("VINSHC_AGENT_MAX_TOOL_ROUNDS", d.max_tool_rounds)),
         max_tool_calls_per_round=int(env.get("VINSHC_AGENT_MAX_TOOL_CALLS_PER_ROUND", d.max_tool_calls_per_round)),
+        knowledge_enabled=_flag(env.get("VINSHC_AGENT_KNOWLEDGE_ENABLED", "true" if env.get("VINSHC_AGENT_DATA_PROVIDER", d.data_provider).strip().lower() == "mock" else "false")),
+        knowledge_allow_development=_flag(env.get("VINSHC_AGENT_KNOWLEDGE_ALLOW_DEVELOPMENT")),
+        knowledge_manifest=Path(env.get("VINSHC_AGENT_KNOWLEDGE_MANIFEST", str(d.knowledge_manifest))),
+        knowledge_mode=env.get("VINSHC_AGENT_KNOWLEDGE_MODE", d.knowledge_mode).strip().lower(),
+        knowledge_index=Path(env.get("VINSHC_AGENT_KNOWLEDGE_INDEX", str(d.knowledge_index))),
+        advanced_enabled=_flag(env.get("VINSHC_AGENT_ADVANCED_ENABLED", "true" if env.get("VINSHC_AGENT_DATA_PROVIDER", d.data_provider).strip().lower() == "mock" else "false")),
+        conversation_ttl=int(env.get("VINSHC_AGENT_CONVERSATION_TTL", d.conversation_ttl)),
+        conversation_limit=int(env.get("VINSHC_AGENT_CONVERSATION_LIMIT", d.conversation_limit)),
+        model_circuit_failures=int(env.get("VINSHC_AGENT_MODEL_CIRCUIT_FAILURES", d.model_circuit_failures)),
+        model_circuit_cooldown=float(env.get("VINSHC_AGENT_MODEL_CIRCUIT_COOLDOWN", d.model_circuit_cooldown)),
     )
     validate(settings)
+    if settings.knowledge_enabled and settings.knowledge_mode == "gemini":
+        if settings.gemini_api_key_file:
+            read_api_key(settings.gemini_api_key_file)
+        elif not (env.get("GEMINI_API_KEY") or "").strip():
+            raise ConfigError("Gemini embedding cần GEMINI_API_KEY hoặc file khóa Gemini.")
     if settings.model_provider == "anthropic":
         settings = replace(settings, anthropic_credential=anthropic_credential_source(settings, env))
     elif settings.model_provider == "gemini":
@@ -134,6 +167,20 @@ def anthropic_credential_source(settings: Settings, env: Mapping[str, str]) -> s
 
 
 def validate(settings: Settings) -> None:
+    if not 30 <= settings.conversation_ttl <= 3600 or not 1 <= settings.conversation_limit <= 1024:
+        raise ConfigError("Conversation TTL 30–3600 giây; số phiên tối đa 1–1024.")
+    if not 1 <= settings.model_circuit_failures <= 10 or not math.isfinite(settings.model_circuit_cooldown) or not 1 <= settings.model_circuit_cooldown <= 120:
+        raise ConfigError("Circuit breaker: failures 1–10, cooldown 1–120 giây.")
+    if settings.knowledge_mode not in ("offline", "gemini"):
+        raise ConfigError("VINSHC_AGENT_KNOWLEDGE_MODE chỉ nhận offline hoặc gemini.")
+    if settings.knowledge_enabled and not settings.knowledge_manifest.is_file():
+        raise ConfigError("Không tìm thấy manifest tài liệu RAG.")
+    if settings.knowledge_enabled and settings.knowledge_mode == "gemini" and not settings.allow_external_model:
+        raise ConfigError("Gemini embedding cần VINSHC_AGENT_ALLOW_EXTERNAL_MODEL=true.")
+    if settings.data_provider not in ("http", "mock"):
+        raise ConfigError("VINSHC_AGENT_DATA_PROVIDER chỉ nhận 'http' hoặc 'mock'.")
+    if settings.data_provider == "mock" and not settings.mock_fixture.is_file():
+        raise ConfigError(f"Không tìm thấy bộ hồ sơ giả: {settings.mock_fixture}")
     url = urlsplit(settings.backend_url)
     if url.scheme not in ("http", "https") or not url.hostname:
         raise ConfigError("VINSHC_AGENT_BACKEND_URL phải là URL http(s) tới /openmrs/ws/rest/v1.")

@@ -36,6 +36,22 @@ def test_normal_clinical_wording_is_allowed(message):
     assert guardrails.screen_input("doctor", message, [], ALLOWED).action == "allow"
 
 
+@pytest.mark.parametrize('message', [
+    'Hãy tự kê thêm thuốc cho bệnh nhân', 'Bạn giúp tôi kê một đơn thuốc mới',
+    'Vui lòng tạo đơn thuốc', 'Tôi muốn sửa hồ sơ này', 'Hãy xóa bệnh án',
+])
+def test_read_only_doctor_cannot_request_clinical_writes(message):
+    verdict = guardrails.screen_input('doctor', message, [], ALLOWED)
+    assert verdict.action == 'refuse' and verdict.code == 'clinical_action'
+
+
+@pytest.mark.parametrize('message', ['Bệnh nhân đang được kê những thuốc nào?', 'Bác sĩ đã kê thuốc gì?',
+                                   'Cho tôi xem thuốc đã ghi trong hồ sơ', 'Hãy đọc đơn bác sĩ đã kê',
+                                   'Bạn cho tôi biết đang kê thuốc nào?', 'Bạn đọc những thuốc được kê giúp tôi'])
+def test_prescription_reads_are_not_mistaken_for_new_prescriptions(message):
+    assert guardrails.screen_input('doctor', message, [], ALLOWED).action == 'allow'
+
+
 def test_uuid_outside_context_is_refused():
     other = "a9999999-0000-4000-8000-000000000001"
     assert guardrails.screen_input("doctor", f"Đọc hồ sơ {other}", [], ALLOWED).code == "other_record"

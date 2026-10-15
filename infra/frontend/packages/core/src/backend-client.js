@@ -60,6 +60,7 @@ export class BackendClient {
       scoped = true,
       binary = false,
       adminCore = false,
+      signal,
     } = {},
   ) {
     if (adminCore) {
@@ -111,9 +112,10 @@ export class BackendClient {
         credentials: "omit",
         redirect: "error",
         cache: "no-store",
-        signal: AbortSignal.timeout(15000),
+        signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(15000)]) : AbortSignal.timeout(15000),
       });
-    } catch {
+    } catch (error) {
+      if (signal?.aborted) throw error;
       throw new BackendError(
         "Chưa kết nối được dịch vụ phòng khám. Vui lòng thử lại hoặc liên hệ quản trị.",
       );
@@ -164,6 +166,12 @@ export class BackendClient {
     return data;
   }
   async chat(persona, body, { signal } = {}) {
+    return this.#agentRequest(persona, "chat", { body, signal });
+  }
+  async readKnowledgeChunk(persona, chunkUuid, { signal } = {}) {
+    return this.#agentRequest(persona, "knowledge/chunks/" + uuid(chunkUuid), { signal });
+  }
+  async #agentRequest(persona, path, { body, signal } = {}) {
     if (!["doctor", "patient"].includes(persona) || !this.#token)
       throw new BackendError("Cần đăng nhập đúng tài khoản để dùng trợ lý.", 401);
     if (persona === "doctor" && this.workspace?.role !== "doctor")
@@ -176,8 +184,8 @@ export class BackendClient {
     }
     let response;
     try {
-      response = await this.fetcher("/agent/v1/" + persona + "/chat", {
-        method: "POST", headers, body: JSON.stringify(body), credentials: "omit", redirect: "error", cache: "no-store",
+      response = await this.fetcher("/agent/v1/" + persona + "/" + path, {
+        method: body === undefined ? "GET" : "POST", headers, body: body === undefined ? undefined : JSON.stringify(body), credentials: "omit", redirect: "error", cache: "no-store",
         signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(95000)]) : AbortSignal.timeout(95000),
       });
     } catch (error) {
@@ -188,7 +196,7 @@ export class BackendClient {
     if (response.status === 401) this.clear();
     let data;
     try { data = await response.json(); } catch { throw new BackendError("Trợ lý không trả dữ liệu hợp lệ.", response.status); }
-    if (!response.ok) throw new BackendError(data.detail || messages[response.status] || "Trợ lý chưa sẵn sàng.", response.status);
+    if (!response.ok) throw new BackendError(data.detail || messages[response.status] || "Trợ lý chưa sẵn sàng.", response.status, data);
     return data;
   }
   async login(username, password) {

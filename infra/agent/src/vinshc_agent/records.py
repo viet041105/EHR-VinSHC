@@ -154,12 +154,15 @@ def clinical_summary(
         rec.gap("vitals", "Sinh hiệu", "none_in_source", "Nguồn đang đọc không có nhóm sinh hiệu nào cho lượt khám này.")
     diagnoses = [d for d in summary.get("diagnoses") or [] if not d.get("voided")]
     if not diagnoses:
-        rec.gap("diagnoses", "Chẩn đoán", "none_in_source", "Chưa có chẩn đoán nào được ghi cho lần khám này.")
+        rec.gap("diagnoses", "Chẩn đoán", "none_in_source", "Chưa có chẩn đoán nào được ghi cho lần khám này.",
+                Source("encounter", encounter, "diagnoses", summary.get("encounterDatetime"), status))
     for dx in diagnoses:
         _diagnosis(rec, dx)
     orders = summary.get("drugOrders") or []
     if not orders:
-        rec.gap("medications", "Thuốc", "none_in_source", "Lần khám này không có dòng thuốc nào trong dữ liệu trả về.")
+        rec.gap("medications", "Thuốc", "none_in_source",
+                "Lần khám đang mở chưa có dòng thuốc nào trong dữ liệu đọc được. Điều này không xác nhận bệnh nhân không dùng thuốc.",
+                Source("encounter", encounter, "drugOrders", summary.get("encounterDatetime"), status))
     for order in orders:
         _drug_order(rec, order)
     for allergy in allergies:
@@ -270,13 +273,14 @@ def _allergy(rec: Recorder, allergy: dict[str, Any]) -> None:
     rec.add("allergies", f"Dị ứng {name}", "; ".join(parts), "recorded", Source("allergy", allergy.get("uuid"), "allergy", None, "active"))
 
 
-def vitals_history(rec: Recorder, payload: dict[str, Any], catalog: FieldCatalog, patient: str, limit: int) -> None:
+def vitals_history(rec: Recorder, payload: dict[str, Any], catalog: FieldCatalog, patient: str, limit: int, visit: str | None = None) -> None:
     _owned(payload, patient)
     groups = [g for g in payload.get("results") or [] if not g.get("voided")]
     for group in groups:
         _owned(group, patient)
     if not groups:
-        rec.gap("vitals", "Sinh hiệu", "none_in_source", "Không có nhóm sinh hiệu nào trong phạm vi đọc.")
+        rec.gap("vitals", "Sinh hiệu", "none_in_source", "Không có nhóm sinh hiệu nào trong phạm vi đọc.",
+                Source("vitals", None, None, None, None, visitUuid=visit))
         return
     for group in groups[:limit]:
         _vital_group(rec, group, catalog)
@@ -296,6 +300,7 @@ def allergy_list(rec: Recorder, payload: dict[str, Any], patient: str) -> None:
             "Danh sách dị ứng",
             "none_in_source",
             "Danh sách dị ứng đang hoạt động trống; điều này không thay cho trạng thái sàng lọc dị ứng trong phiếu khám.",
+            Source("allergy", None, None, None, None),
         )
     rec.note("Danh sách dị ứng phản ánh thời điểm đọc.")
 
@@ -303,7 +308,8 @@ def allergy_list(rec: Recorder, payload: dict[str, Any], patient: str) -> None:
 def visit_list(rec: Recorder, payload: dict[str, Any], patient: str) -> None:
     visits = payload.get("results") or []
     if not visits:
-        rec.gap("visits", "Các lượt khám", "none_in_source", "Không có lượt khám nào trong phạm vi cơ sở đang chọn.")
+        rec.gap("visits", "Các lượt khám", "none_in_source", "Không có lượt khám nào trong phạm vi cơ sở đang chọn.",
+                Source("visit", None, None, None, None))
         return
     for visit in visits:
         _owned(visit, patient)
@@ -337,10 +343,11 @@ def visit_list(rec: Recorder, payload: dict[str, Any], patient: str) -> None:
         rec.note("Còn lượt khám cũ hơn chưa được liệt kê.")
 
 
-def service_orders(rec: Recorder, payload: dict[str, Any], patient: str, limit: int) -> None:
+def service_orders(rec: Recorder, payload: dict[str, Any], patient: str, limit: int, visit: str | None = None) -> None:
     orders = payload.get("results") or []
     if not orders:
-        rec.gap("results", "Chỉ định cận lâm sàng", "none_in_source", "Không có chỉ định cận lâm sàng nào trong phạm vi đọc.")
+        rec.gap("results", "Chỉ định cận lâm sàng", "none_in_source", "Chưa có chỉ định cận lâm sàng nào trong phạm vi đọc; chưa có kết quả để đối chiếu.",
+                Source("service_order", None, None, None, None, visitUuid=visit))
         return
     for order in orders[-limit:]:
         _owned(order, patient)
@@ -394,7 +401,8 @@ def diagnostic_result(rec: Recorder, payload: dict[str, Any], patient: str, meta
 def appointments(rec: Recorder, payload: dict[str, Any], patient: str, limit: int) -> None:
     items = payload.get("results") or []
     if not items:
-        rec.gap("appointments", "Lịch hẹn", "none_in_source", "Không có lịch hẹn nào trong phạm vi cơ sở đang chọn.")
+        rec.gap("appointments", "Lịch hẹn", "none_in_source", "Chưa có lịch hẹn dạng bản ghi trong phạm vi cơ sở đang chọn. Ngày dự kiến tái khám trong phiếu khám là thông tin riêng.",
+                Source("appointment", None, None, None, None))
         return
     for item in items[-limit:]:
         _owned(item, patient)

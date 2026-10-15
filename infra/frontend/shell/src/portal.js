@@ -27,7 +27,12 @@ function render() {
   document.querySelector('#previousVisits')?.addEventListener('click',()=>pageVisits(Math.max(0,offset-PAGE_SIZE)));
   document.querySelector('#nextVisits')?.addEventListener('click',()=>{if(more)pageVisits(offset+PAGE_SIZE);});
   document.querySelector('#portalPassword')?.addEventListener('submit',changePassword);
-  if(session) chat.mount(document.querySelector('#patientChat'),'patient',{visit});
+  if(session) {
+    const selected=visits.find(item=>item.uuid===visit);
+    chat.mount(document.querySelector('#patientChat'),'patient',{visit},{
+      visitLabel:selected ? `${new Date(selected.startDatetime).toLocaleDateString('vi-VN')} · ${selected.facilityName}` : '',
+    });
+  }
 }
 async function loadVisits(){const data=await client.request(`vinshc/portal/visits?limit=${PAGE_SIZE}&offset=${offset}`,{scoped:false});visits=data.results;more=!!data.hasMore;visit=visits[0]?.uuid||null;}
 async function pageVisits(next){const token=++generation;offset=next;record=null;loading=true;render();

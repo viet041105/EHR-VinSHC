@@ -80,6 +80,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--env-file", type=Path, default=AGENT_DIR / ".env",
                         help="file biến môi trường (mặc định infra/agent/.env)")
     parser.add_argument("--reload", action="store_true", help="tự khởi động lại khi sửa code (chỉ dùng khi phát triển)")
+    parser.add_argument("--data-provider", choices=["http", "mock"], help="nguồn dữ liệu: BE qua HTTP hoặc bộ hồ sơ giả độc lập")
+    parser.add_argument("--model", choices=["fake", "gemini", "anthropic"], help="ghi đè model trong .env; không thay đổi nguồn dữ liệu")
+    parser.add_argument("--knowledge-mode", choices=["offline", "gemini"], help="chế độ tìm tài liệu; không thay đổi model chat")
     parser.add_argument("--log-level", default="info", choices=["critical", "error", "warning", "info", "debug"])
     parser.add_argument("--check", action="store_true", help="chỉ kiểm tra cấu hình rồi thoát")
     parser.add_argument("--check-model", action="store_true",
@@ -125,12 +128,29 @@ def main(argv: Sequence[str] | None = None) -> int:
     # Nạp .env trước để --host/--port lấy được mặc định từ file đó.
     pre = argparse.ArgumentParser(add_help=False)
     pre.add_argument("--env-file", type=Path, default=AGENT_DIR / ".env")
+    pre.add_argument("--data-provider", choices=["http", "mock"])
+    pre.add_argument("--model", choices=["fake", "gemini", "anthropic"])
+    pre.add_argument("--knowledge-mode", choices=["offline", "gemini"])
     known, _ = pre.parse_known_args(argv)
     loaded = load_env_file(known.env_file)
+    if known.data_provider:
+        os.environ["VINSHC_AGENT_DATA_PROVIDER"] = known.data_provider
+    if known.model:
+        os.environ["VINSHC_AGENT_MODEL_PROVIDER"] = known.model
+    if known.knowledge_mode:
+        os.environ["VINSHC_AGENT_KNOWLEDGE_MODE"] = known.knowledge_mode
     args = build_parser().parse_args(argv)
 
     try:
         settings = load_settings()
+        if settings.knowledge_enabled:
+            from vinshc_agent.knowledge import Corpus
+            Corpus(settings.knowledge_manifest, allow_development=settings.data_provider == "mock" or settings.knowledge_allow_development)
+        if settings.data_provider == "mock":
+            from vinshc_agent.mock import MockDataset
+            MockDataset.load(settings.mock_fixture, settings.fields_csv)
+            if args.host not in LOOPBACK:
+                raise ConfigError("Chế độ hồ sơ giả chỉ chạy trên loopback (127.0.0.1, localhost hoặc ::1).")
     except (ConfigError, ValueError) as ex:
         print(f"Lỗi cấu hình: {ex}", file=sys.stderr)
         return 2
@@ -140,13 +160,15 @@ def main(argv: Sequence[str] | None = None) -> int:
     if settings.model_provider == "gemini":
         model += f" ({settings.gemini_model}, thinking {settings.gemini_thinking_level})"
     print(f"Env file: {known.env_file} ({len(loaded)} biến)" if loaded else f"Env file: không dùng ({known.env_file})")
-    print(f"Backend: {settings.backend_url}")
+    print(f"Nguồn dữ liệu: {settings.data_provider}")
+    print(f"Hồ sơ giả: {settings.mock_fixture}" if settings.data_provider == "mock" else f"Backend: {settings.backend_url}")
     print(f"Model: {model}")
     if settings.anthropic_credential:
         print(f"Credential: {settings.anthropic_credential}")
     if settings.gemini_credential:
         print(f"Credential: {settings.gemini_credential}")
-    print(f"Cổng bệnh nhân: {settings.patient_portal}")
+    print(f"Cổng bệnh nhân: {'mock' if settings.data_provider == 'mock' else settings.patient_portal}")
+    print(f"Tài liệu RAG: {settings.knowledge_mode if settings.knowledge_enabled else 'tắt'}")
     if args.check_model:
         return check_model(settings)
     if args.check:
@@ -157,6 +179,7 @@ def main(argv: Sequence[str] | None = None) -> int:
 
     import uvicorn
 
+    sys.stdout.flush()
     uvicorn.run(
         "vinshc_agent.app:create_app",
         factory=True,
