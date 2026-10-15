@@ -75,7 +75,8 @@ class AgentPortalTests(unittest.TestCase):
         return portal,user['uuid']
     @classmethod
     def tearDownClass(cls):
-        report={'passed':len(cls.checks)==9,'checks':cls.checks,'model':'fake','clinicalEvaluationDeferred':True}
+        expected=11 if os.environ.get('VINSHC_TEST_AGENT_ADVANCED')=='true' else 10
+        report={'passed':len(cls.checks)==expected,'checks':cls.checks,'model':'fake','clinicalEvaluationDeferred':True}
         path=ROOT/'.runtime/reports/b12-agent-portal.json';path.parent.mkdir(parents=True,exist_ok=True)
         path.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
         for user in cls.accounts:cls.flow.admin.request(REST+'/user/'+user+'?reason=synthetic-test-complete',method='DELETE')
@@ -187,6 +188,51 @@ class AgentPortalTests(unittest.TestCase):
         status,_,body=self.flow.admin.request(API+'/authorization/audit?patient='+self.patient)
         self.assertEqual(status,200);self.assertTrue(any((e.get('detail') or '').startswith('agent:') for e in json.loads(body)))
         self.done('Doctor/patient agent reads real OpenMRS, preserves sources and redaction; audit marks agent')
+    def test_03a_real_doctor_chat_ui(self):
+        import subprocess
+        doctor=self.flow.staff['doctor']
+        env={**os.environ,'P5_DOCTOR_USER':doctor.username,'P5_DOCTOR_PASSWORD':doctor.password,
+             'P5_PATIENT_UUID':self.patient,'P5_VISIT_UUID':self.visit,'P5_ENCOUNTER_UUID':self.encounter}
+        result=subprocess.run(['node','tests/browser/live-doctor-agent-check.cjs'],cwd=ROOT/'infra/frontend',
+                              env=env,capture_output=True,text=True,encoding='utf-8',timeout=240)
+        self.assertEqual(result.returncode,0,(result.stdout+'\n'+result.stderr)[-1800:])
+        self.assertIn('real doctor desktop/mobile',result.stdout)
+        self.done('Doctor desktop/mobile chat reads real backend through the web proxy and opens authorized sources')
+
+    @unittest.skipUnless(os.environ.get('VINSHC_TEST_AGENT_ADVANCED')=='true','advanced synthetic acceptance overlay required')
+    def test_03b_advanced_agent_uses_real_backend_and_scoped_sources(self):
+        context={'patientUuid':self.patient,'encounterUuid':self.encounter,'visitUuid':self.visit}
+        def chat(message,**extra):
+            return self.doctor_agent.json('/agent/v1/doctor/chat',method='POST',payload={**context,'message':message,**extra},timeout=90)
+        timeline=chat('Timeline toàn bộ lịch sử')
+        self.assertEqual(timeline['status'],'ok')
+        self.assertIn('get_patient_timeline',timeline['toolsUsed'])
+        self.assertTrue(timeline['answer'])
+        self.assertTrue(all(a['sources'] for a in timeline['answer']))
+        previous=chat('So sánh với lần khám trước')
+        self.assertEqual(previous['status'],'not_found')
+        self.assertTrue(any(m['reason']=='no_previous_visit' for m in previous['missing']))
+        first=chat('Tóm tắt lần khám',remember=True)
+        session=first['conversationId']
+        self.assertEqual(first['conversationRevision'],1)
+        second=chat('Chi tiết hơn',remember=True,conversationId=session)
+        self.assertEqual(second['conversationRevision'],2)
+        self.assertEqual(second['conversationId'],session)
+        self.assertEqual(self.patient_agent.request('/agent/v1/patient/conversations/'+session,method='DELETE')[0],404)
+        self.assertTrue(self.doctor_agent.json('/agent/v1/doctor/conversations/'+session,method='DELETE')['deleted'])
+        reference=chat('Theo tài liệu unknown khác not_asked thế nào?')
+        self.assertEqual(reference['status'],'ok')
+        source=next(s for a in reference['answer'] for s in a['sources'] if s['kind']=='document')
+        chunk=self.doctor_agent.json('/agent/v1/doctor/knowledge/chunks/'+source['uuid'])
+        self.assertEqual(chunk['documentVersion'],source['documentVersion'])
+        self.assertEqual(self.patient_agent.request('/agent/v1/patient/knowledge/chunks/'+source['uuid'])[0],404)
+        status,headers,stream=self.doctor_agent.request('/agent/v1/doctor/chat',method='POST',payload={**context,'message':'Sinh hiệu đã ghi','stream':True},timeout=90)
+        self.assertEqual(status,200)
+        self.assertIn('text/event-stream',headers.get('Content-Type',''))
+        self.assertIn(b'event: final',stream)
+        self.assertIn(b'event: done',stream)
+        self.done('Advanced HTTP backend: timeline, missing prior, scoped memory, document citations and validated SSE')
+
     def test_04_unassigned_doctor_is_denied(self):
         username,password,person,_=self.fixtures.user_with_role('doctor',[self.flow.facility['locationUuid']])
         original=self.flow.staff['doctor']

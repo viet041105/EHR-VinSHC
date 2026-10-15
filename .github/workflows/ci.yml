@@ -187,8 +187,8 @@ jobs:
         env:
           VINSHC_APP_PORT: '5184'
         run: |
-          docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml build agent clinic
-          timeout 240s docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml up -d --wait --wait-timeout 240
+          docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml -f tests/integration/compose.agent-advanced.yaml build agent clinic
+          timeout 240s docker compose -f compose.yaml -f tests/integration/compose.b4-metadata.yaml -f compose.agent.yaml -f tests/integration/compose.agent-advanced.yaml up -d --wait --wait-timeout 240
       - name: Install P4 browser acceptance dependencies
         # B12 includes real desktop/mobile Playwright tests against the synthetic Docker clinic.
         run: |
@@ -199,6 +199,7 @@ jobs:
       - name: Verify patient publication, portal security, mobile UI and agent integration
         env:
           VINSHC_APP_PORT: '5184'
+          VINSHC_TEST_AGENT_ADVANCED: 'true'
         run: python -m unittest -v tests.integration.test_b12_agent_portal
       - name: Collect redacted diagnostics
         if: always()

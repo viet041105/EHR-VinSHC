@@ -22,8 +22,40 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install -c infra/agent/constraints.txt -e 'infra/agent[dev,anthropic]'
       - run: python -m pytest infra/agent/tests -q
+      - name: Run offline synthetic advanced baseline
+        run: python scripts/agent_review.py --skip-tests
+      - name: Save synthetic agent report
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f
+        with:
+          name: agent-advanced-synthetic
+          path: .runtime/reports/agent-advanced.*
+          retention-days: 7
       - run: python infra/agent/src/main.py --check
       - run: docker build -f infra/agent/Dockerfile -t vinshc-agent:ci .
+      - name: Verify packaged agent assets and synthetic startup
+        shell: bash
+        run: |
+          docker run --rm -i --network none -e VINSHC_AGENT_DATA_PROVIDER=mock -e VINSHC_AGENT_MODEL_PROVIDER=fake vinshc-agent:ci python - <<'PY'
+          import os
+          from pathlib import Path
+          from fastapi.testclient import TestClient
+          from vinshc_agent.app import create_app
+          from vinshc_agent.config import AGENT_ROOT
+          assert os.getuid() == 10001
+          assert AGENT_ROOT == Path('/app')
+          with TestClient(create_app()) as client:
+              health = client.get('/healthz').json()
+              assert health['dataProvider'] == 'mock' and health['knowledge']['enabled']
+              assert client.get('/dev/playground').status_code == 200
+              case = client.get('/dev/cases').json()['cases'][0]
+              headers = {'Authorization': 'Bearer demo-doctor', 'X-VinSHC-Workspace-Role': 'doctor', 'X-VinSHC-Workspace-Facility': case['facilityUuid']}
+              body = {key: case[key] for key in ('patientUuid', 'encounterUuid', 'visitUuid')}
+              body['message'] = 'Timeline toàn bộ lịch sử'
+              result = client.post('/v1/doctor/chat', headers=headers, json=body)
+              assert result.status_code == 200 and result.json()['status'] == 'ok'
+              print('PASS packaged assets, non-root startup and synthetic timeline')
+          PY
   frontend:
     runs-on: ubuntu-24.04
     timeout-minutes: 15

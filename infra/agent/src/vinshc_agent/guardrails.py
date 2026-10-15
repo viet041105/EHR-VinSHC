@@ -13,6 +13,8 @@ from __future__ import annotations
 import hashlib
 import re
 import time
+import unicodedata
+import base64
 from collections import deque
 from dataclasses import dataclass
 from typing import Iterable, Literal
@@ -26,6 +28,7 @@ CCCD_RE = re.compile(r"(?<!\d)\d{12}(?!\d)")
 PHONE_RE = re.compile(r"(?<![\d+])(?:\+84|84|0)(?:[\s.\-]?\d){9,10}(?![\d])")
 EMAIL_RE = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 REDACTED = "[đã ẩn]"
+SECRET_RE = re.compile(r"\b(?:AIza[\w-]{25,}|sk-[\w-]{20,}|eyJ[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,})\b")
 
 # Mẫu so khớp trên văn bản đã bỏ dấu (text.fold).
 INJECTION = [
@@ -78,8 +81,13 @@ TREATMENT_ADVICE = [
         r"\bkhuyen nghi\b",
     )
 ]
+CLINICAL_WRITE_REQUEST = re.compile(
+    r"\b(?:hay|vui long|giup toi|de nghi|toi muon|toi can|ban|tu)\b.{0,24}"
+    r"\b(?:ke(?:\s+\w+){0,3}\s+(?:don|thuoc)|(?:tao|them|doi|sua|xoa|chot)\s+(?:don thuoc|ho so|benh an|chi dinh)|dat chi dinh)\b"
+)
 
 REFUSALS = {
+    "clinical_action": "Yêu cầu này cần nhân viên y tế xử lý. Trợ lý chỉ đọc thông tin và hướng dẫn đã ghi trong hồ sơ.",
     "prompt_injection": "Yêu cầu này nằm ngoài phạm vi của trợ lý hồ sơ.",
     "other_record": "Trợ lý chỉ làm việc với hồ sơ đang mở; không đọc hồ sơ khác theo mã nhập vào.",
     "other_person": "Trợ lý chỉ xem được thông tin của chính tài khoản đang đăng nhập. Người thân cần dùng tài khoản "
@@ -100,12 +108,18 @@ class Verdict:
 
 
 def redact(text: str) -> str:
-    return PHONE_RE.sub(REDACTED, CCCD_RE.sub(REDACTED, EMAIL_RE.sub(REDACTED, text)))
+    return SECRET_RE.sub(REDACTED, PHONE_RE.sub(REDACTED, CCCD_RE.sub(REDACTED, EMAIL_RE.sub(REDACTED, text))))
 
 
 def is_injection(text: str) -> bool:
-    folded = fold(text)
-    return any(p.search(folded) for p in INJECTION)
+    clean = "".join(c for c in unicodedata.normalize("NFKC", text) if unicodedata.category(c) != "Cf")
+    candidates = [fold(clean)]
+    for encoded in re.findall(r"(?:base64|b64)\s*[:=]\s*([A-Za-z0-9+/=]{12,2048})", clean, re.I):
+        try:
+            candidates.append(fold(base64.b64decode(encoded, validate=True).decode("utf-8")))
+        except (ValueError, UnicodeError):
+            pass
+    return any(p.search(candidate) for candidate in candidates for p in INJECTION)
 
 
 def screen_input(
@@ -121,6 +135,11 @@ def screen_input(
         return Verdict("refuse", "other_record", REFUSALS["other_record"])
     if persona == "patient" and OTHER_PERSON.search(folded):
         return Verdict("refuse", "other_person", REFUSALS["other_person"])
+    read_intent = any(s in folded for s in ("da ghi", "da dan", "trong don", "trong ho so", "don ghi"))
+    if persona == "patient" and not read_intent and (any(p.search(folded) for p in MEDICATION_ADVICE) or MEDICATION_ADVICE_ACCENTED.search(message.lower())):
+        return Verdict("refuse", "clinical_action", REFUSALS["clinical_action"])
+    if CLINICAL_WRITE_REQUEST.search(folded) and not re.search(r"\b(?:da ke|dang ke|duoc ke|da ghi|bac si da|don ghi)\b", folded):
+        return Verdict("refuse", "clinical_action", REFUSALS["clinical_action"])
     return Verdict("allow")
 
 

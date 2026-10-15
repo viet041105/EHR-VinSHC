@@ -1,5 +1,22 @@
 # Chatbot trợ lý hồ sơ (`infra/agent`)
 
+**Gói nâng cao:** [AGENT_ADVANCED.md](../../docs/AGENT_ADVANCED.md). Kiểm bằng `npm run agent:review`;
+màn local có sẵn tại `http://127.0.0.1:8002/dev/playground` khi chạy demo ở cổng 8002. Mock tự bật
+timeline/so sánh, RAG nhiều truy vấn, phiên nhớ, streaming và diagnostics; HTTP mặc định chưa bật.
+
+Docker đặt `VINSHC_AGENT_ASSET_ROOT=/app` để package đã cài tìm đúng `fixtures/`, `knowledge/` và
+`playground/`. Chạy source/editable local giữ root mặc định của repo. Image đã được kiểm HTTP startup
+và các luồng synthetic độc lập, không cần gọi model ngoài hoặc khởi động database.
+
+**Phát triển agent trong lúc BE/FE làm lại:** xem [AGENT_DATA_HANDOFF.md](../../docs/AGENT_DATA_HANDOFF.md).
+Từ gốc repo chạy `npm run agent:setup` lần đầu, `npm run agent:dev` để chạy bộ hồ sơ giả với model trong `.env`,
+rồi `npm run agent:chat` ở terminal khác. Service riêng tại `http://127.0.0.1:8001`, không cần Docker hoặc database.
+`npm run agent:demo` dùng model fake để demo offline; `npm run agent:test` chạy test kỹ thuật.
+
+**RAG tài liệu bản đầu:** xem [AGENT_RAG.md](../../docs/AGENT_RAG.md) để hiểu nguồn, quyền, embedding và
+hợp đồng FE/BE. Trong mock, RAG mặc định bật ở chế độ BM25 offline. Thử retrieval riêng bằng
+`npm run agent:rag:search -- "SpO2 dùng đơn vị nào?"`; lệnh này không gọi model chat.
+
 Service Python (FastAPI + LangGraph) cho hai luồng trong [AGENT_PLAN.md](../../docs/AGENT_PLAN.md):
 
 - **Bác sĩ (A):** hỏi đáp, tóm tắt về bệnh nhân và lần khám đang mở, đọc thêm các lần khám trước, sinh hiệu,
@@ -44,6 +61,7 @@ infra/agent/
 │   ├── records.py      # payload backend → dữ kiện có nguồn, kiểm tra đúng bệnh nhân
 │   ├── facts.py        # Fact/Gap, sổ dữ kiện và mã tham chiếu của một lượt hỏi
 │   ├── backend.py      # client chỉ đọc tới adapter VinSHC (đường dẫn cố định)
+│   ├── mock.py         # hồ sơ/quyền/bản công bố giả lập, dùng cùng interface dữ liệu với tool
 │   ├── portal.py       # hợp đồng cổng bệnh nhân: DisabledPortal, FixturePortal
 │   ├── llm/            # kiểu dữ liệu chung, FakeChatModel, ClaudeChatModel
 │   ├── fields.py, text.py, config.py, schemas.py
@@ -77,8 +95,15 @@ docker run --rm -p 8000:8000 --env-file infra/agent/.env vinshc-agent
 
 ## API
 
-Agent không lưu hội thoại. FE gửi lại `history` (tối đa 12 lượt, xen kẽ `user`/`assistant`, dạng văn bản) và
-mỗi lượt agent đọc lại dữ kiện qua tool; lịch sử chỉ giúp hiểu câu hỏi, không được dùng làm nguồn.
+FE tích hợp gửi `remember: true` để tạo phiên RAM; câu sau dùng `conversationId` được trả về,
+không gửi đồng thời `history`. Phiên gắn tài khoản/workspace/hồ sơ, giữ tối đa 6 cặp hỏi/đáp trong
+15 phút và mất khi restart service. Đổi hồ sơ hoặc mở cuộc trò chuyện mới thì tạo phiên mới.
+Client chưa dùng phiên vẫn có thể gửi `history` giới hạn 12 tin nhắn xen kẽ `user`/`assistant`.
+
+Model dùng lịch sử để hiểu ý định và câu tiếp nối. Khi hỏi về chính cuộc trò chuyện, model chọn
+`recall_conversation`; server trích tin nhắn trong phiên, tách khỏi dữ kiện bệnh án và không tạo
+citation bệnh án cho lời đã nói. Câu tiếp nối về bệnh án phải đọc lại tool hồ sơ trong lượt hiện tại.
+Không nhận diện câu hỏi nhắc hội thoại bằng danh sách câu mẫu trong luồng Gemini.
 
 ### `POST /v1/doctor/chat`
 
@@ -89,15 +114,16 @@ Header giống các request FE đang gửi cho backend VinSHC: `Authorization`, 
 {
   "patientUuid": "…", "encounterUuid": "…", "visitUuid": null,
   "message": "Tóm tắt lần khám này giúp tôi",
-  "history": [{"role": "user", "text": "…"}, {"role": "assistant", "text": "…"}]
+  "remember": true
 }
 ```
 
-Nút "Tóm tắt lần khám" trên FE chỉ cần gửi `message` như trên. Chuyển bệnh nhân/lần khám thì FE xóa `history`.
+Nút "Tóm tắt lần khám" trên FE gửi `message` như trên. Câu sau gửi thêm `conversationId`.
+Chuyển bệnh nhân/lần khám thì FE xóa lịch sử và mã phiên.
 
 ### `POST /v1/patient/chat`
 
-Header `Authorization` của phiên cổng bệnh nhân; body `{"message", "history"}`. Bệnh nhân được xác định từ phiên,
+Header `Authorization` của phiên cổng bệnh nhân; body dùng `message`, `remember`/`conversationId` như trên. Bệnh nhân được xác định từ phiên,
 không có tham số chọn hồ sơ.
 
 ### Phản hồi 200
@@ -257,6 +283,9 @@ Contract đã triển khai xem docs/api/patient-portal.md. Backend chỉ trả p
 dùng chung để đọc thay bệnh nhân.
 
 ## Nối với FE
+
+Hướng dẫn ghép BE/FE của PR #21, chạy bằng hồ sơ trong PostgreSQL và các kiểm tra
+đã thực hiện: [AGENT_BE_FE_INTEGRATION.md](../../docs/AGENT_BE_FE_INTEGRATION.md).
 
 FE đã gọi agent qua cùng origin, proxy `/agent` → `http://127.0.0.1:8000` trong `vite.config.mjs` (vùng file
 của người 2), và gửi cùng header như `BackendClient`. Agent không bật CORS.
