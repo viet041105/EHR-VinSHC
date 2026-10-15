@@ -86,9 +86,11 @@ public class StaffAccountService {
 	}
 
 	private static String validPassword(Map<String, Object> body, String key) {
+		// Clinic policy: length only, no character classes. OpenMRS core rules are relaxed to match in
+		// configuration/globalproperties/vinshc/security.xml.
 		String password = field(body, key, 256);
-		if (password.length() < 12 || !password.matches("(?s).*[A-Za-z].*") || !password.matches("(?s).*\\d.*"))
-			throw VinshcService.bad("password must have 12+ characters, letters and digits");
+		if (password.length() < 6)
+			throw VinshcService.bad("password must have at least 6 characters");
 		return password;
 	}
 
@@ -127,12 +129,18 @@ public class StaffAccountService {
 		});
 	}
 
+	/** 3-50 chars (OpenMRS core limit), starts with a letter or digit; same rule for create and rename. */
+	static String validUsername(Map<String, Object> body) {
+		String username = field(body, "username", 60);
+		if (!username.matches("[A-Za-z0-9][A-Za-z0-9._-]{2,49}"))
+			throw VinshcService.bad("username format is invalid");
+		return username;
+	}
+
 	public Map<String, Object> create(Map<String, Object> body) {
 		systemOnly();
 		credentials(body, "username", "password", "role", "personUuid", "givenName", "familyName", "gender");
-		String username = field(body, "username", 60);
-		if (!username.matches("[A-Za-z0-9][A-Za-z0-9._-]{2,59}"))
-			throw VinshcService.bad("username format is invalid");
+		String username = validUsername(body);
 		String role = staffRole(field(body, "role", 40));
 		String password = validPassword(body);
 		if (Context.getUserService().getUserByUsername(username) != null)
@@ -162,7 +170,6 @@ public class StaffAccountService {
 		user.setSystemId("VINSHC-" + UUID.randomUUID().toString().substring(0, 12).toUpperCase(Locale.ROOT));
 		user.addRole(openmrsRole);
 		User created = Context.getUserService().createUser(user, password);
-		created = Context.getUserService().setUserProperty(created, FORCE_PASSWORD_PROPERTY, "true");
 		audit("user.created", created.getUuid(), "role=" + role);
 		return safeView(created);
 	}
@@ -178,14 +185,37 @@ public class StaffAccountService {
 			throw VinshcService.bad("query too long");
 		List<User> users = Context.getUserService().getUsers(term, null, true, skip, size + 1);
 		List<Map<String, Object>> records = new ArrayList<>();
-		for (int i = 0; i < Math.min(size, users.size()); i++)
-			records.add(safeView(users.get(i)));
+		for (int i = 0; i < Math.min(size, users.size()); i++) {
+			Map<String, Object> record = safeView(users.get(i));
+			record.put("workspace", activeWorkspace(users.get(i).getUserId()));
+			records.add(record);
+		}
 		Map<String, Object> result = new LinkedHashMap<>();
 		result.put("results", records);
 		result.put("limit", size);
 		result.put("offset", skip);
 		result.put("hasMore", users.size() > size);
 		return result;
+	}
+
+	/** The account's single active workspace (role + facility), or null when it is not assigned yet. */
+	private Map<String, Object> activeWorkspace(int userId) {
+		return sessionFactory.getCurrentSession().doReturningWork(connection -> {
+			try (PreparedStatement stmt = connection.prepareStatement("SELECT w.role_name,l.uuid,l.name"
+			        + " FROM vinshc_workspace_assignment w JOIN location l ON l.location_id=w.facility_location_id"
+			        + " WHERE w.user_id=? AND w.active=true")) {
+				stmt.setInt(1, userId);
+				try (java.sql.ResultSet rs = stmt.executeQuery()) {
+					if (!rs.next())
+						return null;
+					Map<String, Object> workspace = new LinkedHashMap<>();
+					workspace.put("role", rs.getString(1));
+					workspace.put("facilityUuid", rs.getString(2));
+					workspace.put("facilityName", rs.getString(3));
+					return workspace;
+				}
+			}
+		});
 	}
 
 	private static User target(String uuid) {
@@ -222,6 +252,31 @@ public class StaffAccountService {
 		return safeView(user);
 	}
 
+	/**
+	 * Renames another staff account. Own account is refused: the caller's session is HTTP Basic, so
+	 * renaming it would invalidate the credentials of the request in flight.
+	 */
+	public Map<String, Object> rename(String uuid, Map<String, Object> body) {
+		systemOnly();
+		credentials(body, "username");
+		User user = target(uuid);
+		if (Boolean.TRUE.equals(user.getRetired()))
+			throw VinshcService.bad("cannot rename a retired user");
+		if (user.getUserId().equals(Context.getAuthenticatedUser().getUserId()))
+			throw VinshcService.bad("cannot rename your own account while signed in");
+		String username = validUsername(body);
+		if (username.equals(user.getUsername()))
+			throw VinshcService.bad("username is unchanged");
+		User existing = Context.getUserService().getUserByUsername(username);
+		if (existing != null && !existing.getUserId().equals(user.getUserId()))
+			throw new VinshcExceptions.Conflict("username already exists", Collections.emptyList());
+		String previous = user.getUsername();
+		user.setUsername(username);
+		Context.getUserService().saveUser(user);
+		audit("user.username_changed", user.getUuid(), "from=" + previous + " to=" + username);
+		return safeView(user);
+	}
+
 	public Map<String, Object> resetPassword(String uuid, Map<String, Object> body) {
 		systemOnly();
 		credentials(body, "password");
@@ -232,7 +287,6 @@ public class StaffAccountService {
 			throw VinshcService.bad("use the self-service password change to change your own password");
 		String password = validPassword(body);
 		Context.getUserService().changePassword(user, password);
-		Context.getUserService().setUserProperty(user, FORCE_PASSWORD_PROPERTY, "true");
 		audit("user.password_reset", user.getUuid(), "admin-initiated; secret never logged");
 		return safeView(user);
 	}
@@ -298,7 +352,8 @@ public class StaffAccountService {
 		Role openmrsRole = Context.getUserService().getRole(PREFIX + role);
 		if (openmrsRole == null)
 			throw VinshcService.misconfigured("production role is missing");
-		if (user.hasRole(openmrsRole.getRole()))
+		// ignoreSuperUser: a superuser answers true to hasRole(anyName) without holding the role.
+		if (user.hasRole(openmrsRole.getRole(), true))
 			throw VinshcService.bad("user already has the role");
 		user.addRole(openmrsRole);
 		Context.getUserService().saveUser(user);

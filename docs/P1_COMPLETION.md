@@ -16,7 +16,7 @@
 |---|---|---|
 | POST/GET | `staff/users` | System Developer |
 | POST | `staff/users/{uuid}/roles`, `/state`, `/password` | System Developer |
-| POST | `staff/me/password` | User đang đăng nhập và bị yêu cầu đổi mật khẩu |
+| POST | `staff/me/password` | User đang đăng nhập tự đổi mật khẩu của mình |
 | GET | `staff/audit` | System Developer |
 | POST | `directory/providers`, `/providers/{uuid}`, `/providers/link`, `/providers/unlink`, `/providers/{uuid}/retire` | System Developer |
 | GET | `directory/users/{uuid}/providers` | System Developer |
@@ -28,11 +28,11 @@
 | POST | `admin-configuration/forms/{uuid}/activate`, `/retire` | metadata_admin update |
 | GET/POST | `admin-configuration/workflow/{locationUuid}` và `/workflow` | metadata_admin read/update |
 
-Password khởi tạo hoặc reset chỉ được nhận qua POST, không bao giờ xuất lại trong DTO. API không nhận danh sách Core privileges. User mới hoặc vừa được reset có property `forcePassword=true`; mọi API VinSHC từ chối user này cho tới khi họ gọi `staff/me/password` bằng mật khẩu hiện tại và mật khẩu mới hợp lệ. Response chỉ công bố cờ `mustChangePassword`, không công bố secret/hash/salt. Mọi user được tạo bằng role trong VinSHC allowlist, System Developer không nhận thêm role lâm sàng chỉ để mở trang admin.
+Password khởi tạo hoặc reset chỉ được nhận qua POST, không bao giờ xuất lại trong DTO. API không nhận danh sách Core privileges. Từ 2026-10-15 không bắt buộc đổi mật khẩu lần đầu: user mới hoặc vừa được reset dùng ngay mật khẩu do quản trị đặt, BE không gắn `forcePassword` và không chặn API VinSHC; shell đăng nhập xong mở thẳng workspace. Mật khẩu chỉ cần 6–256 ký tự, không yêu cầu chữ hoa/thường/số; quy tắc core OpenMRS được nới tương ứng trong `infra/backend/configuration/globalproperties/vinshc/security.xml`. `staff/me/password` vẫn cho người dùng tự đổi mật khẩu. Response vẫn có cờ `mustChangePassword` (chỉ còn đúng với tài khoản cũ chưa đổi, không còn được áp dụng), không công bố secret/hash/salt. Mọi user được tạo bằng role trong VinSHC allowlist, System Developer không nhận thêm role lâm sàng chỉ để mở trang admin.
 
 ## Kiểm thử
 
-Chỉ sử dụng Compose project `ehr-p1-local` (cổng `18084`) và tài khoản/Person/Provider synthetic. `python -m unittest -v tests.integration.test_p1_admin` kiểm tra 6 nhóm: tạo đủ 8 role và buộc đổi mật khẩu đầu tiên, từ chối privilege injection, validate/reset/retire/activate, create/update/retire provider và chống giả mạo Person/cơ sở, CRUD business facility, form list/versioning, workflow optimistic version và audit.
+Chỉ sử dụng Compose project `ehr-p1-local` (cổng `18084`) và tài khoản/Person/Provider synthetic. `python -m unittest -v tests.integration.test_p1_admin` kiểm tra 6 nhóm: tạo đủ 8 role và đăng nhập dùng ngay (không buộc đổi mật khẩu đầu tiên; tự đổi và reset chấp nhận mật khẩu 6 ký tự), từ chối privilege injection, validate/reset/retire/activate, create/update/retire provider và chống giả mạo Person/cơ sở, CRUD business facility, form list/versioning, workflow optimistic version và audit.
 
 Báo cáo mặc định: `.runtime/reports/p1-acceptance.json`; có thể tách project bằng `VINSHC_TEST_REPORT_DIR`. Lệnh không sử dụng dữ liệu hoặc volume của project chính. Kiểm thử persistence đọc lại 8 tài khoản/role, liên kết provider, business facility đã retire và form version. CI chạy kiểm tra này sau recreate container và sau restore PostgreSQL sang project/volume mới; chỉ đánh dấu gate persistence hoàn tất khi run CI tương ứng xanh.
 

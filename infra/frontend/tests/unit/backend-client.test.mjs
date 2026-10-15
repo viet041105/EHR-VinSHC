@@ -12,6 +12,9 @@ import {
   facilityForLocation,
   VITAL_FIELD_MAP,
   clearLegacyDemo,
+  passwordProblem,
+  passwordRules,
+  usernameProblem,
 } from "@vinshc/core";
 import { consultationValues } from "@vinshc/clinical";
 import { contactPatch, missingContext } from "@vinshc/patients";
@@ -331,4 +334,65 @@ test("workspace assignment uses chosen location and does not confuse it with bus
     actions.identity.path({ patient, includeHistory: "true" }),
     /includeHistory=true/,
   );
+});
+
+test("own password change signs in again with the new password", async () => {
+  const auth = [], calls = [];
+  const client = new BackendClient(async (path, init) => {
+    calls.push({ path, init });
+    auth.push(init.headers.Authorization);
+    if (path.startsWith("/api/session"))
+      return response({ authenticated: true, user: { uuid: patient, roles: [] } });
+    return response({ uuid: patient, mustChangePassword: false });
+  });
+  await client.login(" bs-moi ", "Tam-thoi-12345");
+  const next = "Mat-khau-moi-12345";
+  await client.changeOwnPassword("Tam-thoi-12345", next);
+  const change = calls.find((c) => c.path === "/api/vinshc/staff/me/password");
+  assert.equal(change.init.method, "POST");
+  assert.deepEqual(JSON.parse(change.init.body), { currentPassword: "Tam-thoi-12345", newPassword: next });
+  assert.equal(change.init.headers["X-VinSHC-Workspace-Role"], undefined);
+  assert.equal(auth.at(-1), "Basic " + btoa("bs-moi:" + next));
+  assert.equal(client.user.uuid, patient);
+});
+test("own password change: short or unsafe passwords are stopped before any request", async () => {
+  const cases = [["", "Mat-khau-moi-12345"], ["Tam-12345678", " Mat-khau-moi-12345"], ["Tam-12345678", "ngan1"],
+    ["Tam-12345678", "x".repeat(257)], ["Tam-12345678", "Tam-12345678"]];
+  for (const [current, next] of cases) assert.notEqual(passwordProblem(current, next), "", next);
+  // Length is the only rule: no upper/lower/digit requirement.
+  for (const next of ["abcdef", "123456", "chi-chu-thuong"]) assert.equal(passwordProblem("Tam-12345678", next), "", next);
+  let sent = 0;
+  const client = new BackendClient(async (path) => {
+    if (!path.startsWith("/api/session")) sent++;
+    return response({ authenticated: true, user: { uuid: patient, roles: [] } });
+  });
+  await client.login("bs", "Tam-12345678");
+  await assert.rejects(client.changeOwnPassword("Tam-12345678", "yeu"), /6 đến 256/);
+  assert.equal(sent, 0);
+  await assert.rejects(new BackendClient(async () => response({})).changeOwnPassword("a", "Mat-khau-moi-12345"), { status: 401 });
+});
+test("temporary password: a server 400 shows its reason and keeps the old session token", async () => {
+  const client = new BackendClient(async (path) =>
+    path.startsWith("/api/session")
+      ? response({ authenticated: true, user: { uuid: patient, roles: [] } })
+      : response({ error: "Password is too weak" }, 400));
+  await client.login("bs", "Tam-12345678");
+  await assert.rejects(client.changeOwnPassword("Tam-12345678", "Mat-khau-moi-12345"), /Password is too weak/);
+  assert.equal(client.user.uuid, patient);
+});
+test("staff account rules: username and password are checked like the backend before sending", () => {
+  for (const bad of ["ab", "bs nguyen", "bác.sĩ", "bs@clinic.vn", ".bs1", "x".repeat(51)])
+    assert.notEqual(usernameProblem(bad), "", bad);
+  for (const good of ["bs.nguyen", "BsNguyen1", "lab-01", "a_b", "x".repeat(50)]) assert.equal(usernameProblem(good), "", good);
+  assert.match(passwordRules("12345", "Mật khẩu khởi tạo"), /Mật khẩu khởi tạo cần từ 6 đến 256 ký tự/);
+  assert.equal(passwordRules("abc123"), "");
+  assert.equal(passwordRules("matkhau"), "");
+});
+test("a 400/409 shows the reason the backend gives, 5xx and detail-bearing errors keep their message", async () => {
+  const fail = (status, body) =>
+    new BackendClient(async () => response(body, status)).request("vinshc/staff/users", { scoped: false });
+  await assert.rejects(fail(400, { error: "username format is invalid" }), /Thông tin chưa hợp lệ.*\(username format is invalid\)/);
+  await assert.rejects(fail(409, { error: "user already exists" }), /\(user already exists\)/);
+  await assert.rejects(fail(403, { error: "forbidden" }), (e) => !e.message.includes("(forbidden)"));
+  await assert.rejects(fail(500, { error: "internal server error" }), (e) => !e.message.includes("internal"));
 });

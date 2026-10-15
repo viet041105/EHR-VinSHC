@@ -84,6 +84,12 @@ const settings = Object.fromEntries(
       localStorage.setItem("vinshc-unrelated", "keep");
     });
     await page.reload();
+    // The legacy-store cleanup runs when the entry module loads, which can finish after "load".
+    await page.waitForFunction(
+      () => localStorage.getItem("vinshc-demo-v2") === null,
+      null,
+      { timeout: 10000 },
+    );
     const stores = await page.evaluate(() => ({
       old: localStorage.getItem("vinshc-demo-v2"),
       other: localStorage.getItem("vinshc-unrelated"),
@@ -102,6 +108,7 @@ const settings = Object.fromEntries(
     await page.locator(".session-identity").waitFor();
     assert.equal(await page.locator("#workspaceForm").count(), 0);
     await page.locator("[data-section=admin]").click();
+    await page.locator("details.advanced-tools > summary").click(); // raw admin forms are collapsed under the guided console
     await page.locator("#actionPicker").selectOption("workspace");
     await page.locator("#actionForm button").click();
     await page
@@ -109,11 +116,11 @@ const settings = Object.fromEntries(
       .filter({ hasText: "VinSHC App: admin" })
       .waitFor();
     await page.locator("#actionPicker").selectOption("systemUsers");
-    await page.locator("[name=query]").fill(settings.EHR_ADMIN_USERNAME);
+    await page.locator("[name=q]").fill(settings.EHR_ADMIN_USERNAME);
     await page.locator("#actionForm button").click();
     await page
       .locator("#backendResult")
-      .filter({ hasText: "quản trị hệ thống" })
+      .filter({ hasText: "Quản trị" })
       .waitFor();
     await page.locator("#actionPicker").selectOption("audit");
     await page.locator("#actionForm button").click();

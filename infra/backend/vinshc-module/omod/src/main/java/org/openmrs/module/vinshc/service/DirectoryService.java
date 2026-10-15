@@ -94,7 +94,8 @@ public class DirectoryService {
 	}
 
 	private static boolean clinical(User user) {
-		return user.hasRole("VinSHC App: nurse") || user.hasRole("VinSHC App: doctor") || user.hasRole("VinSHC App: lab");
+		return user.hasRole("VinSHC App: nurse", true) || user.hasRole("VinSHC App: doctor", true)
+		        || user.hasRole("VinSHC App: lab", true);
 	}
 
 	private static Map<String, Object> providerView(Provider provider, User user, Location facility) {

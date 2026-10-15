@@ -68,6 +68,9 @@ const user = "11111111-1111-4111-8111-111111111111",
         }
         assert.equal(headers["x-vinshc-workspace-role"], role);
         assert.equal(headers["x-vinshc-workspace-facility"], location);
+        // VinSHC staff directory (System Developer): account search used by the advanced tools and the console.
+        if (path.endsWith("/staff/users") && r.method() === "GET")
+          return send({ results: [{ uuid: record, username: "qa-nhanvien", display: "Nguyễn An", retired: false, mustChangePassword: false, roles: ["reception"], workspace: null }], hasMore: false });
         if (path.endsWith("/authorization/workspace"))
           return send({ role, facilityUuid: location });
         if (r.method() !== "GET")
@@ -98,11 +101,12 @@ const user = "11111111-1111-4111-8111-111111111111",
       await page.locator(".session-identity").waitFor();
       if (role === "admin") {
         await page.locator("[data-section=admin]").click();
+        await page.locator("details.advanced-tools > summary").click(); // raw admin forms are collapsed under the guided console
         const option = page.locator("#actionPicker option[value=systemUsers]");
         assert.equal(await option.count(), kind === "system" ? 1 : 0);
         if (kind === "system") {
           await page.locator('#actionPicker').selectOption('systemUsers');
-          await page.locator('[name=query]').fill('qa-nhanvien');
+          await page.locator('[name=q]').fill('qa-nhanvien');
           await page.locator('#actionForm button').click();
           await page.locator('[data-pick-account]').waitFor();
           assert.doesNotMatch(await page.locator('#backendResult').innerText(), /22222222-2222|UUID|OpenMRS/);
@@ -113,15 +117,14 @@ const user = "11111111-1111-4111-8111-111111111111",
           await page.locator("#actionPicker").selectOption("grantAppRole");
           await fillReference(page, "[name=user]", record);
           await page.locator("[name=role]").selectOption("nurse");
+          page.once("dialog", (dialog) => dialog.accept()); // grantAppRole asks for confirmation
           await page.locator("#actionForm button").click();
           await page
             .locator("#connectionMessage")
             .filter({ hasText: "đã được lưu" })
             .waitFor();
-          assert.deepEqual(writes.at(-1).body.roles, [
-            "99999999-9999-4999-8999-999999999999",
-            metadata.roles.nurse.openmrs.uuid,
-          ]);
+          assert.ok(writes.at(-1).path.endsWith("/staff/users/" + record + "/roles"));
+          assert.deepEqual(writes.at(-1).body, { role: "nurse" });
         }
         await page.locator("#actionPicker").selectOption("assignWorkspace");
         await fillReference(page, "[name=user]", record);
