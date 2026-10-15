@@ -451,11 +451,18 @@ public class AuthorizationService {
 		if (!"agent".equals(header("X-VinSHC-Request-Origin")) || !"doctor".equals(workspaceRole(false)))
 			return;
 		activeWorkspace(true);
+		// The doctor may read a patient they examined, or one with an open visit at their facility
+		// (chart selected from the queue before a consultation encounter exists).
 		Number count = (Number) sessionFactory.getCurrentSession().createSQLQuery(
-		    "SELECT count(*) FROM encounter e JOIN encounter_provider ep ON ep.encounter_id=e.encounter_id "
+		    "SELECT (SELECT count(*) FROM encounter e JOIN encounter_provider ep ON ep.encounter_id=e.encounter_id "
 		            + "JOIN provider p ON p.provider_id=ep.provider_id JOIN users u ON u.person_id=p.person_id "
-		            + "WHERE e.patient_id=:patient AND u.user_id=:user AND e.voided=false AND ep.voided=false AND p.retired=false")
+		            + "WHERE e.patient_id=:patient AND u.user_id=:user AND e.voided=false AND ep.voided=false AND p.retired=false)"
+		            + " + (WITH RECURSIVE tree AS (SELECT location_id FROM location WHERE location_id=:facility"
+		            + " UNION SELECT l.location_id FROM location l JOIN tree t ON l.parent_location=t.location_id)"
+		            + " SELECT count(*) FROM visit v WHERE v.patient_id=:patient AND v.voided=false"
+		            + " AND v.date_stopped IS NULL AND v.location_id IN (SELECT location_id FROM tree))")
 		        .setParameter("patient", patient.getPatientId()).setParameter("user", authenticatedUser().getUserId())
+		        .setParameter("facility", assignedFacility().getLocationId())
 		        .uniqueResult();
 		if (count.longValue() == 0)
 			throw forbidden("assigned_patient");

@@ -278,6 +278,9 @@ def build_response(
     status, message, show = _status(state, persona, deps.clinic_contact)
     if status == "out_of_scope" and deps.ctx.knowledge is not None:
         message = "Trợ lý chỉ đọc hồ sơ được phép và tài liệu hướng dẫn hệ thống; câu hỏi này cần nhân viên y tế hoặc người phụ trách trả lời."
+    if context is not None and context.patientUuid is None and status in ("not_found", "out_of_scope"):
+        message = ("Chưa chọn hồ sơ nên trợ lý chỉ trả lời từ tài liệu hướng dẫn. "
+                   "Để hỏi về một bệnh nhân, hãy chọn bệnh nhân và lần khám.")
     if deps.ctx.read_errors and status not in ("refused", "emergency"):
         status, message = "limited", "Một số nguồn chưa đọc được; xem thông tin thiếu/lỗi bên dưới."
     # A verified absence from the comparison tool is an operational result. Do not
@@ -295,6 +298,9 @@ def build_response(
     answer: list[AnswerOut] = []
     if show:
         for checked in state["validation"].accepted:
+            # Text is rendered from the cited source, so citing the same fact twice repeats a line.
+            if any(a.text == checked.statement.text for a in answer):
+                continue
             answer.append(
                 AnswerOut(
                     text=checked.statement.text,

@@ -325,3 +325,27 @@ def test_history_is_context_not_source(make_client):
 def test_rate_limit(make_client):
     client = make_client(rate_limit_per_minute=2)
     assert [ask(client, "Tóm tắt").status_code for _ in range(3)] == [200, 200, 429]
+
+
+def test_general_question_without_chart_reads_no_patient_data(make_client, vinshc):
+    response = make_client(vinshc).post(CHAT, headers=HEADERS, json={"message": "Sinh hiệu gần nhất là bao nhiêu?"})
+    assert response.status_code == 200
+    body = response.json()
+    assert body["context"]["patientUuid"] is None and body["context"]["encounterUuid"] is None
+    assert body["context"]["facilityUuid"] == FACILITY
+    assert body["answer"] == [] and "chọn bệnh nhân" in body["message"]
+    assert not set(body["toolsUsed"]) & {"get_encounter_summary", "get_vitals_history", "list_visits"}
+    # Only the workspace check reaches the backend; no chart endpoint is called.
+    assert {vinshc.route(r.url.path)[0] for r in vinshc.requests} == {"workspace"}
+
+
+def test_patient_only_context_is_allowed(make_client, vinshc):
+    response = make_client(vinshc).post(CHAT, headers=HEADERS, json={"message": "Tóm tắt", "patientUuid": PATIENT})
+    assert response.status_code == 200
+    assert response.json()["context"]["patientUuid"] == PATIENT
+    assert response.json()["context"]["encounterUuid"] is None
+
+
+def test_partial_chart_context_is_rejected(make_client, vinshc):
+    response = make_client(vinshc).post(CHAT, headers=HEADERS, json={"message": "Tóm tắt", "encounterUuid": ENCOUNTER})
+    assert response.status_code == 400

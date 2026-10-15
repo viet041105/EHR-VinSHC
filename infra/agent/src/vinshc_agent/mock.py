@@ -226,8 +226,12 @@ class MockBackend:
             raise BackendError(403, "forbidden", "Hồ sơ không thuộc cơ sở đang chọn.")
         return record
 
-    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str, visit: str | None) -> None:
+    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str | None, visit: str | None) -> None:
         record = await self._record(credentials, patient)
+        if not encounter:
+            if visit and not any((v.get("uuid") or v.get("visitUuid")) == visit for v in getattr(record, "visits", None) or []):
+                raise BackendError(400, "invalid_context", "Lượt khám không thuộc bệnh nhân đang chọn.")
+            return
         summary = record.summaries.get(encounter)
         if summary is None or visit and summary["visitUuid"] != visit:
             raise BackendError(400, "invalid_context", "Bệnh nhân, lượt khám và phiếu khám không khớp nhau.")

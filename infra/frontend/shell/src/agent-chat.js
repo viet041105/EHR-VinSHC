@@ -96,7 +96,9 @@ export class AgentChat {
     this.pending = false; this.sourcePending = false; this.root = null;
   }
   clear() { this.detach(); this.key = null; this.reset(); }
-  get ready() { return this.persona === "patient" || Boolean(this.context.patient && this.context.encounter); }
+  // Doctors may also ask general questions with no chart open; the agent then reads no patient data.
+  get ready() { return this.persona === "patient" || this.persona === "doctor"; }
+  get hasRecord() { return Boolean(this.context.patient); }
   sources(result) {
     const entries = [], indexes = new Map();
     for (const answer of result?.answer || []) for (const source of answer.sources || []) {
@@ -206,7 +208,7 @@ export class AgentChat {
     if (this.pending || !this.ready || !question?.trim()) return;
     question = question.trim().slice(0, 1000);
     const key = this.key, version = this.version, generation = this.client.generation;
-    const context = { ...this.context }, persona = this.persona;
+    const context = { ...this.context }, persona = this.persona, record = this.hasRecord;
     const turn = { question, pending: true };
     if (retryIndex !== null) this.turns[retryIndex] = turn;
     else this.turns.push(turn);
@@ -217,8 +219,8 @@ export class AgentChat {
     if (this.serverMemory) body.remember = true;
     if (this.serverMemory && this.conversationId) body.conversationId = this.conversationId;
     else body.history = this.history.slice(-12);
-    if (persona === 'doctor') Object.assign(body, { patientUuid: context.patient, encounterUuid: context.encounter, visitUuid: context.visit || null });
-    else if (context.visit) body.visitUuid = context.visit;
+    if (persona === 'doctor' && record) Object.assign(body, { patientUuid: context.patient, encounterUuid: context.encounter || null, visitUuid: context.visit || null });
+    else if (persona !== 'doctor' && context.visit) body.visitUuid = context.visit;
     try {
       let result;
       try { result = await this.client.chat(persona, body, { signal: controller.signal }); }
@@ -235,7 +237,7 @@ export class AgentChat {
         result = await this.client.chat(persona, body, { signal: controller.signal });
       }
       if (version !== this.version || key !== this.key || generation !== this.client.generation) return;
-      if (persona === 'doctor' && (result.context?.patientUuid !== context.patient || result.context?.encounterUuid !== context.encounter || result.context?.facilityUuid !== this.client.workspace?.facility)) throw new Error('Phản hồi không khớp hồ sơ đang mở.');
+      if (persona === 'doctor' && ((result.context?.patientUuid ?? null) !== (record ? context.patient : null) || (result.context?.encounterUuid ?? null) !== (record ? context.encounter || null : null) || result.context?.facilityUuid !== this.client.workspace?.facility)) throw new Error('Phản hồi không khớp hồ sơ đang mở.');
       turn.result = result;
       if (this.serverMemory && result.conversationId) this.conversationId = result.conversationId;
       const reply = result.answer?.length ? result.answer.map((answer) => answer.text).join('\n') : result.message;

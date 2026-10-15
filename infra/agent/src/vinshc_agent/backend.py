@@ -69,7 +69,7 @@ class ClinicalDataProvider(Protocol):
 class DoctorContextAuthorizer(Protocol):
     """Optional server check before the model runs, supplied by a mock or a new BE adapter."""
 
-    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str, visit: str | None) -> dict[str, Any] | None: ...
+    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str | None, visit: str | None) -> dict[str, Any] | None: ...
 
 
 class VinshcBackend:
@@ -83,7 +83,7 @@ class VinshcBackend:
         encounter = require_uuid(encounter, "encounterUuid")
         return await self._get(f"vinshc/encounter/{encounter}/clinical-summary", credentials)
 
-    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str,
+    async def validate_doctor_context(self, credentials: Credentials, patient: str, encounter: str | None,
                                       visit: str | None) -> dict[str, Any]:
         # The scoped clinical endpoint enforces the doctor's backend privileges/facility.
         # Check the relationship even when no model/tool will run (greeting/history recap).
@@ -131,8 +131,18 @@ class VinshcBackend:
 
 
 async def read_doctor_context(backend: ClinicalDataProvider, credentials: Credentials, patient: str,
-                              encounter: str, visit: str | None) -> dict[str, Any]:
+                              encounter: str | None, visit: str | None) -> dict[str, Any]:
     """A provider's scoped read is required before any positive doctor response or memory access."""
+    if not encounter:
+        # Chỉ chọn bệnh nhân: đọc hồ sơ bằng quyền của bác sĩ để backend kiểm tra phạm vi truy cập.
+        record = await backend.patient(credentials, patient)
+        if str(record.get("uuid") or record.get("patientUuid") or "").lower() != patient:
+            raise BackendError(400, "invalid_context", "Hồ sơ bệnh nhân trả về không khớp hồ sơ đang chọn.")
+        if visit:
+            rows = (await backend.visits(credentials, patient, 100)).get("results") or []
+            if not any(str(v.get("uuid") or v.get("visitUuid") or "").lower() == visit for v in rows):
+                raise BackendError(400, "invalid_context", "Lượt khám không thuộc bệnh nhân đang chọn.")
+        return record
     summary = await backend.clinical_summary(credentials, encounter)
     if (str(summary.get("patientUuid") or "").lower() != patient
             or str(summary.get("encounterUuid") or "").lower() != encounter

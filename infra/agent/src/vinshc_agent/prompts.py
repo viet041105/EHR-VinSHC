@@ -79,6 +79,21 @@ def doctor_context() -> str:
     )
 
 
+def doctor_general_context() -> str:
+    return "\n".join(
+        [
+            f"Thời điểm hiện tại: {now_text()} (giờ Việt Nam).",
+            "Người dùng: bác sĩ đang làm việc trong workspace bác sĩ của cơ sở đã chọn.",
+            "Chưa mở hồ sơ bệnh nhân nào: không có tool đọc hồ sơ trong lượt này. Chỉ trả lời từ tài liệu "
+            "(search_documents) hoặc về chính cuộc trò chuyện.",
+            "Câu hỏi chung không gắn với một bệnh nhân (đơn vị đo, định nghĩa trường, trạng thái dữ liệu, lượt/phiếu "
+            "khám, công bố hồ sơ, cách dùng hệ thống) thuộc phạm vi: luôn gọi search_documents trước, chỉ trả "
+            "not_found khi tài liệu không có nguồn phù hợp.",
+            "Câu hỏi về một bệnh nhân cụ thể: trả scope=not_found để hệ thống nhắc bác sĩ chọn bệnh nhân và lần khám.",
+        ]
+    )
+
+
 def patient_context(clinic_contact: str | None) -> str:
     lines = [
         f"Thời điểm hiện tại: {now_text()} (giờ Việt Nam).",

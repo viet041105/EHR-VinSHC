@@ -40,8 +40,9 @@ class ChatIn(BaseModel):
 
 
 class DoctorChatIn(ChatIn):
-    patientUuid: str
-    encounterUuid: str
+    # Both omitted: general question without an open chart (reference documents and conversation only).
+    patientUuid: str | None = None
+    encounterUuid: str | None = None
     visitUuid: str | None = None
 
 
@@ -86,8 +87,8 @@ class MissingOut(BaseModel):
 
 
 class DoctorContextOut(BaseModel):
-    patientUuid: str
-    encounterUuid: str
+    patientUuid: str | None
+    encounterUuid: str | None
     visitUuid: str | None
     role: str
     facilityUuid: str
