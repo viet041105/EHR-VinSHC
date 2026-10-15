@@ -15,6 +15,9 @@ const EMPTY = {
   prescriptions: ['Chưa có đơn thuốc phù hợp', 'Mặc định chỉ hiện thuốc còn phải cấp trong ngày. Đổi bộ lọc để xem lịch sử.'],
 };
 
+// Row actions that cancel, refund, revoke or void use the danger style and are never the primary action.
+const DANGER = /^(Hủy|Huỷ|Hoàn tiền|Xóa|Xoá|Thu hồi|Ngừng|Khóa|Khoá|Từ chối|Vô hiệu|Đánh dấu nhập sai)/i;
+
 export function renderWorklist(worklists, key, ctx) {
   const w = worklists[key],
     list = ctx.list || {},
@@ -35,7 +38,7 @@ export function renderWorklistResults(
   const actionButtons = (row, index) => {
     if (role === "doctor" && key === "visits") return "";
     const buttons = row.actions.map((a, i) => canNavigate(a)
-      ? { html: `<button type="button" data-row-action data-list="${key}" data-row="${index}" data-action-index="${i}">${esc(a.label)}</button>`, a } : null).filter(Boolean).map(({ html }, i) => i === 0 ? html.replace('<button ', '<button class="row-primary" ') : html);
+      ? { html: `<button type="button" data-row-action data-list="${key}" data-row="${index}" data-action-index="${i}">${esc(a.label)}</button>`, a } : null).filter(Boolean).map(({ html, a }, i) => DANGER.test(a.label) ? html.replace('<button ', '<button class="danger" ') : i === 0 ? html.replace('<button ', '<button class="row-primary" ') : html);
     return buttons.slice(0, 2).join('') + (buttons.length > 2 ? `<details class="row-more"><summary>Khác</summary><div>${buttons.slice(2).join('')}</div></details>` : '');
   };
   const status = list.loading
@@ -47,7 +50,7 @@ export function renderWorklistResults(
     return '<p class="readonly">Chọn bệnh nhân trong Hồ sơ đang làm việc hoặc từ danh sách bệnh nhân/lượt khám để xem.</p>';
   if (list.error)
     return status + `<div class="list-feedback"><strong>Chưa tải được danh sách</strong><p class="error" role="alert">${esc(list.error)}</p><button type="button" data-worklist-reload="${key}">Thử tải lại</button></div>`;
-  if (list.loading) return `<p class="list-loading" role="status">Đang tải danh sách…</p>`;
+  if (list.loading) return `<div class="list-loading" role="status" aria-busy="true"><span>Đang tải danh sách…</span><span class="skeleton" aria-hidden="true"></span><span class="skeleton" aria-hidden="true"></span><span class="skeleton" aria-hidden="true"></span></div>`;
   if (!list.loadedAt)
     return status || '<p class="readonly">Chưa tải danh sách.</p>';
   if (!rows.length) {

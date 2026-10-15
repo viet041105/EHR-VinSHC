@@ -1,0 +1,150 @@
+/* App frame for the clinic app: header with role chip, sidebar navigation and its mobile form.
+   Loaded after components.css. Every height below derives from --header-h (tokens.css), including the
+   docked doctor assistant's title bar, so the bars stay aligned. */
+
+/* ---------- Header ---------- */
+.clinic-header {
+  min-height: var(--header-h);
+  padding-block: 8px;
+  background: var(--white);
+  border-bottom: 1px solid var(--line);
+}
+.clinic-header .site-brand strong { font-size: var(--fs-xl); letter-spacing: -.5px; line-height: var(--lh-tight); }
+.clinic-header .site-brand small { margin-top: 2px; font-size: var(--fs-xs); line-height: 1.2; letter-spacing: 1px; color: var(--text-subtle); }
+.assistant-head { min-height: calc(var(--header-h) - 1px); }
+
+/* ---------- Frame: full width, full height ---------- */
+.clinic-main { min-height: calc(100dvh - var(--header-h)); }
+@media (min-width: 801px) {
+  .clinic-main:has(.connected-content) .clinic-sidebar { top: var(--header-h); height: calc(100dvh - var(--header-h)); }
+}
+/* The work area uses the whole window: no centred max-width, one gutter token on every side. */
+.clinic-main .content.connected-content {
+  max-width: none;
+  margin: 0;
+  padding: 20px var(--page-gutter) 24px;
+}
+@media (min-width: 1100px) {
+  body.assistant-docked .clinic-main .content.connected-content { padding-right: calc(var(--assistant-w, 400px) + var(--page-gutter)); }
+}
+@media (min-width: 801px) {
+  /* The last section stretches to the bottom of the window, so short lists do not leave a grey void. */
+  .clinic-main .content.connected-content {
+    display: flex;
+    flex-direction: column;
+    min-height: calc(100dvh - var(--header-h));
+  }
+  .clinic-main .content.connected-content > section:last-of-type { flex-grow: 1; }
+}
+.clinic-header .logo-plus { font-size: var(--fs-xl); }
+.clinic-header .session-identity {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding-right: var(--space-4);
+  border-right: 1px solid var(--line);
+}
+.role-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  background: var(--tint-primary);
+  border: 1px solid var(--control-border);
+  color: var(--primary-strong);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  white-space: nowrap;
+}
+.session-user { font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--ink); overflow-wrap: anywhere; }
+.clinic-header .session-actions { display: flex; align-items: center; gap: var(--space-2); }
+.clinic-header button {
+  min-height: var(--control-h);
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--primary-strong);
+}
+
+/* ---------- Page heading ---------- */
+.connected-content .page-heading .eyebrow {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  letter-spacing: .4px;
+  color: var(--text-subtle);
+  text-transform: none;
+}
+.connected-content .page-heading { margin-bottom: 16px; }
+.connected-content .page-heading h1 { letter-spacing: -.4px; line-height: var(--lh-tight); margin: 4px 0; }
+
+/* ---------- Sidebar ---------- */
+.clinic-sidebar nav button { position: relative; min-height: var(--control-h); color: var(--ink); }
+.clinic-sidebar nav button.active { background: var(--tint-primary); color: var(--primary-strong); font-weight: var(--fw-semibold); }
+.clinic-sidebar nav button.active::before {
+  content: "";
+  position: absolute;
+  left: 0; top: 8px; bottom: 8px;
+  width: 3px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+}
+.clinic-sidebar .sidebar-caption { display: block; font-size: var(--fs-xs); color: var(--muted); }
+.clinic-sidebar .sidebar-note strong { font-size: var(--fs-sm); }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 800px) {
+  .clinic-header {
+    flex-wrap: nowrap;
+    min-height: 60px;
+    padding: 8px 16px;
+    gap: var(--space-3);
+  }
+  .clinic-header .site-brand small { display: none; }
+  .clinic-header:has(.session-identity) .header-controls,
+  .clinic-header .header-controls {
+    flex-wrap: nowrap;
+    width: auto;
+    margin-left: auto;
+    gap: var(--space-2);
+  }
+  .clinic-header .session-identity { width: auto; padding: 0; border: 0; }
+  .clinic-header .session-actions { width: auto; padding: 0; border: 0; gap: var(--space-2); }
+  .clinic-header button { padding: 6px 10px; }
+
+  /* Section navigation becomes a sticky, scrollable strip with an edge fade hinting at more items. */
+  .clinic-main:has(.connected-content) .clinic-sidebar {
+    position: sticky;
+    top: 0;
+    z-index: 15;
+    padding: 8px 0;
+    background: var(--white);
+    box-shadow: var(--shadow-sm);
+  }
+  .clinic-sidebar nav {
+    gap: var(--space-2);
+    padding: 0 16px;
+    scroll-snap-type: x proximity;
+    scroll-padding-inline: 16px;
+    scrollbar-width: none;
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 32px), transparent);
+  }
+  .clinic-sidebar nav::-webkit-scrollbar { display: none; }
+  .clinic-sidebar nav button {
+    scroll-snap-align: start;
+    padding: 8px 14px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-full);
+    background: var(--white);
+    font-size: var(--fs-sm);
+  }
+  .clinic-sidebar nav button.active { border-color: var(--primary); }
+  .clinic-sidebar nav button.active::before { display: none; }
+}
+@media (max-width: 600px) {
+  .clinic-header .session-user { display: none; }
+}
+@media print {
+  .role-chip, .session-user { display: none; }
+}

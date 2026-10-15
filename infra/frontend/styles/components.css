@@ -1,0 +1,389 @@
+/* Shared components for the clinic app and patient portal. Loaded last, after the page styles.
+   New canonical classes (.btn-*, .badge, .tabs, .table, .card, .empty-state, .skeleton) plus the
+   older class names they replace, so existing markup keeps working while modules migrate. */
+
+/* ---------- Base ---------- */
+:is(.connected-content, .portal-page, .connection-login, .clinic-header) {
+  font-variant-numeric: tabular-nums;
+}
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+:is(button, a, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+/* Focus must not be clipped by scrolling containers (tables, tab strips). */
+:is(.workspace-table-wrap, .table-wrap, .doctor-tabs, .tabs) :is(button, a):focus-visible { outline-offset: -2px; }
+
+/* ---------- Buttons: secondary (default) / primary / ghost / danger ---------- */
+:is(.connected-content, .portal-page, .connection-login) button {
+  min-height: var(--control-h-sm);
+  padding: 6px 14px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--primary-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  line-height: var(--lh-tight);
+}
+:is(.connected-content, .portal-page, .connection-login) button:hover:not(:disabled) {
+  background: var(--tint-primary);
+  border-color: var(--line-strong);
+}
+:is(.connected-content, .portal-page, .connection-login) button.primary {
+  min-height: var(--control-h);
+  padding-inline: 18px;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+}
+:is(.connected-content, .portal-page, .connection-login) button.primary:hover:not(:disabled) {
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+:is(.connected-content, .portal-page) button.ghost {
+  border-color: transparent;
+  background: transparent;
+}
+:is(.connected-content, .portal-page) button.danger {
+  color: var(--red);
+  border-color: #edd2cf;
+}
+:is(.connected-content, .portal-page) button.danger:hover:not(:disabled) { background: var(--danger-bg); border-color: var(--red); }
+:is(.connected-content, .portal-page) button.primary.danger-fill { background: var(--red); border-color: var(--red); color: var(--white); }
+:is(.connected-content, .portal-page) button.primary.danger-fill:hover:not(:disabled) { background: #8c2d2f; border-color: #8c2d2f; }
+:is(.connected-content, .portal-page, .connection-login) button:disabled { opacity: .55; cursor: not-allowed; }
+
+/* ---------- Fields ---------- */
+.connected-content label, .connection-login label, .portal-page label {
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+  gap: 6px;
+}
+.field-text { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 8px; }
+.field-optional {
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-regular);
+  color: var(--muted);
+}
+.field-hint { font-size: var(--fs-xs); color: var(--muted); font-weight: var(--fw-regular); line-height: var(--lh); }
+.form-legend { grid-column: 1 / -1; margin: 0 0 var(--space-4); font-size: var(--fs-xs); color: var(--muted); }
+:is(.connected-content, .connection-login, .portal-page) :is(input, select, textarea):not([type=checkbox], [type=radio], [type=file]) {
+  min-height: var(--control-h);
+  padding: 8px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--ink);
+  font-size: var(--fs-md);
+}
+:is(.connected-content, .connection-login, .portal-page) textarea { min-height: 88px; line-height: var(--lh); }
+:is(.connected-content, .connection-login, .portal-page) :is(input, select, textarea):hover:not(:disabled, :focus) { border-color: var(--control-border); }
+:is(.connected-content, .connection-login, .portal-page) :is(input, select, textarea):focus { border-color: var(--blue); }
+:is(.connected-content, .connection-login, .portal-page) :is(input, select, textarea):disabled { background: var(--surface); color: var(--muted); }
+/* Native validation state, shown only after the user has interacted with the field. */
+:is(.connected-content, .connection-login, .portal-page) :is(input, select, textarea):user-invalid {
+  border-color: var(--red);
+  box-shadow: 0 0 0 1px var(--red);
+}
+.connected-content .form-grid, .form-card .form-grid { gap: var(--space-4) var(--space-6); }
+
+/* ---------- Cards / section headings ---------- */
+:is(.connected-content, .portal-page) .panel {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+.connected-content .doctor-profile-column .task-form { padding: 0; border: 0; box-shadow: none; }
+.workspace-heading h2, .card-title { font-size: var(--fs-lg); font-weight: var(--fw-semibold); line-height: var(--lh-tight); color: var(--ink); }
+.workspace-heading p { font-size: var(--fs-sm); color: var(--muted); }
+
+/* ---------- Badges (status, capability, pills) ---------- */
+.badge, .row-status, .capability-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  background: var(--tint-primary);
+  color: var(--text-subtle);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  line-height: 1.6;
+  white-space: nowrap;
+}
+.badge-success, .row-status[data-state=paid], .row-status[data-state=settled], .row-status[data-state=completed], .capability-badge.connected {
+  background: var(--success-bg); color: var(--success);
+}
+.badge-warning, .row-status[data-state=unpaid], .row-status[data-state=pending], .row-status[data-state=requested], .capability-badge.pending {
+  background: var(--warning-bg); color: var(--warning);
+}
+.badge-danger, .row-status[data-state=cancelled], .row-status[data-state=entered-in-error], .row-status[data-state=refunded] {
+  background: var(--danger-bg); color: var(--red);
+}
+.badge-neutral { background: var(--surface); color: var(--text-subtle); border-color: var(--line); }
+
+/* ---------- Tabs (doctor record, portal, admin) ---------- */
+.tabs, .doctor-tabs, .portal-tabs, .admin-tabs {
+  display: flex;
+  gap: var(--space-1);
+  overflow-x: auto;
+  scrollbar-width: thin;
+  border-bottom: 1px solid var(--line);
+  padding: 0;
+  margin-bottom: 0;
+}
+:is(.connected-content, .portal-page) :is(.tabs, .doctor-tabs, .portal-tabs, .admin-tabs) button {
+  flex: 0 0 auto;
+  min-height: var(--control-h);
+  padding: 8px 14px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--text-subtle);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+}
+:is(.connected-content, .portal-page) :is(.tabs, .doctor-tabs, .portal-tabs, .admin-tabs) button:hover:not(:disabled) {
+  background: var(--surface);
+  color: var(--primary-strong);
+}
+:is(.connected-content, .portal-page) :is(.tabs, .doctor-tabs, .portal-tabs, .admin-tabs) button:is([aria-selected=true], .active) {
+  color: var(--primary-strong);
+  border-bottom-color: var(--primary);
+  background: transparent;
+  font-weight: var(--fw-semibold);
+}
+
+/* ---------- Tables ---------- */
+.table-wrap, .workspace-table-wrap { overflow-x: auto; }
+.table, .workspace-table, .admin-staff-table { width: 100%; border-collapse: collapse; font-size: var(--fs-sm); }
+:is(.table, .workspace-table, .admin-staff-table) th {
+  padding: 10px 12px;
+  background: var(--surface);
+  color: var(--text-subtle);
+  font-size: var(--fs-xs);
+  font-weight: var(--fw-semibold);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+}
+:is(.table, .workspace-table, .admin-staff-table) td {
+  padding: 12px;
+  vertical-align: top;
+  border-bottom: 1px solid var(--line-soft);
+  line-height: var(--lh);
+  /* Break only words that cannot fit, so "350.000 ₫" never splits from its currency sign. */
+  overflow-wrap: break-word;
+}
+:is(.table, .workspace-table, .admin-staff-table) td strong { font-size: var(--fs-md); font-weight: var(--fw-semibold); }
+:is(.table, .workspace-table, .admin-staff-table) td small { font-size: var(--fs-xs); color: var(--muted); }
+:is(.table, .workspace-table, .admin-staff-table) tbody tr:hover { background: var(--surface-raised); }
+:is(.table, .workspace-table) tr.selected-row { background: var(--tint-primary); box-shadow: inset 3px 0 0 var(--primary); }
+.connected-content .workspace-table td button:not(.worklist-record-link) { min-height: var(--control-h-sm); padding: 4px 10px; font-size: var(--fs-sm); margin: 2px 6px 2px 0; }
+.connected-content .workspace-table .row-primary { color: var(--white); background: var(--primary); border-color: var(--primary); }
+.connected-content .workspace-table .row-primary:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
+/* Record title: the row's main link. Standalone in its cell, so no underline until hover/focus. */
+.connected-content .workspace-table .worklist-record-link {
+  min-height: 0;
+  padding: 0;
+  color: var(--primary-strong);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  text-decoration: none;
+}
+.connected-content .workspace-table .worklist-record-link:is(:hover, :focus-visible) { text-decoration: underline; text-underline-offset: 3px; }
+.selected-note { display: inline-flex; margin-top: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--primary-strong); }
+/* "Khác" overflow: a compact ghost control; the list opens inline so table scrolling never clips it. */
+.row-more summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--control-h-sm);
+  padding: 4px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  color: var(--text-subtle);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  list-style: none;
+}
+.row-more summary::-webkit-details-marker { display: none; }
+.row-more summary::after { content: "▾"; font-size: var(--fs-xs); }
+.row-more[open] summary::after { content: "▴"; }
+.row-more summary:hover { background: var(--surface); border-color: var(--line); }
+.row-more > div { box-shadow: var(--shadow-md); }
+.amount, td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* ---------- Empty state ---------- */
+.empty-state, .workspace-empty, .section-empty, .record-empty, .portal-empty, .admin-empty, .notification-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: var(--space-8) var(--space-4);
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--muted);
+}
+:is(.empty-state, .workspace-empty, .section-empty, .record-empty, .portal-empty, .admin-empty, .notification-empty) strong {
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  color: var(--ink);
+}
+:is(.empty-state, .workspace-empty, .section-empty, .record-empty, .portal-empty, .admin-empty, .notification-empty) p {
+  margin: 0;
+  max-width: 540px;
+  font-size: var(--fs-sm);
+  color: var(--muted);
+  line-height: var(--lh);
+}
+.empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2); margin-top: var(--space-2); }
+
+/* ---------- Loading: skeleton + aria-busy ---------- */
+.list-loading {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  padding: 0;
+  background: none;
+  color: var(--muted);
+  font-size: var(--fs-xs);
+}
+.skeleton {
+  display: block;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-sunken) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+@keyframes skeleton-shimmer { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+[aria-busy=true] { cursor: progress; }
+
+/* ---------- Feedback text ---------- */
+.readonly, .list-count, .worklist .worklist-time { font-size: var(--fs-xs); color: var(--muted); }
+.error { font-size: var(--fs-sm); color: var(--red); }
+.error:empty { display: none; }
+
+/* ---------- Mobile ---------- */
+@media (max-width: 800px) {
+  :is(.connected-content, .portal-page) button { min-height: var(--control-h); }
+  .connected-content .workspace-table td button:not(.worklist-record-link) { min-height: var(--control-h); }
+  /* Table rows become cards on mobile (pages.css); their field captions are content, not decoration. */
+  .worklist .workspace-table td::before { color: var(--text-subtle); font-weight: var(--fw-semibold); }
+  .connected-content .workspace-table .worklist-record-link { min-height: 0; font-size: var(--fs-lg); }
+  /* Rows are cards here: cells keep no separators of their own. */
+  :is(.worklist .workspace-table, .admin-staff-table) td { border-bottom: 0; }
+  /* Overflowing tab strips fade at the edge to show there is more to scroll. */
+  :is(.tabs, .admin-tabs, .portal-tabs, .doctor-tabs) {
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+/* ---------- Inline field error (filled by installFieldErrors from the browser's message) ---------- */
+.field-error { display: block; margin-top: 4px; font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--red); }
+:is(input, select, textarea)[aria-invalid=true] { border-color: var(--red) !important; }
+
+/* ---------- Page action bar and grouped "Thao tác khác" ---------- */
+.record-toolbar { gap: var(--space-2); align-items: flex-start; }
+:is(.record-toolbar, .action-group-buttons) > button[aria-current] {
+  background: var(--tint-primary);
+  border-color: var(--primary);
+  color: var(--primary-strong);
+}
+.other-actions[open] { flex-basis: 100%; }
+.other-actions > summary {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--control-h-sm);
+  padding: 6px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  color: var(--primary-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  list-style: none;
+}
+.other-actions > summary::-webkit-details-marker { display: none; }
+.other-actions > summary::after { content: "▾"; font-size: var(--fs-xs); }
+.other-actions[open] > summary::after { content: "▴"; }
+.other-actions > summary:hover { background: var(--tint-primary); }
+.action-count {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: var(--radius-full);
+  background: var(--surface-sunken);
+  color: var(--text-subtle);
+  font-size: var(--fs-xs);
+}
+.other-actions > .action-groups {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: var(--space-4) var(--space-6);
+  max-width: none;
+  margin-top: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--white);
+  box-shadow: var(--shadow-sm);
+}
+.action-group { display: grid; gap: var(--space-2); align-content: start; }
+.action-group-title { font-size: var(--fs-xs); font-weight: var(--fw-semibold); letter-spacing: .4px; text-transform: uppercase; color: var(--text-subtle); }
+.action-group-buttons { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+
+/* ---------- Overview: one clear way to start the shift ---------- */
+.connected-content .daily-start button {
+  min-height: var(--control-h);
+  padding-inline: 18px;
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--white);
+}
+.connected-content .daily-start button:hover:not(:disabled) { background: var(--primary-hover); border-color: var(--primary-hover); }
+.task-entry .nav-icon { color: var(--text-subtle); }
+.connection-note { color: var(--text-subtle); border-left-color: var(--control-border); }
+
+/* ---------- Result panel: stat tiles first, then the detail list ---------- */
+.result-metrics { gap: var(--space-3); }
+.result-metrics > div {
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+.result-metrics span { display: block; font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--text-subtle); }
+.result-metrics strong { display: block; margin-top: 4px; font-size: var(--fs-2xl); font-weight: var(--fw-bold); line-height: var(--lh-tight); color: var(--ink); }
+.result-fields > div { border-bottom-color: var(--line-soft); }
+.result-fields dt { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--text-subtle); }
+.result-fields dd { font-size: var(--fs-sm); color: var(--ink); }
+
+/* ---------- Collapsible tool panels ---------- */
+.advanced-tools { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.advanced-tools > summary { display: flex; align-items: center; gap: var(--space-2); color: var(--ink); font-size: var(--fs-md); list-style: none; }
+.advanced-tools > summary::-webkit-details-marker { display: none; }
+.advanced-tools > summary::before { content: "▸"; color: var(--text-subtle); }
+.advanced-tools[open] > summary::before { content: "▾"; }
+
+/* ---------- Login card ---------- */
+.connection-login > .panel { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }

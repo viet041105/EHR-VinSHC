@@ -15,6 +15,16 @@ const STATUS = { final: 'Đã chốt', draft: 'Đang ghi', unknown: 'Không rõ'
   no_known_allergy: 'Không ghi nhận dị ứng', present: 'Có ghi nhận', none_reported: 'Không ghi nhận',
   primary: 'Chính', secondary: 'Kèm theo', provisional: 'Sơ bộ', confirmed: 'Xác định' };
 const label = value => STATUS[value] || stateText(value);
+// Patient banner badges. Allergy is always shown, "Chưa ghi nhận" when the consultation has no status.
+function allergyBadge(status) {
+  if (!status) return '<span class="badge badge-neutral">Dị ứng: Chưa ghi nhận</span>';
+  const tone = status === 'present' ? 'badge-danger' : status === 'no_known_allergy' ? 'badge-success' : 'badge-warning';
+  return `<span class="badge ${tone}">${status === 'no_known_allergy' ? esc(label(status)) : 'Dị ứng: ' + esc(label(status))}</span>`;
+}
+function visitBadge(visit, summary) {
+  if (summary?.status === 'final') return '<span class="badge badge-success">Phiếu đã chốt</span>';
+  return visit.status === 'closed' ? '<span class="badge badge-neutral">Lượt đã kết thúc</span>' : '<span class="badge">Lượt đang mở</span>';
+}
 
 export function vitalsContent(value) {
   const groups = rows(value);
@@ -60,11 +70,11 @@ export function doctorWorkspaceScreen(section, ctx) {
   const tabs = [['consultation', 'Phiếu khám'], ['vitals', 'Sinh hiệu'], ['orders', 'Chỉ định & kết quả'], ['clinical', 'Chẩn đoán & thuốc'], ['history', 'Lịch sử']];
   const values = data.summary?.consultation?.values || {};
   const allergy = values['allergy.trang_thai'];
-  let content = !visit ? absent('Chọn tên người bệnh để mở hồ sơ.') : data.loading ? '<p role="status">Đang tải hồ sơ…</p>' :
+  let content = !visit ? absent('Chọn tên người bệnh để mở hồ sơ.') : data.loading ? '<div class="list-loading" role="status" aria-busy="true"><span>Đang tải hồ sơ…</span><span class="skeleton" aria-hidden="true"></span><span class="skeleton" aria-hidden="true"></span></div>' :
     ctx.doctorTab === 'vitals' ? vitalsContent(data.vitals) : ctx.doctorTab === 'orders' ? ordersContent(data, ctx) :
       ctx.doctorTab === 'clinical' ? medicationContent(data, ctx) : ctx.doctorTab === 'history' ? historyContent(data) : noteContent(data, ctx);
   if (visit && ctx.taskForm) content = ctx.taskForm;
   const errors = Object.values(data.errors || {}).filter(Boolean);
   const visitActions = [['visitDetail','Xem lượt khám'], ['closeVisit','Kết thúc lượt khám']].filter(([key]) => ctx.canAction(key) && (key !== 'closeVisit' || visit?.status === 'open')).map(([key, title]) => `<button type="button" data-task-action="${key}">${title}</button>`).join('');
-  return `<section class="doctor-workspace ${visit ? 'has-patient' : ''}"><div class="doctor-worklist-column">${ctx.worklist('visits')}</div><section class="panel doctor-profile-column" aria-label="Hồ sơ khám"><div class="doctor-profile-header"><div><h2>${esc(visit?.patient?.fullName || 'Hồ sơ khám')}</h2>${visit ? `<p>${esc(patientIdentity(visit.patient || {}))} · ${esc(visit.visitCode || '')}</p><p>${data.summary?.status === 'final' ? 'Phiếu đã chốt' : (visit.status === 'closed' ? 'Lượt đã kết thúc' : 'Lượt đang mở')}${allergy ? ' · Dị ứng: ' + esc(label(allergy)) : ''}</p>` : ''}</div>${visit ? `<div class="doctor-header-actions"><button type="button" data-doctor-patient-access>Yêu cầu tài khoản</button><button type="button" data-doctor-clear>Đóng hồ sơ</button>${visitActions ? `<details class="doctor-visit-actions"><summary>Thao tác lượt khám</summary><div>${visitActions}</div></details>` : ''}</div>` : ''}</div>${visit ? `<nav class="doctor-tabs" role="tablist" aria-label="Nội dung hồ sơ">${tabs.map(([key, title]) => `<button type="button" role="tab" data-doctor-tab="${key}" aria-selected="${ctx.doctorTab === key}" aria-controls="doctorTabContent">${title}</button>`).join('')}</nav>` : ''}${errors.length ? `<div class="record-errors" role="status">${errors.map(e => `<p>${esc(e)}</p>`).join('')}<button type="button" data-doctor-reload>Thử lại</button></div>` : ''}<div class="doctor-profile-body" id="doctorTabContent" role="tabpanel">${content}${ctx.resultContent || ''}</div></section></section>`;
+  return `<section class="doctor-workspace ${visit ? 'has-patient' : ''}"><div class="doctor-worklist-column">${ctx.worklist('visits')}</div><section class="panel doctor-profile-column" aria-label="Hồ sơ khám"><div class="doctor-profile-header patient-banner"><div><h2>${esc(visit?.patient?.fullName || 'Hồ sơ khám')}</h2>${visit ? `<p class="patient-meta">${esc(patientIdentity(visit.patient || {}))} · ${esc(visit.visitCode || '')}</p><div class="patient-flags">${visitBadge(visit, data.summary)}${allergyBadge(allergy)}</div>` : ''}</div>${visit ? `<div class="doctor-header-actions"><button type="button" data-doctor-patient-access>Yêu cầu tài khoản</button><button type="button" class="ghost" data-doctor-clear>Đóng hồ sơ</button>${visitActions ? `<details class="doctor-visit-actions"><summary>Thao tác lượt khám</summary><div>${visitActions}</div></details>` : ''}</div>` : ''}</div>${visit ? `<nav class="doctor-tabs" role="tablist" aria-label="Nội dung hồ sơ">${tabs.map(([key, title]) => `<button type="button" role="tab" data-doctor-tab="${key}" aria-selected="${ctx.doctorTab === key}" aria-controls="doctorTabContent">${title}</button>`).join('')}</nav>` : ''}${errors.length ? `<div class="record-errors" role="status">${errors.map(e => `<p>${esc(e)}</p>`).join('')}<button type="button" data-doctor-reload>Thử lại</button></div>` : ''}<div class="doctor-profile-body" id="doctorTabContent" role="tabpanel">${content}${ctx.resultContent || ''}</div></section></section>`;
 }

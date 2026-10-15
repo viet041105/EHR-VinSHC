@@ -16,6 +16,8 @@ OpenMRS vẫn là nền tảng xác thực và dữ liệu; module VinSHC cung c
 Người dùng đăng nhập ngay trên FE VinSHC, không cần mở giao diện OpenMRS/O3.
 Tài khoản admin hiện có tiếp tục được dùng; không tạo lại tài khoản hay chuyển DB.
 Xem [APPLICATION_REDESIGN.md](docs/APPLICATION_REDESIGN.md) về kết nối và kiểm chứng.
+Token màu/chữ/khoảng cách và bộ component dùng chung của app phòng khám và portal:
+[DESIGN_SYSTEM.md](docs/DESIGN_SYSTEM.md).
 
 ## Chạy FE
 
@@ -189,7 +191,7 @@ runtime; luồng ghi thật với tài khoản 7 role nằm ở `tests/integrati
 infra/frontend/
 ├─ index.html, connected.html, portal.html   các HTML entrypoint
 ├─ landing/          boot, app và nội dung trang giới thiệu
-├─ styles/           base.css, connected.css, workspace.css
+├─ styles/           base.css (landing); tokens, components, layout, roles + connected/workspace/pages (app)
 ├─ docs/             tài liệu FE, backend cục bộ và đánh giá
 ├─ assets/           ảnh và thông tin nguồn ảnh
 ├─ package.json, vite.config.mjs, Dockerfile, compose.local.yaml   cấu hình/chạy ứng dụng

@@ -1,0 +1,359 @@
+/* Role-specific screen refinements. Loaded last. One section per role; shared patterns stay in
+   components.css and layout.css. */
+
+/* ---------- Worklist filters (all roles): compact inline bar ---------- */
+.worklist .worklist-filters {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+}
+.worklist .worklist-filters .form-grid { flex: 1; gap: var(--space-3); }
+.worklist .worklist-filters label { gap: 4px; font-size: var(--fs-xs); color: var(--text-subtle); }
+/* Every filter is optional, so the per-field "không bắt buộc" note is noise here. */
+.worklist .worklist-filters .field-optional { display: none; }
+.worklist .worklist-filters :is(input, select) { min-height: 36px; padding-block: 6px; }
+.connected-content .worklist .worklist-filters .form-actions { flex-shrink: 0; }
+.connected-content .worklist .worklist-filters button[type=submit] { min-height: 36px; }
+.worklist .workspace-heading > button { flex-shrink: 0; white-space: nowrap; }
+
+/* =====================================================================================
+   Bác sĩ — Danh sách khám (doctor-workspace.js)
+   ===================================================================================== */
+
+/* D1: visit list column — filters on one row, list gets the height. */
+.doctor-worklist-column .worklist { padding: var(--space-5) var(--space-4); }
+.doctor-worklist-column .workspace-heading { align-items: flex-start; }
+.doctor-worklist-column .workspace-heading p { font-size: var(--fs-xs); }
+.doctor-worklist-column .worklist-filters { flex-wrap: wrap; }
+.doctor-worklist-column .worklist-filters .form-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.doctor-worklist-column .worklist-filters .form-actions { width: 100%; justify-content: stretch; }
+.connected-content .doctor-worklist-column .worklist-filters button[type=submit] { width: 100%; }
+.doctor-worklist-column .worklist-time, .doctor-worklist-column .list-count { margin: var(--space-3) 0 var(--space-2); text-align: left; }
+
+/* D2: patient rows — clear selected state, name as a title rather than a link. */
+.doctor-patient-list { display: grid; gap: var(--space-1); }
+.doctor-patient-row {
+  position: relative;
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  border-bottom: 1px solid var(--line-soft);
+}
+.doctor-patient-row:hover { background: var(--surface-raised); }
+.doctor-patient-row.selected-row {
+  margin: 0;
+  padding: var(--space-3);
+  background: var(--tint-primary);
+  border-color: var(--control-border);
+  box-shadow: inset 3px 0 0 var(--primary);
+}
+.connected-content .doctor-patient-row .worklist-record-link {
+  justify-content: flex-start;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-size: var(--fs-md);
+  font-weight: var(--fw-semibold);
+  text-align: left;
+  text-decoration: none;
+}
+.connected-content .doctor-patient-row .worklist-record-link::after { content: ""; position: absolute; inset: 0; }
+.connected-content .doctor-patient-row .worklist-record-link:hover:not(:disabled) { background: none; color: var(--primary-strong); }
+.doctor-patient-row p { margin: 0; font-size: var(--fs-xs); color: var(--muted); }
+.doctor-patient-row .row-status { justify-self: start; }
+
+/* D3: patient banner — identity, visit status and allergy always visible next to the name. */
+.patient-banner {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-5) var(--space-6);
+  border-bottom: 1px solid var(--line);
+  background: var(--white);
+}
+.patient-banner h2 { margin: 0 0 4px; font-size: var(--fs-xl); line-height: var(--lh-tight); }
+.patient-banner .patient-meta { margin: 0; font-size: var(--fs-sm); color: var(--muted); }
+.patient-flags { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
+.patient-flags .badge { font-size: var(--fs-sm); padding: 3px 12px; }
+.patient-banner .doctor-header-actions { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: var(--space-2); }
+.patient-banner .doctor-visit-actions { position: relative; }
+.patient-banner .doctor-visit-actions > summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-h-sm);
+  padding: 6px 12px;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-md);
+  color: var(--primary-strong);
+  font-size: var(--fs-sm);
+  font-weight: var(--fw-semibold);
+  list-style: none;
+}
+.patient-banner .doctor-visit-actions > summary::-webkit-details-marker { display: none; }
+.patient-banner .doctor-visit-actions > summary::after { content: "▾"; margin-left: 6px; font-size: var(--fs-xs); }
+.patient-banner .doctor-visit-actions > div {
+  position: absolute;
+  right: 0;
+  z-index: 5;
+  min-width: 200px;
+  padding: var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  background: var(--white);
+  box-shadow: var(--shadow-md);
+}
+.patient-banner .doctor-visit-actions > div button { width: 100%; justify-content: flex-start; }
+
+/* Tabs: padded to the banner, edge fade when they overflow. */
+.connected-content .doctor-profile-column .doctor-tabs { padding: 0 var(--space-4); }
+@media (max-width: 800px) {
+  .connected-content .doctor-profile-column .doctor-tabs {
+    -webkit-mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+    mask-image: linear-gradient(90deg, #000 calc(100% - 28px), transparent);
+  }
+}
+
+/* D4: exam form — long-text fields span the row, actions stay reachable while scrolling. */
+.doctor-profile-body { padding: var(--space-5) var(--space-6) var(--space-8); }
+.doctor-profile-column .form-grid > label:has(> textarea) { grid-column: 1 / -1; }
+.doctor-profile-column .task-form .workspace-heading { margin-bottom: var(--space-2); }
+.connected-content .doctor-profile-column .task-form .form-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 4;
+  margin: var(--space-4) calc(-1 * var(--space-6)) calc(-1 * var(--space-8));
+  padding: var(--space-3) var(--space-6);
+  background: color-mix(in srgb, var(--white) 94%, transparent);
+  border-top: 1px solid var(--line);
+  backdrop-filter: blur(2px);
+}
+.doctor-summary-grid dt { font-weight: var(--fw-semibold); color: var(--text-subtle); }
+
+/* D6: the assistant launcher sits above the sticky save bar instead of covering it. */
+body:has(.doctor-profile-column .task-form) .assistant-fab { bottom: 84px; }
+
+@media (max-width: 800px) {
+  .patient-banner { display: block; padding: var(--space-4); }
+  .patient-banner .doctor-header-actions { justify-content: flex-start; margin-top: var(--space-3); }
+  .connected-content .patient-banner .doctor-header-actions button { margin-top: 0; }
+  .doctor-profile-body { padding: var(--space-4) var(--space-4) var(--space-6); }
+  .connected-content .doctor-profile-column .task-form .form-actions {
+    margin: var(--space-4) calc(-1 * var(--space-4)) calc(-1 * var(--space-6));
+    padding: var(--space-3) var(--space-4);
+  }
+  .connected-content .doctor-profile-column .task-form .form-actions button.primary { width: 100%; }
+  body:has(.doctor-profile-column .task-form) .assistant-fab { bottom: 80px; }
+  .doctor-worklist-column .worklist-filters .form-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* =====================================================================================
+   Tiếp đón — Bệnh nhân, Lượt khám, Thông tin hành chính, Lịch hẹn, Hàng đợi
+   ===================================================================================== */
+/* R1: the patient search is the first step of reception, so it reads as a search bar. */
+.worklist[data-worklist-panel=patients] .worklist-filters input[type=search] {
+  min-height: 44px;
+  padding-left: 40px;
+  font-size: var(--fs-md);
+  background: var(--white) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23566e84' stroke-width='2' stroke-linecap='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m20 20-3.5-3.5'/%3E%3C/svg%3E") no-repeat 12px center / 18px 18px;
+}
+.connected-content .worklist[data-worklist-panel=patients] .worklist-filters button[type=submit] {
+  min-height: 44px;
+  border-color: var(--primary);
+  color: var(--primary-strong);
+}
+/* Queue and appointments: the number/time title is what staff scan for. */
+.worklist:is([data-worklist-panel=queue], [data-worklist-panel=appointments]) td:first-child .worklist-record-link { font-size: var(--fs-lg); }
+.selected-patient { border-radius: var(--radius-md); }
+.selected-patient strong { color: var(--primary-strong); }
+
+/* =====================================================================================
+   Thu ngân — Phiếu phí, Giao dịch
+   ===================================================================================== */
+/* T2: amounts in the bill and payment lists line up digit by digit. */
+.worklist:is([data-worklist-panel=bills], [data-worklist-panel=payments]) td { font-variant-numeric: tabular-nums; }
+.worklist[data-worklist-panel=payments] td:first-child .worklist-record-link { font-size: var(--fs-lg); }
+
+/* =====================================================================================
+   Điều dưỡng — Sinh hiệu
+   ===================================================================================== */
+/* When the page shows the "choose a visit first" guide, that guide carries the only filled button. */
+.connected-content .record-toolbar:has(~ .measurement-start) > button.primary {
+  min-height: var(--control-h-sm);
+  background: var(--white);
+  border-color: var(--control-border);
+  color: var(--primary-strong);
+}
+.connected-content .measurement-start { border-left: 3px solid var(--primary); }
+.vital-grid dt { font-weight: var(--fw-semibold); color: var(--text-subtle); }
+.vital-grid dd { font-size: var(--fs-lg); font-weight: var(--fw-semibold); color: var(--ink); font-variant-numeric: tabular-nums; }
+.vital-grid dd small { font-size: var(--fs-xs); font-weight: var(--fw-regular); color: var(--muted); }
+
+/* =====================================================================================
+   Kỹ thuật viên CLS — Chỉ định và kết quả
+   ===================================================================================== */
+.connected-content .review-self { border-radius: var(--radius-md); background: var(--surface-raised); border-color: var(--line); }
+.connected-content .review-self small { color: var(--muted); }
+.clinical-result { padding: var(--space-3); border: 1px solid var(--line-soft); border-radius: var(--radius-md); background: var(--surface-raised); }
+
+/* =====================================================================================
+   Dược — Quầy thuốc
+   ===================================================================================== */
+.worklist[data-worklist-panel=prescriptions] td { font-variant-numeric: tabular-nums; }
+.medication-line { padding: var(--space-3) 0; border-bottom: 1px solid var(--line-soft); }
+.medication-line:last-child { border-bottom: 0; }
+
+/* =====================================================================================
+   Quản lý — Báo cáo
+   ===================================================================================== */
+.connected-content .report-start { border-left: 3px solid var(--primary); }
+.report-start h2 { font-size: var(--fs-xl); }
+.report-start button { min-width: 96px; }
+
+/* =====================================================================================
+   Quản trị — Nhân viên, Cơ sở, Lịch sử, công cụ nâng cao
+   ===================================================================================== */
+.admin-stats > div { border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); }
+.admin-stats span { font-size: var(--fs-sm); font-weight: var(--fw-semibold); color: var(--text-subtle); }
+.admin-stats strong { font-variant-numeric: tabular-nums; }
+.admin-staff-table th:last-child { text-align: right; }
+.admin-toolbar { gap: var(--space-2); }
+.admin-timeline time { font-size: var(--fs-xs); font-weight: var(--fw-semibold); color: var(--text-subtle); }
+
+/* =====================================================================================
+   Cổng người bệnh (portal.html)
+   ===================================================================================== */
+.portal-header { gap: var(--space-4); }
+.portal-user { font-weight: var(--fw-semibold); color: var(--ink); }
+.portal-page .portal-pagination button { min-height: var(--control-h-sm); font-size: var(--fs-sm); }
+.portal-pagination span { font-weight: var(--fw-semibold); color: var(--text-subtle); }
+.portal-publication small { color: var(--muted); }
+.portal-record h3, .portal-record strong { color: var(--ink); }
+.portal-medication dt { font-weight: var(--fw-semibold); color: var(--text-subtle); }
+.portal-page .portal-tabs { margin-bottom: var(--space-2); }
+
+/* =====================================================================================
+   Đăng nhập (connected.html, portal.html)
+   ===================================================================================== */
+.login-intro h1 { letter-spacing: -.5px; }
+.login-intro > p { color: var(--muted); }
+.login-intro li { font-size: var(--fs-sm); }
+.login-card > p, .connection-login .login-support { font-size: var(--fs-sm); color: var(--muted); }
+.connection-login button.primary { width: 100%; min-height: 44px; font-size: var(--fs-md); }
+.login-personas > a:hover { background: var(--white); color: var(--primary-strong); }
+.show-password { color: var(--ink); }
+
+@media (max-width: 800px) {
+  .worklist .worklist-filters { flex-wrap: wrap; }
+  .worklist .worklist-filters .form-grid { flex-basis: 100%; }
+  .connected-content .worklist .worklist-filters .form-actions { width: 100%; }
+  .connected-content .worklist .worklist-filters button[type=submit] { width: 100%; }
+  .other-actions > .action-groups { grid-template-columns: minmax(0, 1fr); }
+  .admin-staff-table th:last-child { text-align: left; }
+  /* Portal header: one row, like the staff app. */
+  .portal-header { flex-wrap: nowrap; gap: var(--space-3); padding: 12px 0; }
+  .portal-header > div { width: auto; flex-wrap: nowrap; justify-content: flex-end; gap: var(--space-2); min-width: 0; }
+  .portal-header .site-brand strong { font-size: var(--fs-xl); }
+  .portal-header .site-brand small { display: none; }
+  .portal-user { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* =====================================================================================
+   Khung trang rộng và cao (mọi vai trò)
+   Content is full width (layout.css); here each screen type uses the space it gets.
+   ===================================================================================== */
+/* Tables size their columns to the window instead of capping the information column. */
+.workspace-table td { max-width: none; }
+.admin-stats { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+@media (min-width: 801px) {
+  /* Worklists: the panel reaches the bottom of the window; an empty result centres in that space. */
+  .connected-content > .worklist { display: flex; flex-direction: column; }
+  .connected-content > .worklist > [data-worklist-results] { flex: 1 0 auto; }
+  .worklist [data-worklist-results] > [data-worklist-more] { justify-self: center; margin-top: var(--space-4); }
+
+  /* Filters keep a readable width and sit next to their button; the table below takes the full width. */
+  .connected-content > .worklist .worklist-filters .form-grid {
+    flex: 0 1 auto;
+    grid-auto-flow: column;
+    grid-template-columns: none;
+    grid-auto-columns: minmax(180px, 280px);
+  }
+  .connected-content > .worklist[data-worklist-panel=patients] .worklist-filters .form-grid {
+    flex: 0 1 880px;
+    grid-auto-columns: minmax(280px, 1fr);
+  }
+}
+
+@media (min-width: 1400px) {
+  /* Wide windows: task forms flow into as many 300px+ columns as fit; long text spans two. */
+  .connected-content > .task-form .form-grid { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .connected-content > .task-form .form-grid > label:has(> textarea) { grid-column: span 2; }
+}
+
+/* Bác sĩ: the profile column is not a scroll container, so (in page-scroll layouts) the sticky
+   save bar follows the window. */
+.doctor-profile-column { overflow: clip; }
+@media (min-width: 1001px) and (min-height: 620px) {
+  /* Workstation layout: the doctor's screen fits the window exactly. The visit list and the chart
+     body scroll on their own; the patient banner, tabs and the save bar never leave the screen. */
+  .clinic-main .content.connected-content:has(> .doctor-workspace) {
+    height: calc(100dvh - var(--header-h));
+    min-height: 0;
+    padding-bottom: 16px;
+    overflow: hidden;
+  }
+  .connected-content > .doctor-workspace {
+    flex: 1 1 0;
+    min-height: 0;
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .doctor-worklist-column { display: flex; flex-direction: column; min-height: 0; }
+  .doctor-worklist-column .worklist { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; }
+  .doctor-worklist-column .worklist > [data-worklist-results] { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+  .doctor-profile-column { min-height: 0; }
+  .doctor-profile-column > .doctor-profile-body { flex: 1 1 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 0; }
+  /* Sticky elements stop at the scroll container's padding, so the body has none at the bottom:
+     the save bar sits on the panel's edge; other tabs get the space back from a spacer. */
+  .doctor-profile-column > .doctor-profile-body:not(:has(.task-form))::after { content: ""; display: block; height: var(--space-6); }
+  .connected-content .doctor-profile-column .task-form .form-actions { margin-bottom: 0; background: var(--white); }
+  body:has(.doctor-profile-column .task-form) .assistant-fab { bottom: 100px; }
+}
+
+/* Result header: record count and "Cập nhật lúc" share one row instead of two. */
+[data-worklist-results] { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: start; column-gap: var(--space-4); }
+[data-worklist-results] > * { grid-column: 1 / -1; }
+[data-worklist-results] > .list-count { grid-column: 1; grid-row: 1; align-self: center; margin: var(--space-3) 0; }
+[data-worklist-results] > .worklist-time { grid-column: 2; grid-row: 1; align-self: center; }
+@media (min-width: 801px) {
+  .connected-content > .worklist > [data-worklist-results] { grid-template-rows: auto 1fr; }
+  .connected-content > .worklist > [data-worklist-results] > .workspace-empty { justify-content: center; }
+}
+
+/* Bác sĩ: with no patient chosen, the hint fills the chart panel instead of a strip at the top. */
+.doctor-profile-column { display: flex; flex-direction: column; }
+.doctor-profile-body { flex: 1 0 auto; }
+.doctor-profile-body:has(> .record-empty:only-child) { display: flex; flex-direction: column; }
+.doctor-profile-body > .record-empty:only-child { flex: 1; display: grid; place-items: center; }
+
+/* Very wide windows: two worklists of one page (Thu ngân, Sinh hiệu…) sit side by side. */
+@media (min-width: 1680px) {
+  .clinic-main .content.connected-content:has(> .worklist + .worklist) { flex-flow: row wrap; align-content: flex-start; column-gap: 20px; }
+  .clinic-main .content.connected-content:has(> .worklist + .worklist) > * { flex: 1 1 100%; }
+  .clinic-main .content.connected-content:has(> .worklist + .worklist) > .worklist { flex: 1 1 0; min-width: 0; }
+}
+
+/* Quản trị: row actions stay on one line when there is room. */
+@media (min-width: 1280px) { .admin-row-actions > div { max-width: none; flex-wrap: nowrap; } }
+
+/* Cổng người bệnh: wider canvas, still readable for long published text. */
+.portal-page { max-width: 1440px; }
