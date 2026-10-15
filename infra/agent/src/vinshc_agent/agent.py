@@ -292,24 +292,34 @@ def build_response(
             and state["verdict"].action == "allow" and not state.get("leaked")
             and not state.get("model_error") and not deps.ctx.read_errors):
         status, message, show = "not_found", no_prior.detail, bool(accepted and not comparison_only)
+    no_current = next((gap for gap in deps.ctx.registry.gaps if gap.reason == "no_current_encounter"), None)
+    if (no_current and not accepted and state["verdict"].action == "allow" and not state.get("leaked")
+            and not state.get("model_error") and not deps.ctx.read_errors):
+        status, message, show = "not_found", no_current.detail, False
     if (state.get("conversation_allowed") and not state.get("service_message")
             and status in ("ok", "limited")):
         message = deps.ctx.conversation_reply + ("\n\n" + message if message else "")
     answer: list[AnswerOut] = []
+    answers_by_text: dict[str, AnswerOut] = {}
+    sources_by_text: dict[str, set] = {}
     if show:
         for checked in state["validation"].accepted:
-            # Text is rendered from the cited source, so citing the same fact twice repeats a line.
-            if any(a.text == checked.statement.text for a in answer):
-                continue
-            answer.append(
-                AnswerOut(
-                    text=checked.statement.text,
-                    sources=[
-                        SourceOut(factId=e.id, section=e.section, label=e.label, **asdict(e.source))
-                        for f in checked.facts for e in deps.ctx.registry.evidence(f)
-                    ],
-                )
-            )
+            text = checked.statement.text
+            if text not in answers_by_text:
+                answers_by_text[text] = AnswerOut(text=text, sources=[])
+                sources_by_text[text] = set()
+                answer.append(answers_by_text[text])
+            for fact in checked.facts:
+                for evidence in deps.ctx.registry.evidence(fact):
+                    # A request-local fact ID may change when two tools read the same record.
+                    # Merge the line, but retain every distinct record/field/time/version.
+                    key = (evidence.section, evidence.label, evidence.source)
+                    if key not in sources_by_text[text]:
+                        sources_by_text[text].add(key)
+                        answers_by_text[text].sources.append(
+                            SourceOut(factId=evidence.id, section=evidence.section, label=evidence.label,
+                                      **asdict(evidence.source))
+                        )
     blocked = state["verdict"].action != "allow"
     registry = deps.ctx.registry
     relevant_sections = {fact.section for checked in state.get("validation", Validation()).accepted for fact in checked.facts}

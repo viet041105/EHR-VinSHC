@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
-from typing import Any
+import asyncio
+from datetime import datetime, timezone
+from typing import Any, NoReturn
 
 from .. import records
-from ..facts import Recorder, Source, ToolError, ToolOutput
+from ..backend import require_uuid
+from ..facts import ContextMismatch, Gap, Recorder, Source, ToolError, ToolOutput
 from . import Tool, ToolContext, ref_param
 
 VISITS_LIMIT = 20
@@ -28,6 +31,92 @@ async def _summary(ctx: ToolContext, encounter: str) -> dict[str, Any]:
     return ctx.cache[key]
 
 
+def _time(value: Any) -> datetime | None:
+    try:
+        result = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+        return result.astimezone(timezone.utc) if result.tzinfo is not None else None
+    except (ValueError, TypeError):
+        return None
+
+
+def _missing_current(ctx: ToolContext, detail: str) -> NoReturn:
+    ctx.registry.gap(Gap("visits", "Phiếu khám để đọc", "no_current_encounter", detail))
+    raise ToolError(detail)
+
+
+async def _read_current_visit(ctx: ToolContext, selected: str | None) -> dict[str, Any]:
+    backend, credentials = _staff(ctx)
+    payload = await backend.visits(credentials, ctx.patient_uuid, 100 if selected else VISITS_LIMIT)
+    rows = payload.get("results") or []
+    records._owned(payload, ctx.patient_uuid)
+    for row in rows:
+        if str(row.get("patientUuid") or "").lower() != ctx.patient_uuid:
+            raise ContextMismatch("Lượt khám thuộc bệnh nhân khác")
+    rows = [row for row in rows if not row.get("voided")]
+    if selected:
+        row = next((row for row in rows if str(row.get("uuid") or row.get("visitUuid") or "").lower() == selected), None)
+        if row is None:
+            _missing_current(ctx, "Không đọc được lượt khám đang chọn; hãy chọn lại lượt khám trong danh sách.")
+        return row
+    if not rows:
+        _missing_current(ctx, "Bệnh nhân chưa có lượt khám trong phạm vi được phép đọc; chưa có phiếu để tóm tắt.")
+    if any(_time(row.get("startDatetime")) is None for row in rows):
+        _missing_current(ctx, "Chưa xác định được lượt khám gần nhất vì thiếu thời điểm có múi giờ; hãy chọn lượt và phiếu khám cụ thể.")
+    return max(rows, key=lambda row: (_time(row["startDatetime"]), str(row.get("uuid") or row.get("visitUuid"))))
+
+
+async def _current_visit_row(ctx: ToolContext) -> dict[str, Any]:
+    # All parallel tools in this request share one selection and one authorized read.
+    key = "current_visit_selection"
+    if key not in ctx.cache:
+        ctx.cache["current_visit_explicit"] = ctx.visit_uuid is not None
+        ctx.cache[key] = asyncio.create_task(_read_current_visit(ctx, ctx.visit_uuid))
+    row = await ctx.cache[key]
+    ctx.visit_uuid = require_uuid(row.get("uuid") or row.get("visitUuid"), "current visit")
+    return row
+
+
+async def _read_current_encounter(ctx: ToolContext) -> str:
+    row = await _current_visit_row(ctx)
+    selected_visit = ctx.cache["current_visit_explicit"]
+    encounters = row.get("encounters") or []
+    for encounter in encounters:
+        records._owned(encounter, ctx.patient_uuid)
+        records._owned(encounter, ctx.visit_uuid, "visitUuid")
+    candidates = [encounter for encounter in encounters
+                  if (encounter.get("encounterType") or {}).get("key") == "consultation"
+                  and not encounter.get("voided")
+                  and encounter.get("status") not in {"voided", "entered-in-error"}]
+    if not candidates:
+        _missing_current(ctx, "Lượt khám đang chọn chưa có phiếu khám bệnh để tóm tắt." if selected_visit else
+                         "Lượt khám gần nhất chưa có phiếu khám bệnh để tóm tắt; hãy chọn một lượt và phiếu khám đã có.")
+    if any(_time(encounter.get("encounterDatetime")) is None for encounter in candidates):
+        _missing_current(ctx, "Chưa xác định được phiếu khám bệnh gần nhất vì thiếu thời điểm có múi giờ; hãy chọn phiếu khám cụ thể.")
+    encounter = max(candidates, key=lambda item: (_time(item["encounterDatetime"]), str(item.get("encounterUuid") or item.get("uuid"))))
+    uuid = require_uuid(encounter.get("encounterUuid") or encounter.get("uuid"), "current encounter")
+    summary = await _summary(ctx, uuid)
+    if (str(summary.get("patientUuid") or "").lower() != ctx.patient_uuid
+            or str(summary.get("encounterUuid") or "").lower() != uuid
+            or str(summary.get("visitUuid") or "").lower() != ctx.visit_uuid):
+        raise ContextMismatch("Phiếu khám gần nhất không khớp bệnh nhân/lượt khám")
+    ctx.encounter_uuid = uuid
+    note = (f"Chưa chọn phiếu khám: đang đọc phiếu khám bệnh gần nhất lúc {records.clock(encounter['encounterDatetime'])} "
+            + ("trong lượt khám đã chọn." if selected_visit else
+               f"của lượt khám gần nhất ({records.clock(row['startDatetime'])}) trong phạm vi được phép đọc."))
+    ctx.cache["current_encounter_note"] = note
+    ctx.registry.note(note)
+    return uuid
+
+
+async def _current_encounter(ctx: ToolContext) -> str:
+    if ctx.encounter_uuid:
+        return ctx.encounter_uuid
+    key = "current_encounter_selection"
+    if key not in ctx.cache:
+        ctx.cache[key] = asyncio.create_task(_read_current_encounter(ctx))
+    return await ctx.cache[key]
+
+
 async def _visit(ctx: ToolContext, visit_ref: str) -> str | None:
     """`all` → None (mọi lượt), `current` → lượt của lần khám đang mở, `V…` → lượt do list_visits cấp."""
     ref = visit_ref.strip()
@@ -38,7 +127,7 @@ async def _visit(ctx: ToolContext, visit_ref: str) -> str | None:
             summary = await _summary(ctx, ctx.encounter_uuid)
             ctx.visit_uuid = (summary.get("visitUuid") or "").lower() or None
         if ctx.visit_uuid is None:
-            raise ToolError("Không xác định được lượt khám hiện tại; dùng 'all' hoặc mã V… từ list_visits.")
+            await _current_visit_row(ctx)
         return ctx.visit_uuid
     uuid, _ = ctx.registry.resolve(ref, "visit")
     return uuid
@@ -47,18 +136,17 @@ async def _visit(ctx: ToolContext, visit_ref: str) -> str | None:
 async def get_encounter_summary(ctx: ToolContext, args: dict[str, Any]) -> ToolOutput:
     ref = args["encounter_ref"]
     if ref.lower() == "current":
-        if not ctx.encounter_uuid:
-            raise ToolError("Chưa có lần khám đang mở trong ngữ cảnh.")
-        encounter = ctx.encounter_uuid
+        encounter = await _current_encounter(ctx)
     else:
         encounter, _ = ctx.registry.resolve(ref, "encounter")
     rec = Recorder(ctx.registry)
     visit = records.clinical_summary(rec, await _summary(ctx, encounter), ctx.catalog, ctx.patient_uuid, encounter)
     if encounter == ctx.encounter_uuid and visit:
         if ctx.visit_uuid and ctx.visit_uuid != visit:
-            from ..facts import ContextMismatch
             raise ContextMismatch("visit không thuộc encounter đang mở")
         ctx.visit_uuid = visit
+    if ref.lower() == "current" and (note := ctx.cache.get("current_encounter_note")):
+        rec.note(note)
     return rec.output
 
 
@@ -123,15 +211,16 @@ async def get_patient_demographics(ctx: ToolContext, args: dict[str, Any]) -> To
     return rec.output
 
 
-VISIT_REF = ref_param("'current' cho lượt khám đang mở, 'all' cho mọi lượt, hoặc mã V… do list_visits trả về.")
+VISIT_REF = ref_param("'current' cho lượt đã chọn (hoặc lượt gần nhất nếu chưa chọn), 'all' cho mọi lượt, hoặc mã V… do list_visits trả về.")
 
 DOCTOR_TOOLS = [
     Tool(
         "get_encounter_summary",
         "Đọc một lần khám: lý do khám, bệnh sử, tiền sử và trạng thái khai thác, khám, chẩn đoán ICD-10, thuốc đã kê "
         "kèm trạng thái, dị ứng, sinh hiệu của lượt khám, lời dặn và hẹn tái khám. Dùng cho tóm tắt và hầu hết câu hỏi "
-        "về lần khám đang mở.",
-        {"encounter_ref": ref_param("'current' cho lần khám đang mở, hoặc mã E… do list_visits trả về.")},
+        "về lần khám đang mở. Chưa chọn phiếu: đọc phiếu khám bệnh gần nhất trong lượt đã chọn; "
+        "chưa chọn lượt thì dùng lượt gần nhất được phép đọc. Không tự chuyển sang lượt cũ nếu lượt đó chưa có phiếu khám bệnh.",
+        {"encounter_ref": ref_param("'current' cho phiếu đã chọn hoặc phiếu khám bệnh gần nhất trong ngữ cảnh, hoặc mã E… do list_visits trả về.")},
         get_encounter_summary,
     ),
     Tool(

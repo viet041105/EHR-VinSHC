@@ -6,7 +6,7 @@ from decimal import Decimal, InvalidOperation
 import re
 
 from . import Tool, ToolError
-from .doctor import _staff, _summary
+from .doctor import _current_encounter, _staff, _summary
 from .patient import _portal
 from .. import records
 from ..facts import ContextMismatch, PRESENT_STATES, Recorder, Source
@@ -86,8 +86,7 @@ def key_of(fact):
 
 async def compare_previous_visit(ctx, args):
     backend, credential = _staff(ctx)
-    if not ctx.encounter_uuid:
-        raise ToolError("Chưa có phiếu khám đang mở để so sánh; dùng list_visits để xem các lần khám trước.")
+    await _current_encounter(ctx)
     current = await _summary(ctx, ctx.encounter_uuid)
     rec = Recorder(ctx.registry)
     records.clinical_summary(rec, current, ctx.catalog, ctx.patient_uuid, ctx.encounter_uuid)

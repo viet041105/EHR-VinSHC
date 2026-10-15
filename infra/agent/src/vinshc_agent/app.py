@@ -422,7 +422,7 @@ def create_app(
             max_rounds=settings.max_tool_rounds,
             max_calls_per_round=settings.max_tool_calls_per_round,
         )
-        conversation = Conversation("doctor", doctor_general_context() if general else doctor_context(),
+        conversation = Conversation("doctor", doctor_general_context() if general else doctor_context(bool(encounter), bool(visit)),
                                     _history(body), body.message)
         context = DoctorContextOut(
             patientUuid=patient, encounterUuid=encounter, visitUuid=visit, role="doctor", facilityUuid=credentials.facility
