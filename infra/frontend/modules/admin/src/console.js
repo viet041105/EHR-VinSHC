@@ -171,7 +171,7 @@ function statusBadge(u) {
 }
 
 function staffTable() {
-  if (ui.users === null) return '<p class="admin-empty">Đang tải danh sách nhân viên…</p>';
+  if (ui.users === null) return '<div class="list-loading" role="status" aria-busy="true"><span>Đang tải danh sách nhân viên…</span><span class="skeleton" aria-hidden="true"></span><span class="skeleton" aria-hidden="true"></span></div>';
   const me = ctx.client.user?.uuid;
   const rows = ui.users.filter((u) => (ui.showRetired || !u.retired) && (!ui.roleFilter || u.roles.includes(ui.roleFilter)));
   if (!rows.length) return `<div class="admin-empty"><strong>Không có nhân viên phù hợp</strong><p>Thử bỏ bộ lọc, hoặc bấm “Thêm nhân viên”.</p></div>`;
@@ -267,7 +267,7 @@ function staffTab() {
 }
 
 function facilitiesTab() {
-  if (ui.facilities === null) return '<p class="admin-empty">Đang tải danh sách cơ sở…</p>';
+  if (ui.facilities === null) return '<div class="list-loading" role="status" aria-busy="true"><span>Đang tải danh sách cơ sở…</span><span class="skeleton" aria-hidden="true"></span><span class="skeleton" aria-hidden="true"></span></div>';
   const list = activeFacilities();
   const stopped = ui.facilities.filter((f) => f.active === false).length;
   const staffAt = (loc) => (ui.users || []).filter((u) => !u.retired && u.workspace?.facilityUuid === loc).length;
@@ -277,7 +277,7 @@ function facilitiesTab() {
 }
 
 function auditTab() {
-  if (ui.audit === null) return '<p class="admin-empty">Đang tải lịch sử…</p>';
+  if (ui.audit === null) return '<div class="list-loading" role="status" aria-busy="true"><span>Đang tải lịch sử…</span><span class="skeleton" aria-hidden="true"></span><span class="skeleton" aria-hidden="true"></span></div>';
   if (!ui.audit.length) return '<div class="admin-empty"><strong>Chưa có thay đổi nào</strong></div>';
   const names = new Map((ui.users || []).map((u) => [u.uuid, u.display]));
   const me = ctx.client.user?.uuid;
@@ -296,7 +296,7 @@ function auditTab() {
 function view() {
   if (!isSystemAdministrator(ctx.client.user))
     return `<section class="panel admin-panel"><h2>Quản lý nhân viên</h2><p>Việc tạo và khóa tài khoản do <strong>quản trị hệ thống</strong> thực hiện. Bạn vẫn có thể cấu hình biểu mẫu và quy trình trong “Công cụ nâng cao” bên dưới.</p></section><div id="patientAccessInbox"></div>`;
-  const tabs = [["staff", "👥 Nhân viên"], ["patientAccess", "Yêu cầu tài khoản bệnh nhân"], ["facilities", "🏥 Cơ sở"], ["audit", "🕘 Lịch sử thay đổi"]];
+  const tabs = [["staff", "Nhân viên"], ["patientAccess", "Yêu cầu tài khoản bệnh nhân"], ["facilities", "Cơ sở"], ["audit", "Lịch sử thay đổi"]];
   return `<nav class="admin-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-admin-tab="${k}" aria-selected="${ui.tab === k}" class="${ui.tab === k ? "active" : ""}">${l}</button>`).join("")}</nav>
     <div role="tabpanel">${ui.tab === "patientAccess" ? '<div id="patientAccessInbox"></div>' : ui.tab === "staff" ? staffTab() : ui.tab === "facilities" ? facilitiesTab() : auditTab()}</div>`;
 }

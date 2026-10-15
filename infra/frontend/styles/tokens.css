@@ -1,0 +1,85 @@
+/* VinSHC clinic app + patient portal design tokens. Loaded first; the landing page does not use it.
+   Colours keep the existing palette. Near-identical greys/blues were grouped onto the most-used value. */
+:root {
+  /* Brand */
+  --primary: #22577f;
+  --primary-hover: #194565;
+  --primary-strong: #174f7c;
+  --blue: #245b88;
+  --teal: #008e87;
+  --teal-hover: #007872;
+  --accent-strong: #00776f; /* only for white text on a teal background */
+
+  /* Text */
+  --ink: #253344;
+  --muted: #687585;
+  --text-subtle: #566e84;
+  --text-faint: #7b8ba0;       /* decorative only — below AA, never for content */
+  --text-placeholder: #8493a7; /* decorative only — below AA, never for content */
+
+  /* Surfaces and lines */
+  --white: #fff;
+  --surface: #f5f6f8;
+  --bg: var(--surface);
+  --surface-sunken: #edf0f3;
+  --tint-primary: #eef5fa;
+  --tint-accent: #eaf7f5;
+  --surface-raised: #f7f9fc;
+  --line: #e0e5ea;
+  --line-soft: #e6ebef;
+  --line-strong: #d5dce4;
+  --control-border: #cdd8e4;
+
+  /* Semantic */
+  --red: #a93638;
+  --success: #1d6b4f;
+  --success-bg: #eef6f1;
+  --warning: #8a5a00;
+  --warning-bg: #fff9ec;
+  --danger-bg: #fdecec;
+
+  /* Typography: system fonts with full Vietnamese coverage. Six sizes, never below 12px. */
+  --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Roboto, "Noto Sans", Arial, sans-serif;
+  --font-mono: ui-monospace, Consolas, "Cascadia Mono", monospace;
+  --fs-xs: 12px;  /* metadata, captions, table headers */
+  --fs-sm: 13px;  /* secondary text, buttons */
+  --fs-md: 14px;  /* body, controls */
+  --fs-lg: 16px;  /* card titles */
+  --fs-xl: 20px;  /* section titles */
+  --fs-2xl: 28px; /* page title, brand */
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+  --fw-bold: 700;
+  --lh-tight: 1.3;
+  --lh: 1.55;
+
+  /* Spacing (4px grid) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+
+  /* Shape and depth */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-full: 999px;
+  --shadow-sm: 0 1px 2px rgba(20, 50, 80, .06);
+  --shadow-md: 0 4px 14px rgba(20, 50, 80, .08);
+  --shadow-lg: 0 12px 36px rgba(20, 50, 80, .14);
+  --focus-ring: 0 0 0 2px var(--white), 0 0 0 4px var(--primary);
+
+  /* Controls */
+  --control-h-sm: 32px;
+  --control-h: 40px;
+
+  /* App frame: header height and the page's side gutter (content itself is full width). */
+  --header-h: 64px;
+  --page-gutter: 28px;
+}
+@media (max-width: 1100px) { :root { --page-gutter: 20px; } }
+@media (max-width: 800px) { :root { --header-h: 60px; --page-gutter: 16px; } }

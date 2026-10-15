@@ -61,5 +61,6 @@ export {
   preparationPanel,
 } from "./ui.js";
 export { RESULT_LABELS } from "./labels.js";
+export { installFieldErrors } from "./field-errors.js";
 export { WorkspaceMemory } from "./workspace-model.js";
 export { defineModule, createRegistry } from "./registry.js";
