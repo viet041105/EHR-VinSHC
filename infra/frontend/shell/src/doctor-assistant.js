@@ -1,5 +1,5 @@
-// Floating chatbot for the doctor workspace. Request handling, stale-response protection and source
-// lookup are inherited from AgentChat; this class only renders the chat as a launcher + side panel
+// Doctor-workspace chatbot. Request handling, stale-response protection and source
+// lookup are inherited from AgentChat; this class renders a launcher that opens a docked side column
 // that stays available on every doctor screen and survives shell re-renders.
 import { AgentChat, readingFields, missingView, notesView } from "./agent-chat.js";
 import { displayResult } from "./result-view.js";
@@ -12,6 +12,13 @@ const SUGGESTIONS = [
   ["🧪", "Kết quả CLS", "Kết quả cận lâm sàng của lần khám này là gì?"],
   ["💊", "Thuốc đã kê", "Bệnh nhân đang được kê những thuốc nào?"],
 ];
+const WIDTH_KEY = "vinshc.assistantWidth";
+const clampWidth = (w) => Math.round(Math.min(Math.max(w, 320), Math.min(900, window.innerWidth * 0.7)));
+const applyWidth = (w) => document.documentElement.style.setProperty("--assistant-w", `${clampWidth(w)}px`);
+try {
+  const saved = Number(localStorage.getItem(WIDTH_KEY));
+  if (saved) applyWidth(saved);
+} catch {}
 const time = (iso) => new Date(iso).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" });
 
 export class DoctorAssistant extends AgentChat {
@@ -74,9 +81,10 @@ export class DoctorAssistant extends AgentChat {
       <p>Tôi không chẩn đoán hay kê đơn thay bác sĩ.</p></div></div>`;
     this.root.innerHTML = `<div class="assistant ${this.open ? "open" : ""}">
       <button type="button" class="assistant-fab" data-assistant-toggle aria-expanded="${this.open}" aria-controls="assistantPanel">
-        <span aria-hidden="true">${this.open ? "✕" : "🩺"}</span><span class="assistant-fab-label">${this.open ? "Đóng trợ lý" : "Trợ lý bác sĩ"}</span>${!this.open && this.turns.length ? `<span class="assistant-dot" aria-label="Có hội thoại"></span>` : ""}
+        <span aria-hidden="true">🩺</span><span class="assistant-fab-label">Trợ lý bác sĩ</span>${!this.open && this.turns.length ? `<span class="assistant-dot" aria-label="Có hội thoại"></span>` : ""}
       </button>
-      <section id="assistantPanel" class="assistant-panel" role="dialog" aria-label="Trợ lý bác sĩ" ${this.open ? "" : "hidden"}>
+      <section id="assistantPanel" class="assistant-panel" role="complementary" aria-label="Trợ lý bác sĩ" ${this.open ? "" : "hidden"}>
+        <div class="assistant-resize" data-assistant-resize title="Kéo để đổi độ rộng" aria-hidden="true"></div>
         <header class="assistant-head">
           <span class="assistant-avatar" aria-hidden="true">🩺</span>
           <div><strong>Trợ lý bác sĩ</strong><small>Đọc hồ sơ · có trích nguồn</small></div>
@@ -119,6 +127,27 @@ export class DoctorAssistant extends AgentChat {
     root.querySelector("[data-assistant-close]").onclick = () => toggle(false);
     root.querySelector(".assistant-panel").onkeydown = (e) => {
       if (e.key === "Escape") toggle(false);
+    };
+    // Drag the left edge to resize; the width lives on :root so re-renders keep it.
+    const handle = root.querySelector("[data-assistant-resize]");
+    handle.onpointerdown = (e) => {
+      e.preventDefault();
+      handle.setPointerCapture(e.pointerId);
+      handle.classList.add("dragging");
+      document.body.classList.add("assistant-resizing");
+      handle.onpointermove = (ev) => applyWidth(window.innerWidth - ev.clientX);
+      handle.onpointerup = handle.onpointercancel = () => {
+        handle.onpointermove = handle.onpointerup = handle.onpointercancel = null;
+        handle.classList.remove("dragging");
+        document.body.classList.remove("assistant-resizing");
+        try {
+          localStorage.setItem(WIDTH_KEY, parseInt(getComputedStyle(document.documentElement).getPropertyValue("--assistant-w")));
+        } catch {}
+      };
+    };
+    handle.ondblclick = () => {
+      document.documentElement.style.removeProperty("--assistant-w");
+      try { localStorage.removeItem(WIDTH_KEY); } catch {}
     };
     root.querySelector("[data-clear]").onclick = () => {
       this.controller?.abort();

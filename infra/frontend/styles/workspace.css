@@ -327,10 +327,14 @@ body:has(.clinic-header), body:has(.portal-page) {
 .assistant-fab:hover { background: #194565; color: #fff; }
 .assistant-fab > span:first-child { font-size: 18px; line-height: 1; }
 .assistant-dot { width: 9px; height: 9px; border-radius: 50%; background: #f0b429; box-shadow: 0 0 0 2px #22577f; }
-.assistant.open .assistant-fab { padding: 10px 14px; }
-.assistant-panel { position: fixed; right: 24px; bottom: 84px; z-index: 40; width: min(420px, calc(100vw - 48px)); height: min(640px, calc(100vh - 120px)); display: flex; flex-direction: column; background: #fff; border: 1px solid #c9d6e2; border-radius: 12px; box-shadow: 0 16px 48px rgba(20, 50, 80, .25); overflow: hidden; font-size: 13px; }
+.assistant.open .assistant-fab { display: none; }
+/* Open = a full-height column docked to the right edge; the page reflows beside it (see body.assistant-docked). */
+.assistant-panel { position: fixed; top: 0; right: 0; bottom: 0; z-index: 40; width: min(var(--assistant-w, 400px), 100vw); display: flex; flex-direction: column; background: #fff; border-left: 1px solid #c9d6e2; box-shadow: -8px 0 24px rgba(20, 50, 80, .08); overflow: hidden; font-size: 13px; }
 .assistant-panel[hidden] { display: none; }
-.assistant-head { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #22577f; color: #fff; }
+.assistant-resize { position: absolute; top: 0; bottom: 0; left: -3px; width: 8px; z-index: 1; cursor: ew-resize; touch-action: none; }
+.assistant-resize:hover, .assistant-resize.dragging { background: rgba(34, 87, 127, .35); }
+body.assistant-resizing { cursor: ew-resize; user-select: none; }
+.assistant-head { box-sizing: border-box; flex-shrink: 0; min-height: 75px; display: flex; align-items: center; gap: 10px; padding: 0 16px; /* = .clinic-header 74px + 1px border, so both bars line up */ background: #22577f; color: #fff; }
 .assistant-head div { flex: 1; display: grid; line-height: 1.3; }
 .assistant-head small { opacity: .8; font-size: 11px; }
 .assistant-head button { min-height: 30px; padding: 4px 10px; border: 1px solid rgba(255, 255, 255, .35); background: transparent; color: #fff; border-radius: 6px; }
@@ -377,8 +381,8 @@ body:has(.clinic-header), body:has(.portal-page) {
 @media (max-width: 600px) {
   .assistant-fab { right: 16px; bottom: 16px; }
   .assistant-fab-label { display: none; }
-  .assistant-panel { inset: 0; width: 100%; height: 100%; border-radius: 0; border: 0; }
-  .assistant.open .assistant-fab { display: none; }
+  .assistant-panel { width: 100%; border: 0; }
+  .assistant-resize { display: none; }
 }
-@media (min-width: 1100px) { body.assistant-docked .connected-content { padding-right: 468px; } }
+@media (min-width: 1100px) { body.assistant-docked .connected-content { padding-right: var(--assistant-w, 400px); } }
 @media print { .assistant { display: none !important; } }
