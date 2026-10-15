@@ -25,6 +25,21 @@ trên OpenMRS, lưu PostgreSQL; FE đọc API VinSHC cùng origin.
   Muốn thử corpus này qua BE HTTP synthetic phải bật thêm
   `VINSHC_AGENT_KNOWLEDGE_ALLOW_DEVELOPMENT=true`; mặc định tắt.
 
+### Khi chỉ chọn bệnh nhân, chưa chọn phiếu khám
+
+- `current` ưu tiên phiếu khám đã chọn. Nếu chưa chọn phiếu, agent đọc phiếu loại
+  `consultation` gần nhất trong lượt đã chọn. Nếu chưa chọn cả lượt, agent dùng
+  lượt gần nhất được phép đọc tại cơ sở, theo thời điểm có múi giờ.
+- Phiếu sinh hiệu, hành chính và phiếu đã hủy không được dùng làm phiếu khám bệnh.
+  Lượt gần nhất chưa có phiếu khám bệnh thì báo rõ; không tự lấy phiếu của lượt cũ.
+- Tóm tắt và các tool dùng `visit_ref=current` chia sẻ cùng lựa chọn trong một
+  lượt hỏi, kể cả khi chạy song song. Backend vẫn kiểm quyền bằng phiên của bác sĩ;
+  agent kiểm tra bệnh nhân–lượt–phiếu trước khi trả dữ kiện.
+- Ghi chú và nguồn trả về nêu rõ phiếu/thời điểm thực tế được đọc. `context` trong
+  phản hồi vẫn giữ nguyên lựa chọn FE gửi, để không đổi hồ sơ hoặc khóa phiên nhớ.
+- Những dòng trả lời trùng nội dung được gộp, đồng thời hợp nhất đầy đủ các nguồn
+  khác nhau. Cùng một bản ghi/trường/thời điểm/phiên bản chỉ được trích một lần.
+
 ## Chạy local
 
 ### Database hiện có trên máy

@@ -199,7 +199,15 @@ def test_stream_has_progress_and_only_checked_answers(client):
     assert names[0]=='start' and names[-1]=='done' and 'progress' in names and 'answer' in names
     final=next(data for name,data in events if name=='final')
     assert final['status']=='ok' and final['conversationId']
-    assert all(len(a['sources'])==2 for a in final['answer'])
+    assert final['answer'] and all(a['sources'] for a in final['answer'])
+    for row in final['answer']:
+        sources = row['sources']
+        # Current allergy state can be the very same record in both summaries.
+        # Repeated evidence gets one citation; distinct historical measurements keep both.
+        identities = [json.dumps({k: v for k, v in s.items() if k != 'factId'}, sort_keys=True) for s in sources]
+        assert len(identities) == len(set(identities))
+        if any(s['kind'] == 'vitals' for s in sources):
+            assert len(sources) == 2 and len({s['recordedAt'] for s in sources}) == 2
 
 
 def test_stream_does_not_expose_rejected_model_text():

@@ -344,6 +344,7 @@ def test_patient_only_context_is_allowed(make_client, vinshc):
     assert response.status_code == 200
     assert response.json()["context"]["patientUuid"] == PATIENT
     assert response.json()["context"]["encounterUuid"] is None
+    assert response.json()["status"] == "ok" and response.json()["answer"]
 
 
 def test_partial_chart_context_is_rejected(make_client, vinshc):
