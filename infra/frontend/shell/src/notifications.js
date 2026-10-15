@@ -43,6 +43,7 @@ export class NotificationBell {
       this.rows=more?[...this.rows,...data.results]:data.results;this.count=data.unreadCount;this.more=!!data.hasMore;this.ready=true;this.status='ready';
     }catch(error){
       if(key!==this.key||serial!==this.serial)return;
+      if(error.status===403&&this.persona==='patient'&&this.ready){this.clear();this.onError(error);return;}
       this.rows=[];this.count=0;this.more=false;this.ready=false;
       this.status=[404,405,501].includes(error.status)||error.message==='unsupported'?'waiting':error.status===403?'forbidden':'error';
       if(error.status===401){this.clear();this.onError(error);return;}
@@ -53,7 +54,7 @@ export class NotificationBell {
     const key=this.key;this.loading=true;this.error='';this.paint();
     try{await this.client.request('vinshc/notifications/'+(id==='all'?'read-all':encodeURIComponent(id)+'/read'),{method:'POST',scoped:this.persona!=='patient'});
       if(key!==this.key)return;this.loading=false;await this.load();
-    }catch(error){if(key!==this.key)return;if(error.status===401){this.clear();this.onError(error);return;}this.error='Chưa đánh dấu được. Vui lòng thử lại.';}
+    }catch(error){if(key!==this.key)return;if(error.status===401||(error.status===403&&this.persona==='patient')){this.clear();this.onError(error);return;}this.error='Chưa đánh dấu được. Vui lòng thử lại.';}
     finally{if(key===this.key){this.loading=false;this.paint();}}
   }
   paint(){

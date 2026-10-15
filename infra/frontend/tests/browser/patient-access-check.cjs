@@ -10,7 +10,7 @@ const facility=map.entities['location.development.clinic'];
  const browser=await chromium.launch({headless:true});
  try{for(const width of [1440,390]){
   const page=await browser.newPage({viewport:{width,height:1000}});page.setDefaultTimeout(10000);
-  let role='doctor',available=false,capable=true,read=false,held=null,hold=false;
+  let role='doctor',available=false,capable=true,read=false,held=null,hold=false,created=false;
   const writes=[],errors=[];
   const visit={uuid:id(1),patientUuid:id(2),visitCode:'LK-QA',status:'open',patient:{fullName:'Người bệnh kiểm thử',identifier:'QA-1'},encounters:[{uuid:id(3),encounterType:{key:'consultation'},providers:[{uuid:id(5)}]}]};
   let request={uuid:id(20),type:'patient_account_create',status:'pending',patientUuid:id(2),patientName:'Người bệnh kiểm thử',visitUuid:id(1),requesterName:'Bác sĩ kiểm thử',createdAt:'2026-10-16T02:00:00Z'};
@@ -29,14 +29,14 @@ const facility=map.entities['location.development.clinic'];
    if(p.endsWith('/clinical-summary'))return send({status:'draft',patientUuid:id(2),visitUuid:id(1),encounterUuid:id(3),diagnoses:[],drugOrders:[]});
    if(p.startsWith('vinshc/patient-access/requests')){
     if(!available)return send({error:'missing'},404);
-    if(method==='GET'&&p.endsWith('/requests'))return send({results:role==='admin'?[request]:[],hasMore:false,capabilities:{request:capable,fulfill:capable,reject:capable}});
+    if(method==='GET'&&p.endsWith('/requests'))return send({results:(role==='admin'||created)&&(!u.searchParams.get('status')||u.searchParams.get('status')===request.status)?[request]:[],hasMore:false,capabilities:{request:capable,fulfill:capable,reject:capable}});
     if(method==='GET')return send(request);
     const d=req.postDataJSON();
     if(p.endsWith('/requests')){
      assert.equal(d.patientUuid,visit.patientUuid);assert.equal(d.visitUuid,visit.uuid);assert.ok(d.idempotencyKey);
-     request={...request,type:d.type,note:d.note};return send(request,201);
+     created=true;request={...request,type:d.type,note:d.note};return send(request,201);
     }
-    if(p.endsWith('/fulfill')){assert.equal(d.verificationMethod,'in_person_document');assert.ok(d.idempotencyKey);request={...request,status:'fulfilled'};return send(request);}
+    if(p.endsWith('/fulfill')){assert.equal(d.verificationMethod,'verified_clinic_record');assert.ok(d.idempotencyKey);request={...request,status:'fulfilled',username:d.username||'qa.patient'};return send(request);}
     if(p.endsWith('/reject')){request={...request,status:'rejected',reason:d.reason};return send(request);}
    }
    if(p.startsWith('vinshc/notifications')){
@@ -64,7 +64,7 @@ const facility=map.entities['location.development.clinic'];
   await page.locator('[data-doctor-patient-access]').click();
   await page.getByText(/Chờ kết nối máy chủ.*Backend chưa hỗ trợ/).waitFor();
   assert.equal(await page.locator('#patientAccessRequest button[type=submit]').isDisabled(),true);
-  await page.locator('#patientAccessRequest [name=type]').selectOption('patient_password_reset');await page.locator('#patientAccessRequest [name=note]').fill('Cần hỗ trợ đăng nhập');
+  await page.locator('[data-access-type]').click();assert.equal(await page.locator('#patientAccessRequest [name=type]').inputValue(),'patient_password_reset');await page.locator('#patientAccessRequest [name=note]').fill('Cần hỗ trợ đăng nhập');
   assert.equal(writes.length,0);
   await page.locator('[data-access-close]').click();await page.locator('[data-bell-toggle]').click();
   await page.getByText(/Chờ kết nối máy chủ.*thông báo/).waitFor();assert.equal(await page.locator('.bell-badge').count(),0);await page.keyboard.press('Escape');
@@ -72,8 +72,9 @@ const facility=map.entities['location.development.clinic'];
   available=true;
   await page.locator('[data-doctor-patient-access]').click();await page.locator('[data-access-retry]').click();
   await page.waitForFunction(()=>!document.querySelector('#patientAccessRequest button[type=submit]').disabled);
-  await page.locator('#patientAccessRequest [name=note]').fill('Nhờ xác minh và cấp tài khoản');await page.locator('#patientAccessRequest button[type=submit]').click();
+  await page.locator('#patientAccessRequest [name=note]').fill('Nhờ tạo tài khoản cho hồ sơ đã tiếp nhận');await page.locator('#patientAccessRequest button[type=submit]').click();
   await page.getByText(/Đã gửi yêu cầu đến quản trị/).waitFor();assert.equal(writes.length,1);
+  await page.locator('[data-access-close]').click();await page.locator('[data-doctor-patient-access]').click();await page.getByText('Đã có yêu cầu đang chờ quản trị xử lý.',{exact:true}).waitFor();assert.equal(await page.locator('#patientAccessRequest button[type=submit]').count(),0);assert.equal(writes.length,1);
   await page.locator('[data-access-close]').click();
   await page.locator('[data-bell-toggle]').click();await page.getByText('Thông báo doctor',{exact:true}).waitFor();
   assert.equal(await page.locator('[data-bell-open]').count(),1,'Arbitrary target URL never creates a link');
@@ -85,9 +86,10 @@ const facility=map.entities['location.development.clinic'];
   await page.locator('[data-admin-tab=patientAccess]').click();await page.locator('[data-access-select]').click();
   await page.locator('#accessFulfill [name=username]').fill('qa.patient');await page.locator('#accessFulfill [name=password]').fill('Private-fixture-42');await page.locator('#accessFulfill [name=confirmation]').fill('Private-fixture-42');
   assert.equal(await page.locator('#accessFulfill button').isEnabled(),true);
-  // No write until identity has been explicitly verified and the admin submits.
-  await page.locator('#accessFulfill [name=verificationMethod]').selectOption('in_person_document');await page.locator('#accessFulfill button').click();
-  await page.getByText(/Máy chủ đã xác nhận xử lý yêu cầu/).waitFor();assert.equal(writes.length,3);
+  // Confirmation stays inside the create form, without a separate identity-verification page.
+  assert.equal(await page.locator('#accessFulfill [name=verificationMethod]').count(),0);await page.locator('#accessFulfill button').click();assert.equal(writes.length,2);
+  await page.locator('#accessFulfill [name=patientConfirmed]').check();await page.locator('#accessFulfill button').click();
+  await page.getByText(/Đã tạo tài khoản qa.patient/).waitFor();assert.equal(writes.length,3);
   assert.equal(await page.locator('body').innerText().then(t=>t.includes('Private-fixture-42')),false);
   assert.equal(await page.evaluate(()=>JSON.stringify({...localStorage,...sessionStorage}).includes('Private-fixture-42')),false);
   // Explicit capability refusal must keep writes unavailable even when GET works.
@@ -105,7 +107,8 @@ const facility=map.entities['location.development.clinic'];
   await page.goto(base+'/portal.html');role='patient';await page.locator('#portalLogin [name=username]').fill('qa.patient');await page.locator('#portalLogin [name=password]').fill('fixture-only');await page.locator('#portalLogin button').click();
   await page.locator('#portalNotifications [data-bell-toggle]').click();await page.getByText('Thông báo patient',{exact:true}).waitFor();
   await page.locator('[data-bell-open]').click();await page.getByText('Lời dặn đã công bố',{exact:true}).waitFor();
-  await page.locator('#portalLogout').click();assert.equal(await page.locator('.notification-bell').count(),0);
+  available=false;await page.locator('[data-bell-toggle]').click();await page.locator('#portalLogin').waitFor();
+  assert.equal(await page.locator('#portalLogout,.notification-bell').count(),0,'A previously working notification API denying portal access must clear the patient session');
   assert.equal(writes.length,3);assert.deepEqual(errors,[]);
   console.log(`PASS ${width}px: patient entry, missing API locks, doctor request, admin verified fulfillment, capabilities, bell/read/targets, account isolation, patient portal. All API writes mocked.`);
   await page.close();

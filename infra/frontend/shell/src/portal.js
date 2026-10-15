@@ -49,7 +49,8 @@ async function openNotification(target) {
   try {
     const item=await client.request('vinshc/portal/visits/'+target.visitUuid,{scoped:false});
     if(token!==generation)return;
-    if(item?.uuid!==target.visitUuid)throw new BackendError('Chưa mở được lần khám này.');
+    if((item?.uuid||item?.visitUuid)!==target.visitUuid)throw new BackendError('Chưa mở được lần khám này.');
+    item.uuid=item.uuid||item.visitUuid;
     if(!visits.some(v=>v.uuid===item.uuid))visits=[item,...visits];
     visit=item.uuid;loading=false;await readVisit();
   }catch(ex){if(token===generation){error=userError(ex);if([401,403].includes(ex.status))clearPatientContext();}}
