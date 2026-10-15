@@ -271,6 +271,31 @@ const address = action(
   (d) => ({ ...d, catalogueVersion: d.catalogueVersion, ...source() }),
   { prepare: requireCatalogue, bind: loadProvinces },
 );
+
+function captureIdentity(result, ctx) {
+  if (Array.isArray(result?.contacts) && Array.isArray(result?.addresses)) {
+    ctx.context.identity = result;
+    for (const [type, rows] of [['contact', result.contacts], ['address', result.addresses]])
+      for (const row of rows) ctx.memory.remember(type, { ...row, patientUuid: result.patientUuid });
+  }
+  if (result?.row_key) {
+    const type = Object.hasOwn(result, 'full_name') ? 'contact' : Object.hasOwn(result, 'address_text') ? 'address' : null;
+    if (type) ctx.memory.remember(type, { ...result, patientUuid: ctx.memory.context.patient });
+  }
+}
+function identityCards(ctx) {
+  const identity = ctx.context.identity;
+  if (!identity || identity.patientUuid !== ctx.memory.context.patient) return '';
+  return `<section class="identity-details"><h2>Thông tin liên hệ đã lưu</h2>${[['contact', 'Người liên hệ', identity.contacts], ['address', 'Địa chỉ', identity.addresses]].map(([type, title, rows]) => {
+    const current = rows.filter(r => r.is_current !== false && r.status !== 'void');
+    return `<div class="identity-group"><h3>${title}</h3>${current.length ? `<div class="identity-card-grid">${current.map(r => `<article class="panel identity-card"><strong>${esc(type === 'contact' ? r.full_name : r.address_text || 'Địa chỉ đã lưu')}</strong><p>${esc(type === 'contact' ? [r.relationship_name, r.phone_raw, r.address_text].filter(Boolean).join(' · ') : [r.commune_name, r.province_name].filter(Boolean).join(' · '))}</p><small>Phiên bản ${esc(r.version_number)}${r.is_primary ? ' · Liên hệ chính' : ''}${r.emergency_contact ? ' · Liên hệ khẩn cấp' : ''}</small><div>${ctx.canAction(type === 'contact' ? 'updateContact' : 'updateAddress') ? `<button type="button" data-identity-action="${type === 'contact' ? 'updateContact' : 'updateAddress'}" data-identity-row="${esc(r.row_key)}">Sửa thông tin</button><button type="button" class="danger" data-identity-action="${type === 'contact' ? 'voidContact' : 'voidAddress'}" data-identity-row="${esc(r.row_key)}">Ngừng sử dụng</button>` : ''}</div></article>`).join('')}</div>` : `<p class="section-empty">Chưa có ${title.toLowerCase()} hiện hành. ${ctx.canAction(type === 'contact' ? 'contact' : 'address') ? 'Chọn công việc thêm mới ở phía trên để bổ sung.' : ''}</p>`}</div>`;
+  }).join('')}${(identity.fieldStates || []).filter(r => r.is_current !== false && r.status !== 'void').length ? `<div class="identity-group"><h3>Thông tin chưa đầy đủ</h3><div class="identity-state-list">${identity.fieldStates.filter(r => r.is_current !== false && r.status !== 'void').map(r => `<p><strong>${esc(policies.fields.find(f => f.code === r.field_code)?.label || 'Thông tin trong hồ sơ')}</strong><span class="row-status">${esc(stateText(r.data_status))}</span></p>`).join('')}</div></div>` : ''}</section>`;
+}
+function bindIdentity(ctx) {
+  document.querySelectorAll('[data-identity-action]').forEach(button => button.onclick = () => {
+    ctx.navigate('identity', button.dataset.identityAction, { record: button.dataset.identityRow });
+  });
+}
 const missingFields = [
   patient,
   choice(
@@ -362,6 +387,7 @@ const actions = {
     (d) => "contact/" + uuid(d.record),
     contactPatch,
     {
+      record: 'contact', captures: 'contact',
       notice:
         "Chỉ nhập thông tin muốn đổi. Bỏ trống để giữ nguyên; chọn Xóa để bỏ thông tin cũ.",
     },
@@ -374,7 +400,7 @@ const actions = {
     (d) =>
       "contact/" + uuid(d.record) + "?" + new URLSearchParams({ reason: d.reason }),
     null,
-    { method: "DELETE" },
+    { method: "DELETE", record: 'contact', captures: 'contact' },
   ),
   updateAddress: action(
     "Sửa địa chỉ đã lưu",
@@ -396,6 +422,7 @@ const actions = {
       return out;
     },
     {
+      record: 'address', captures: 'address',
       prepare: requireCatalogue,
       bind: loadProvinces,
       notice:
@@ -410,7 +437,7 @@ const actions = {
     (d) =>
       "address/" + uuid(d.record) + "?" + new URLSearchParams({ reason: d.reason }),
     null,
-    { method: "DELETE" },
+    { method: "DELETE", record: 'address', captures: 'address' },
   ),
   fieldState: action(
     "Ghi trạng thái thông tin thiếu",
@@ -514,7 +541,7 @@ const actions = {
         required: false,
       }),
       optional("occupation", "Nghề nghiệp", "text", { max: 50 }),
-      ...identifierFields,
+      ...identifierFields.map(f => ({ ...f, required: false })),
       optional("reason", "Lý do sửa", "textarea", { max: 255 }),
     ],
     (d) => "patients/" + uuid(d.patient),
@@ -530,6 +557,7 @@ const actions = {
 // ---------------------------------------------------------------- worklist
 
 const patients = {
+  recordType: "patient",
   section: "patients",
   resource: "patient_identity",
   title: "Tìm bệnh nhân",
@@ -597,11 +625,15 @@ export default defineModule({
       note: "Người liên hệ, địa chỉ có mã hành chính và trạng thái thông tin thiếu. Đăng ký, tìm và sửa thông tin cơ bản nằm ở mục Bệnh nhân.",
       records: ["patient"],
       overview: false,
+      footer: identityCards,
+      bind: bindIdentity,
     },
   ],
   actions,
   worklists: { patients },
   records: {
+    contact: { label: 'Người liên hệ', section: 'identity', idKey: 'row_key' },
+    address: { label: 'Địa chỉ', section: 'identity', idKey: 'row_key' },
     patient: {
       label: "Bệnh nhân",
       section: "patients",
@@ -609,8 +641,10 @@ export default defineModule({
       readSection: "identity",
       readField: "patient",
       idKey: "patientUuid",
+      contextFrom: r => ({ patient: r.patientUuid || r.uuid }),
     },
   },
+  onCapture: captureIdentity,
   calls: [
     { name: "loadProvinces", method: "GET", path: "address-catalogue" },
     { name: "loadCatalogueVersion", method: "GET", path: "configuration-status" },

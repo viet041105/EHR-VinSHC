@@ -77,6 +77,10 @@ function vitalsForm(ctx) {
     return note(
       "Vai trò hiện tại chỉ xem lịch sử sinh hiệu, không ghi lần đo.",
     );
+  if (!ctx.memory.context.patient || !ctx.memory.context.encounter || ctx.encounterType && ctx.encounterType !== 'vitals') {
+    const hasVisit = Boolean(ctx.memory.context.visit);
+    return `<section class="panel measurement-start"><span class="eyebrow">TRƯỚC KHI NHẬP SỐ ĐO</span><h2>${hasVisit ? 'Bắt đầu lần đo cho người bệnh đã chọn' : 'Chọn lượt khám để ghi sinh hiệu'}</h2><p>${hasVisit ? 'Hệ thống cần mở lần ghi sinh hiệu của bạn trong lượt khám này. Bấm bắt đầu; sau khi xác nhận, các ô số đo sẽ hiện tại đây.' : 'Mở danh sách lượt khám, tìm đúng người bệnh rồi bấm Ghi sinh hiệu trên dòng đó.'}</p><button type="button" class="primary" data-guide-section="${hasVisit ? 'vitals' : 'visits'}" ${hasVisit ? 'data-guide-action="startVitalsEncounter"' : ''}>${hasVisit ? 'Bắt đầu lần đo' : 'Chọn người bệnh trong danh sách'}</button></section>`;
+  }
   const missing = [["", "Chưa ghi"], ...missingStates];
   const { field } = ctx;
   return `<section class="panel form-card"><h2>Ghi lần đo sinh hiệu</h2>${note("Chọn lượt khám trước khi ghi lần đo. Nhập số đo hoặc chọn lý do chưa có số đo; kiểm tra kỹ hai giá trị huyết áp.")}<form id="vitalsForm"><details class="form-reference-block"><summary>Hồ sơ được chọn</summary><div class="form-grid">${field(id("patient", "Bệnh nhân"))}${field(id("encounter", "Lần khám sinh hiệu"))}</div></details><div class="form-grid vital-inputs">${field(F("measuredAt", "Thời điểm đo", "datetime-local"))}${VITAL_FIELD_MAP.map(f => field(F(f.key, f.label + " (" + f.unit + ")", "number", {required:false,min:VITAL_LIMITS[f.key][0],max:VITAL_LIMITS[f.key][1],step:"any"}))).join('')}</div><details class="missing-measurements"><summary>Lý do chưa có số đo (nếu cần)</summary><p>Chọn lý do cho chỉ số chưa đo được. Không chọn lý do khi đã nhập số đo.</p><div class="form-grid">${VITAL_FIELD_MAP.map(f => field(choice(f.key + 'State', f.label, missing, {required:false}))).join('')}</div></details><div class="form-actions"><button class="primary" ${ctx.busy ? 'disabled' : ''}>${ctx.busy ? 'Đang lưu…' : 'Lưu sinh hiệu'}</button></div></form></section>`;
@@ -104,6 +108,7 @@ function bindVitalsForm(ctx) {
           "Đã lưu lần đo sinh hiệu.",
           (result) => {
             ctx.capture("vitals", result, data);
+            ctx.completeTask("vitals", result, data);
             if (result.needsVerification)
               ctx.setMessage(
                 "Đã lưu sinh hiệu. Cần đối chiếu huyết áp; kiểm tra lại số đo.",
@@ -197,6 +202,7 @@ const vitalUnits = Object.fromEntries(
   VITAL_FIELD_MAP.map((f) => [f.code, f.unit]),
 );
 const vitals = {
+  recordType: "vitals",
   section: "vitals",
   resource: "vitals",
   title: "Các lần đo của bệnh nhân",
@@ -278,7 +284,7 @@ export default defineModule({
   actions,
   worklists: { vitals },
   records: {
-    vitals: { label: "Lần đo sinh hiệu", section: "vitals", read: null },
+    vitals: { label: "Lần đo sinh hiệu", section: "vitals", read: null, contextFrom: r => ({ patient: r.patientUuid || r.patient, visit: r.visitUuid, encounter: r.encounterUuid || r.encounter }) },
   },
   captures: { vitals: "vitals" },
   // The nurse records vitals as a provider; no form field is prefilled for that role.

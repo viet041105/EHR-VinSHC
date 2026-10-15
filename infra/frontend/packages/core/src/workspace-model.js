@@ -47,7 +47,7 @@ export class WorkspaceMemory {
     this.context = next;
   }
   idOf(type, response) {
-    return valid(response[this.recordTypes[type]?.idKey || "uuid"]);
+    return valid(response[this.recordTypes[type]?.idKey || "uuid"] ?? response.uuid);
   }
   /** The first registered link whose key the record carries, e.g. billUuid → bill. */
   linkOf(data) {
@@ -145,9 +145,10 @@ export class WorkspaceMemory {
     const link = this.linkOf(row.data);
     const parent = link ? this.records.get(link.type + ":" + row.data[link.key]) : null;
     const source = row.data.patientUuid ? row.data : parent?.data || {};
-    const patient = valid(source.patientUuid),
-      visit = valid(source.visitUuid),
-      encounter = valid(source.encounterUuid);
+    const context = this.recordTypes[type]?.contextFrom?.(row.data) || {};
+    const patient = valid(context.patient || source.patientUuid),
+      visit = valid(context.visit || source.visitUuid),
+      encounter = valid(context.encounter || source.encounterUuid);
     this.setContext({ patient, visit, encounter });
     this.selected = { [type]: row.id };
     for (const { key, type: linked } of this.recordLinks)

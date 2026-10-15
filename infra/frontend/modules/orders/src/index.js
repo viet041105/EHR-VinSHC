@@ -194,6 +194,7 @@ const actions = {
 };
 
 const orders = {
+  recordType: "order",
   section: "orders",
   resource: "diagnostic_order",
   title: "Chỉ định CLS",
@@ -225,9 +226,9 @@ const orders = {
     }),
   row: (o) => ({
     id: o.uuid,
-    title: o.serviceName,
+    title: patientLabel(o) || o.serviceName,
     detail: [
-      patientLabel(o),
+      o.serviceName,
       o.assignedProviderName ? "KTV " + o.assignedProviderName : null,
       formatTime(o.createdAt),
     ]
@@ -241,9 +242,10 @@ const orders = {
     },
     label: patientLabel(o),
     actions: [
-      go("Cập nhật trạng thái", "orders", "orderTransition", {
-        prefill: { record: o.uuid },
-      }),
+      ...(o.state === 'requested' ? [go('Nhận chỉ định', 'orders', 'orderTransition', { onlyRoles: ['lab'], prefill: { record: o.uuid, state: 'assigned' } })] : []),
+      ...(o.state === 'assigned' ? [go('Bắt đầu thực hiện', 'orders', 'orderTransition', { onlyRoles: ['lab'], prefill: { record: o.uuid, state: 'in_progress' } })] : []),
+      ...(o.state === 'in_progress' && ['final', 'corrected'].includes((o.results || []).at(-1)?.state) ? [go('Hoàn tất chỉ định', 'orders', 'orderTransition', { onlyRoles: ['lab'], prefill: { record: o.uuid, state: 'completed' } })] : []),
+      ...((o.results || []).length ? [go('Xem kết quả', 'orders', 'result', { prefill: { record: o.results.at(-1).result_uuid } })] : []),
       ...(["assigned", "in_progress"].includes(o.state) &&
       !(o.results || []).length
         ? [
@@ -253,6 +255,9 @@ const orders = {
           ]
         : []),
       go("Xem", "orders", "order", { prefill: { record: o.uuid } }),
+      go("Cập nhật trạng thái", "orders", "orderTransition", {
+        prefill: { record: o.uuid },
+      }),
     ],
   }),
 };

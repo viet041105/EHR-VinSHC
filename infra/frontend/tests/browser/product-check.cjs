@@ -50,13 +50,13 @@ const firstSection = {reception:'patients', nurse:'visits', doctor:'visits', lab
         assert.doesNotMatch(await page.locator('body').innerText(),/OpenMRS|UUID|Đã nối API|backend|workspace/);
         if(role==='admin'||role==='reception')await page.screenshot({path:path.join(os.tmpdir(),`vinshc-redesign-${role}-${width}.png`),fullPage:true});
         await page.locator(`[data-section=${firstSection[role]}]`).click();
-        await page.locator('#actionPicker').waitFor({state:'attached'});
-        assert.equal(await page.locator('#actionForm').count(),0,'Selecting a menu opens a list, not an arbitrary form');
+        await page.locator('.session-identity').waitFor();
+        assert.equal(await page.locator('#actionForm').count(),0,'Selecting a menu opens its worklist; automatic reports are checked at login');
         if(role==='reception') {
           await page.locator('[data-worklist-row=patients]').waitFor();
           assert.doesNotMatch(await page.locator('[data-worklist-row=patients]').innerText(),/11111111-1111|UUID/);
           await page.screenshot({path:path.join(os.tmpdir(),`vinshc-redesign-patients-${width}.png`),fullPage:true});
-          await page.locator('[data-go-action=registerPatient]').click();
+          await page.locator('[data-task-action=registerPatient]').click();
           await page.locator('#actionForm').waitFor();
           await page.locator('#closeTaskForm').click();
           assert.equal(await page.locator('#actionForm').count(),0);

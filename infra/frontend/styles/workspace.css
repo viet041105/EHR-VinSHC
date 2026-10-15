@@ -1,4 +1,57 @@
 /* Clinic application only. The public landing page never loads this stylesheet. */
+/* Guided tasks use the existing service contracts. These styles only load in the clinic app. */
+.connected-content .role-guide { padding: 18px 0; margin: 0 0 22px; border-block: 1px solid var(--line); }
+.guide-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px 16px; margin-bottom: 14px; }
+.guide-heading strong { font-size: 13px; }
+.guide-heading > span { color: var(--muted); font-size: 11px; }
+.role-guide ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 8px; }
+.role-guide li { min-width: 0; }
+.connected-content .role-guide button { display: flex; align-items: flex-start; gap: 10px; height: 100%; width: 100%; text-align: left; padding: 12px 10px; border: 1px solid transparent; background: transparent; }
+.role-guide button > span:last-child { min-width: 0; }
+.role-guide strong { display: block; font-size: 12px; line-height: 1.5; }
+.role-guide small { display: block; margin-top: 5px; font-size: 11px; line-height: 1.6; font-weight: 400; color: var(--muted); }
+.guide-number { display: grid; place-items: center; width: 25px; height: 25px; flex-shrink: 0; border: 1px solid #cad6df; background: white; color: #597187; border-radius: 50%; font-size: 11px; }
+.connected-content .role-guide [aria-current=step] { border-color: #b8cddd; background: #edf4f9; }
+.role-guide [aria-current=step] .guide-number { background: #245b88; border-color: #245b88; color: white; }
+.next-step-panel { border-left: 3px solid #49826a; padding: 14px 18px; margin-bottom: 22px; background: #eef6f1; }
+.next-step-panel strong { font-size: 14px; color: #2d624b; }
+.next-step-panel p { color: #527262; margin: 4px 0 12px; }
+.next-step-panel > div:last-child { display: flex; flex-wrap: wrap; gap: 8px; }
+.next-step-panel button span { margin-left: 8px; }
+.connected-content .task-form { border-top: 3px solid #457393; padding: 24px; scroll-margin-top: 100px; }
+.task-instruction { max-width: 780px; color: #53687a; margin: 0 0 22px; }
+.task-prerequisite { grid-column: 1/-1; border: 1px solid #e5d6b6; background: #fffbf2; padding: 14px 16px; border-radius: 5px; margin: 0 0 20px; }
+.task-prerequisite strong { font-size: 13px; color: #755d2c; }
+.task-prerequisite p { margin: 4px 0 10px; }
+.form-reference-block, .optional-fields { grid-column: 1/-1; margin: 0 0 18px; padding: 12px 0; border-block: 1px solid #edf0f3; }
+.form-reference-block summary, .optional-fields summary { color: #597084; cursor: pointer; font-size: 12px; }
+.form-reference-block[open] > .form-grid, .optional-fields[open] > .form-grid { margin-top: 16px; }
+.connected-content .review-self { grid-column: 1/-1; display: grid; grid-template-columns: 20px minmax(0,1fr); align-items: start; gap: 6px 10px; padding: 14px; background: #f3f7fa; border: 1px solid #dce6ee; border-radius: 5px; }
+.connected-content .review-self input { width: 16px; height: 16px; margin: 2px 0 0; grid-row: span 2; }
+.review-self small { grid-column: 2; color: var(--muted); font-size: 11px; line-height: 1.6; font-weight: 400; }
+.catalogue-choice { min-width: 0; }
+.catalogue-choice input[type=search] { background: #f8fafb; font-weight: 400; }
+.catalogue-choice select { margin-top: 8px; }
+.skip-link { opacity: 0; pointer-events: none; }
+.skip-link:focus { opacity: 1; pointer-events: auto; }
+.catalogue-choice > small { display: block; font-size: 11px; line-height: 1.6; color: var(--muted); margin-top: 6px; }
+.connected-content .measurement-start { padding: 24px; margin-bottom: 22px; }
+.measurement-start h2 { margin-top: 8px; }
+.measurement-start p { max-width: 680px; color: var(--muted); }
+.connected-content .workspace-table .row-primary { color: #1d557e; border-color: #aec8da; background: #eff5fa; font-weight: 650; }
+.connected-content #connectionMessage, .connected-content #connectionError { scroll-margin-top: 105px; }
+.connected-content [hidden] { display: none !important; }
+@media(max-width: 800px) {
+  .role-guide ol { grid-template-columns: repeat(2, minmax(0,1fr)); }
+  .role-guide button small { display: none; }
+  .role-guide button[aria-current=step] small { display: block; }
+  .connected-content .role-guide button { padding: 10px 8px; }
+  .role-guide { margin-bottom: 16px; }
+  .connected-content .task-form { scroll-margin-top: 16px; padding: 20px 16px; }
+  .guide-heading > span { font-size: 10px; }
+  .connected-content #connectionMessage, .connected-content #connectionError { scroll-margin-top: 16px; }
+}
+@media print { .role-guide, .next-step-panel, .measurement-start { display: none !important; } }
 body:has(.clinic-header), body:has(.portal-page) {
   --ink: #253344;
   --muted: #687585;
@@ -390,3 +443,112 @@ body.assistant-resizing { cursor: ew-resize; user-select: none; }
   body.assistant-docked .clinic-header { padding-right: calc(var(--assistant-w, 400px) + 26px); }
 }
 @media print { .assistant { display: none !important; } }
+
+/* Doctor workspace: worklist and the selected patient's chart stay visible together. */
+.doctor-workspace {
+  display: grid;
+  grid-template-columns: minmax(360px, .95fr) minmax(440px, 1.25fr);
+  gap: 20px;
+  align-items: start;
+}
+.doctor-worklist-column,
+.doctor-profile-column { min-width: 0; }
+.doctor-worklist-column .worklist { margin-bottom: 0; }
+.doctor-profile-column { overflow: hidden; }
+.doctor-profile-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid var(--line);
+}
+.doctor-profile-header h2 { margin: 7px 0 5px; }
+.doctor-profile-header p { margin: 0; color: var(--muted); font-size: 12px; }
+.doctor-tabs {
+  display: flex;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--line);
+}
+.connected-content .doctor-tabs button {
+  flex: 0 0 auto;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: var(--muted);
+  padding: 12px 10px 10px;
+  white-space: nowrap;
+}
+.connected-content .doctor-tabs button[aria-selected="true"] {
+  color: #174f7c;
+  border-bottom-color: #22577f;
+  font-weight: 650;
+}
+.doctor-profile-body { min-height: 260px; padding: 20px 22px 24px; }
+.doctor-empty { padding: 28px 4px; color: var(--muted); }
+.doctor-empty strong { display: block; color: var(--ink); font-size: 15px; }
+.doctor-empty p { max-width: 620px; margin: 7px 0 18px; }
+.doctor-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+.doctor-summary-grid > div,
+.doctor-history > div {
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid #e3e9ee;
+  border-radius: 6px;
+  background: #fbfcfd;
+}
+.doctor-summary-grid dt,
+.doctor-history dt { color: var(--muted); font-size: 11px; }
+.doctor-summary-grid dd,
+.doctor-history dd { margin: 5px 0 0; white-space: pre-line; line-height: 1.65; }
+.doctor-inline-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+.doctor-record-list { display: grid; gap: 10px; }
+.doctor-record-item { padding: 13px 14px; border: 1px solid #e3e9ee; border-radius: 6px; background: #fbfcfd; }
+.doctor-record-item strong { display: block; font-size: 13px; color: var(--ink); }
+.doctor-record-item p { margin: 5px 0 0; color: #4f6375; white-space: pre-line; }
+.doctor-record-item small { display: block; margin-top: 7px; color: var(--muted); font-size: 11px; }
+.doctor-detail-columns { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.doctor-detail-columns h3 { margin: 0 0 10px; font-size: 13px; }
+.doctor-history { display: grid; gap: 10px; margin: 0; }
+.connected-content .worklist-record-link {
+  display: inline;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: #1d557e;
+  font: inherit;
+  font-weight: 650;
+  line-height: inherit;
+  text-align: left;
+  text-decoration: underline;
+  text-decoration-color: #aec8da;
+  text-underline-offset: 3px;
+}
+.connected-content .worklist-record-link:hover { background: transparent; color: #174f7c; }
+@media (max-width: 1050px) {
+  .doctor-workspace { grid-template-columns: minmax(300px, .9fr) minmax(360px, 1.1fr); gap: 14px; }
+}
+@media (max-width: 800px) {
+  .doctor-workspace { grid-template-columns: minmax(0, 1fr); }
+  .doctor-profile-column { order: 2; }
+  .doctor-worklist-column { order: 1; }
+  .doctor-profile-header { padding: 18px 16px 14px; }
+  .doctor-profile-body { padding: 18px 16px 20px; }
+}
+@media (max-width: 600px) {
+  .doctor-summary-grid,
+  .doctor-detail-columns { grid-template-columns: minmax(0, 1fr); }
+  .doctor-tabs { padding-inline: 8px; }
+  .doctor-profile-header { display: block; }
+  .doctor-profile-header button { margin-top: 12px; }
+}

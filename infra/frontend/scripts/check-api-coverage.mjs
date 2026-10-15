@@ -66,6 +66,7 @@ callers.push(
   { name: "portal:me", method: "GET", path: "/vinshc/portal/me" },
   { name: "portal:password", method: "POST", path: "/vinshc/portal/password" },
   { name: "portal:visits", method: "GET", path: "/vinshc/portal/visits" },
+  { name: "portal:notificationVisit", method: "GET", path: "/vinshc/portal/visits/" + id },
   { name: "portal:instructions", method: "GET", path: "/vinshc/portal/visits/" + id + "/instructions" },
   { name: "portal:prescriptions", method: "GET", path: "/vinshc/portal/prescriptions" },
   { name: "portal:results", method: "GET", path: "/vinshc/portal/results" },
@@ -82,7 +83,6 @@ callers.push(
 const noCaller = new Map([
   ["GET /vinshc/directory/facilities/{uuid}", "the facility list already carries every field the admin screens use"],
   ["GET /vinshc/portal/session", "superseded by GET portal/me"],
-  ["GET /vinshc/portal/visits/{uuid}", "the portal reads instructions/prescriptions/results of a visit separately"],
   ["GET /vinshc/portal/prescriptions/{uuid}", "the portal lists prescriptions by visit"],
   ["GET /vinshc/portal/results/{uuid}", "the portal lists results by visit"],
   ["GET /vinshc/portal/attachments/{uuid}/content", "disabled by the backend until attachments are malware-scanned (checklist 8.2)"],

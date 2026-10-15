@@ -1,3 +1,4 @@
+const { chooseAction, mockSelectCare } = require("./reference-helper.cjs");
 // Worklist and context UI contracts with isolated route mocks; no calls reach the clinical database.
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
@@ -263,9 +264,7 @@ const visitRow = {
         );
 
       await workspace("reception");
-      await page
-        .getByRole("heading", { name: "Các bước trong lượt khám" })
-        .waitFor();
+      await page.locator('[data-worklist-panel=patients]').waitFor();
       assert.equal(await page.locator("[data-pending-form]").count(), 0);
       await section("patients");
       await row("patients").waitFor();
@@ -290,7 +289,7 @@ const visitRow = {
         patient,
       );
       assert.match(
-        await page.locator(".care-summary strong").innerText(),
+        await page.locator(".selected-patient strong").innerText(),
         /Nguyễn Thị Bình/,
       );
       await page
@@ -306,7 +305,7 @@ const visitRow = {
         visitType: "outpatient",
       });
       await section("patients");
-      await page.locator("#actionPicker").selectOption("registerPatient");
+      await chooseAction(page, "registerPatient");
       await page.locator("#actionForm [name=familyName]").fill("Nguyễn");
       await page.locator("#actionForm [name=givenName]").fill("Bình");
       await page.locator("#actionForm [name=gender]").selectOption("F");
@@ -451,7 +450,7 @@ const visitRow = {
           .getEntriesByType("resource")
           .some((e) => e.name.includes("/providers/me")),
       );
-      await page.locator("#actionPicker").selectOption("prescription");
+      await chooseAction(page, "prescription");
       await page.waitForFunction(
         (value) =>
           document.querySelector("#actionForm [name=orderer]")?.value === value,

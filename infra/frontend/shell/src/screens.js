@@ -18,17 +18,11 @@ export const OVERVIEW = {
   title: "Tổng quan công việc",
   actions: [],
 };
-export function contextPanel({ role, memory, field }) {
-  if (!permitted(role, "patient_identity", "read")) return "";
-  const canVisit =
-    permitted(role, "visit", "read") ||
-    permitted(role, "clinical_chart", "read");
-  const contextField = (key, label) =>
-    field(id("care_" + key, label, false), {
-      ["care_" + key]: memory.context[key] || "",
-    });
-  return `<section class="panel care-summary"><div><span class="eyebrow">BỆNH NHÂN ĐANG CHỌN</span><strong>${memory.context.patient ? esc(memory.contextLabel || "Hồ sơ đã chọn") : "Chưa chọn bệnh nhân"}</strong><p>${memory.context.patient ? memory.context.visit ? 'Đã chọn lượt khám. Các biểu mẫu dùng hồ sơ này.' : 'Chọn lượt khám để tiếp tục công việc.' : 'Chọn một dòng trong danh sách bệnh nhân hoặc lượt khám.'}</p></div><div class="context-links">${memory.context.patient ? `<button type="button" id="clearCareContext">Bỏ chọn</button>${permitted(role, "clinical_chart", "read") && memory.context.encounter ? openButton("clinical", "summary", "Xem hồ sơ khám") : ""}` : openButton("patients", null, "Tìm bệnh nhân")}</div><details class="context-panel"><summary>Chọn hồ sơ bằng mã</summary><form id="careContextForm"><div class="form-grid">${contextField("patient", "Mã bệnh nhân")}${canVisit ? contextField("visit", "Mã lượt khám") + contextField("encounter", "Mã lần khám") : ''}</div><button type="submit">Áp dụng mã hồ sơ</button></form></details></section>`;
+export function contextPanel({ role, memory }) {
+  if (['admin','manager'].includes(role) || !memory.context.patient) return '';
+  return `<div class="selected-patient"><strong>${esc(memory.contextLabel || 'Người bệnh đã chọn')}</strong><button type="button" data-go-section="${permitted(role, 'visit', 'read') ? 'visits' : 'patients'}">Đổi người bệnh</button></div>`;
 }
+
 function recordTable(section, { memory, stateText, registry }) {
   const rows = memory.list(section.records);
   if (!rows.length) return "";

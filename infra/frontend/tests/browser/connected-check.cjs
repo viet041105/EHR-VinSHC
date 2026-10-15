@@ -1,3 +1,4 @@
+const { chooseAction, mockSelectCare } = require("./reference-helper.cjs");
 const { fillReference } = require("./reference-helper.cjs");
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
@@ -42,6 +43,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
             contentType: "application/json",
             body: JSON.stringify(data),
           });
+        if (url.pathname.endsWith("/providers/me")) return respond({providers:[{uuid:patient}]});
         if (url.pathname.endsWith("/session"))
           return respond({
             authenticated: true,
@@ -141,16 +143,16 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
       }
       await workspace("doctor");
       await page.locator("[data-section=clinical]").click();
-      await page.locator("#actionPicker").selectOption("summary");
+      await chooseAction(page, "summary");
       await fillReference(page, "[name=encounter]", encounter);
       await page.locator("#actionForm button").click();
       await page.getByText("Phiếu kiểm thử", { exact: true }).waitFor();
-      await page.locator("#actionPicker").selectOption("correction");
+      await chooseAction(page, "correction");
       assert.equal(
         await page.locator('[name="visit.ly_do_kham"]').inputValue(),
         "Phiếu kiểm thử",
       );
-      await page.locator("#actionPicker").selectOption("diagnosis");
+      await chooseAction(page, "diagnosis");
       assert.equal(
         await page.locator("[name=concept] option").count(),
         1 +
@@ -167,6 +169,8 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
       assert.equal(await page.locator("[data-section=billing]").count(), 0);
       await workspace("nurse");
       await page.locator("[data-section=vitals]").click();
+      assert.equal(await page.locator('#vitalsForm').count(), 0);
+      await mockSelectCare(page,{patient,encounter,role:'nurse'});
       await fillReference(page, "[name=patient]", patient);
       await fillReference(page, "[name=encounter]", encounter);
       await page.locator("[name=systolic]").fill("70");
@@ -176,7 +180,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
       assert.equal(writes.at(-1).body.values["vitals.ha_tam_thu"], 70);
       await workspace("cashier");
       await page.locator("[data-section=billing]").click();
-      await page.locator("#actionPicker").selectOption("bill");
+      await chooseAction(page, "bill");
       await fillReference(page, "[name=patient]", patient);
       await fillReference(page, "[name=visit]", encounter);
       await page.locator("[name=service]").selectOption({ index: 1 });
@@ -187,7 +191,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
       assert.equal(writes.at(-1).body.facility, facility);
       assert.ok(writes.at(-1).body.idempotencyKey);
       assert.equal(writes.at(-1).body.lines[0].unitPriceVnd, undefined);
-      await page.locator("#actionPicker").selectOption("receipt");
+      await chooseAction(page, "receipt");
       await fillReference(page, "[name=record]", patient);
       await page.locator("[name=amountVnd]").fill("10000");
       await page.locator("[name=method]").selectOption("cash");
@@ -212,7 +216,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
       await workspace("manager");
       assert.equal(await page.locator("[data-section=identity]").count(), 0);
       await page.locator("[data-section=reports]").click();
-      await page.locator("#actionPicker").selectOption("report");
+      await chooseAction(page, "report");
       await page.locator("#actionForm button").click();
       await page.getByText("Thu ròng (VND)", { exact: true }).waitFor();
       const overflow = await page.evaluate(
@@ -235,12 +239,12 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574",
           await page.locator("[data-section=" + section + "]").click();
           const advanced = page.locator("details.advanced-tools:not([open]) > summary");
           if (await advanced.count()) await advanced.click();
-          if (await page.locator("#actionPicker").count()) {
+          if (await page.locator("[data-task-action]").count()) {
             const choices = await page
-              .locator("#actionPicker option")
-              .evaluateAll((els) => els.map((el) => el.value).filter(Boolean));
+              .locator("[data-task-action]")
+              .evaluateAll((els) => [...new Set(els.map((el) => el.dataset.taskAction))]);
             for (const value of choices) {
-              await page.locator("#actionPicker").selectOption(value);
+              await chooseAction(page, value);
               assert.equal(
                 await page.evaluate(
                   () => document.documentElement.scrollWidth > innerWidth,

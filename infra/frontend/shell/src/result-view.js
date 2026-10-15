@@ -3,6 +3,7 @@ import { RESULT_LABELS, esc, stateText } from "@vinshc/core";
 import { plainText } from "./presentation.js";
 
 const HIDDEN = ["memberUuids", "packSha256", "upstreamBoundaries", "adapterStrategy"];
+const internalId = value => typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
 
 /** Labels: shared response labels, then module labels, then field labels of registered actions. */
 export function resultLabels(registry) {
@@ -18,14 +19,14 @@ export function displayResult(value, labels, depth = 0) {
     return '<span class="readonly">Chưa ghi nhận</span>';
   if (typeof value !== "object")
     return esc(
-      typeof value === "boolean" ? (value ? "Có" : "Không") : stateText(value),
+      internalId(value) ? 'Hồ sơ đã liên kết' : typeof value === "boolean" ? (value ? "Có" : "Không") : stateText(value),
     );
   if (Array.isArray(value))
     return value.length
       ? `<div class="result-list">${value.map((v) => `<article>${displayResult(v, labels, depth + 1)}</article>`).join("")}</div>`
       : '<p class="readonly">Chưa có bản ghi.</p>';
   return `<dl class="result-fields">${Object.entries(value)
-    .filter(([k]) => !HIDDEN.includes(k) && !/(uuid|Uuid|_uuid)$/.test(k) && !["links", "projection", "resourceVersion", "privilegeName", "privilegeUuid"].includes(k))
+    .filter(([k, v]) => !internalId(v) && !HIDDEN.includes(k) && !/(uuid|Uuid|_uuid)$/.test(k) && !["links", "projection", "resourceVersion", "privilegeName", "privilegeUuid"].includes(k))
     .map(
       ([k, v]) =>
         `<div><dt>${esc(plainText(labels[k] || k))}</dt><dd>${typeof v === "number" && /(Vnd|_vnd)$/.test(k) ? esc(new Intl.NumberFormat("vi-VN").format(v)) : displayResult(v, labels, depth + 1)}</dd></div>`,

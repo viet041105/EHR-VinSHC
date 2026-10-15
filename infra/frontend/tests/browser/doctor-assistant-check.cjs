@@ -1,3 +1,4 @@
+const { mockSelectCare } = require("./reference-helper.cjs");
 // Doctor assistant chatbot against a mocked backend and agent: launcher on every doctor screen,
 // guided "missing context" states, suggestions, Enter-to-send, history, sources, persistence across
 // re-renders, Escape/close, mobile full-screen without page overflow. No DB writes.
@@ -21,6 +22,7 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574";
       const send = (route, data, status = 200) => route.fulfill({ status, contentType: "application/json", body: JSON.stringify(data) });
       await page.route("**/api/**", (route) => {
         const path = new URL(route.request().url()).pathname;
+        if(path.endsWith("/providers/me")) return send(route,{providers:[{uuid:patient}]});
         if (path.endsWith("/session"))
           return send(route, { authenticated: true, user: { uuid: "44444444-4444-4444-8444-444444444444", display: "BS. Minh", roles: [{ name: "VinSHC App: doctor" }] } });
         if (path.endsWith("/authorization/workspaces")) return send(route, [{ role: "doctor", facilityUuid: location, facilityName: "VinSHC Development Clinic" }]);
@@ -54,21 +56,13 @@ const location = "feae71be-957c-4f94-b100-d84bc6915574";
       // The guided step opens the visit list. Wide screens keep the panel docked beside the page;
       // phones minimise the full-screen panel so the list can be used.
       await page.click("[data-assistant-go]");
-      await page.locator("#careContextForm").waitFor({ state: "attached" });
-      assert.equal(await page.locator("#assistantPanel").isVisible(), !mobile);
-      if (!mobile) {
-        const panel = await page.locator("#assistantPanel").boundingBox();
-        const content = await page.locator(".care-summary").boundingBox();
-        assert.ok(content.x + content.width <= panel.x, "docked panel must not cover the page");
-      }
-      await fillReference(page, "[name=care_patient]", patient);
-      await fillReference(page, "[name=care_visit]", visit);
-      await page.locator("#careContextForm button[type=submit]").click();
+      assert.equal(await page.locator('#assistantPanel').isVisible(), !mobile);
+      if (mobile && await page.locator('#assistantPanel').isVisible()) await page.click('[data-assistant-close]');
+      await mockSelectCare(page,{patient,visit});
       await openPanel();
-      assert.match(await page.locator(".assistant-context").innerText(), /Bắt đầu phiếu khám/);
-      if (mobile) await page.click("[data-assistant-close]");
-      await fillReference(page, "[name=care_encounter]", encounter);
-      await page.locator("#careContextForm button[type=submit]").click();
+      assert.match(await page.locator('.assistant-context').innerText(), /Bắt đầu phiếu khám/);
+      if (mobile) await page.click('[data-assistant-close]');
+      await mockSelectCare(page,{patient,visit,encounter});
       await openPanel();
       // Ready: suggestions send a question with the selected record.
       await page.locator(".assistant-suggestions [data-ask]").first().click();

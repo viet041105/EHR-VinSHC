@@ -164,6 +164,7 @@ const actions = {
 };
 
 const appointments = {
+  recordType: "appointment",
   section: "appointments",
   resource: "appointment",
   title: "Lịch hẹn trong ngày",
@@ -189,12 +190,14 @@ const appointments = {
     },
     label: patientLabel(a),
     actions: [
+      ...(a.status === 'booked' ? [go('Xác nhận lịch', 'appointments', 'appointmentTransition', { prefill: { record: a.uuid, status: 'confirmed' } })] : []),
+      ...(a.status === 'confirmed' ? [go('Ghi nhận đã đến', 'appointments', 'appointmentTransition', { prefill: { record: a.uuid, status: 'arrived' } })] : []),
       go("Cập nhật", "appointments", "appointmentTransition", {
         prefill: { record: a.uuid },
       }),
       ...(["booked", "confirmed", "arrived"].includes(a.status) && !a.visitUuid
         ? [
-            go("Check-in mở lượt", "visits", "openVisit", {
+            go("Tiếp nhận mở lượt", "visits", "openVisit", {
               prefill: { appointment: a.uuid, visitType: "followup" },
             }),
           ]
@@ -206,6 +209,7 @@ const appointments = {
   }),
 };
 const queue = {
+  recordType: "queue",
   section: "queue",
   resource: "queue",
   title: "Bảng hàng đợi hôm nay",
@@ -242,16 +246,12 @@ const queue = {
     context: { patient: q.patientUuid, visit: q.visitUuid },
     label: patientLabel(q),
     actions: [
+      ...(q.state === 'waiting' ? [go('Gọi bệnh nhân', 'queue', 'queueTransition', { prefill: { record: q.uuid, state: 'called' } })] : []),
+      ...(q.state === 'called' ? [go('Bắt đầu phục vụ', 'queue', 'queueTransition', { prefill: { record: q.uuid, state: 'in_service' } })] : []),
+      ...(q.state === 'in_service' ? [go('Chuyển điểm tiếp theo', 'queue', 'advance', { prefill: { record: q.uuid } })] : []),
       go("Chuyển trạng thái", "queue", "queueTransition", {
         prefill: { record: q.uuid },
       }),
-      ...(q.state === "in_service"
-        ? [
-            go("Chuyển điểm tiếp theo", "queue", "advance", {
-              prefill: { record: q.uuid },
-            }),
-          ]
-        : []),
     ],
   }),
 };

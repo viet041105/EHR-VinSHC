@@ -79,15 +79,19 @@ const ui = {
   audit: null,
   panel: null, // {kind:"create"|"assign"|"reset"|"retire", user?, ...}
 };
-let ctx = null;
+let ctx = null, sessionGeneration = -1;
 
 /** Active facilities: registered via the API plus the metadata catalogue (the seeded clinic lives there). */
-function activeFacilities() {
-  const byLocation = new Map();
-  for (const f of [...active(m.facilities.records), ...(ui.facilities || [])])
-    if (f.active !== false && !byLocation.has(f.locationUuid)) byLocation.set(f.locationUuid, f);
+export function mergeFacilities(catalogue, registered) {
+  const byLocation = new Map(active(catalogue).map(f => [f.locationUuid, f]));
+  for (const f of registered) {
+    if (!f.locationUuid) continue;
+    if (f.active === false || f.retired) byLocation.delete(f.locationUuid);
+    else byLocation.set(f.locationUuid, f);
+  }
   return [...byLocation.values()];
 }
+function activeFacilities() { return mergeFacilities(m.facilities.records, ui.facilities || []); }
 const facilityOptions = () => activeFacilities().map((f) => [f.locationUuid, f.name]);
 const facilitySelect = (name, selected) =>
   `<select name="${name}" required>${facilityOptions().map(([v, l]) => `<option value="${esc(v)}" ${v === selected ? "selected" : ""}>${esc(l)}</option>`).join("")}</select>`;
@@ -102,16 +106,20 @@ async function call(path, options) {
 }
 
 async function loadUsers(append = false) {
+  const generation = ctx.client.generation;
   ui.loading = true;
   ui.error = "";
   paint();
   try {
     const offset = append ? ui.users.length : 0;
     const data = await call("staff/users?" + new URLSearchParams({ q: ui.query, offset, limit: "100" }));
+    if (generation !== ctx.client.generation) return;
     const rows = (data?.results || []).filter((u) => u.username !== "daemon");
     ui.users = append ? [...ui.users, ...rows] : rows;
     ui.hasMore = Boolean(data.hasMore);
+    ctx.rememberChoices('user', ui.users.map(u => ({ value: u.uuid, label: `${u.display} · ${u.username || ''}` })));
   } catch (error) {
+    if (generation !== ctx.client.generation) return;
     ui.error = friendlyError(error);
     ui.users = ui.users || [];
   }
@@ -119,19 +127,27 @@ async function loadUsers(append = false) {
   paint();
 }
 async function loadFacilities() {
+  const generation = ctx.client.generation;
   try {
-    ui.facilities = (await call("directory/facilities"))?.results || [];
+    const data = await call("directory/facilities");
+    if (generation !== ctx.client.generation) return;
+    ui.facilities = data?.results || [];
   } catch {
+    if (generation !== ctx.client.generation) return;
     ui.facilities = [];
   }
   paint();
 }
 async function loadAudit() {
+  const generation = ctx.client.generation;
   ui.audit = null;
   paint();
   try {
-    ui.audit = (await call("staff/audit?limit=100"))?.results || [];
+    const data = await call("staff/audit?limit=100");
+    if (generation !== ctx.client.generation) return;
+    ui.audit = data?.results || [];
   } catch (error) {
+    if (generation !== ctx.client.generation) return;
     ui.audit = [];
     ui.error = friendlyError(error);
   }
@@ -223,7 +239,7 @@ function credentialsCard(p) {
 
 /** Account identity shown on every account action, so the UUID can be checked or copied into the advanced tools. */
 const accountId = (id, username) =>
-  id ? `<dl class="admin-account-id">${username ? `<div><dt>Tên đăng nhập</dt><dd>${esc(username)}</dd></div>` : ""}<div><dt>Mã tài khoản (UUID)</dt><dd><code>${esc(id)}</code><button type="button" data-admin="copyuuid" data-uuid="${esc(id)}">Sao chép</button></dd></div></dl>` : "";
+  id ? `<details class="admin-reference"><summary>Thông tin định danh tài khoản</summary><dl class="admin-account-id">${username ? `<div><dt>Tên đăng nhập</dt><dd>${esc(username)}</dd></div>` : ""}<div><dt>Mã tài khoản</dt><dd><code>${esc(id)}</code><button type="button" data-admin="copyuuid" data-uuid="${esc(id)}">Sao chép</button></dd></div></dl></details>` : "";
 
 function userPanel(p) {
   const u = p.user;
@@ -241,7 +257,6 @@ function userPanel(p) {
 function staffTab() {
   const roles = Object.keys(m.permissions.roles);
   return `${stats()}
-    <ol class="admin-guide"><li><strong>Thêm nhân viên</strong><span>Chọn vai trò và nơi làm việc</span></li><li><strong>Gửi tài khoản</strong><span>Tên đăng nhập + mật khẩu</span></li><li><strong>Nhân viên đăng nhập</strong><span>Vào thẳng màn hình làm việc</span></li></ol>
     ${ui.panel ? (ui.panel.done ? credentialsCard(ui.panel.done) : ui.panel.kind === "create" ? createPanel(ui.panel) : userPanel(ui.panel)) : ""}
     <section class="panel admin-list"><div class="admin-toolbar">
       <form id="adminSearch" role="search"><input name="staffQuery" type="search" placeholder="Tìm theo tên hoặc tên đăng nhập…" value="${esc(ui.query)}" aria-label="Tìm nhân viên"><button>Tìm</button></form>
@@ -256,8 +271,8 @@ function facilitiesTab() {
   const list = activeFacilities();
   const stopped = ui.facilities.filter((f) => f.active === false).length;
   const staffAt = (loc) => (ui.users || []).filter((u) => !u.retired && u.workspace?.facilityUuid === loc).length;
-  return `<div class="admin-facilities">${list
-    .map((f) => `<article class="panel admin-facility ${f.active === false ? "retired" : ""}"><h3>🏥 ${esc(f.name)}</h3><p>${esc(f.address || f.legalName || "")}</p><dl><div><dt>Mã cơ sở</dt><dd>${esc(f.code || "—")}</dd></div><div><dt>Điện thoại</dt><dd>${esc(f.phone || "—")}</dd></div><div><dt>Nhân viên</dt><dd>${ui.users ? staffAt(f.locationUuid) : "…"}</dd></div><div><dt>Trạng thái</dt><dd>${f.active === false ? "Ngừng hoạt động" : "Đang hoạt động"}</dd></div></dl></article>`)
+  return `<div class="admin-facility-toolbar"><p>Kiểm tra thông tin và nhân viên được phân công tại từng cơ sở.</p><button type="button" class="primary" data-admin-open="createFacility">Thêm cơ sở</button></div><div class="admin-facilities">${list
+    .map((f) => `<article class="panel admin-facility ${f.active === false ? "retired" : ""}"><h3>${esc(f.name)}</h3><p>${esc(f.address || f.legalName || "")}</p><dl><div><dt>Mã cơ sở</dt><dd>${esc(f.code || "—")}</dd></div><div><dt>Điện thoại</dt><dd>${esc(f.phone || "—")}</dd></div><div><dt>Nhân viên</dt><dd>${ui.users ? staffAt(f.locationUuid) : "…"}</dd></div><div><dt>Trạng thái</dt><dd>${f.active === false ? "Ngừng hoạt động" : "Đang hoạt động"}</dd></div></dl><div class="admin-facility-actions"><button type="button" data-admin-open="updateFacility" data-facility="${esc(f.uuid)}">Sửa thông tin</button><button type="button" data-admin-open="readWorkflow" data-facility="${esc(f.uuid)}">Xem quy trình</button></div></article>`)
     .join("")}</div><p class="admin-hint">${stopped ? `Đã ẩn ${stopped} cơ sở ngừng hoạt động. ` : ""}Thêm hoặc sửa thông tin cơ sở trong mục “Công cụ nâng cao” bên dưới.</p>`;
 }
 
@@ -280,10 +295,10 @@ function auditTab() {
 
 function view() {
   if (!isSystemAdministrator(ctx.client.user))
-    return `<section class="panel admin-panel"><h2>Quản lý nhân viên</h2><p>Việc tạo và khóa tài khoản do <strong>quản trị hệ thống</strong> thực hiện. Bạn vẫn có thể cấu hình biểu mẫu và quy trình trong “Công cụ nâng cao” bên dưới.</p></section>`;
-  const tabs = [["staff", "👥 Nhân viên"], ["facilities", "🏥 Cơ sở"], ["audit", "🕘 Lịch sử thay đổi"]];
+    return `<section class="panel admin-panel"><h2>Quản lý nhân viên</h2><p>Việc tạo và khóa tài khoản do <strong>quản trị hệ thống</strong> thực hiện. Bạn vẫn có thể cấu hình biểu mẫu và quy trình trong “Công cụ nâng cao” bên dưới.</p></section><div id="patientAccessInbox"></div>`;
+  const tabs = [["staff", "👥 Nhân viên"], ["patientAccess", "Yêu cầu tài khoản bệnh nhân"], ["facilities", "🏥 Cơ sở"], ["audit", "🕘 Lịch sử thay đổi"]];
   return `<nav class="admin-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" data-admin-tab="${k}" aria-selected="${ui.tab === k}" class="${ui.tab === k ? "active" : ""}">${l}</button>`).join("")}</nav>
-    <div role="tabpanel">${ui.tab === "staff" ? staffTab() : ui.tab === "facilities" ? facilitiesTab() : auditTab()}</div>`;
+    <div role="tabpanel">${ui.tab === "patientAccess" ? '<div id="patientAccessInbox"></div>' : ui.tab === "staff" ? staffTab() : ui.tab === "facilities" ? facilitiesTab() : auditTab()}</div>`;
 }
 
 function paint() {
@@ -294,6 +309,8 @@ function paint() {
   if (draft && ui.panel?.kind === "create") ui.panel.values = Object.fromEntries(new FormData(draft));
   host.innerHTML = view();
   bindConsole();
+  const inbox = host.querySelector('#patientAccessInbox');
+  if (inbox) ctx.mountPatientAccess?.(inbox);
 }
 
 const findUser = (id) => ui.users?.find((u) => u.uuid === id);
@@ -404,6 +421,10 @@ async function unretire(u) {
 
 function bindConsole() {
   const root = document.querySelector("#adminConsole");
+  root.querySelectorAll('[data-admin-open]').forEach(button => button.onclick = () => {
+    const f = activeFacilities().find(f => f.uuid === button.dataset.facility);
+    ctx.navigate('admin', button.dataset.adminOpen, f ? { facilityUuid: f.uuid, locationUuid: f.locationUuid, facilityLocationUuid: f.locationUuid, legalName: f.legalName, address: f.address, phone: f.phone } : {});
+  });
   root.querySelectorAll("[data-admin-tab]").forEach((b) => (b.onclick = () => {
     ui.tab = b.dataset.adminTab;
     ui.error = "";
@@ -476,9 +497,11 @@ function bindConsole() {
 /** Section footer: the console host; content is painted by bind so async loads can repaint it. */
 export const adminConsole = () => '<div id="adminConsole" class="admin-console"></div>';
 export function bindAdminConsole(moduleCtx) {
-  const changed = ctx?.client.user?.uuid !== moduleCtx.client.user?.uuid;
+  const changed = sessionGeneration !== moduleCtx.client.generation;
   ctx = moduleCtx;
-  if (changed) Object.assign(ui, { users: null, facilities: null, audit: null, panel: null, flash: "", error: "", query: "" });
+  sessionGeneration = moduleCtx.client.generation;
+  if (changed) Object.assign(ui, { tab: 'staff', users: null, facilities: null, audit: null, panel: null, flash: "", error: "", query: "", loading: false, hasMore: false, roleFilter: '', showRetired: false });
+  if (moduleCtx.takePatientAccessTab?.()) ui.tab = 'patientAccess';
   paint();
   if (!isSystemAdministrator(ctx.client.user)) return;
   if (ui.users === null && !ui.loading) loadUsers();

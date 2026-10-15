@@ -1,3 +1,4 @@
+const { chooseAction, mockSelectCare } = require("./reference-helper.cjs");
 // Read-only runtime checks. This script never creates users, patients or transactions.
 const { chromium } = require("playwright");
 const assert = require("node:assert/strict");
@@ -109,27 +110,27 @@ const settings = Object.fromEntries(
     assert.equal(await page.locator("#workspaceForm").count(), 0);
     await page.locator("[data-section=admin]").click();
     await page.locator("details.advanced-tools > summary").click(); // raw admin forms are collapsed under the guided console
-    await page.locator("#actionPicker").selectOption("workspace");
+    await chooseAction(page, "workspace");
     await page.locator("#actionForm button").click();
     await page
       .locator("#backendResult")
       .filter({ hasText: "VinSHC App: admin" })
       .waitFor();
-    await page.locator("#actionPicker").selectOption("systemUsers");
+    await chooseAction(page, "systemUsers");
     await page.locator("[name=q]").fill(settings.EHR_ADMIN_USERNAME);
     await page.locator("#actionForm button").click();
     await page
       .locator("#backendResult")
       .filter({ hasText: "Quản trị" })
       .waitFor();
-    await page.locator("#actionPicker").selectOption("audit");
+    await chooseAction(page, "audit");
     await page.locator("#actionForm button").click();
     await page
       .locator("#connectionMessage")
       .filter({ hasText: "Đã tải thông tin" })
       .waitFor();
     await page.locator("[data-section=reports]").click();
-    await page.locator("#actionPicker").selectOption("report");
+    await chooseAction(page, "report");
     await page.locator("#actionForm button").click();
     await page
       .locator("#backendResult")
