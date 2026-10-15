@@ -1,0 +1,26 @@
+<config>
+    <!-- Clinic password policy: at least 6 characters, no character-class rules (also enforced by
+         StaffAccountService.validPassword). OpenMRS core defaults are 8+ with upper/lower/digit. -->
+    <globalProperties>
+        <globalProperty>
+            <property>security.passwordMinimumLength</property>
+            <value>6</value>
+        </globalProperty>
+        <globalProperty>
+            <property>security.passwordRequiresUpperAndLowerCase</property>
+            <value>false</value>
+        </globalProperty>
+        <globalProperty>
+            <property>security.passwordRequiresDigit</property>
+            <value>false</value>
+        </globalProperty>
+        <globalProperty>
+            <property>security.passwordRequiresNonDigit</property>
+            <value>false</value>
+        </globalProperty>
+        <globalProperty>
+            <property>security.passwordCannotMatchUsername</property>
+            <value>false</value>
+        </globalProperty>
+    </globalProperties>
+</config>

@@ -14,7 +14,8 @@ import org.openmrs.api.context.Context;
 /** Runs on the authenticated forward to HAPI, which bypasses Spring MVC interceptors. */
 public class PortalFhirGuardFilter implements Filter {
 	public static boolean isPortalAccount(User user) {
-		return user != null && user.hasRole("VinSHC Portal: patient");
+		// ignoreSuperUser: a superuser (System Developer) answers true to hasRole(anyName).
+		return user != null && user.hasRole("VinSHC Portal: patient", true);
 	}
 
 	

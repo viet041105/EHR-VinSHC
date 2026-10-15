@@ -23,7 +23,9 @@ import org.springframework.web.servlet.HandlerInterceptor;
 public class PortalIsolationInterceptor implements HandlerInterceptor {
 
 	static boolean isPortalAccount(User user) {
-		return user != null && user.hasRole(PortalService.ROLE);
+		// ignoreSuperUser: User.hasRole(name) is true for every role name when the user is a superuser,
+		// which would lock System Developer accounts (admin) out of every non-portal API.
+		return user != null && user.hasRole(PortalService.ROLE, true);
 	}
 
 	@Override

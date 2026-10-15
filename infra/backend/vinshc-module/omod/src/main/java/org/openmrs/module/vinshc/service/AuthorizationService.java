@@ -156,7 +156,9 @@ public class AuthorizationService {
 			throw VinshcService.bad("user does not exist");
 		if (facility == null || facility.getRetired())
 			throw VinshcService.bad("facility does not exist");
-		if (openmrsRole == null || !target.hasRole(openmrsRole.getRole()))
+		// ignoreSuperUser: hasRole(name) is true for every name when the user is a superuser, which would let
+		// an assignment be stored for a role the account does not actually hold.
+		if (openmrsRole == null || !target.hasRole(openmrsRole.getRole(), true))
 			throw VinshcService.bad("user does not hold the requested role");
 		if (target.getRoles().stream().filter(r -> r.getName().startsWith(ROLE_PREFIX))
 		        .anyMatch(r -> !r.getRole().equals(openmrsRole.getRole())))
@@ -236,7 +238,7 @@ public class AuthorizationService {
 		for (Object[] row : assignments) {
 			String role = (String) row[0];
 			Role openmrsRole = Context.getUserService().getRole(ROLE_PREFIX + role);
-			if (openmrsRole == null || !user.hasRole(openmrsRole.getRole()))
+			if (openmrsRole == null || !user.hasRole(openmrsRole.getRole(), true))
 				continue;
 			Map<String, Object> assignment = new LinkedHashMap<>();
 			assignment.put("role", role);
@@ -494,10 +496,8 @@ public class AuthorizationService {
 	private static User authenticatedUser() {
 		if (!Context.isAuthenticated() || Context.getAuthenticatedUser() == null)
 			throw new VinshcExceptions.NotAuthenticated();
-		User user = Context.getAuthenticatedUser();
-		if (Boolean.parseBoolean(user.getUserProperty(StaffAccountService.FORCE_PASSWORD_PROPERTY)))
-			throw new APIAuthenticationException("Password change required before using VinSHC APIs");
-		return user;
+		// No forced first-login password change: accounts work with the password the admin set.
+		return Context.getAuthenticatedUser();
 	}
 
 	private static boolean isSystemAdministrator(User user) {

@@ -10,6 +10,7 @@
 package org.openmrs.module.vinshc.web;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -104,6 +105,16 @@ class ScopedCorePrivilegeInterceptorTest {
 		assertTrue(user.hasRole(PortalService.ROLE));
 		assertTrue(PortalIsolationInterceptor.isPortalAccount(user));
 		assertTrue(PortalFhirGuardFilter.isPortalAccount(user));
+	}
+
+	@Test
+	void superUserIsNotAPortalAccount() {
+		User admin = new User();
+		admin.addRole(new Role("System Developer", "Superuser"));
+
+		assertTrue(admin.hasRole(PortalService.ROLE), "OpenMRS answers true to any role name for a superuser");
+		assertFalse(PortalIsolationInterceptor.isPortalAccount(admin));
+		assertFalse(PortalFhirGuardFilter.isPortalAccount(admin));
 	}
 
 	@SuppressWarnings("unchecked")

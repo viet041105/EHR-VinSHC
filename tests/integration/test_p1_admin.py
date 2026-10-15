@@ -13,6 +13,10 @@ from api_client import Client
 from common import read_settings, report_path
 
 
+# Keys that would carry a credential; mustChangePassword and the user.password_* audit actions are not secrets.
+SECRET_KEYS = {"password", "currentpassword", "newpassword", "hashedpassword", "salt", "secret"}
+
+
 class P1AdminTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -59,30 +63,31 @@ class P1AdminTests(unittest.TestCase):
             self.assertEqual(user["roles"], [role])
             self.assertEqual(user["username"], username)
             self.assertFalse(user["retired"])
-            self.assertTrue(user["mustChangePassword"])
+            self.assertFalse(user["mustChangePassword"])
             self.assertFalse(any(k in user for k in ("password", "hashedPassword", "salt")))
             self.assertNotIn(password, json.dumps(user))
             self.users[role] = user
             self.passwords[role] = password
         doctor = self.users["doctor"]
         staff = Client(self.base, doctor["username"], self.passwords["doctor"])
-        code, _, _ = staff.request("/openmrs/ws/rest/v1/vinshc/providers/me")
-        self.assertEqual(code, 403)
-        replacement = "P1-changed-" + uuid.uuid4().hex
+        # No forced first-login change: the admin-set password works immediately.
+        self.assertEqual(staff.request("/openmrs/ws/rest/v1/vinshc/providers/me")[0], 200)
+        replacement = "p1" + uuid.uuid4().hex[:4]  # 6 characters, no case/digit rules
         code, _, content = staff.request("/openmrs/ws/rest/v1/vinshc/staff/me/password", method="POST", payload={
             "currentPassword": self.passwords["doctor"], "newPassword": replacement,
         })
         changed = json.loads(content)
         self.assertEqual(code, 200, changed)
         self.assertFalse(changed["mustChangePassword"])
-        self.assertNotIn(replacement, content)
+        self.assertNotIn(replacement, content.decode("utf-8"))
         self.passwords["doctor"] = replacement
         staff = Client(self.base, doctor["username"], replacement)
         self.assertEqual(staff.request("/openmrs/ws/rest/v1/vinshc/providers/me")[0], 200)
         status, listing = self.call("staff/users?limit=30&offset=0", method="GET")
         self.assertEqual(status, 200, listing)
         self.assertTrue(listing["results"])
-        self.assertFalse(any("password" in json.dumps(item).lower() for item in listing["results"]))
+        self.assertFalse(any(k.lower() in SECRET_KEYS for item in listing["results"] for k in item))
+        self.assertFalse(any(p in json.dumps(listing) for p in self.passwords.values()))
         self.record("8 user roles created using VinSHC API without plaintext/password hash in response")
 
     def test_02_validation_and_escalation_denials(self):
@@ -110,11 +115,11 @@ class P1AdminTests(unittest.TestCase):
 
     def test_03_reset_retire_and_reactivate(self):
         target = self.users["pharmacy"]
-        password = "Reset-" + uuid.uuid4().hex + "A4"
+        password = "reset" + uuid.uuid4().hex[:1]  # 6 characters, no case/digit rules
         status, result = self.call(f"staff/users/{target['uuid']}/password", {"password": password})
         self.assertEqual(status, 200, result)
         self.assertNotIn(password, json.dumps(result))
-        self.assertTrue(result["mustChangePassword"])
+        self.assertFalse(result["mustChangePassword"])
         staff = Client(self.base, target["username"], password)
         self.assertTrue(staff.json("/openmrs/ws/rest/v1/session?v=full")["authenticated"])
         status, result = self.call(f"staff/users/{target['uuid']}/state", {
@@ -126,7 +131,16 @@ class P1AdminTests(unittest.TestCase):
         status, result = self.call(f"staff/users/{target['uuid']}/state", {"active": True})
         self.assertEqual(status, 200)
         self.assertFalse(result["retired"])
-        self.record("Password reset returns no credentials; retired account cannot reset; reactivated")
+        renamed = "p1-renamed-" + uuid.uuid4().hex[:8]
+        status, result = self.call(f"staff/users/{target['uuid']}/username", {"username": renamed})
+        self.assertEqual(status, 200, result)
+        self.assertEqual(result["username"], renamed)
+        self.assertTrue(Client(self.base, renamed, password).json("/openmrs/ws/rest/v1/session?v=full")["authenticated"])
+        target["username"] = renamed
+        self.assertEqual(self.call(f"staff/users/{target['uuid']}/username",
+            {"username": self.users["doctor"]["username"]})[0], 409)
+        self.assertEqual(self.call(f"staff/users/{target['uuid']}/username", {"username": "bad name"})[0], 400)
+        self.record("Password reset returns no credentials; retired account cannot reset; reactivated; renamed")
 
     def test_04_provider_ownership_and_facility_binding(self):
         doctor = self.users["doctor"]
@@ -244,8 +258,8 @@ class P1AdminTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(history["results"])
         self.assertTrue(all(row.get("actorUuid") and row.get("at") for row in history["results"]))
-        self.assertFalse(any("password" in json.dumps(row).lower() and "reset" not in row["action"]
-                             for row in history["results"]))
+        self.assertFalse(any(k.lower() in SECRET_KEYS for row in history["results"] for k in row))
+        self.assertFalse(any(p in json.dumps(history) for p in self.passwords.values()))
         self.record("Form versions immutable; workflow optimistic version; audit actor and time")
 
 

@@ -51,6 +51,11 @@ public class StaffAccountController extends BaseVinshcController {
 		return service.changeState(uuid, body);
 	}
 
+	@PostMapping("/users/{uuid}/username")
+	public Map<String, Object> username(@PathVariable String uuid, @RequestBody Map<String, Object> body) {
+		return service.rename(uuid, body);
+	}
+
 	@PostMapping("/users/{uuid}/password")
 	public Map<String, Object> password(@PathVariable String uuid, @RequestBody Map<String, Object> body) {
 		return service.resetPassword(uuid, body);

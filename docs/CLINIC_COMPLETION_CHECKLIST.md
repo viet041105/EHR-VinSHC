@@ -103,7 +103,9 @@ Không triển khai chatbot bệnh nhân trước khi P3 và P4 có test chống
 - [x] Payload tạo user không cho client gửi privilege trực tiếp; chỉ chọn role VinSHC trong allowlist.
 - [x] Hỗ trợ username, tên hiển thị, person, trạng thái active/retired và mật khẩu khởi tạo.
 - [x] Không trả password/hash/salt trong response hoặc log.
-- [x] Bắt buộc đổi mật khẩu lần đầu nếu OpenMRS baseline hỗ trợ; nếu không, ghi rõ cơ chế thay thế.
+- [ ] Bắt buộc đổi mật khẩu lần đầu nếu OpenMRS baseline hỗ trợ; nếu không, ghi rõ cơ chế thay thế.
+  - Quyết định 2026-10-15 (phục vụ demo): **không** bắt buộc đổi mật khẩu lần đầu. Tài khoản dùng ngay mật khẩu do quản trị đặt; BE không còn gắn `forcePassword` khi tạo/reset và không trả 403 `Password change required`; FE shell đã gỡ màn đổi mật khẩu lần đầu. `staff/me/password` vẫn giữ cho người dùng tự đổi. Cần bật lại trước khi dùng với dữ liệu bệnh nhân thật.
+  - Chính sách mật khẩu nhân viên: tối thiểu 6, tối đa 256 ký tự, không yêu cầu chữ hoa/thường/số (`StaffAccountService.validPassword`, `passwordRules` ở FE, global property OpenMRS trong `infra/backend/configuration/globalproperties/vinshc/security.xml`). Portal bệnh nhân vẫn giữ yêu cầu 12 ký tự ở FE.
 - [x] Thêm API khóa/mở hoặc retire user có audit và chặn tự khóa tài khoản quản trị cuối cùng.
 - [x] Thêm API reset mật khẩu; không có API đọc lại mật khẩu cũ.
 - [x] Chặn username trùng, user đã retired, role không hợp lệ và thao tác ngoài quyền.
