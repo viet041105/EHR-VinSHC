@@ -14,7 +14,7 @@ export const SECTION_COPY = {
   orders: ["Chỉ định và kết quả", "Theo dõi chỉ định, ghi kết quả và xem tệp đính kèm."],
   pharmacy: ["Quầy thuốc", "Xem đơn chờ cấp, ghi nhận số lượng và lịch sử cấp thuốc."],
   reports: ["Báo cáo", "Xem số liệu hoạt động và thu chi theo ngày hoặc khoảng ngày."],
-  admin: ["Quản trị", "Phân công nhân viên, kiểm tra quyền và xem nhật ký hoạt động."],
+  admin: ["Quản trị", "Thêm nhân viên, phân công nơi làm việc và xem lịch sử thay đổi."],
   documents: ["Chứng từ", "Chọn phiếu hoặc đơn đã có để xem và in."],
 };
 export const ROLE_START = {

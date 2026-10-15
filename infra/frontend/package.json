@@ -16,7 +16,7 @@
     "build:package": "node scripts/build.mjs --only",
     "preview": "vite preview --host 127.0.0.1 --port 4173 --strictPort",
     "test": "node --test tests/unit/*.test.mjs",
-    "test:browser": "node tests/browser/landing-check.cjs && node tests/browser/connected-check.cjs && node tests/browser/additional-check.cjs && node tests/browser/workspace-check.cjs && node tests/browser/microfrontend-check.cjs && node tests/browser/product-check.cjs",
+    "test:browser": "node tests/browser/landing-check.cjs && node tests/browser/connected-check.cjs && node tests/browser/additional-check.cjs && node tests/browser/workspace-check.cjs && node tests/browser/microfrontend-check.cjs && node tests/browser/product-check.cjs && node tests/browser/doctor-assistant-check.cjs",
     "test:connected": "node tests/browser/connected-check.cjs",
     "test:live": "node tests/browser/live-check.cjs",
     "test:api": "node scripts/check-api-coverage.mjs",

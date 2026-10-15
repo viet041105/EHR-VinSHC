@@ -5,6 +5,8 @@ import {
   metadata as m,
   active,
   BackendError,
+  passwordRules,
+  usernameProblem,
   uuid,
   action,
   F,
@@ -12,11 +14,9 @@ import {
   id,
   optional,
   workflowConfigOptions,
-  esc,
-  CONNECTED_BADGE,
-  openButton,
   preparationPanel,
 } from "@vinshc/core";
+import { adminConsole, bindAdminConsole } from "./console.js";
 
 const roleChoices = Object.entries(m.permissions.roles).map(([k, v]) => [
   k,
@@ -167,15 +167,19 @@ const actions = {
   ),
   createStaff: action(
     "Tạo tài khoản nhân viên", "metadata_admin", "create",
-    [F("username", "Tên đăng nhập"), F("givenName", "Tên"), F("familyName", "Họ"),
+    [F("username", "Tên đăng nhập (3-50 ký tự: chữ/số không dấu, . _ -)"), F("givenName", "Tên"), F("familyName", "Họ"),
       choice("gender", "Giới tính", [["U", "Không rõ"], ["M", "Nam"], ["F", "Nữ"]]),
       choice("role", "Vai trò ứng dụng", roleChoices),
-      F("password", "Mật khẩu khởi tạo (12+ ký tự)", "password", { min: 12 })],
+      F("password", "Mật khẩu (tối thiểu 6 ký tự)", "password", { min: 6 })],
     () => "staff/users",
     d => ({ username: d.username, givenName: d.givenName, familyName: d.familyName,
       gender: d.gender, role: d.role, password: d.password }),
     { systemOnly: true, sensitive: true,
-      notice: "Chỉ System Developer. Giao mật khẩu tạm bằng kênh bảo mật; không lưu hoặc trả lại trong UI." },
+      prepare(d) {
+        const problem = usernameProblem(d.username || "") || passwordRules(d.password || "", "Mật khẩu");
+        if (problem) throw new BackendError(problem);
+      },
+      notice: "Chỉ System Developer. Giao mật khẩu cho nhân viên qua kênh riêng." },
   ),
   grantAppRole: action(
     "Thêm role ứng dụng", "metadata_admin", "update",
@@ -198,12 +202,19 @@ const actions = {
     d => "staff/users/"+uuid(d.user)+"/state",
     () => ({active:true}), {systemOnly:true},
   ),
+  renameStaff: action(
+    "Đổi tên đăng nhập", "metadata_admin", "update",
+    [id("user","UUID tài khoản"),F("username","Tên đăng nhập mới (3-50 ký tự: chữ/số không dấu, . _ -)")],
+    d => "staff/users/"+uuid(d.user)+"/username",
+    d => ({username:d.username}),
+    {systemOnly:true,prepare(d,ctx){const problem=usernameProblem(d.username||"");if(problem)throw new BackendError(problem);if(d.user===ctx.client.user?.uuid)throw new BackendError("Không thể đổi tên đăng nhập của tài khoản đang đăng nhập.");}},
+  ),
   resetStaffPassword: action(
     "Đặt lại mật khẩu", "metadata_admin", "update",
-    [id("user","UUID tài khoản"),F("password","Mật khẩu mới (12+ ký tự)","password")],
+    [id("user","UUID tài khoản"),F("password","Mật khẩu mới (tối thiểu 6 ký tự)","password")],
     d => "staff/users/"+uuid(d.user)+"/password",
     d => ({password:d.password}),
-    {systemOnly:true,sensitive:true,confirm:"Xác nhận đặt lại mật khẩu tài khoản?",notice:"Mật khẩu mới chỉ được gửi tới server, không lưu ở trình duyệt hoặc trả về."},
+    {systemOnly:true,sensitive:true,prepare(d){const problem=passwordRules(d.password||"","Mật khẩu mới");if(problem)throw new BackendError(problem);},confirm:"Xác nhận đặt lại mật khẩu tài khoản?",notice:"Mật khẩu mới chỉ được gửi tới server, không lưu ở trình duyệt hoặc trả về."},
   ),
   createProvider: action(
     "Tạo provider và gán cơ sở", "metadata_admin", "create",
@@ -270,6 +281,12 @@ const actions = {
     ()=>"admin-configuration/forms",d=>d,
     {onlyRoles:["admin"],notice:"Schema VinSHC version hóa; không dùng metadata/forms.json handoff làm form production."},
   ),
+  listForms: action(
+    "Danh sách phiên bản biểu mẫu", "metadata_admin", "read",
+    [id("facilityLocationUuid","Location UUID"),optional("code","Mã biểu mẫu (để trống = tất cả)")],
+    d=>"admin-configuration/forms?"+new URLSearchParams({facilityLocationUuid:uuid(d.facilityLocationUuid),...(d.code?{code:d.code.trim().toLowerCase()}:{})}),
+    null,{method:"GET",onlyRoles:["admin"]},
+  ),
   formDetail: action(
     "Đọc phiên bản biểu mẫu", "metadata_admin", "read",
     [id("formUuid","Form UUID")],
@@ -304,27 +321,6 @@ const actions = {
   ),
 };
 
-function directory(ctx) {
-  const shortcuts = [
-    ["createStaff","Tạo tài khoản"],["systemUsers","Tìm tài khoản"],
-    ["retireUser","Khóa tài khoản"],["resetStaffPassword","Reset mật khẩu"],
-    ["assignWorkspace","Gán cơ sở"],["createProvider","Tạo provider"],
-    ["linkProvider","Liên kết provider"],["retireProvider","Ngừng provider"],
-    ["createFacility","Tạo cơ sở"],["facilities","Danh sách cơ sở"],
-    ["draftForm","Tạo form nháp"],["activateForm","Kích hoạt form"],
-    ["setWorkflow","Chọn workflow"],["readWorkflow","Đọc workflow"],
-    ["audit","Nhật ký truy cập"],["staffAudit","Audit quản trị"],
-  ].filter(([key])=>ctx.canAction(key))
-    .map(([key,label])=>openButton("admin",key,label)).join("");
-  return `<section class="panel admin-directory">
-    <div class="workspace-heading"><div><h2>Quản trị nhân viên và cơ sở</h2>
-    <p>Thao tác thật qua API VinSHC, không ghi trực tiếp Core REST từ giao diện.
-    Mật khẩu khởi tạo/reset không được hiển thị lại.</p></div>${CONNECTED_BADGE}</div>
-    <div class="role-tags">${Object.values(m.permissions.roles).map(r=>`<span>${esc(r.label)}</span>`).join("")}</div>
-    <div class="context-links">${shortcuts}</div>
-    </section>`;
-}
-
 export default defineModule({
   name: "admin",
   version: "0.1.0",
@@ -343,14 +339,17 @@ export default defineModule({
         "assignWorkspace",
         "revokeWorkspace",
         "systemUsers", "staffAudit", "createStaff", "grantAppRole",
-        "retireUser", "unretireUser", "resetStaffPassword",
+        "retireUser", "unretireUser", "renameStaff", "resetStaffPassword",
         "createProvider", "linkProvider", "unlinkProvider", "retireProvider", "userProviders",
         "createFacility", "facilities", "updateFacility", "retireFacility",
-        "draftForm", "formDetail", "activateForm", "retireForm", "readWorkflow", "setWorkflow",
+        "draftForm", "listForms", "formDetail", "activateForm", "retireForm", "readWorkflow", "setWorkflow",
       ],
       note: "Quản trị qua VinSHC API. System Developer quản lý tài khoản/provider/cơ sở; admin theo workspace quản lý biểu mẫu và workflow được cấp quyền.",
       icon: "⚙",
-      footer: directory,
+      footer: adminConsole,
+      bind: bindAdminConsole,
+      // Per-endpoint forms (UUID based) stay reachable for technical staff, collapsed by default.
+      advancedTools: true,
     },
   ],
   actions,
